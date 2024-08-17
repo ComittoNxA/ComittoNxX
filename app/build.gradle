@@ -31,10 +31,10 @@ android {
 
     defaultConfig {
         applicationId packageName
-        minSdkVersion 21
+        minSdk 21
         // targetSdk11以降でSMBまわりでNetworkOnMainThreadExceptionエラー発生の可能性
         // targetSdk29はrequestLegacyExternalStorageをセットできる
-        targetSdkVersion 29
+        targetSdk 29
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"

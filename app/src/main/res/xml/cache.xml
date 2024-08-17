@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Settings for Memory Cache" >
+        <src.comitton.config.MemSizeSeekbar
+            android:dialogMessage="The size of the memory used to cache. (Too large to hang.)"
+            android:dialogTitle="Memory Cache Size"
+            android:key="MemSize"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Memory Cache Size" />
+        <src.comitton.config.MemNextSeekbar
+            android:dialogMessage="Number of pages to be cached on the following pages."
+            android:dialogTitle="Cache Pages (Next)"
+            android:key="MemNext"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Cache Pages (Next)" />
+        <src.comitton.config.MemPrevSeekbar
+            android:dialogMessage="Number of pages to the cache before the previous page."
+            android:dialogTitle="Cache Pages (Prev)"
+            android:key="MemPrev"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Cache Pages (Prev)" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="CacheHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScrollView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+			android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:gravity="left"
+            android:text="@string/svNameTitle" />
+
+        <EditText
+            android:id="@+id/edit_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:autoText="false"
+            android:capitalize="none"
+            android:gravity="fill_horizontal"
+            android:hint="@string/svNameHist"
+            android:maxLength="40"
+            android:required="true"
+            android:scrollHorizontally="true"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/text_host"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:gravity="left"
+            android:text="@string/svHostTitle" />
+
+        <EditText
+            android:id="@+id/edit_host"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:autoText="false"
+            android:capitalize="none"
+            android:gravity="fill_horizontal"
+            android:hint="@string/svHostHist"
+            android:maxLength="100"
+            android:required="true"
+            android:scrollHorizontally="true"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/text_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:gravity="left"
+            android:text="@string/svUserTitle" />
+
+        <EditText
+            android:id="@+id/edit_user"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:autoText="false"
+            android:capitalize="none"
+            android:gravity="fill_horizontal"
+            android:hint="@string/svUserHist"
+            android:maxLength="100"
+            android:scrollHorizontally="true"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/text_pass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:gravity="left"
+            android:text="@string/svPassTitle" />
+
+        <EditText
+            android:id="@+id/edit_pass"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:autoText="false"
+            android:capitalize="none"
+            android:gravity="fill_horizontal"
+            android:hint="@string/svPassHist"
+            android:maxLength="100"
+            android:scrollHorizontally="true"
+            android:singleLine="true" />
+    </LinearLayout>
+
+</ScrollView>

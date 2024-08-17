@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Image Viewer Settings" >
+        <src.comitton.config.ColorMgnSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Margin Color"
+            android:key="MgnRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Margin Color" />
+        <src.comitton.config.ColorCntSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Center Mrgin Color"
+            android:key="CntRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Center Mrgin Color" />
+        <src.comitton.config.ColorGuiSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Guide Color"
+            android:key="GuiRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Guide Color" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Text Viewer Settings" >
+        <src.comitton.config.ColorTxtMgnSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Margin Color"
+            android:key="txMgnRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Margin Color" />
+        <src.comitton.config.ColorTxtCntSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Center Mrgin Color"
+            android:key="txCntRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Center Mrgin Color" />
+        <src.comitton.config.ColorTxtGuiSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Guide Color"
+            android:key="txGuiRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Guide Color" />
+        <src.comitton.config.ColorTvtSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Text Color"
+            android:key="txTvtRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Text Color" />
+        <src.comitton.config.ColorTvbSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Background Color"
+            android:key="txTvbRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Background Color" />
+        <src.comitton.config.ColorTvgSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Background Color for Gradation"
+            android:key="txTvgRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Background Color for Gradation" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Gradation Settings"
+            android:entries="@array/txgradation_name_list"
+            android:entryValues="@array/txgradation_value_list"
+            android:key="txGradation"
+            android:summary="dummy"
+            android:title="Gradation Settings" />
+        <src.comitton.config.ColorHitSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Search Hit Color"
+            android:key="txHitRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Search Hit Color" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="ImgTxtClrHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

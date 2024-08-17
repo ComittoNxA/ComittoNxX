@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="View Settings" >
+        <src.comitton.config.MarginSeekbar
+            android:dialogMessage="Select end of scroll margin size."
+            android:dialogTitle="Margin Size"
+            android:key="Mergin"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Margin Size" />
+        <src.comitton.config.CenterSeekbar
+            android:dialogMessage="Margin width in the middle of Dual View."
+            android:dialogTitle="Center Margin Width"
+            android:key="Center"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Center Margin Width" />
+        <src.comitton.config.GradationSeekbar
+            android:dialogMessage="Percentage of Shadows width in the single page."
+            android:dialogTitle="Shadow Width"
+            android:key="Gradation"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Shadow Width" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ImmEnable"
+            android:summary="Hide the navigation bar at the terminal of KitKat later."
+            android:title="Enable Immersive Mode" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="OldMenu"
+            android:summary="Menu to select the command in a single action."
+            android:title="Old type on the top menu." />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Operation Settings" >
+        <src.comitton.config.EffectTimeSeekbar
+            android:dialogMessage="Effect time at turning page"
+            android:dialogTitle="Effect Time"
+            android:key="EffectTime"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Effect Time" />
+        <src.comitton.config.ScrollSeekbar
+            android:dialogMessage="To drag ratio of the amount of scrolling."
+            android:dialogTitle="Image Scroll Speed"
+            android:key="Scroll"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scrolling Speed" />
+        <src.comitton.config.ClickAreaSeekbar
+            android:dialogMessage="Set the scaling size for the operation area."
+            android:dialogTitle="Operation Area Size"
+            android:key="ClickAreaSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Operation Area Size" />
+        <src.comitton.config.PageRangeSeekbar
+            android:dialogMessage="Page selection sensitivity at the bottom of the screen."
+            android:dialogTitle="Page Change Sensitivity"
+            android:key="PageRangeSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Page Selection Sensitivity" />
+        <src.comitton.config.TapRangeSeekbar
+            android:dialogMessage="The sensitivity of the scroll by dragging the start."
+            android:dialogTitle="Scroll Start Sensitivity"
+            android:key="TapRangeSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scroll Start Sensitivity" />
+        <src.comitton.config.VolScrlSeekbar
+            android:dialogMessage="Scroll Speed of Vol-Button or Noise Operation."
+            android:dialogTitle="Scroll Speed"
+            android:key="VolScrlSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scroll Speed" />
+        <src.comitton.config.MomentModeSeekbar
+            android:dialogMessage="Immediately stop the smaller."
+            android:dialogTitle="Slowdown Amount"
+            android:key="MomentMode"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Amount of Slowdown" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="BottomFile"
+            android:summary="Enable to change file by screen bottom Operation."
+            android:title="Enable File Change" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="PinchEnable"
+            android:summary="Enable the change of display size by pinch operation."
+            android:title="Pinch Operation" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="ImgTxtDtlHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

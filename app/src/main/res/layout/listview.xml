@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <src.comitton.view.TitleView
+        android:id="@+id/title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <src.comitton.view.ToolbarView
+        android:id="@+id/toolbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <FrameLayout 
+        android:id="@+id/frame"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+
+        <src.comitton.view.TileScrollView
+            android:id="@+id/scroll"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+
+            <src.comitton.view.TileView
+                android:id="@+id/tile"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </src.comitton.view.TileScrollView>
+
+        <src.comitton.view.ScrollerView
+            android:id="@+id/scroller"
+            android:layout_width="20dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="right" />
+    </FrameLayout>
+
+    <src.comitton.view.SelectorView
+        android:id="@+id/selector"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

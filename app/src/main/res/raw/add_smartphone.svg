@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="add_smartphone.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   width="32.0px"
+   height="32.0px"
+   viewBox="0 0 32.0 32.0"
+   version="1.1"
+   id="SVGRoot">
+  <defs
+     id="defs127" />
+  <sodipodi:namedview
+     inkscape:window-maximized="1"
+     inkscape:window-y="-8"
+     inkscape:window-x="-8"
+     inkscape:window-height="995"
+     inkscape:window-width="1920"
+     showgrid="true"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="px"
+     inkscape:cy="17.228597"
+     inkscape:cx="6.7664406"
+     inkscape:zoom="22.578853"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base">
+    <inkscape:grid
+       type="xygrid"
+       id="grid136" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata130">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="レイヤー 1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.56098px;stroke-linecap:round;stroke-linejoin:round"
+       class="a"
+       d="M 16.813839,30.439026 H 10.536454 A 2.3414635,2.3414635 0 0 1 8.19499,28.097562 V 3.1219514 a 2.3414635,2.3414635 0 0 1 2.341464,-2.34146355 h 0.780487"
+       id="path8" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.56098px;stroke-linecap:round;stroke-linejoin:round"
+       class="a"
+       d="M 11.316941,0.78048785 H 21.463283 A 2.3414635,2.3414635 0 0 1 23.804747,3.1219514 V 15.609757"
+       id="path10" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.56098px;stroke-linecap:round;stroke-linejoin:round"
+       class="a"
+       d="M 20.682795,0.78048785 19.292668,3.4711416 A 0.80905369,0.80905369 0 0 1 18.57181,3.9024392 H 13.427302 A 0.80913174,0.80913174 0 0 1 12.706366,3.4709855 L 11.316941,0.78048785"
+       id="path12" />
+    <circle
+       style="fill:none;stroke:#000000;stroke-width:1.56098px;stroke-linecap:round;stroke-linejoin:round"
+       class="a"
+       cx="23.804747"
+       cy="24.975609"
+       r="6.2439027"
+       id="circle14" />
+    <line
+       style="fill:none;stroke:#000000;stroke-width:1.56098px;stroke-linecap:round;stroke-linejoin:round"
+       class="a"
+       x1="21.463284"
+       y1="24.975609"
+       x2="26.146212"
+       y2="24.975609"
+       id="line16" />
+    <line
+       style="fill:none;stroke:#000000;stroke-width:1.56098px;stroke-linecap:round;stroke-linejoin:round"
+       class="a"
+       x1="23.804747"
+       y1="22.634148"
+       x2="23.804747"
+       y2="27.317074"
+       id="line18" />
+  </g>
+  <style
+     type="text/css"
+     id="style98">
+	.st0{fill:#4B4B4B;}
+</style>
+</svg>

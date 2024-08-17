@@ -1,0 +1,48 @@
+
+name: Android Release
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Build with Gradle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: ./app/build/outputs/apk/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: comittonxa
+          path: ${{steps.sign_apk.outputs.signedReleaseFile}}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="48"
+   height="48"
+   id="svg2985">
+  <defs
+     id="defs2987" />
+  <metadata
+     id="metadata2990">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1">
+    <path
+       d="M 1.9186154,6.001515 C 1.41671,6.0540874 0.99445115,6.5381666 1.0000551,7.0545541 l 0,3.4223769 3.0496197,0 14.2560542,0 0,-3.4223769 c 0.0031,-0.5522583 -0.489248,-1.056314 -1.028788,-1.0530391 l -15.2480985,0 c -0.036707,-0.00202 -0.073519,-0.00202 -0.1102271,0 z"
+       id="rect3820"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#1a1a1a;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.73954034;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+    <path
+       d="m 2.1390698,9.7247608 c -1.15728325,0.012359 -2.20950683,1.2188162 -2.20454431,2.5197722 l 0,24.257511 7.23825361,-22.715561 c 0.3475577,-1.108207 1.7794767,-2.133217 2.9761359,-2.143687 l 30.606423,0 C 40.502143,10.5963 39.600737,9.7351949 38.624279,9.7247608 l -36.4852092,0 z"
+       id="rect3820-7"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#1a1a1a;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4.54277039;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+    <path
+       d="m 10.699319,13.061195 c -1.1352204,0.01059 -2.4968763,1.037306 -2.8641616,2.159483 L 0.00672484,38.827073 c -0.37700835,1.122176 0.30374541,2.148817 1.43189336,2.159483 l 35.6811448,0 c 1.135222,-0.01059 2.496878,-1.037307 2.864163,-2.159483 l 7.828432,-23.606395 c 0.377011,-1.122177 -0.303743,-2.148817 -1.431893,-2.159483 z m 0.745595,4.318965 c -11.4256978,19.819907 -5.7128502,9.909953 0,0 z"
+       id="rect3820-7-6-8"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#1a1a1a;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4.54277039;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+    <rect
+       width="1.1381681"
+       height="4.2236457"
+       x="0.87716073"
+       y="34.24168"
+       id="rect2991"
+       style="fill:#1a1a1a;stroke:#1a1a1a;stroke-width:1.89318776" />
+  </g>
+</svg>

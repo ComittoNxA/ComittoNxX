@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="View Settings" >
+        <src.comitton.config.WAdjustSeekbar
+            android:dialogMessage="Adjust the display&apos;s aspect ratio when the landscape."
+            android:dialogTitle="Aspect Ratio"
+            android:key="WAdjust"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Aspect Ratie" />
+        <src.comitton.config.WScalingSeekbar
+            android:dialogMessage="Adjust the width of the iamge."
+            android:dialogTitle="Image Width"
+            android:key="WScaling"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Image Width" />
+        <src.comitton.config.ScalingSeekbar
+            android:dialogMessage="Scale image to specified size"
+            android:dialogTitle="Image scaling"
+            android:key="Scaling"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Image scaling" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="AccessLamp"
+            android:summary="To view the status of reading in the upper left corner"
+            android:title="View the status file reading" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Operation Settings" >
+        <src.comitton.config.LongTapSeekbar
+            android:dialogMessage="Time to select the Loupe view in the long tap."
+            android:dialogTitle="Time to Loupe view"
+            android:key="LongTap"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Time to Loupe view (long tap)" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Max number of processing threads"
+            android:entries="@array/loupesize_name_list"
+            android:entryValues="@array/loupesize_value_list"
+            android:key="LoupeSize"
+            android:summary="dummy"
+            android:title="Size of Loupe view" />
+        <src.comitton.config.ScrlRngWSeekbar
+            android:dialogMessage="Scroll Width of Vol-Button, etc."
+            android:dialogTitle="Scroll Range (Width)"
+            android:key="ScrlRngW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scroll Range (Width)" />
+        <src.comitton.config.ScrlRngHSeekbar
+            android:dialogMessage="Scroll Height of Vol-Button, etc."
+            android:dialogTitle="Scroll Range (Height)"
+            android:key="ScrlRngH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scroll Range (Height)" />
+        <src.comitton.config.AutoPlaySeekbar
+            android:dialogMessage="Interval to play automatically."
+            android:dialogTitle="Auto Play Interval"
+            android:key="AutoPlayInt"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Auto Play Interval" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Max number of processing threads"
+            android:entries="@array/maxthread_name_list"
+            android:entryValues="@array/maxthread_value_list"
+            android:key="MaxThread"
+            android:summary="dummy"
+            android:title="Max number of processing threads" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="IDtlHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

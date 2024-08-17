@@ -1,0 +1,53 @@
+name: Android Clone Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Change package name
+        run: |
+          grep -l -r 'jp.dip.muracoro.comittona' | xargs sed -i "s/jp.dip.muracoro.comittona/jp.dip.muracoro.comittona.by_8cAyqpVKio/g"
+          grep -l -r 'https://github.com/ComittoNxA/ComittoNxA' | xargs sed -i "s/ComittoNxA\/ComittoNxA/8cAyqpVKio\/cnxd/g"
+          grep -l -r '<string name="app_name">ComittoNxA</string>' | xargs sed -i "s/<string name=\"app_name\">ComittoNxA<\/string>/<string name=\"app_name\">ComittoNxD<\/string>/g"
+          grep -l -r '<string name="app_launch_name">CNxA</string>' | xargs sed -i "s/<string name=\"app_launch_name\">CNxA<\/string>/<string name=\"app_launch_name\">CNxD<\/string>/g"
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Build with Gradle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: ./app/build/outputs/apk/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
+          keyStorePassword: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: comittonxd
+          path: ${{steps.sign_apk.outputs.signedReleaseFile}}

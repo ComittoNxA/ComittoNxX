@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="メモリーキャッシュの設定" >
+        <src.comitton.config.MemSizeSeekbar
+            android:dialogMessage="キャッシュに使用するメモリサイズ (多すぎると落ちます)"
+            android:dialogTitle="使用メモリサイズ"
+            android:key="MemSize"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="使用メモリサイズ" />
+        <src.comitton.config.MemNextSeekbar
+            android:dialogMessage="先読みでメモリにキャッシュする現在ページ以降のページ数"
+            android:dialogTitle="現ページ以降のキャッシュページ数"
+            android:key="MemNext"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="現ページ以降のキャッシュページ数" />
+        <src.comitton.config.MemPrevSeekbar
+            android:dialogMessage="先読みでメモリにキャッシュする現在ページ以前のページ数"
+            android:dialogTitle="現ページ以前のキャッシュページ数"
+            android:key="MemPrev"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="現ページ以前のキャッシュページ数" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="CacheHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

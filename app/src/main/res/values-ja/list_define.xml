@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="algomode_name_list">
+        <item>最近傍補間</item>
+        <item>双一次補間</item>
+        <item>双一次補間(二段階)</item>
+        <item>双三次補間</item>
+        <item>双三次補間(二段階)</item>
+    </string-array>
+    <string-array name="algomode_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="backmode_name_list">
+        <item>ComittoNの終了</item>
+        <item>親ディレクトリに移動</item>
+        <item>前のディレクトリに戻る</item>
+    </string-array>
+    <string-array name="backmode_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="file_rotaname_list">
+        <item>回転あり</item>
+        <item>縦固定</item>
+        <item>横固定</item>
+    </string-array>
+    <string-array name="file_rotavalue_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="rotate_name_list">
+        <item>回転あり</item>
+        <item>縦固定</item>
+        <item>横固定</item>
+        <item>縦固定(90°回転)</item>
+    </string-array>
+    <string-array name="rotate_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="zipsort_name_list">
+        <item>ソートなし</item>
+        <item>ファイル名(ディレクトリ混在)</item>
+        <item>ファイル名(ディレクトリ分離)</item>
+        <item>新しい順(ディレクトリ混在)</item>
+        <item>新しい順(ディレクトリ分離)</item>
+        <item>古い順(ディレクトリ混在)</item>
+        <item>古い順(ディレクトリ分離)</item>
+    </string-array>
+    <string-array name="zipsort_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="thumsize_name_list">
+        <item>最小</item>
+        <item>小</item>
+        <item>中</item>
+        <item>大1</item>
+        <item>大2</item>
+        <item>大3</item>
+        <item>大4</item>
+    </string-array>
+    <string-array name="thumsize_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="thumcache_name_list">
+        <item>保持しない</item>
+        <item>最大100ファイル</item>
+        <item>最大500ファイル</item>
+        <item>最大1000ファイル</item>
+        <item>削除しない(手動削除)</item>
+    </string-array>
+    <string-array name="thumcache_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="rotatebtn_name_list">
+        <item>使用しない</item>
+        <item>カメラフォーカスボタン</item>
+        <item>カメラシャッターボタン</item>
+    </string-array>
+    <string-array name="rotatebtn_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="filesort_name_list">
+        <item>ソートなし</item>
+        <item>ファイル名-昇順</item>
+        <item>ファイル名-降順</item>
+    </string-array>
+    <string-array name="filesort_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="preset_name_list">
+        <item>カスタム</item>
+        <item>標準（黒）</item>
+        <item>標準（白）</item>
+        <item>桜</item>
+        <item>藍</item>
+        <item>葉</item>
+        <item>橙</item>
+        <item>墨</item>
+    </string-array>
+    <string-array name="preset_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+    <string-array name="viewpt_name_list">
+        <item>右上</item>
+        <item>左上</item>
+        <item>右下</item>
+        <item>左下</item>
+        <item>中央</item>
+    </string-array>
+    <string-array name="viewpt_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="scale_name_list">
+        <item>元のサイズで表示</item>
+        <item>幅に合わせて表示</item>
+        <item>幅に合わせて表示(見開き対応)</item>
+        <item>高さに合わせて表示</item>
+        <item>全体を表示</item>
+        <item>全体を表示(見開き対応)</item>
+        <item>画面全体で表示</item>
+        <item>画面全体で表示(見開き対応)</item>
+    </string-array>
+    <string-array name="scale_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>6</item>
+        <item>2</item>
+        <item>3</item>
+        <item>7</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="pageway_name_list">
+        <item>右から左へ(右表紙)</item>
+        <item>左から右へ(左表紙)</item>
+    </string-array>
+    <string-array name="pageway_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="initview_name_list">
+        <item>そのまま</item>
+        <item>見開き表示</item>
+        <item>単ページ表示</item>
+        <item>単ページ／見開き</item>
+    </string-array>
+    <string-array name="initview_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="zoomsize_name_list">
+        <item>元画像サイズ</item>
+        <item>元画像サイズの2.0倍</item>
+        <item>元画像サイズの3.0倍</item>
+        <item>表示サイズの1.5倍</item>
+        <item>表示サイズの2.0倍</item>
+        <item>表示サイズの2.5倍</item>
+        <item>表示サイズの3.0倍</item>
+    </string-array>
+    <string-array name="zoomsize_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="volkey_name_list">
+        <item>使用しない</item>
+        <item>Vol-Up:前ページ/Down:次ページ</item>
+        <item>Vol-Up:次ページ/Down:前ページ</item>
+    </string-array>
+    <string-array name="volkey_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="noisedec_name_list">
+        <item>ゆっくり</item>
+        <item>普通</item>
+        <item>高速</item>
+    </string-array>
+    <string-array name="noisedec_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="charset_name_list">
+        <item>UTF-8</item>
+        <item>Shift_JIS</item>
+        <item>EUC-JP</item>
+        <item>EUC-KR</item>
+        <item>Big5</item>
+        <item>GB2312</item>
+    </string-array>
+    <string-array name="charset_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="scroll_name_list">
+        <item>横方向 → 縦方向</item>
+        <item>縦方向 → 横方向</item>
+    </string-array>
+    <string-array name="scroll_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="mgncut_name_list">
+        <item>なし</item>
+        <item>弱</item>
+        <item>中</item>
+        <item>強</item>
+        <item>最強</item>
+        <item>縦横比無視</item>
+    </string-array>
+    <string-array name="mgncut_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="txscale_name_list">
+        <item>元のサイズで表示</item>
+        <item>幅に合わせて表示</item>
+        <item>高さに合わせて表示</item>
+        <item>全体を表示</item>
+    </string-array>
+    <string-array name="txscale_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="txinitview_name_list">
+        <item>見開き表示</item>
+        <item>単ページ表示</item>
+        <item>連続表示</item>
+    </string-array>
+    <string-array name="txinitview_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="txpaper_name_list">
+        <item>画面サイズ(縦)</item>
+        <item>800×1280</item>
+        <item>720×1280</item>
+        <item>540×960</item>
+        <item>480×800</item>
+    </string-array>
+    <string-array name="txpaper_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="txgradation_name_list">
+        <item>なし</item>
+        <item>左上→右下</item>
+        <item> 上 → 下</item>
+        <item>右上→左下</item>
+        <item> 右 → 左</item>
+        <item>右下→左上</item>
+        <item> 下 → 上</item>
+        <item>左下→右上</item>
+        <item> 左 → 右</item>
+    </string-array>
+    <string-array name="txgradation_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="txpic_name_list">
+        <item>元画像サイズ</item>
+        <item>元画像サイズの2倍</item>
+        <item>元画像サイズの3倍</item>
+        <item>元画像サイズの4倍</item>
+        <item>画面サイズに拡大</item>
+    </string-array>
+    <string-array name="txpic_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="effect_name_list">
+        <item>なし</item>
+        <item>フリップ</item>
+        <item>フェードイン</item>
+        <item>スクロール</item>
+    </string-array>
+    <string-array name="effect_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="quality_name_list">
+        <item>速度を優先する</item>
+        <item>画質を優先する</item>
+    </string-array>
+    <string-array name="quality_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pnpos_name_list">
+        <item>左上</item>
+        <item>中央上</item>
+        <item>右上</item>
+        <item>左下</item>
+        <item>中央下</item>
+        <item>右下</item>
+    </string-array>
+    <string-array name="pnpos_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="pnfmt_name_list">
+        <item>page / total</item>
+        <item>page1-2 / total</item>
+    </string-array>
+    <string-array name="pnfmt_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pncolor_name_list">
+        <item>白</item>
+        <item>黒</item>
+    </string-array>
+    <string-array name="pncolor_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="timefmt_name_list">
+        <item>24:00</item>
+        <item>24:00 [100%]</item>
+        <item>24:00 [100%] [AC]</item>
+        <item>12:00</item>
+        <item>12:00 [100%]</item>
+        <item>12:00 [100%] [AC]</item>
+    </string-array>
+    <string-array name="timefmt_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="lastpage_name_list">
+        <item>画面を閉じる</item>
+        <item>確認ダイアログの表示</item>
+        <item>次のファイルを表示</item>
+    </string-array>
+    <string-array name="lastpage_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="pagesel_name_list">
+        <item>画面下をスワイプ</item>
+        <item>スライダー表示</item>
+        <item>サムネイル</item>
+    </string-array>
+    <string-array name="pagesel_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="txpagesel_name_list">
+        <item>画面下をスワイプ</item>
+        <item>スライダー表示</item>
+    </string-array>
+    <string-array name="txpagesel_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="history_name_list">
+        <item>保存しない</item>
+        <item>20</item>
+        <item>40</item>
+        <item>60</item>
+        <item>80</item>
+        <item>100</item>
+    </string-array>
+    <string-array name="history_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="max_lines_name_list">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+    <string-array name="max_lines_value_list">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+    <string-array name="filemenu_name_list">
+        <item>表示しない</item>
+        <item>表示する</item>
+        <item>ローカルのみ表示</item>
+        <item>サーバのみ表示</item>
+    </string-array>
+    <string-array name="filemenu_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="bright_name_list">
+        <item>-2</item>
+        <item>-1</item>
+        <item>なし</item>
+        <item>+1</item>
+        <item>+2</item>
+    </string-array>
+    <string-array name="bright_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="gamma_name_list">
+        <item>-2</item>
+        <item>-1</item>
+        <item>なし</item>
+        <item>+1</item>
+        <item>+2</item>
+    </string-array>
+    <string-array name="gamma_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="maxthread_name_list">
+        <item>1スレッド</item>
+        <item>2スレッド</item>
+        <item>3スレッド</item>
+        <item>4スレッド</item>
+        <item>5スレッド</item>
+        <item>6スレッド</item>
+        <item>7スレッド</item>
+        <item>8スレッド</item>
+    </string-array>
+    <string-array name="maxthread_value_list">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="loupesize_name_list">
+        <item>通常</item>
+        <item>大</item>
+        <item>特大</item>
+    </string-array>
+    <string-array name="loupesize_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+</resources>

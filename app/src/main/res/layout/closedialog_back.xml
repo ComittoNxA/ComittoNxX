@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/ScrollView"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" >
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:gravity="center_horizontal"
+		android:padding="8dip"
+		android:orientation="vertical" >
+	
+		<TextView
+			android:id="@+id/text_message"
+			android:layout_width="320sp"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:textSize="20sp"
+			android:textColor="#FFFFFFFF"
+			android:text="@string/lastTitle" />
+
+		<ImageView
+			android:layout_width="fill_parent"
+			android:layout_height="1sp"
+			android:background="#FFFFFFFF"
+			android:layout_marginTop="6sp"
+			android:layout_marginBottom="16sp" />
+
+		<Button
+			android:id="@+id/btn_prev"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:textSize="18sp"
+			android:text="@string/cdBtnPrev" />
+	
+		<Button
+			android:id="@+id/btn_next"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:textSize="18sp"
+			android:text="@string/cdBtnNext" />
+
+		<ImageView
+			android:background="#00FFFFFF"
+			android:layout_width="fill_parent"
+			android:layout_height="0.5sp"
+			android:layout_marginBottom="6sp" />
+
+		<Button
+			android:id="@+id/btn_close"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="16sp"
+			android:paddingBottom="24sp"
+			android:textSize="18sp"
+			android:text="@string/cdBtnClose" />
+	
+		<CheckBox
+			android:id="@+id/chk_mark"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="left|center"
+			android:textSize="17sp"
+			android:text= "@string/cdChkMark" />
+
+		<CheckBox
+			android:id="@+id/chk_resume"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="left|center"
+			android:textSize="17sp"
+			android:text= "@string/cdChkResume"
+			android:layout_marginTop="-6sp" />
+	
+	</LinearLayout>
+</ScrollView>

@@ -1,0 +1,15 @@
+[binaries]
+c = 'armv7a-linux-androideabi21-clang.cmd'
+cpp = 'armv7a-linux-androideabi21-clang++.cmd'
+ar = 'llvm-ar.exe'
+strip = 'llvm-strip.exe'
+pkgconfig = 'pkg-config.exe'
+
+[properties]
+needs_exe_wrapper = true
+
+[host_machine]
+system = 'android'
+cpu_family = 'arm'
+cpu = 'arm'
+endian = 'little'

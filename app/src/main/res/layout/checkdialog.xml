@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/listlayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/dialogframe" >
+
+	<TextView
+		android:id="@+id/text_title"
+		android:layout_width="320sp"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:textSize="22sp"
+		android:textColor="#FFFFFFFF"
+		android:text="@string/addBmTitle" />
+
+	<ImageView
+		android:layout_width="fill_parent"
+		android:layout_height="1sp"
+		android:background="#FFFFFFFF"
+		android:layout_marginTop="0sp"
+		android:layout_marginBottom="0sp" />
+
+	<ListView
+		android:id="@+id/listview"
+		android:layout_width="fill_parent"
+		android:gravity="fill_horizontal"
+		android:divider="#80FFFFFF"
+		android:dividerHeight="0.5sp"
+        android:layout_height="0dp"
+	    android:layout_weight="1" />
+
+	<ImageView
+		android:layout_width="fill_parent"
+		android:layout_height="1sp"
+		android:background="#FFFFFFFF"
+		android:layout_marginTop="0sp"
+		android:layout_marginBottom="0sp" />
+	
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:gravity="center"
+		android:padding="4dip"
+		android:orientation="horizontal" >
+
+		<Button
+			android:id="@+id/btn_cancel"
+			android:layout_width="120sp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textSize="18sp"
+			android:text="@string/btnCancel" />
+
+		<Button
+			android:id="@+id/btn_ok"
+			android:layout_width="120sp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textSize="18sp"
+			android:text="@string/btnOK" />
+	</LinearLayout>
+</LinearLayout>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:padding="4dip"
+    android:orientation="vertical" >
+
+	<SeekBar
+	    android:id="@+id/seek_page"
+	    style="@style/PageSeekBar"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:paddingLeft="20sp"
+	    android:paddingRight="20sp" />
+
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="center_vertical"
+	    android:gravity="center_horizontal"
+	    android:padding="4dip"
+	    android:orientation="horizontal" >
+
+	    <EditText
+	        android:id="@+id/edit_page"
+	        android:layout_width="80sp"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_vertical"
+	        android:gravity="right"
+	        android:hint=""
+	        android:maxLength="4"
+	        android:scrollHorizontally="true"
+	        android:singleLine="true"
+	        android:textSize="20sp"
+			android:imeOptions="actionSearch" />
+
+	    <TextView
+	        android:id="@+id/text_slash"
+	        android:layout_width="20sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="center"
+	        android:textSize="16sp" />
+
+	    <TextView
+	        android:id="@+id/text_maxpage"
+	        android:layout_width="40sp"
+	        android:layout_height="wrap_content"
+	        android:gravity="right"
+	        android:textSize="16sp" />
+
+	    <Button
+	        android:id="@+id/btn_ok"
+	        android:layout_width="100sp"
+	        android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+	        android:textSize="18sp"
+	        android:text="@string/btnOK" />
+	    
+	    <Button
+	        android:id="@+id/btn_cancel"
+	        android:layout_width="100sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="18sp"
+	        android:text="@string/btnCancel" />
+	</LinearLayout>
+
+    <LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="center_vertical"
+		android:layout_weight="1"
+	    android:gravity="center_horizontal"
+	    android:padding="4dip"
+	    android:orientation="horizontal" >
+
+        <Button
+	        android:id="@+id/btn_sub100"
+	        android:layout_width="60sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:text="@string/psSub100" />
+
+	    <Button
+	        android:id="@+id/btn_sub10"
+	        android:layout_width="64sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:text="@string/psSub10" />
+
+	    <Button
+	        android:id="@+id/btn_sub1"
+	        android:layout_width="64sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:text="@string/psSub1" />
+
+	    <Button
+	        android:id="@+id/btn_add1"
+	        android:layout_width="64sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:text="@string/psAdd1" />
+	
+	    <Button
+	        android:id="@+id/btn_add10"
+	        android:layout_width="64sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:text="@string/psAdd10" />
+	
+	    <Button
+	        android:id="@+id/btn_add100"
+	        android:layout_width="64sp"
+	        android:layout_height="wrap_content"
+	        android:textSize="16sp"
+	        android:text="@string/psAdd100" />
+	</LinearLayout>
+</LinearLayout>

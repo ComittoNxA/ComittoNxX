@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Initial Settings" >
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Initial Scale Mode"
+            android:entries="@array/txscale_name_list"
+            android:entryValues="@array/txscale_value_list"
+            android:key="txIniScale"
+            android:summary="dummy"
+            android:title="Initial Scale Mode" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Initial View Mode"
+            android:entries="@array/txinitview_name_list"
+            android:entryValues="@array/txinitview_value_list"
+            android:key="txInitView"
+            android:summary="dummy"
+            android:title="Initial View Mode" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Paper Size"
+            android:entries="@array/txpaper_name_list"
+            android:entryValues="@array/txpaper_value_list"
+            android:key="txPaperSize"
+            android:summary="dummy"
+            android:title="Paper Size" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Display Settings" >
+        <PreferenceScreen
+            android:key="txFontDL"
+            android:summary="Transition to the font download screen."
+            android:title="Font Download" >
+        </PreferenceScreen>
+        <ListPreference
+            android:defaultValue=""
+            android:dialogTitle="Select Font"
+            android:key="txFontName"
+            android:summary="dummy"
+            android:title="Select Font" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Illustrations Size"
+            android:entries="@array/txpic_name_list"
+            android:entryValues="@array/txpic_value_list"
+            android:key="txPicSize"
+            android:summary="dummy"
+            android:title="Illustrations Size" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="txNotice"
+            android:summary="Required Restart"
+            android:title="Hide the Notification Area" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="txNoSleep"
+            android:summary="Required Restart"
+            android:title="Not To Sleep" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Screen Orientation"
+            android:entries="@array/rotate_name_list"
+            android:entryValues="@array/rotate_value_list"
+            android:key="txViewRota"
+            android:summary="dummy"
+            android:title="Screen orientation" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="txCMargin"
+            android:summary="Insert Margin in the middle of Dual View"
+            android:title="Center Margin" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="txCShadow"
+            android:summary="Draw a shadow in the middle of Dual View"
+            android:title="Draw Shadow" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="txEffect"
+            android:summary="When you scroll through page turns"
+            android:title="Page turning effect" />
+        <src.comitton.config.TextScrlRngWSeekbar
+            android:dialogMessage="Scroll Width of Vol-Button, etc."
+            android:dialogTitle="Scroll Range (Width)"
+            android:key="txScrlRngW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scroll Range (Width)" />
+        <src.comitton.config.TextScrlRngHSeekbar
+            android:dialogMessage="Scroll Height of Vol-Button, etc."
+            android:dialogTitle="Scroll Range (Height)"
+            android:key="txScrlRngH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scroll Range (Height)" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="First Image Position"
+            android:entries="@array/viewpt_name_list"
+            android:entryValues="@array/viewpt_value_list"
+            android:key="ViewPt"
+            android:summary="dummy"
+            android:title="First Image Position(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="PrevRev"
+            android:summary="To return to the previous page is opposed to the horizontal display position"
+            android:title="PrevPage to Reverse Position(*)" />
+        <src.comitton.config.TimeAndBatteryPreference
+            android:dialogTitle="Time and Battery"
+            android:key="TimeAndBattery"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Time and Buttery(*)" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Operation Settings" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ConfirmBack"
+            android:summary="Display a confirmation message when you exit via the back button."
+            android:title="Confirmation on exit(*)" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Operation in last/top page"
+            android:entries="@array/lastpage_name_list"
+            android:entryValues="@array/lastpage_value_list"
+            android:key="LastPage"
+            android:summary="dummy"
+            android:title="Operation in last/top page(*)" />
+        <src.comitton.config.OperationPreference
+            android:dialogMessage="Please select the location tap page turning.\n(&lt;:Next Page, &gt;:Prev Page)"
+            android:dialogTitle="Pattern of tap position"
+            android:key="TapPattern"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Pattern of tap position(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPage"
+            android:summary="When checked, the right of the screen will move to the previous page."
+            android:title="Swap the tap operation(*)" />
+        <!--CheckBoxPreference
+            android:defaultValue="false"
+            android:key="OldPageSel"
+            android:summary="When checked, the page selection method will be to drag the bottom of the screen."
+            android:title="Old type selection page(*)" /-->
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="VibFlag"
+            android:summary="Vibrate according to the operation"
+            android:title="Vibrate by operation(*)" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Operation by Vol Key"
+            android:entries="@array/volkey_name_list"
+            android:entryValues="@array/volkey_value_list"
+            android:key="VolKey"
+            android:summary="dummy"
+            android:title="Operation by Vol Key(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="TapScrl"
+            android:summary="Also perform scroll by tapping."
+            android:title="Scrolling with the tap(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="FlickPage"
+            android:summary="move to next / prev page by flicking."
+            android:title="move page with the flick(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="FlickEdge"
+            android:summary="To page turning only when you flick from the edge of the page."
+            android:title="Flick from the edge(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgFlick"
+            android:summary="When checked, the flick in the direction of the front cover will move to the previous page."
+            android:title="Swap the flick operation(*)" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Page select operation"
+            android:entries="@array/txpagesel_name_list"
+            android:entryValues="@array/txpagesel_value_list"
+            android:key="txPageSelect"
+            android:summary="dummy"
+            android:title="Page select operation(*)" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Size Settings" >
+        <src.comitton.config.TextFontTopSeekbar
+            android:dialogMessage="Select font size of head."
+            android:dialogTitle="Head Font Size"
+            android:key="txFontTopSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Head Font Size" />
+        <src.comitton.config.TextFontBodySeekbar
+            android:dialogMessage="Select font size of body."
+            android:dialogTitle="Body Font Size"
+            android:key="txFontBodySp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Body Font Size" />
+        <src.comitton.config.TextFontRubiSeekbar
+            android:dialogMessage="Select font size of Rubi."
+            android:dialogTitle="Rubi Font Size"
+            android:key="txFontRubiSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Rubi Font Size" />
+        <src.comitton.config.TextFontInfoSeekbar
+            android:dialogMessage="Select font size of Information."
+            android:dialogTitle="Information Font Size"
+            android:key="txFontInfoSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Information Font Size" />
+        <src.comitton.config.TextSpaceWSeekbar
+            android:dialogMessage="Select size of Lines between."
+            android:dialogTitle="Lines between Size"
+            android:key="txSpaceW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Lines between Size" />
+        <src.comitton.config.TextSpaceHSeekbar
+            android:dialogMessage="Select size of Characters between."
+            android:dialogTitle="Characters between Size"
+            android:key="txSpaceH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Characters between Size" />
+        <src.comitton.config.TextMarginWSeekbar
+            android:dialogMessage="Select size of Left and Right Margins."
+            android:dialogTitle="Left and Right Margins Size"
+            android:key="txMarginW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Left and Right Margins Size" />
+        <src.comitton.config.TextMarginHSeekbar
+            android:dialogMessage="Select size of Top and Bottom Margins."
+            android:dialogTitle="Top and Bottom Margins Size"
+            android:key="txMarginH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Top and Bottom Margins Size" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="TextHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

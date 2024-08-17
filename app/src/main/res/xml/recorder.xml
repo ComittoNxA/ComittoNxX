@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Recorder Settings" >
+<!--         <CheckBoxPreference -->
+<!--             android:defaultValue="true" -->
+<!--             android:key="ShowSelector" -->
+<!--             android:summary="Show the list selector to the bottom of the list." -->
+<!--             android:title="Show List Selector" /> -->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RDView"
+            android:summary="To switch to the directory list."
+            android:title="Display Directory List" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RBView"
+            android:summary="To switch to the favorite list."
+            android:title="Display Favorite List" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RHView"
+            android:summary="To switch to the history list."
+            android:title="Display History List" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RHLocalRec"
+            android:summary="Record to history by read the file in the local."
+            android:title="Record Local History" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RHSambaRec"
+            android:summary="Record to history by read the file in the server."
+            android:title="Record Server History" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Number of saved history"
+            android:entries="@array/history_name_list"
+            android:entryValues="@array/history_value_list"
+            android:key="RLSave3"
+            android:summary="dummy"
+            android:title="Number of saved history" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="RecordHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

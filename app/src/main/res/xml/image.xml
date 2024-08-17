@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Initial Settings" >
+        <ListPreference
+            android:defaultValue="5"
+            android:dialogTitle="Initial Scale Mode"
+            android:entries="@array/scale_name_list"
+            android:entryValues="@array/scale_value_list"
+            android:key="IniScale"
+            android:summary="dummy"
+            android:title="Initial Scale Mode" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Initial View Mode"
+            android:entries="@array/initview_name_list"
+            android:entryValues="@array/initview_value_list"
+            android:key="InitView"
+            android:summary="dummy"
+            android:title="Initial View Mode" />
+        <ListPreference
+            android:defaultValue="4"
+            android:dialogTitle="Image Interpolation"
+            android:entries="@array/algomode_name_list"
+            android:entryValues="@array/algomode_value_list"
+            android:key="AlgoMode"
+            android:summary="dummy"
+            android:title="Image Interpolation" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Remove the white margin"
+            android:entries="@array/mgncut_name_list"
+            android:entryValues="@array/mgncut_value_list"
+            android:key="MarginCut"
+            android:summary="dummy"
+            android:title="Strength to remove the white margin." />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="Sharpen"
+            android:title="Sharpen image" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Display Settings" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="Notice"
+            android:summary="Required Restart"
+            android:title="Hide the Notification Area" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="NoSleep"
+            android:summary="Required Restart"
+            android:title="Not To Sleep" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Screen Orientation"
+            android:entries="@array/rotate_name_list"
+            android:entryValues="@array/rotate_value_list"
+            android:key="ViewRota"
+            android:summary="dummy"
+            android:title="Screen orientation" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Show Image Order"
+            android:entries="@array/filesort_name_list"
+            android:entryValues="@array/filesort_value_list"
+            android:key="FileSort"
+            android:summary="dummy"
+            android:title="Show Image Order" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Turning the Page Direction"
+            android:entries="@array/pageway_name_list"
+            android:entryValues="@array/pageway_value_list"
+            android:key="PageWay"
+            android:summary="dummy"
+            android:title="Turning the Page Direction" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="NoExpand"
+            android:summary="Not expand beyond original size"
+            android:title="Not Expand" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="FitDual"
+            android:summary="Adjust the height of the dual view"
+            android:title="Adjust Height" />
+        <ListPreference
+            android:defaultValue="4"
+            android:dialogTitle="Magnification of the Loupe"
+            android:entries="@array/zoomsize_name_list"
+            android:entryValues="@array/zoomsize_value_list"
+            android:key="ZoomType"
+            android:summary="dummy"
+            android:title="Magnification of the Loupe" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="CMargin"
+            android:summary="Insert Margin in the middle of Dual View"
+            android:title="Center Margin" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="CShadow"
+            android:summary="Draw a shadow in the middle of Dual View"
+            android:title="Draw Shadow" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Page turning effect"
+            android:entries="@array/effect_name_list"
+            android:entryValues="@array/effect_value_list"
+            android:key="EffectList"
+            android:summary="dummy"
+            android:title="Page turning effect" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="First Image Position"
+            android:entries="@array/viewpt_name_list"
+            android:entryValues="@array/viewpt_value_list"
+            android:key="ViewPt"
+            android:summary="dummy"
+            android:title="First Image Position(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="PrevRev"
+            android:summary="To return to the previous page is opposed to the horizontal display position"
+            android:title="PrevPage to Reverse Position(*)" />
+        <src.comitton.config.PageNumberPreference
+            android:dialogTitle="Page Number"
+            android:key="PageNumber"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Page Number" />
+        <src.comitton.config.TimeAndBatteryPreference
+            android:dialogTitle="Time and Battery"
+            android:key="TimeAndBattery"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Time and Buttery(*)" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Operation Settings" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ConfirmBack"
+            android:summary="Display a confirmation message when you exit via the back button."
+            android:title="Confirmation on exit(*)" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Operation in last/top page"
+            android:entries="@array/lastpage_name_list"
+            android:entryValues="@array/lastpage_value_list"
+            android:key="LastPage"
+            android:summary="dummy"
+            android:title="Operation in last/top page(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SavePage"
+            android:summary="Record the reading position even if the app has stopped."
+            android:title="Save each at page move" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Direction of the scroll"
+            android:entries="@array/scroll_name_list"
+            android:entryValues="@array/scroll_value_list"
+            android:key="ScrlWay"
+            android:summary="dummy"
+            android:title="Volume button to scroll in the direction." />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="DelShare"
+            android:summary="Delete the temporary files for sharing at the end of the Image Viewer."
+            android:title="Delete Temporary File" />
+        <src.comitton.config.OperationPreference
+            android:dialogMessage="Please select the location tap page turning.\n(&lt;:Next Page, &gt;:Prev Page)"
+            android:dialogTitle="Pattern of tap position"
+            android:key="TapPattern"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Pattern of tap position" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ChgPage"
+            android:summary="When checked, the right of the screen will move to the previous page."
+            android:title="Swap the tap operation(*)" />
+        <!--CheckBoxPreference
+            android:defaultValue="false"
+            android:key="OldPageSel"
+            android:summary="When checked, the page selection method will be to drag the bottom of the screen."
+            android:title="Old type selection page(*)" /-->
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="VibFlag"
+            android:summary="Vibrate according to the operation"
+            android:title="Vibrate by operation(*)" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Operation by Vol Key"
+            android:entries="@array/volkey_name_list"
+            android:entryValues="@array/volkey_value_list"
+            android:key="VolKey"
+            android:summary="dummy"
+            android:title="Operation by Vol Key(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="TapScrl"
+            android:summary="Also perform scroll by tapping."
+            android:title="Scrolling with the tap(*)" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="FlickPage"
+            android:summary="move to next / prev page by flicking."
+            android:title="Move page with the flick(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="FlickEdge"
+            android:summary="To page turning only when you flick from the edge of the page."
+            android:title="Flick from the edge(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgFlick"
+            android:summary="When checked, the flick in the direction of the front cover will move to the previous page."
+            android:title="Swap the flick operation(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ScrollNext"
+            android:summary="Allows you to move to the previous or next page by scrolling"
+            android:title="Scroll to the next page" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ViewNextPage"
+            android:summary="Display the next page when there is free display area to the side"
+            android:title="Display next pages" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Page select operation"
+            android:entries="@array/pagesel_name_list"
+            android:entryValues="@array/pagesel_value_list"
+            android:key="PageSelect"
+            android:summary="dummy"
+            android:title="Page select operation(*)" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="ImageHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

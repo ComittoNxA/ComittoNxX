@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="表示関連の設定" >
+        <src.comitton.config.MarginSeekbar
+            android:dialogMessage="スクロールの端を表す余白サイズの選択"
+            android:dialogTitle="余白サイズ"
+            android:key="Mergin"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="周囲の余白サイズ" />
+        <src.comitton.config.CenterSeekbar
+            android:dialogMessage="並べて表示で画像間の余白の幅を設定"
+            android:dialogTitle="中央の余白幅 (並べて表示中)"
+            android:key="Center"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="中央の余白幅 (並べて表示中)" />
+        <src.comitton.config.GradationSeekbar
+            android:dialogMessage="並べて表示で画像間に描画する影の幅を設定"
+            android:dialogTitle="中央の影の幅 (並べて表示)"
+            android:key="Gradation"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="中央の影の幅 (並べて表示中)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ImmEnable"
+            android:summary="KitKat以降の端末でナビゲーションバーを隠します"
+            android:title="IMMERSIVEモードを有効にする" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="OldMenu"
+            android:summary="シングルアクションでコマンドを選択するメニュー"
+            android:title="旧タイプの上部メニューを使用" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="操作関連の設定" >
+        <src.comitton.config.EffectTimeSeekbar
+            android:dialogMessage="ページめくり時のエフェクト時間"
+            android:dialogTitle="エフェクト時間"
+            android:key="EffectTime"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="エフェクト時間" />
+        <src.comitton.config.ScrollSeekbar
+            android:dialogMessage="ドラッグに対するスクロール量の倍率"
+            android:dialogTitle="ドラッグによるスクロール量"
+            android:key="Scroll"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="ドラッグによるスクロール量" />
+        <src.comitton.config.ClickAreaSeekbar
+            android:dialogMessage="上下の操作エリアのサイズを指定"
+            android:dialogTitle="上下の操作エリアサイズ"
+            android:key="ClickAreaSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="上下の操作エリアサイズ" />
+        <src.comitton.config.PageRangeSeekbar
+            android:dialogMessage="下部ページ選択領域で1ページあたりのドラッグ量"
+            android:dialogTitle="ページ選択の感度"
+            android:key="PageRangeSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="ページ選択の感度" />
+        <src.comitton.config.TapRangeSeekbar
+            android:dialogMessage="スクロールを開始するまでの移動量"
+            android:dialogTitle="スクロール開始の感度"
+            android:key="TapRangeSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="スクロール開始の感度" />
+        <src.comitton.config.VolScrlSeekbar
+            android:dialogMessage="音量キーや音操作でのスクロール速度"
+            android:dialogTitle="スクロール速度"
+            android:key="VolScrlSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="音量キーでのスクロール速度" />
+        <src.comitton.config.MomentModeSeekbar
+            android:dialogMessage="小さいほどすぐ止まる"
+            android:dialogTitle="減速スピード"
+            android:key="MomentMode"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="減速スピード" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="BottomFile"
+            android:summary="画面下部の操作で前後のファイルへの移動を可能とする"
+            android:title="下部操作での前後ファイル移動" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="PinchEnable"
+            android:summary="ピンチイン/アウト操作で表示サイズを変更します"
+            android:title="ピンチイン/アウト操作" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="ImgTxtDtlHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

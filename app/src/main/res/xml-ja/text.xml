@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="起動時の表示状態の設定" >
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="サイズ調整方法"
+            android:entries="@array/txscale_name_list"
+            android:entryValues="@array/txscale_value_list"
+            android:key="txIniScale"
+            android:summary="dummy"
+            android:title="サイズ調整方法" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="見開きモード"
+            android:entries="@array/txinitview_name_list"
+            android:entryValues="@array/txinitview_value_list"
+            android:key="txInitView"
+            android:summary="dummy"
+            android:title="見開きモード" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="用紙選択"
+            android:entries="@array/txpaper_name_list"
+            android:entryValues="@array/txpaper_value_list"
+            android:key="txPaperSize"
+            android:summary="dummy"
+            android:title="用紙選択" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="表示関連の設定(＊はイメージと共通の設定)" >
+        <PreferenceScreen
+            android:key="txFontDL"
+            android:summary="テキスト表示に使用するフォントをダウンロードする画面に遷移します"
+            android:title="フォントのダウンロード" >
+        </PreferenceScreen>
+        <ListPreference
+            android:defaultValue=""
+            android:dialogTitle="フォント選択"
+            android:key="txFontName"
+            android:summary="dummy"
+            android:title="フォント選択" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="挿絵のサイズ"
+            android:entries="@array/txpic_name_list"
+            android:entryValues="@array/txpic_value_list"
+            android:key="txPicSize"
+            android:summary="dummy"
+            android:title="挿絵のサイズ" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="txNotice"
+            android:summary="テキスト表示画面を一旦閉じたあと有効"
+            android:title="通知領域を非表示にする" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="txNoSleep"
+            android:summary="テキスト表示画面を一旦閉じたあと有効"
+            android:title="スリープさせない" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="表示方向"
+            android:entries="@array/rotate_name_list"
+            android:entryValues="@array/rotate_value_list"
+            android:key="txViewRota"
+            android:summary="dummy"
+            android:title="表示方向" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="txCMargin"
+            android:summary="並べて表示のとき画像の間に余白を空ける"
+            android:title="中央に余白を表示" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="txCShadow"
+            android:summary="並べて表示のとき画像の中央に影を描画する"
+            android:title="中央に影を描画" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="txEffect"
+            android:summary="ページめくりのエフェクトを有効にする"
+            android:title="ページめくりのエフェクト" />
+        <src.comitton.config.TextScrlRngWSeekbar
+            android:dialogMessage="音量キー等でのスクロール量(幅)"
+            android:dialogTitle="スクロール量(幅)"
+            android:key="txScrlRngW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="音量キーでのスクロール量(幅)" />
+        <src.comitton.config.TextScrlRngHSeekbar
+            android:dialogMessage="音量キー等でのスクロール量(高さ)"
+            android:dialogTitle="スクロール量(高さ)"
+            android:key="txScrlRngH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="音量キー等でのスクロール量(高さ)" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="画像の初期表示位置"
+            android:entries="@array/viewpt_name_list"
+            android:entryValues="@array/viewpt_value_list"
+            android:key="ViewPt"
+            android:summary="dummy"
+            android:title="画像の初期表示位置＊" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="PrevRev"
+            android:summary="前ページに戻る時、横方向の表示位置を初期表示位置の反対にします"
+            android:title="前ページ位置を左右反転＊" />
+        <src.comitton.config.TimeAndBatteryPreference
+            android:dialogTitle="時刻と充電表示"
+            android:key="TimeAndBattery"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="時刻と充電表示＊" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="操作関連の設定(＊はイメージと共通)" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ConfirmBack"
+            android:summary="戻るボタンで画面を閉じるときに確認メッセージを表示する"
+            android:title="戻るボタンで確認表示＊" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="最終/先頭ページでの動作"
+            android:entries="@array/lastpage_name_list"
+            android:entryValues="@array/lastpage_value_list"
+            android:key="LastPage"
+            android:summary="dummy"
+            android:title="最終/先頭ページでの動作＊" />
+        <src.comitton.config.OperationPreference
+            android:dialogMessage="ページめくりするタップ位置を選択してください\n（&lt;:次ページ、&gt;:前ページ）"
+            android:dialogTitle="タップ位置のパターン"
+            android:key="TapPattern"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="タップ操作のパターン＊" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPage"
+            android:summary="チェックにより画面左:次ページ/画面右:前ページの移動になります"
+            android:title="タップ操作の入替え＊" />
+        <!--CheckBoxPreference
+            android:defaultValue="false"
+            android:key="OldPageSel"
+            android:summary="チェックにより画面下部をドラッグする方式のページ選択になります"
+            android:title="旧タイプのページ選択＊" /-->
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="VibFlag"
+            android:summary="イメージの操作・選択により振動させる"
+            android:title="振動を有効にする＊" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="音量ボタンでのページめくり"
+            android:entries="@array/volkey_name_list"
+            android:entryValues="@array/volkey_value_list"
+            android:key="VolKey"
+            android:summary="dummy"
+            android:title="音量ボタンでのページめくり＊" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="TapScrl"
+            android:summary="タップでスクロールも行う"
+            android:title="タップでのスクロール＊" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="FlickPage"
+            android:summary="フリックでページめくりする"
+            android:title="フリックでページめくり＊" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="FlickEdge"
+            android:summary="ページ端からフリックを開始したしたときのみページめくりする"
+            android:title="ページ端からフリック＊" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgFlick"
+            android:summary="チェックにより表紙方向へのフリックが前ページの移動になります"
+            android:title="フリック操作の入替え＊" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="ページ選択方法"
+            android:entries="@array/txpagesel_name_list"
+            android:entryValues="@array/txpagesel_value_list"
+            android:key="txPageSelect"
+            android:summary="dummy"
+            android:title="ページ選択方法" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="サイズ設定" >
+        <src.comitton.config.TextFontTopSeekbar
+            android:dialogMessage="見出しのフォントサイズを選択"
+            android:dialogTitle="見出しのフォントサイズ"
+            android:key="txFontTopSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="見出しのフォントサイズ" />
+        <src.comitton.config.TextFontBodySeekbar
+            android:dialogMessage="本文のフォントサイズを選択"
+            android:dialogTitle="本文のフォントサイズ"
+            android:key="txFontBodySp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="本文のフォントサイズ" />
+        <src.comitton.config.TextFontRubiSeekbar
+            android:dialogMessage="ルビのフォントサイズを選択"
+            android:dialogTitle="ルビのフォントサイズ"
+            android:key="txFontRubiSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="ルビのフォントサイズ" />
+        <src.comitton.config.TextFontInfoSeekbar
+            android:dialogMessage="ヘッダ/フッタのフォントサイズを選択"
+            android:dialogTitle="ヘッダ/フッタのフォントサイズ"
+            android:key="txFontInfoSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="ヘッダ/フッタのフォントサイズ" />
+        <src.comitton.config.TextSpaceWSeekbar
+            android:dialogMessage="行間のサイズを選択"
+            android:dialogTitle="行間のサイズ"
+            android:key="txSpaceW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="行間のサイズ" />
+        <src.comitton.config.TextSpaceHSeekbar
+            android:dialogMessage="文字間のサイズを選択"
+            android:dialogTitle="文字間のサイズ"
+            android:key="txSpaceH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="文字間のサイズ" />
+        <src.comitton.config.TextMarginWSeekbar
+            android:dialogMessage="左右の余白サイズを選択"
+            android:dialogTitle="左右の余白サイズ"
+            android:key="txMarginW"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="左右の余白サイズ" />
+        <src.comitton.config.TextMarginHSeekbar
+            android:dialogMessage="上下の余白サイズを選択"
+            android:dialogTitle="上下の余白サイズ"
+            android:key="txMarginH"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="上下の余白サイズ" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="TextHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

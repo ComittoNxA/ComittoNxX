@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32"
+   height="32"
+   id="svg2993"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="_toolbar_search.svg"
+   inkscape:export-filename="c:\Android\Workspace\ComittoN\res\drawable-nodpi\toolbar_thumon_s.png"
+   inkscape:export-xdpi="60"
+   inkscape:export-ydpi="60">
+  <defs
+     id="defs2995">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 16 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="32 : 16 : 1"
+       inkscape:persp3d-origin="16 : 10.666667 : 1"
+       id="perspective4652" />
+    <linearGradient
+       id="linearGradient4022-8"
+       inkscape:collect="always">
+      <stop
+         id="stop4024-8"
+         offset="0"
+         style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop
+         id="stop4026-2"
+         offset="1"
+         style="stop-color:#483737;stop-opacity:0.536" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4022-7"
+       inkscape:collect="always">
+      <stop
+         id="stop4024-4"
+         offset="0"
+         style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop
+         id="stop4026-0"
+         offset="1"
+         style="stop-color:#483737;stop-opacity:0.536" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4022-7"
+       id="linearGradient4020-1"
+       x1="5"
+       y1="18"
+       x2="5"
+       y2="48"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.72727273,0,0,0.76923079,-1.4545455,14.461539)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4022-8"
+       id="linearGradient4020-4"
+       x1="5"
+       y1="18"
+       x2="5"
+       y2="48"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.72727273,0,0,0.76923079,-1.4545455,14.461539)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="26.28125"
+     inkscape:cx="14.458977"
+     inkscape:cy="19.043995"
+     inkscape:current-layer="svg2993"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:snap-bbox="true"
+     inkscape:window-width="1774"
+     inkscape:window-height="1053"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:snap-global="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3001"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata2998">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     style="fill:#1a1a1a;stroke:none"
+     d="M 12.5,0 C 6.1487251,0 1,5.148725 1,11.5 1,17.851275 6.1487251,23 12.5,23 c 2.731048,0 5.246153,-0.941 7.21875,-2.53125 l 0.8125,0.8125 L 20,21.8125 29.1875,31 32,28.1875 22.8125,19 l -0.53125,0.53125 -0.8125,-0.8125 C 23.059,16.746153 24,14.231048 24,11.5 24,5.148725 18.851275,0 12.5,0 z m 0,3 C 17.19442,3 21,6.80558 21,11.5 21,16.19442 17.19442,20 12.5,20 7.8055796,20 4,16.19442 4,11.5 4,6.80558 7.8055796,3 12.5,3 z"
+     id="path2994"
+     inkscape:connector-curvature="0" />
+</svg>

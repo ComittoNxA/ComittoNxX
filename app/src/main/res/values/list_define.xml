@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="algomode_name_list">
+        <item>Nearest Neighbor</item>
+        <item>Bi-Linear</item>
+        <item>Bi-Linear(2 Step)</item>
+        <item>Bi-Cubic</item>
+        <item>Bi-Cubic(2 Step)</item>
+    </string-array>
+    <string-array name="algomode_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="backmode_name_list">
+        <item>Exit ComittoN</item>
+        <item>Parent Directory</item>
+        <item>History Back</item>
+    </string-array>
+    <string-array name="backmode_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="file_rotaname_list">
+        <item>Auto Rotate</item>
+        <item>Portrait</item>
+        <item>Landscape</item>
+    </string-array>
+    <string-array name="file_rotavalue_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="rotate_name_list">
+        <item>Auto Rotate</item>
+        <item>Portrait</item>
+        <item>Landscape</item>
+        <item>Portrait(Rotated 90deg)</item>
+    </string-array>
+    <string-array name="rotate_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="zipsort_name_list">
+        <item>None</item>
+        <item>Name (Merge Dir)</item>
+        <item>Name (Separate Dir)</item>
+        <item>New Date (Marge Dir)</item>
+        <item>New Date (Separate Dir)</item>
+        <item>Old Date (Marge Dir)</item>
+        <item>Old Date (Separate Dir)</item>
+    </string-array>
+    <string-array name="zipsort_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="thumsize_name_list">
+        <item>Tiny</item>
+        <item>Small</item>
+        <item>Normal</item>
+        <item>Large</item>
+        <item>Huge</item>
+        <item>Huge2</item>
+        <item>Huge3</item>
+    </string-array>
+    <string-array name="thumsize_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="thumcache_name_list">
+        <item>Not retain</item>
+        <item>Max 100 files</item>
+        <item>Max 500 files</item>
+        <item>Max 1000 files</item>
+        <item>Delete manually</item>
+    </string-array>
+    <string-array name="thumcache_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="rotatebtn_name_list">
+        <item>No Use</item>
+        <item>Camera Focus</item>
+        <item>Camera Shutter</item>
+    </string-array>
+    <string-array name="rotatebtn_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="filesort_name_list">
+        <item>None</item>
+        <item>File Name(Ascending)</item>
+        <item>File Name(Descending)</item>
+    </string-array>
+    <string-array name="filesort_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="preset_name_list">
+        <item>Custom</item>
+        <item>Standard (Black)</item>
+        <item>Standard (White)</item>
+        <item>Cherry</item>
+        <item>Indigo</item>
+        <item>Leaves</item>
+        <item>Mandarin</item>
+        <item>Sumi</item>
+    </string-array>
+    <string-array name="preset_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+    <string-array name="viewpt_name_list">
+        <item>Right Top</item>
+        <item>Left Top</item>
+        <item>Right Bottom</item>
+        <item>Left Bottom</item>
+        <item>Center</item>
+    </string-array>
+    <string-array name="viewpt_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="scale_name_list">
+        <item>Original Size</item>
+        <item>Fit Width</item>
+        <item>Fit Width(for Spread)</item>
+        <item>Fit Height</item>
+        <item>Fit Screen</item>
+        <item>Fit Screen(for Spread)</item>
+        <item>Full Screen</item>
+        <item>Full Screen(for Spread)</item>
+    </string-array>
+    <string-array name="scale_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>6</item>
+        <item>2</item>
+        <item>3</item>
+        <item>7</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="pageway_name_list">
+        <item>Right to Left</item>
+        <item>Left to Right</item>
+    </string-array>
+    <string-array name="pageway_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="initview_name_list">
+        <item>Normal</item>
+        <item>Dual View</item>
+        <item>Half View</item>
+        <item>Half / Dual View</item>
+    </string-array>
+    <string-array name="initview_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="zoomsize_name_list">
+        <item>Original x1.0</item>
+        <item>Original x2.0</item>
+        <item>Original x3.0</item>
+        <item>Display x1.5</item>
+        <item>Display x2.0</item>
+        <item>Display x2.5</item>
+        <item>Display x3.0</item>
+    </string-array>
+    <string-array name="zoomsize_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="volkey_name_list">
+        <item>No Use</item>
+        <item>Vol-Up:Prev / Down:Next</item>
+        <item>Vol-Up:Next / Down:Prev</item>
+    </string-array>
+    <string-array name="volkey_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="noisedec_name_list">
+        <item>Slow</item>
+        <item>Normal</item>
+        <item>Quick</item>
+    </string-array>
+    <string-array name="noisedec_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="charset_name_list">
+        <item>UTF-8</item>
+        <item>Shift_JIS</item>
+        <item>EUC-JP</item>
+        <item>EUC-KR</item>
+        <item>Big5</item>
+        <item>GB2312</item>
+    </string-array>
+    <string-array name="charset_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="scroll_name_list">
+        <item>Horizontal -> Direction</item>
+        <item>Direction -> Horizontal</item>
+    </string-array>
+    <string-array name="scroll_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="mgncut_name_list">
+        <item>None</item>
+        <item>Weak</item>
+        <item>Medium</item>
+        <item>Strong</item>
+        <item>Overkill</item>
+        <item>Ignore Aspect Ratio</item>
+    </string-array>
+    <string-array name="mgncut_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="txscale_name_list">
+        <item>Original Size</item>
+        <item>Fit Width</item>
+        <item>Fit Height</item>
+        <item>Fit Screen</item>
+    </string-array>
+    <string-array name="txscale_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="txinitview_name_list">
+        <item>Dual View</item>
+        <item>Half View</item>
+        <item>Tile View</item>
+    </string-array>
+    <string-array name="txinitview_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="txpaper_name_list">
+        <item>Screen Size(Portrait)</item>
+        <item>800x1280</item>
+        <item>720x1280</item>
+        <item>540x960</item>
+        <item>480x800</item>
+    </string-array>
+    <string-array name="txpaper_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="txgradation_name_list">
+        <item>None</item>
+        <item>Top Left -> Bottom Right</item>
+        <item>Top -> Bottom</item>
+        <item>Top Right->Bottom Left</item>
+        <item>Right -> Left</item>
+        <item>Bottom Right->Top Left</item>
+        <item>Bottom -> Top</item>
+        <item>Bottom Left->Top Right</item>
+        <item>Left -> Right</item>
+    </string-array>
+    <string-array name="txgradation_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="txpic_name_list">
+        <item>Original Size</item>
+        <item>Original x1</item>
+        <item>Original x2</item>
+        <item>Original x3</item>
+        <item>Fit Screen</item>
+    </string-array>
+    <string-array name="txpic_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="effect_name_list">
+        <item>None</item>
+        <item>Flip</item>
+        <item>Fade In</item>
+        <item>Scroll</item>
+    </string-array>
+    <string-array name="effect_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="quality_name_list">
+        <item>fast, low quality</item>
+        <item>slow, high quality</item>
+    </string-array>
+    <string-array name="quality_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pnpos_name_list">
+        <item>Top Right</item>
+        <item>Top Center</item>
+        <item>Top Left</item>
+        <item>Bottom Right</item>
+        <item>Bottom Center</item>
+        <item>Bottom Left</item>
+    </string-array>
+    <string-array name="pnpos_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="pnfmt_name_list">
+        <item>page / total</item>
+        <item>page-page / total</item>
+    </string-array>
+    <string-array name="pnfmt_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pncolor_name_list">
+        <item>White</item>
+        <item>Black</item>
+    </string-array>
+    <string-array name="pncolor_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="timefmt_name_list">
+        <item>24:00</item>
+        <item>24:00 [100%]</item>
+        <item>24:00 [100%] [AC]</item>
+        <item>12:00</item>
+        <item>12:00 [100%]</item>
+        <item>12:00 [100%] [AC]</item>
+    </string-array>
+    <string-array name="timefmt_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="lastpage_name_list">
+        <item>Close viewer</item>
+        <item>Display a confirmation</item>
+        <item>Move to next file</item>
+    </string-array>
+    <string-array name="lastpage_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="pagesel_name_list">
+        <item>Swipe the bottom of the screen</item>
+        <item>View slider</item>
+        <item>Thumbnail</item>
+    </string-array>
+    <string-array name="pagesel_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="txpagesel_name_list">
+        <item>Swipe the bottom of the screen</item>
+        <item>View slider</item>
+    </string-array>
+    <string-array name="txpagesel_value_list">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="history_name_list">
+        <item>Not save</item>
+        <item>20</item>
+        <item>40</item>
+        <item>60</item>
+        <item>80</item>
+        <item>100</item>
+    </string-array>
+    <string-array name="history_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="max_lines_name_list">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+    <string-array name="max_lines_value_list">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+    <string-array name="filemenu_name_list">
+        <item>Don\'t Show</item>
+        <item>Show</item>
+        <item>Show Only Local</item>
+        <item>Show Only Server</item>
+    </string-array>
+    <string-array name="filemenu_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="bright_name_list">
+        <item>-2</item>
+        <item>-1</item>
+        <item>None</item>
+        <item>+1</item>
+        <item>+2</item>
+    </string-array>
+    <string-array name="bright_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="gamma_name_list">
+        <item>-2</item>
+        <item>-1</item>
+        <item>None</item>
+        <item>+1</item>
+        <item>+2</item>
+    </string-array>
+    <string-array name="gamma_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+    <string-array name="maxthread_name_list">
+        <item>1 therad</item>
+        <item>2 threads</item>
+        <item>3 threads</item>
+        <item>4 threads</item>
+        <item>5 threads</item>
+        <item>6 threads</item>
+        <item>7 threads</item>
+        <item>8 threads</item>
+    </string-array>
+    <string-array name="maxthread_value_list">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="loupesize_name_list">
+        <item>None</item>
+        <item>+1</item>
+        <item>+2</item>
+    </string-array>
+    <string-array name="loupesize_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+</resources>

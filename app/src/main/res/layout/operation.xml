@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:padding="4dip"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:text="@string/opLabel" />
+
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="center_vertical"
+	    android:gravity="center_horizontal"
+	    android:padding="4dip"
+	    android:orientation="horizontal" >
+
+	    <src.comitton.view.SelectIconView
+	        android:id="@+id/icon_00"
+	        android:layout_width="40sp"
+	        android:layout_height="40sp" />
+
+	    <src.comitton.view.SelectIconView
+	        android:id="@+id/icon_01"
+	        android:layout_width="40sp"
+	        android:layout_height="40sp" />
+
+	</LinearLayout>
+
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="center_vertical"
+	    android:gravity="center_horizontal"
+	    android:padding="4dip"
+	    android:orientation="horizontal" >
+
+	    <src.comitton.view.SelectIconView
+	        android:id="@+id/icon_02"
+	        android:layout_width="40sp"
+	        android:layout_height="40sp" />
+
+	    <src.comitton.view.SelectIconView
+	        android:id="@+id/icon_03"
+	        android:layout_width="40sp"
+	        android:layout_height="40sp" />
+	</LinearLayout>
+
+	<Spinner android:id="@+id/rate_sel"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content">
+	</Spinner>
+
+    <Button
+        android:id="@+id/btn_check"
+        android:layout_width="60sp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="@string/opCheck" />
+</LinearLayout>

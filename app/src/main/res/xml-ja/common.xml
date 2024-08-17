@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="共通設定" >
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="文字コード"
+            android:entries="@array/charset_name_list"
+            android:entryValues="@array/charset_value_list"
+            android:key="Charset"
+            android:summary="dummy"
+            android:title="文字コード" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="HiddenFile"
+            android:summary="Mac OS Xで作成される変なファイルを非表示にします。"
+            android:title=".で始まるファイルを表示しない" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="画面を回転するボタン"
+            android:entries="@array/rotatebtn_name_list"
+            android:entryValues="@array/rotatebtn_value_list"
+            android:key="RotateBtn"
+            android:summary="dummy"
+            android:title="画面を回転するボタン" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="CommHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

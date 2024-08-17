@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="File List Settings" >
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Screen Orientation"
+            android:entries="@array/file_rotaname_list"
+            android:entryValues="@array/file_rotavalue_list"
+            android:key="ListRota"
+            android:summary="dummy"
+            android:title="Screen Orientation" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Sort Type"
+            android:entries="@array/zipsort_name_list"
+            android:entryValues="@array/zipsort_value_list"
+            android:key="ListSort"
+            android:summary="dummy"
+            android:title="Sort Type" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Back Key Mode"
+            android:entries="@array/backmode_name_list"
+            android:entryValues="@array/backmode_value_list"
+            android:key="BackMode"
+            android:summary="dummy"
+            android:title="Back Key Mode" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ResumeOpen"
+            android:summary="Open the file that was last opened automatically when the application starts."
+            android:title="Open the last file on startup" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="TapExpand"
+            android:summary="Expands to display the contents of the file by tapping zip/rar/pdf file."
+            android:title="Expanded file on tap" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ParentMove"
+            android:summary="Display the move to parent directory in file list."
+            android:title="View Parent Directory" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="Extension"
+            android:summary="Show extension in the file name."
+            android:title="Show Extension" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="SplitFilename"
+            android:summary="Split the file name with []() in Tile View"
+            android:title="Split the file name" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Max lines of Tile View"
+            android:entries="@array/max_lines_name_list"
+            android:entryValues="@array/max_lines_value_list"
+            android:key="MaxLinesFilename"
+            android:summary="dummy"
+            android:title="Max lines of Tile View" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Show Delete File"
+            android:entries="@array/filemenu_name_list"
+            android:entryValues="@array/filemenu_value_list"
+            android:key="FileDelMenu"
+            android:summary="dummy"
+            android:title="Show Delete Menu" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Show Rename Menu"
+            android:entries="@array/filemenu_name_list"
+            android:entryValues="@array/filemenu_value_list"
+            android:key="FileRenMenu"
+            android:summary="dummy"
+            android:title="Show Rename Menu" />
+        <src.comitton.config.FontTitleSeekbar
+            android:dialogMessage="Select font size of the title."
+            android:dialogTitle="Title Font Size"
+            android:key="FontTitleSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Title Font Size" />
+        <src.comitton.config.FontMainSeekbar
+            android:dialogMessage="Select font size of the list."
+            android:dialogTitle="Font Size"
+            android:key="FontMainSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Font Size" />
+        <src.comitton.config.FontSubSeekbar
+            android:dialogMessage="Select summary font size of the list."
+            android:dialogTitle="Summary Font Size"
+            android:key="FontSubSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Summary Font Size" />
+        <src.comitton.config.FontTileSeekbar
+            android:dialogMessage="Select font size of the tile view."
+            android:dialogTitle="Tile View Font Size"
+            android:key="FontTileSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Font Size" />
+        <src.comitton.config.ItemMarginSeekbar
+            android:dialogMessage="Select margin size of list item."
+            android:dialogTitle="List Item Margin"
+            android:key="ItemMarginSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="List Item Margin" />
+<!--         <CheckBoxPreference -->
+<!--             android:defaultValue="true" -->
+<!--             android:key="ShowToolbar" -->
+<!--             android:summary="Show the toolbar to the top of the list." -->
+<!--             android:title="Show Toolbar" /> -->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ToolbarName"
+            android:summary="Show the toolbar icon name."
+            android:title="Toolbar Icon Name" />
+        <src.comitton.config.ToolbarSeekbar
+            android:dialogMessage="Set the icon size of the toolbar."
+            android:dialogTitle="Toolbar Size"
+            android:key="ToolbarSeek"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Toolbar Size" />
+        <src.comitton.config.ThumbnailPreference
+            android:dialogMessage="Set the icon size of the thumbnail."
+            android:dialogTitle="Thumbnail Size"
+            android:key="ThumbSeek"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Thumbnail Size" />
+        <src.comitton.config.ListThumbSeekbar
+            android:dialogMessage="Set thumbnail size of the list."
+            android:dialogTitle="List Thumbnail Size"
+            android:key="ListThumbSeek"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="List Thumbnail Size" />
+        <ListPreference
+            android:defaultValue="3"
+            android:dialogTitle="Thumbnail Cache"
+            android:entries="@array/thumcache_name_list"
+            android:entryValues="@array/thumcache_value_list"
+            android:key="ThumbCache"
+            android:summary="dummy"
+            android:title="Thumbnail Cache" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ThumbSort"
+            android:summary="To determine the first file name to see all the file name of the compressed file.(Very Slower)"
+            android:title="Create first name Thumbnail" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ClearTop"
+            android:summary="Exit existing task at shortcut startup.\n(Valid only in the newly created shortcut.)"
+            android:title="Exit task by shortcut" />
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:key="ThumbnailTap"
+            android:title="Thumbnail on Menu" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="FileHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

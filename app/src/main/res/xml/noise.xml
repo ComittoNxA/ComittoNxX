@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Noise Operation Settings" >
+        <src.comitton.config.NoiseScrlSeekbar
+            android:dialogMessage="Scroll speed by during the operation of the long noise."
+            android:dialogTitle="Scrolling Speed"
+            android:key="NoiseScrlSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Scrolling Speed" />
+        <src.comitton.config.NoiseOverSeekbar
+            android:dialogMessage="Microphone input level determined to silence."
+            android:dialogTitle="Level determined to noise"
+            android:key="NoiseOver"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Level determined to noise" />
+        <src.comitton.config.NoiseUnderSeekbar
+            android:dialogMessage="Microphone input level determined to silence."
+            android:dialogTitle="Level determined to silence"
+            android:key="NoiseUnder"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Level determined to silence" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Decision speed"
+            android:entries="@array/noisedec_name_list"
+            android:entryValues="@array/noisedec_value_list"
+            android:key="NoiseDec"
+            android:summary="dummy"
+            android:title="Decision speed" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="NoiseLevel"
+            android:summary="Displays the microphone input level during the operation of the noise."
+            android:title="View microphone input level" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="NoiseHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

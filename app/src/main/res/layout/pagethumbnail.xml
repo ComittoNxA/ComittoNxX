@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:padding="4dip"
+    android:orientation="vertical" >
+
+	<src.comitton.view.image.ThumbnailScrollView
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/scrl_view"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:paddingLeft="2sp"
+	    android:paddingRight="2sp"
+	    android:scrollbars="none"
+		android:color="#00000000"
+		android:background="#00000000" >
+
+	    <src.comitton.view.image.ThumbnailView
+		    android:id="@+id/thumb_view"
+		    android:layout_width="wrap_content"
+		    android:layout_height="220sp"
+		    android:background="#00000000" />
+	</src.comitton.view.image.ThumbnailScrollView>
+
+	<SeekBar
+	    android:id="@+id/seek_page"
+	    style="@style/PageSeekBar"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:paddingLeft="20sp"
+	    android:paddingRight="20sp" />
+
+</LinearLayout>

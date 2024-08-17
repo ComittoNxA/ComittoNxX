@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="記録系リストの設定" >
+<!--         <CheckBoxPreference -->
+<!--             android:defaultValue="true" -->
+<!--             android:key="ShowSelector" -->
+<!--             android:summary="リスト下部のリスト選択ツールバーを表示する" -->
+<!--             android:title="リスト選択を表示" /> -->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RDView"
+            android:summary="ディレクトリ一覧への切り替えを可能にする"
+            android:title="ディレクトリ一覧を表示" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RBView"
+            android:summary="ブックマーク一覧への切り替えを可能にする"
+            android:title="ブックマーク一覧を表示" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RHView"
+            android:summary="履歴一覧への切り替えを可能にする"
+            android:title="履歴一覧を表示" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RHLocalRec"
+            android:summary="ローカルのファイルを読んだとき履歴に記録する"
+            android:title="ローカルの履歴保存" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="RHSambaRec"
+            android:summary="サーバのファイルを読んだとき履歴に記録する"
+            android:title="サーバの履歴保存" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="履歴の保持件数"
+            android:entries="@array/history_name_list"
+            android:entryValues="@array/history_value_list"
+            android:key="RLSave3"
+            android:summary="dummy"
+            android:title="履歴の保持件数" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="RecordHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

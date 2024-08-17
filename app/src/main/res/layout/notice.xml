@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_marginLeft="20sp"
+	android:layout_marginRight="20sp"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_gravity="center_vertical"
+	android:padding="4dip"
+	android:orientation="vertical" >
+
+	<TextView
+		android:id="@+id/text_title"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:textSize="22sp"
+		android:text="@string/noticeTitle"
+		android:color="#FFFFFFFF"
+		android:background="#FF000000" />
+	
+	<ImageView
+		android:layout_width="fill_parent"
+		android:layout_height="1sp"
+		android:background="#FF808080" />
+	
+	<ScrollView
+		android:id="@+id/scroll"
+		android:layout_width="fill_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:color="#00000000"
+		android:background="#C0003F7F" >
+
+		<WebView
+			android:id="@+id/web_text"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="left"
+			android:textSize="16sp"
+			android:color="#FFFFFFFF"
+			android:background="#C0000000" />
+
+	</ScrollView>
+
+	<Button
+		android:id="@+id/btn_ok"
+		android:layout_width="240sp"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:layout_gravity="center"
+		android:textSize="16sp"
+		android:text="@string/aboutOK" />
+</LinearLayout>

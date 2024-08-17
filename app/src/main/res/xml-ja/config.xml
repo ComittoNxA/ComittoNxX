@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="ファイル選択画面" >
+        <PreferenceScreen
+            android:key="FileListSet"
+            android:title="ファイル選択画面の設定"
+            android:summary="ファイル選択画面の起動時の表示や操作を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetFileListActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="RecorderSet"
+            android:title="記録系リストの設定"
+            android:summary="ディレクトリ／ブックマーク／履歴一覧の表示や動作を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetRecorderActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="FileColor"
+            android:title="ファイル選択画面の色設定"
+            android:summary="ファイル選択画面の表示色を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetFileColorActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="イメージ＆テキスト表示画面" >
+        <PreferenceScreen
+            android:key="ImageSet"
+            android:title="イメージ表示画面の設定"
+            android:summary="イメージ表示画面の起動時の表示や操作を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetImageActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="DetailSet"
+            android:title="イメージ表示画面の詳細設定"
+            android:summary="イメージ表示画面の動作に影響するパラメータを設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetImageDetailActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="TextSet"
+            android:title="テキスト表示画面の設定"
+            android:summary="テキスト表示画面の起動時の表示や操作を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetTextActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="ImageTextDetailSet"
+            android:title="共通の表示詳細設定"
+            android:summary="イメージ／テキスト表示画面で共通なパラメータを設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetImageTextDetailActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="ImageColor"
+            android:title="共通の色設定"
+            android:summary="イメージ／テキスト表示画面の表示色を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetImageTextColorActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="共通" >
+        <PreferenceScreen
+            android:key="CommOpeSet"
+            android:title="共通の操作設定"
+            android:summary="各画面で共通な操作を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetCommonActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="その他の設定" >
+        <PreferenceScreen
+            android:key="NoiseSet"
+            android:title="音操作の設定"
+            android:summary="音操作での認識速度や検知レベル等のパラメータを設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetNoiseActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="MemoryCache"
+            android:title="メモリキャッシュの設定"
+            android:summary="メモリキャッシュのサイズやページ数のパラメータを設定する（再起動で反映）">
+            <intent
+                android:targetClass="src.comitton.config.SetCacheActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="設定のファイル保存" >
+        <src.comitton.config.ExportSettingPreference
+            android:dialogMessage="出力先のファイル名を入力\n※拡張子不要"
+            android:key="ExportSetting"
+            android:summary="現在の設定に名前をつけてファイルに出力します。\n（[sdcard]/comittona/conf/*.setに保存）"
+            android:title="設定の保存" />
+        <src.comitton.config.ImportSettingPreference
+            android:dialogTitle="設定ファイルの適用"
+            android:key="ImportSetting"
+            android:summary="選択したファイルの内容を現在の設定に上書します。\n ([sdcard]/comittona/conf/*.setを参照)"
+            android:title="設定ファイルの適用" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="ConfHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

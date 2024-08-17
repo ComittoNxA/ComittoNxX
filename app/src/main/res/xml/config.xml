@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory>
+        <PreferenceScreen
+            android:key="FileListSet"
+            android:title="Settings for File List">
+            <intent
+                android:targetClass="src.comitton.config.SetFileListActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="RecorderSet"
+            android:title="Settings for Recoder">
+            <intent
+                android:targetClass="src.comitton.config.SetRecorderActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="FileColor"
+            android:title="Color Settings for File List">
+            <intent
+                android:targetClass="src.comitton.config.SetFileColorActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Image &amp; Text Viewer Settings" >
+        <PreferenceScreen
+            android:key="ImageSet"
+            android:title="Settings for Image Viewer" >
+            <intent
+                android:targetClass="src.comitton.config.SetImageActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="DetailSet"
+            android:title="Detail Settings for Image Viewer" >
+            <intent
+                android:targetClass="src.comitton.config.SetImageDetailActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="TextSet"
+            android:title="Settings for Text Viewer" >
+            <intent
+                android:targetClass="src.comitton.config.SetTextActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="ImTxDetailSet"
+            android:title="Detail Settings for Image &amp; Text" >
+            <intent
+                android:targetClass="src.comitton.config.SetImageTextDetailActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="ImageTextColor"
+            android:title="Color Settings for Image &amp; Text" >
+            <intent
+                android:targetClass="src.comitton.config.SetImageTextColorActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Common" >
+        <PreferenceScreen
+            android:key="CommOpeSet"
+            android:title="Settings for Common Operation" >
+            <intent
+                android:targetClass="src.comitton.config.SetCommonActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Other Settings" >
+        <PreferenceScreen
+            android:key="NoiseSet"
+            android:title="Settings for Noise Operation" >
+            <intent
+                android:targetClass="src.comitton.config.SetNoiseActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+        <PreferenceScreen
+            android:key="MemoryCache"
+            android:summary="Required Restart"
+            android:title="Settings for memory cache" >
+            <intent
+                android:targetClass="src.comitton.config.SetCacheActivity"
+                android:targetPackage="jp.dip.muracoro.comittonx" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Save settings to file" >
+        <src.comitton.config.ExportSettingPreference
+            android:dialogMessage="Export filename\n(Do not enter the extension.)"
+            android:key="ExportSetting"   
+            android:summary="Export to a file the current settings.\n (output file : [sdcard]/comittona/conf/*.set)"
+            android:title="Save settings to file" />  
+        <src.comitton.config.ImportSettingPreference
+            android:dialogTitle="Load setting from file"
+            android:key="ImportSetting"
+            android:summary="Overwrite the current settings with the contents of the select file.\n (reference file : [sdcard]/comittona/conf/*.set)"
+            android:title="Load setting from file" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="ConfHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

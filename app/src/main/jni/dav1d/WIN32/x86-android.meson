@@ -1,0 +1,15 @@
+[binaries]
+c = 'i686-linux-android21-clang.cmd'
+cpp = 'i686-linux-android21-clang++.cmd'
+ar = 'llvm-ar.exe'
+strip = 'llvm-strip.exe'
+pkgconfig = 'pkg-config.exe'
+
+[properties]
+needs_exe_wrapper = true
+
+[host_machine]
+system = 'android'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'

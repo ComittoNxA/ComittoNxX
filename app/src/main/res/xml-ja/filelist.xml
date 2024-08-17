@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="ファイル選択画面設定" >
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="表示方向"
+            android:entries="@array/file_rotaname_list"
+            android:entryValues="@array/file_rotavalue_list"
+            android:key="ListRota"
+            android:summary="dummy"
+            android:title="表示方向" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="ソート表示"
+            android:entries="@array/zipsort_name_list"
+            android:entryValues="@array/zipsort_value_list"
+            android:key="ListSort"
+            android:summary="dummy"
+            android:title="ソート表示" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Backキーの動作"
+            android:entries="@array/backmode_name_list"
+            android:entryValues="@array/backmode_value_list"
+            android:key="BackMode"
+            android:summary="dummy"
+            android:title="Backキーの動作" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ResumeOpen"
+            android:summary="起動時に前回表示したファイルをオープンする"
+            android:title="前回のファイルをオープン" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="TapExpand"
+            android:summary="zip/rar/pdfのタップでファイル内容を展開表示する"
+            android:title="タップでファイル展開表示" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ParentMove"
+            android:summary="ファイルリストに親ディレクトリへの移動項目(上矢印)を表示する"
+            android:title="親ディレクトリ表示" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="Extension"
+            android:summary="ファイル名の拡張子を表示する"
+            android:title="拡張子の表示" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="SplitFilename"
+            android:summary="タイル表示でファイル名を[]()で分割して表示する"
+            android:title="ファイル名の分割" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="タイル表示のテキストの行数"
+            android:entries="@array/max_lines_name_list"
+            android:entryValues="@array/max_lines_value_list"
+            android:key="MaxLinesFilename"
+            android:summary="dummy"
+            android:title="タイル表示のテキストの行数" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="削除メニューの表示"
+            android:entries="@array/filemenu_name_list"
+            android:entryValues="@array/filemenu_value_list"
+            android:key="FileDelMenu"
+            android:summary="dummy"
+            android:title="削除メニューの表示" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="名前変更メニューの表示"
+            android:entries="@array/filemenu_name_list"
+            android:entryValues="@array/filemenu_value_list"
+            android:key="FileRenMenu"
+            android:summary="dummy"
+            android:title="名前変更メニューの表示" />
+        <src.comitton.config.FontTitleSeekbar
+            android:dialogMessage="タイトルのフォントサイズを選択"
+            android:dialogTitle="タイトルのフォントサイズ"
+            android:key="FontTitleSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="タイトルのフォントサイズ" />
+        <src.comitton.config.FontMainSeekbar
+            android:dialogMessage="ファイル名等のフォントサイズを選択"
+            android:dialogTitle="フォントサイズ"
+            android:key="FontMainSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="ファイル名等のフォントサイズ" />
+        <src.comitton.config.FontSubSeekbar
+            android:dialogMessage="サマリのフォントサイズを選択"
+            android:dialogTitle="サマリのフォントサイズ"
+            android:key="FontSubSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="サマリのフォントサイズ" />
+        <src.comitton.config.FontTileSeekbar
+            android:dialogMessage="タイル表示のフォントサイズを選択"
+            android:dialogTitle="タイル表示のフォントサイズ"
+            android:key="FontTileSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="タイル用フォントサイズ" />
+        <src.comitton.config.ItemMarginSeekbar
+            android:dialogMessage="リスト項目の余白サイズを選択"
+            android:dialogTitle="項目の余白サイズ"
+            android:key="ItemMarginSp"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="項目の余白サイズ" />
+<!--         <CheckBoxPreference -->
+<!--             android:defaultValue="true" -->
+<!--             android:key="ShowToolbar" -->
+<!--             android:summary="一覧上部のツールバーを表示する" -->
+<!--             android:title="ツールバーの表示" /> -->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ToolbarName"
+            android:summary="ツールバーのアイコン名を表示する"
+            android:title="ツールバーのアイコン名" />
+        <src.comitton.config.ToolbarSeekbar
+            android:dialogMessage="ツールバーのアイコンサイズを設定"
+            android:dialogTitle="ツールバーのサイズ"
+            android:key="ToolbarSeek"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="ツールバーのサイズ" />
+        <src.comitton.config.ThumbnailPreference
+            android:dialogMessage="サムネイルのアイコンサイズを設定"
+            android:dialogTitle="サムネイルのサイズ"
+            android:key="ThumbSeek"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="サムネイルのサイズ" />
+        <src.comitton.config.ListThumbSeekbar
+            android:dialogMessage="リスト表示のサムネイルサイズを設定"
+            android:dialogTitle="リスト表示のサムネイルサイズ"
+            android:key="ListThumbSeek"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="リスト表示のサムネイルサイズ" />
+        <ListPreference
+            android:defaultValue="3"
+            android:dialogTitle="サムネイルのキャッシュ"
+            android:entries="@array/thumcache_name_list"
+            android:entryValues="@array/thumcache_value_list"
+            android:key="ThumbCache"
+            android:summary="dummy"
+            android:title="サムネイルのキャッシュ" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ThumbSort"
+            android:summary="圧縮ファイル中の全ファイル名を解析して先頭ファイルを求める(かなり遅くなります)"
+            android:title="先頭ファイル名のサムネイル作成" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ClearTop"
+            android:summary="ショートカット起動時に既存のタスクを終了する\n(新しく作成するショートカットに属性を追加します)"
+            android:title="ショートカットで既存タスク終了" />
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:key="ThumbnailTap"
+            android:summary="サムネイルON時にリスト表示ではサムネイル、タイル表示ではファイル名をタップすると長押しメニューを出せる"
+            android:title="サムネイルONで長押しメニューを有効" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="オンラインヘルプ" >
+        <PreferenceScreen
+            android:key="FileHelp"
+            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:title="設定項目の説明" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

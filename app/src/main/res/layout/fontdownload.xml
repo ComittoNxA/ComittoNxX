@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+
+	<TextView
+		android:id="@+id/text_title"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="left"
+		android:textSize="20sp"
+		android:text="@string/fontdlMsg"
+		android:color="#FFFFFFFF"
+		android:background="#FF000000" />
+	
+	<ImageView
+   		android:layout_width="fill_parent"
+   		android:layout_height="1sp"
+		android:background="#FF808080"
+		android:padding="6sp" />
+	
+	<ScrollView android:id="@+id/scroll"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+
+   	    <LinearLayout
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" >
+
+	        <TextView
+				android:id="@+id/font_info1"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left"
+				android:textSize="18sp"
+				android:text="@string/fontdlInfo"
+				android:color="#FFFFFFFF"
+				android:background="#FF000000" />
+	
+			<!-- license -->
+			<Button
+				android:id="@+id/btn_lic1"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/fontdlLic"
+				/>
+			<!-- mincho download -->
+			<Button
+				android:id="@+id/btn_mincho"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/fontdlMincho"
+				/>
+			<!-- mincho download -->
+			<Button
+				android:id="@+id/btn_gothic"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/fontdlGothic"
+				/>
+
+			<ImageView
+				android:layout_width="fill_parent"
+				android:layout_height="1sp"
+				android:background="#FF808080"
+				android:padding="6sp" />
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout >

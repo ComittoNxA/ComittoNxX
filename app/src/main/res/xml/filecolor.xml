@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Preset Color" >
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Select Preset Color"
+            android:entries="@array/preset_name_list"
+            android:entryValues="@array/preset_value_list"
+            android:key="Preset"
+            android:summary="dummy"
+            android:title="Select Preset Color" />
+        <PreferenceScreen
+            android:key="CustomUpdate"
+            android:summary="to overwrite the custom color settings in the Preset."
+            android:title="Overwrite Custom Color" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Custom Setting" >
+        <src.comitton.config.ColorTxtSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Server Text Color"
+            android:key="TxtRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Server Text Color" />
+        <src.comitton.config.ColorDirSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Directory Color"
+            android:key="DirRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Directory Color" />
+        <src.comitton.config.ColorBefSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Unread Color"
+            android:key="BefRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Unread Color" />
+        <src.comitton.config.ColorNowSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Reading Color"
+            android:key="NowRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Reading Color" />
+        <src.comitton.config.ColorAftSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Read Color"
+            android:key="AftRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Read Color" />
+        <src.comitton.config.ColorImgSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Image File Color"
+            android:key="ImgRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Image File Color" />
+        <src.comitton.config.ColorInfSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="File Information Color"
+            android:key="InfRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="File Information Color" />
+        <src.comitton.config.ColorMrkSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Marker Color"
+            android:key="MrkRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Marker Color" />
+        <src.comitton.config.ColorBakSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Background Color"
+            android:key="BakRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Background Color" />
+        <src.comitton.config.ColorCurSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Selected Color"
+            android:key="CurRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Selected Color" />
+        <src.comitton.config.ColorTitSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Title Text Color"
+            android:key="TitRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Title Text Color" />
+        <src.comitton.config.ColorTibSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Title Back Color"
+            android:key="TibRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Title Back Color" />
+        <src.comitton.config.ColorTldSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Toolbar Draw Color"
+            android:key="TldRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Toolbar Draw Color" />
+        <src.comitton.config.ColorTlbSetting
+            android:dialogMessage="Please Select Color."
+            android:dialogTitle="Toolbar Button Color"
+            android:key="TlbRGB"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="Toolbar Button Color" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Online Help" >
+        <PreferenceScreen
+            android:key="FClrHelp"
+            android:summary="Displays the online help for these settings."
+            android:title="Description of the item" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

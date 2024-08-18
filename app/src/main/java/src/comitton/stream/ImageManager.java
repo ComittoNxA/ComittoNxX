@@ -3285,51 +3285,49 @@ public class ImageManager extends InputStream implements Runnable {
 			if (returnCode >= 0) {
 				// 読み込み成功
 				mMemCacheFlag[page].fSource = true;
-
-				if (DEF.DEBUG && mFileList[page].type == IMAGETYPE_AVIF) {
-					// Avif だったら
-					// スレッドからトーストを呼び出す
-					simpleToast.displaySimpleToast(
-							"ImageManager: LoadImageAvif succeeded." +
-							"\nPage=" + page +
-							", returnCode=" + returnCode +
-							"\nWidth=" + mFileList[page].width +
-							", Height=" + mFileList[page].height +
-							", o_Width=" + mFileList[page].o_width +
-							", o_Height=" + mFileList[page].o_height +
-							"\nName=" + mFileList[page].name,
-							Toast.LENGTH_LONG
-					);
-					try {
-						// 3秒間一時停止する
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-
 				id = new ImageData();
 				id.Page = page;
 				id.Width = mFileList[page].width;
 				id.Height = mFileList[page].height;
 
-
+				if (DEF.DEBUG) {
+					// スレッドからトーストを呼び出す
+					simpleToast.displaySimpleToast(
+							"ImageManager: LoadImage succeeded." +
+									"\nPage=" + page +
+									", returnCode=" + returnCode +
+									"\nWidth=" + mFileList[page].width +
+									", Height=" + mFileList[page].height +
+									", o_Width=" + mFileList[page].o_width +
+									", o_Height=" + mFileList[page].o_height +
+									"\nName=" + mFileList[page].name,
+							Toast.LENGTH_LONG
+					);
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {}
+				}
 			} else {
 				mFileList[page].error = true;
 
-				if (DEF.DEBUG && mFileList[page].type == IMAGETYPE_AVIF) {
-					// Avif だったら
+				if (DEF.DEBUG) {
 					// スレッドからトーストを呼び出す
-					simpleToast.displaySimpleToast("ImageManager: LoadBitmapFile returnCode =" + returnCode, Toast.LENGTH_LONG);
+					simpleToast.displaySimpleToast(
+							"ImageManager: LoadImage failed." +
+									"\nPage=" + page +
+									", returnCode=" + returnCode +
+									"\nWidth=" + mFileList[page].width +
+									", Height=" + mFileList[page].height +
+									", o_Width=" + mFileList[page].o_width +
+									", o_Height=" + mFileList[page].o_height +
+									"\nName=" + mFileList[page].name,
+							Toast.LENGTH_LONG
+					);
 					try {
 						// 3秒間一時停止する
 						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					} catch (InterruptedException e) {}
 				}
-
-
 			}
 	}
 //		Log.i("ImageManager", "LoadBitmapFile time : " + (int)(SystemClock.uptimeMillis() - sttime));

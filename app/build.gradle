@@ -7,14 +7,14 @@ def packageName = "jp.dip.muracoro.comittonx"
 def applicationName = "ComittoNxX"
 def versionMajor = 1
 def versionMinor = 0
-def versionPatch = 0
+def versionPatch = 1
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
 def WITH_PNG = "ON"
 def WITH_GIF = "OFF"
 def WITH_WEBP = "ON"
-def WITH_AVIF = "OFF"
+def WITH_AVIF = "ON"
 def WITH_HEIF = "OFF"
 def WITH_JXL = "OFF"
 

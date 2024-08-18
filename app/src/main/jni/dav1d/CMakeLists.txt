@@ -10,22 +10,18 @@ FetchContent_Populate(
 
 if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
     # Windowsのとき
+    set(BUILD_OS "WIN32")
 
-    # NDKの実行ファイルパスを "/" から "\" に変換
+    # NDKの実行ファイルパスを環境変数のパスに追加する
     string(REPLACE "/" "\\" NDK_BIN_PATH "${ANDROID_TOOLCHAIN_ROOT}\\bin")
-
-    # ビルド用のファイルをソースディレクトリにコピーする
-    file(COPY "${CMAKE_CURRENT_LIST_DIR}/WIN32" DESTINATION "${FETCHCONTENT_BASE_DIR}/dav1d-src")
-    set(BUILD_COMMAND "WIN32\\build.bat")
+    set(ENV{PATH} "${NDK_BIN_PATH};$ENV{PATH}")
 else()
     # Windowsじゃないとき
+    set(BUILD_OS "UNIX")
 
-    # NDKの実行ファイルパスをセット
+    # NDKの実行ファイルパスを環境変数のパスに追加する
     set(NDK_BIN_PATH "${ANDROID_TOOLCHAIN_ROOT}/bin")
-
-    # ビルド用のファイルをソースディレクトリにコピーする
-    file(COPY "${CMAKE_CURRENT_LIST_DIR}/UNIX" DESTINATION ${source_dir})
-    set(BUILD_COMMAND "bash UNIX/build.sh")
+    set(ENV{PATH} "${NDK_BIN_PATH}:;$ENV{PATH}")
 endif()
 
 # ビルドするアーキテクチャーの情報を変数に入れる
@@ -39,8 +35,29 @@ else()
     set(android_arch "x86")
 endif()
 
-# スタティックライブラリをビルドする
-execute_process(COMMAND "${BUILD_COMMAND}" "${NDK_BIN_PATH}" "${ANDROID_ABI}" "${android_arch}"
+# ビルド用のファイルをソースディレクトリにコピーする
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/${BUILD_OS}" DESTINATION "${FETCHCONTENT_BASE_DIR}/dav1d-src")
+
+EXECUTE_PROCESS(
+    COMMAND meson setup ../dav1d-build/build/${ANDROID_ABI}
+    --default-library=static --buildtype release
+    --cross-file=${BUILD_OS}/${android_arch}-android.meson
+    -Denable_tools=false -Denable_tests=false
+    WORKING_DIRECTORY "${FETCHCONTENT_BASE_DIR}/dav1d-src"
+    COMMAND_ECHO STDERR
+    #COMMAND_ERROR_IS_FATAL ANY
+    RESULT_VARIABLE BUILD_COMMAND_RESULT
+    OUTPUT_VARIABLE BUILD_COMMAND_STDOUT
+    ERROR_VARIABLE BUILD_COMMAND_STDERR
+)
+
+# ビルドの実行結果をログ出力する
+message(WARNING "Cmake: dav1d: BUILD_COMMAND_RESULT = ${BUILD_COMMAND_RESULT}")
+message(WARNING "Cmake: dav1d: BUILD_COMMAND_STDOUT = ${BUILD_COMMAND_STDOUT}")
+message(WARNING "Cmake: dav1d: BUILD_COMMAND_STDERR = ${BUILD_COMMAND_STDERR}")
+
+EXECUTE_PROCESS(
+        COMMAND ninja -C ../dav1d-build/build/${ANDROID_ABI}
         WORKING_DIRECTORY "${FETCHCONTENT_BASE_DIR}/dav1d-src"
         COMMAND_ECHO STDERR
         #COMMAND_ERROR_IS_FATAL ANY

@@ -9,17 +9,6 @@
 
 extern char	*gLoadBuffer;
 extern long	gLoadFileSize;
-extern int gLoadError;
-
-extern BUFFMNG *gBuffMng;
-extern long gBuffNum;
-
-extern int gCancel;
-
-extern char gDitherX_3bit[8][8];
-extern char gDitherX_2bit[4][4];
-extern char gDitherY_3bit[8];
-extern char gDitherY_2bit[4];
 
 int LoadImagePng(IMAGEDATA *pData, int page, int scale)
 {
@@ -32,18 +21,15 @@ int LoadImagePng(IMAGEDATA *pData, int page, int scale)
 
     png_structp pPng = NULL;
     png_infop pInfo = NULL;
-    uint8_t** ppRowImage;
+    uint8_t *buffer = NULL;
+    uint8_t *row;
+    int yy;
 
     typedef struct {
         uint8_t* data_ptr;
         uint32_t len;
         uint32_t offset;
     } png_buffer;
-
-    int buffindex;
-    int buffpos;
-    int linesize;
-    WORD *buffptr;
 
     if(png_sig_cmp((png_bytep)gLoadBuffer, 0, 8)){
         LOGE("LoadImagePng : png_sig_cmp error");
@@ -71,7 +57,7 @@ int LoadImagePng(IMAGEDATA *pData, int page, int scale)
         return -7;
     }
 
-    png_buffer buffer = {(uint8_t*)gLoadBuffer, 0, (uint32_t)gLoadFileSize};
+    png_buffer pBuffer = {(uint8_t*)gLoadBuffer, 0, (uint32_t)gLoadFileSize};
     auto read_fn = [](png_struct* p, png_byte* data, png_size_t length) {
         auto* r = (png_buffer*) png_get_io_ptr(p);
         uint32_t next = std::min(r->offset, (uint32_t) length);
@@ -82,7 +68,7 @@ int LoadImagePng(IMAGEDATA *pData, int page, int scale)
         }
     };
 
-    png_set_read_fn(pPng, &buffer, read_fn);
+    png_set_read_fn(pPng, &pBuffer, read_fn);
     png_set_expand(pPng);
 
 	png_read_info(pPng, pInfo);
@@ -112,99 +98,23 @@ int LoadImagePng(IMAGEDATA *pData, int page, int scale)
     row_bytes = png_get_rowbytes(pPng, pInfo);
     image_bytes = height * row_bytes;
 
-    buffindex = -1;
-    buffpos   = 0;
-    linesize  = (width + HOKAN_DOTS);
-    buffptr   = NULL;
-
-    //画像データ用バッファーの確保
-    ppRowImage = (uint8_t**)malloc(sizeof(uint8_t*) * height + image_bytes);
-    if (!ppRowImage) {
-        png_destroy_read_struct(&pPng, &pInfo, NULL);
-        return -8;
+    buffer = (uint8_t *)malloc(image_bytes);
+    if (buffer == NULL) {
+        LOGD("LoadImageJpeg : MAlloc Error. size=%d", (int)(image_bytes));
+        return -7;
     }
-    //画像データ用バッファーの初期化
-    {
-        uint8_t* pRowImage;
-        pRowImage = (uint8_t*)&(ppRowImage[height]);
-        for(int yy = 0; yy < height; yy++)
-        {
-            ppRowImage[yy] = pRowImage;
-            pRowImage += row_bytes;
-        }
+    row = buffer;
+
+    for(yy = 0; yy < height; yy++) {
+        //１ラインづつ読み込んでいく。
+        png_read_row(pPng, row, NULL);
+        row += row_bytes;
     }
 
-    //画像ファイル読み込み
-    png_read_image(pPng, ppRowImage);
+    //読み込み終了処理。
+    png_read_end(pPng,NULL); //イメージデータの後ろにあるチャンクをスキップ。
 
-    for(int yy = 0; yy < height; yy++)
-    {
-        if (gCancel) {
-            LOGD("LoadImagePng : cancel.");
-            ReleaseBuff(page, -1, -1);
-            ret = -9;
-            break;
-        }
-
-        // ライン毎のバッファの位置を保存
-        if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-            for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-                if (gBuffMng[buffindex].Page == -1) {
-                    break;
-                }
-            }
-            if (buffindex >= gBuffNum) {
-                // 領域不足
-                ret = -10;
-                break;
-            }
-            buffpos = 0;
-            gBuffMng[buffindex].Page = page;
-            gBuffMng[buffindex].Type = 0;
-            gBuffMng[buffindex].Half = 0;
-            gBuffMng[buffindex].Size = 0;
-            gBuffMng[buffindex].Index = 0;
-        }
-
-        buffptr = gBuffMng[buffindex].Buff + buffpos + HOKAN_DOTS / 2;
-//      LOGD("DEBUG2:yy=%d, idx=%d, pos=%d", yy, buffindex, buffpos);
-
-        uint8_t* pImagePixel;
-        pImagePixel = (uint8_t*)(ppRowImage[yy]);		//画像ファイルの行データ
-
-        int yd3 = gDitherY_3bit[yy & 0x07];
-        int yd2 = gDitherY_2bit[yy & 0x03];
-
-        for (int xx = 0 ; xx < width ; xx ++) {
-            int rr = pImagePixel[xx * 3];
-            int gg = pImagePixel[xx * 3 + 1];
-            int bb = pImagePixel[xx * 3 + 2];
-
-//          LOGD("RGB : rr=%02x, gg=%02x, bb=%02x", (int)pImagePixel[xx * 4], (int)pImagePixel[xx * 4 + 1], (int)pImagePixel[xx * 4 + 2]);
-
-            // 切り捨ての値を分散
-            if (rr < 0xF8) {
-                rr = rr + gDitherX_3bit[rr & 0x07][(xx + yd3) & 0x07];
-            }
-            if (gg < 0xFC) {
-                gg = gg + gDitherX_2bit[gg & 0x03][(xx + yd2) & 0x03];
-            }
-            if (bb < 0xF8) {
-                bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
-            }
-            buffptr[xx] = MAKE565(rr, gg, bb);
-//          buffptr[xx] = MAKE565(pImagePixel[xx * 3], pImagePixel[xx * 3 + 1], pImagePixel[xx * 3 + 2]);
-        }
-        // 補完用の余裕
-        buffptr[-2] = buffptr[0];
-        buffptr[-1] = buffptr[0];
-        buffptr[width + 0] = buffptr[width - 1];
-        buffptr[width + 1] = buffptr[width - 1];
-
-        // go to next line
-        buffpos += linesize;
-        gBuffMng[buffindex].Size += linesize;
-    }
+    ret = SetBuff(page, width, height, (uint8_t *)buffer, COLOR_FORMAT_RGB);
 
     pData->UseFlag = 1;
     pData->OrgWidth = width;

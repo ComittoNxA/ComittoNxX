@@ -26,6 +26,11 @@ extern long			gSclBuffNum;
 
 extern int			gCancel;
 
+extern char gDitherX_3bit[8][8];
+extern char gDitherX_2bit[4][4];
+extern char gDitherY_3bit[8];
+extern char gDitherY_2bit[4];
+
 long long	*gSclLLongParam = NULL;
 int			*gSclIntParam1 = NULL;
 int			*gSclIntParam2 = NULL;
@@ -661,6 +666,103 @@ void ScaleMemLineFree()
 		gDsLinesPtr = NULL;
 	}
 	return;
+}
+
+int SetBuff(int page, uint32_t width, uint32_t height, uint8_t *data, colorFormat colorFormat)
+{
+    int returnCode = 0;
+
+    int buffindex = -1;
+    int buffpos = 0;
+    int linesize = (width + HOKAN_DOTS);
+    int ret = 0;
+    WORD *buffptr = NULL;
+
+    int yy, xx, yd3, yd2;
+    int rr, gg, bb;
+
+    // 画像バッファにデータを格納する処理
+    for(yy = 0; yy < height; yy++)
+    {
+        // キャンセルされたら終了する
+        if (gCancel) {
+            LOGD("SetBuff : cancel.");
+            ReleaseBuff(page, -1, -1);
+            returnCode = -100;
+            break;
+        }
+
+        // ライン毎のバッファの位置を保存
+        if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
+            for (buffindex++; buffindex < gBuffNum ; buffindex++) {
+                if (gBuffMng[buffindex].Page == -1) {
+                    break;
+                }
+            }
+            if (buffindex >= gBuffNum) {
+                // 領域不足
+                returnCode = -101;
+                break;
+            }
+            buffpos = 0;
+            gBuffMng[buffindex].Page = page;
+            gBuffMng[buffindex].Type = 0;
+            gBuffMng[buffindex].Half = 0;
+            gBuffMng[buffindex].Size = 0;
+            gBuffMng[buffindex].Index = 0;
+        }
+
+        buffptr = gBuffMng[buffindex].Buff + buffpos + HOKAN_DOTS / 2;
+
+        // データセット
+        yd3 = gDitherY_3bit[yy & 0x07];
+        yd2 = gDitherY_2bit[yy & 0x03];
+
+        for (xx = 0 ; xx < width ; xx++) {
+            if (colorFormat == COLOR_FORMAT_ARGB || colorFormat == COLOR_FORMAT_ABGR) {
+                data++;
+            }
+            if (colorFormat == COLOR_FORMAT_RGB || colorFormat == COLOR_FORMAT_RGBA || colorFormat == COLOR_FORMAT_ARGB) {
+                rr = *data; data++;
+                gg = *data; data++;
+                bb = *data; data++;
+            }
+            else if (colorFormat == COLOR_FORMAT_BGR || colorFormat == COLOR_FORMAT_BGRA || colorFormat == COLOR_FORMAT_ABGR) {
+                bb = *data; data++;
+                gg = *data; data++;
+                rr = *data; data++;
+            }
+            if (colorFormat == COLOR_FORMAT_RGBA || colorFormat == COLOR_FORMAT_BGRA) {
+                data++;
+            }
+            if (colorFormat == COLOR_FORMAT_GRAYSCALE) {
+                rr = gg = bb = *data; data++;
+            }
+
+            // 切り捨ての値を分散
+            if (rr < 0xF8) {
+                rr = rr + gDitherX_3bit[rr & 0x07][(xx + yd3) & 0x07];
+            }
+            if (gg < 0xFC) {
+                gg = gg + gDitherX_2bit[gg & 0x03][(xx + yd2) & 0x03];
+            }
+            if (bb < 0xF8) {
+                bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
+            }
+            buffptr[xx] = MAKE565(rr, gg, bb);
+        }
+
+        // 補完用の余裕
+        buffptr[-2] = buffptr[0];
+        buffptr[-1] = buffptr[0];
+        buffptr[width + 0] = buffptr[width - 1];
+        buffptr[width + 1] = buffptr[width - 1];
+
+        // go to next line
+        buffpos += linesize;
+        gBuffMng[buffindex].Size += linesize;
+    }
+    return returnCode;
 }
 
 int ReleaseBuff(int page, int type, int half)

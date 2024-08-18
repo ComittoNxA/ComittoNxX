@@ -54,6 +54,17 @@
 typedef	unsigned short	WORD;
 typedef	unsigned char	BYTE;
 
+
+typedef enum {
+    COLOR_FORMAT_RGB = 0,
+    COLOR_FORMAT_RGBA,
+    COLOR_FORMAT_ARGB,
+    COLOR_FORMAT_BGR,
+    COLOR_FORMAT_BGRA,
+    COLOR_FORMAT_ABGR,
+    COLOR_FORMAT_GRAYSCALE
+} colorFormat;
+
 typedef struct imagedata {
 	short		UseFlag;
 	long		OrgWidth;
@@ -101,6 +112,7 @@ int ThumbnailSave(long long, int, int, int, int, BYTE*);
 int ThumbnailDraw(long long, int, int, int, int, BYTE*);
 void ThumbnailFree(long long);
 
+int SetBuff(int, uint32_t, uint32_t, uint8_t*, colorFormat);
 int ReleaseBuff(int, int, int);
 int MemAlloc(int);
 void MemFree(void);

@@ -6,19 +6,19 @@ plugins {
 def packageName = "jp.dip.muracoro.comittonx"
 def applicationName = "ComittoNxX"
 def versionMajor = 1
-def versionMinor = 0
-def versionPatch = 1
+def versionMinor = 1
+def versionPatch = 0
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
 def WITH_PNG = "ON"
-def WITH_GIF = "OFF"
+def WITH_GIF = "ON"
 def WITH_WEBP = "ON"
 def WITH_AVIF = "ON"
-def WITH_HEIF = "OFF"
+def WITH_HEIF = "ON"
 def WITH_JXL = "OFF"
 
-// 以下のファイルを作成して signingConfig の設定を記述してください
+// アプリに署名するため以下のファイルを作成して signingConfig の設定を記述してください
 apply from:'../signingConfigs/release.gradle', to: android
 android {
 
@@ -129,9 +129,6 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
-
-    // SVGファイル(アイコン表示用)
-    implementation 'com.caverock:androidsvg-aar:1.4'
 
     // SMB接続用ライブラリ(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
     implementation 'org.codelibs:jcifs:2.1.38'

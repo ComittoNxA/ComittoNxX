@@ -164,11 +164,20 @@
             android:defaultValue="true"
             android:key="ThumbnailTap"
             android:title="Thumbnail on Menu" />
+<!--
+        <src.comitton.config.MenuLongTapSeekbar
+            android:dialogMessage="Select the long press hold time."
+            android:dialogTitle="Long press time"
+            android:key="MenuLongTap"
+            android:negativeButtonText="@null"
+            android:summary="Time until long press operations are accepted in the file list and recorder menu"
+            android:title="Time to long tap" />
+-->
     </PreferenceCategory>
     <PreferenceCategory android:title="Online Help" >
         <PreferenceScreen
             android:key="FileHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="dummy"
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

@@ -21,7 +21,7 @@ public class ToolbarArea {
 
 	private final int ICON_ID[] =
 	{
-			R.raw.toolbar_back, R.raw.toolbar_refresh, R.raw.toolbar_mode, R.raw.toolbar_search, R.raw.add_directory, R.raw.toolbar_exit
+			R.drawable.toolbar_back, R.drawable.toolbar_refresh, R.drawable.toolbar_mode, R.drawable.toolbar_search, R.drawable.add_directory, R.drawable.toolbar_exit
 	};
 	private final int TEXT_ID[] = { R.string.toolbar00, R.string.toolbar01, R.string.toolbar02, R.string.toolbar03, R.string.toolbar04, R.string.toolbar05 };
 

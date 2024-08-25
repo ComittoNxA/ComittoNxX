@@ -212,8 +212,8 @@ public class TitleView extends View implements Handler.Callback {
 
 		// ビットマップリソースを読み込み
 		Resources res = mContext.getResources();
-		mMenuBitmapOn= ImageAccess.createIcon(res, R.raw.navi_menu, size * 2, mTextColor);
-		mMenuBitmapOff= ImageAccess.createIcon(res, R.raw.navi_menu, size * 2, color2);
+		mMenuBitmapOn= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, mTextColor);
+		mMenuBitmapOff= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, color2);
 	}
 
 	// 文字列の設定

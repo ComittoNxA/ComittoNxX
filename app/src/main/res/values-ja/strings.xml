@@ -103,6 +103,7 @@
     <string name="exitMenu">終了</string>
     <string name="noticeMenu">ComittoNxXについて</string>
     <string name="aboutMenu">バージョン情報</string>
+    <string name="licenseMenu">ライセンス情報</string>
     <string name="noiseMenu">音での操作</string>
     <string name="playMenu">自動再生</string>
     <string name="thumbMenu">サムネイルキャッシュ削除</string>

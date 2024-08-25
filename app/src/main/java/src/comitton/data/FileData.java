@@ -1,6 +1,7 @@
 package src.comitton.data;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -170,7 +171,7 @@ public class FileData {
 		if(DEF.WITH_AVIF && ext.equals(".avif")){
 			return true;
 		}
-		if(DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic"))){
+		if(DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
 			return true;
 		}
 		if(DEF.WITH_JXL && ext.equals(".jxl")){
@@ -180,6 +181,12 @@ public class FileData {
 	}
 	public static boolean isArchive(String ext) {
 		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr") || ext.equals(".epub");
+	}
+	public static boolean isZip(String ext) {
+		return ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub");
+	}
+	public static boolean isRar(String ext) {
+		return ext.equals(".rar") || ext.equals(".cbr");
 	}
 	public static boolean isText(String ext) {
 		return ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html");

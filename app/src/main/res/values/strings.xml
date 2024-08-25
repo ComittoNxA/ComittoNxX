@@ -103,6 +103,7 @@
     <string name="exitMenu">Exit</string>
     <string name="noticeMenu">Notice</string>
     <string name="aboutMenu">About</string>
+    <string name="licenseMenu">License</string>
     <string name="noiseMenu">Operation by noise</string>
     <string name="playMenu">Auto Play</string>
     <string name="thumbMenu">Delete Thumbnail Cache</string>

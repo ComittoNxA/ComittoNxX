@@ -6,12 +6,12 @@
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
-#define IMAGETYPE_JPEG 1
-#define IMAGETYPE_PNG 2
-#define IMAGETYPE_TXT 3
-//#define IMAGETYPE_CCITT 4
-//#define IMAGETYPE_FLATE 5
+#define IMAGETYPE_NONE 0
+#define IMAGETYPE_PDF 3;
+#define IMAGETYPE_JPEG 4
+#define IMAGETYPE_PNG 5
 #define IMAGETYPE_GIF 6
+#define IMAGETYPE_TXT 7
 #define IMAGETYPE_WEBP 51
 #define IMAGETYPE_AVIF 52
 #define IMAGETYPE_HEIF 53
@@ -40,6 +40,7 @@
 //#define WHITE_CHECK(rgb) (((rgb>>11) & 0x0010) && ((rgb>>5) & 0x0020) && (rgb & 0x0010))
 #define WHITE_CHECK(rgb) ((rgb & 0x8410) == 0x8410)
 #define BLACK_CHECK(rgb) ((rgb & 0x8410) == 0x0000)
+#define COLOR_CHECK(rgb1, rgb2) (((rgb1 ^ rgb2) & 0x8410) == 0x0000)
 
 #define HOKAN_DOTS	4
 #define SCLBUFFNUM	500
@@ -62,8 +63,14 @@ typedef enum {
     COLOR_FORMAT_BGR,
     COLOR_FORMAT_BGRA,
     COLOR_FORMAT_ABGR,
+    COLOR_FORMAT_RGB565,
     COLOR_FORMAT_GRAYSCALE
 } colorFormat;
+
+typedef enum {
+    SET_BUFFER = 0,
+    SET_BITMAP
+} loadCommand;
 
 typedef struct imagedata {
 	short		UseFlag;
@@ -112,7 +119,9 @@ int ThumbnailSave(long long, int, int, int, int, BYTE*);
 int ThumbnailDraw(long long, int, int, int, int, BYTE*);
 void ThumbnailFree(long long);
 
+void CheckImageType(int *);
 int SetBuff(int, uint32_t, uint32_t, uint8_t*, colorFormat);
+int SetBitmap(int, uint32_t, uint32_t, uint8_t*, colorFormat, WORD *);
 int ReleaseBuff(int, int, int);
 int MemAlloc(int);
 void MemFree(void);
@@ -152,23 +161,26 @@ int CreateScaleCubic(int, int, int, int, int, int, int);
 int CreateScaleHalf(int, int, int, int, int);
 
 #ifdef HAVE_LIBJPEG
-int LoadImageJpeg(IMAGEDATA *, int, int);
+int LoadImageJpeg(int, IMAGEDATA *, int, int, WORD *);
 #endif
 #ifdef HAVE_LIBPNG
-int LoadImagePng(IMAGEDATA *, int, int);
+int LoadImagePng(int, IMAGEDATA *, int, int, WORD *);
 #endif
 #ifdef HAVE_LIBGIF
-int LoadImageGif(IMAGEDATA *, int, int);
+int LoadImageGif(int, IMAGEDATA *, int, int, WORD *);
 #endif
 #ifdef HAVE_LIBWEBP
-int LoadImageWebp(IMAGEDATA *, int, int);
+int LoadImageWebp(int, IMAGEDATA *, int, int, WORD *);
 #endif
 #ifdef HAVE_LIBAVIF
-int LoadImageAvif(IMAGEDATA *, int, int);
+int ImageGetSizeAvif(int, int *, int *);
+int LoadImageAvif(int, IMAGEDATA *, int, int, WORD *);
 #endif
 #ifdef HAVE_LIBHEIF
-int LoadImageHeif(IMAGEDATA *, int, int);
+int ImageGetSizeHeif(int, int *, int *);
+int LoadImageHeif(int, IMAGEDATA *, int, int, WORD *);
 #endif
 #ifdef HAVE_LIBJXL
-int LoadImageJxl(IMAGEDATA *, int, int);
+int ImageGetSizeJxl(int, int *, int *);
+int LoadImageJxl(int, IMAGEDATA *, int, int, WORD *);
 #endif

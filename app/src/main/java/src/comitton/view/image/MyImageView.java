@@ -68,6 +68,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	private boolean mIsShadow = false;
 	private boolean mPseLand  = false;
 	private boolean mScrlNext  = false;
+	private boolean mScrlNextStop = false;
 	private boolean mViewNext  = false;
 
 	private int mDispWidth  = 0;
@@ -318,7 +319,8 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
     		int cx;
     		int cy;
-    		if (pseLand == false) {
+
+			if (pseLand == false) {
     			cx = getWidth();
     			cy = getHeight();
     		}
@@ -445,25 +447,78 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				Canvas bmpCanvas = new Canvas(mCanvasBitmap);
     			bmpCanvas.drawColor(mMgnColor);
 
+				int prev2Page = -1;
+				int prevPage = -1;
+				int nextPage = -1;
+				int next2Page = -1;
+
+				// 前のページと次のページのページ番号を求める
+				if (mImage[0] != null && mImage[1] == null ) {
+					prevPage = mImage[0].Page - 1;
+					nextPage = mImage[0].Page + 1;
+				}
+				if (mImage[0] == null && mImage[1] != null ) {
+					prevPage = mImage[1].Page - 1;
+					nextPage = mImage[1].Page + 1;
+				}
+				if (mImage[0] != null && mImage[1] != null ) {
+					prevPage = Math.min(mImage[0].Page, mImage[1].Page) - 1;
+					nextPage = Math.max(mImage[0].Page, mImage[1].Page) + 1;
+				}
+				prev2Page = prevPage - 1;
+				next2Page = nextPage + 1;
+
 				// 「スクロールで前後のページへ移動」の設定が有効のとき
 				if (mScrlNext && effect == 3) {
+					mScrlNextStop = false;
+
+					if (mOverScrollX > 0) {
+						if (mPageWay == DEF.PAGEWAY_RIGHT) {
+							if (nextPage >= mImageManager.length()) {
+								mScrlNextStop = true;
+							}
+						} else {
+							if (prevPage < 0) {
+								mScrlNextStop = true;
+							}
+						}
+					}
+					if (mOverScrollX < 0) {
+						if (mPageWay == DEF.PAGEWAY_RIGHT) {
+							if (prevPage < 0) {
+								mScrlNextStop = true;
+							}
+						} else {
+							if (nextPage >= mImageManager.length()) {
+								mScrlNextStop = true;
+							}
+						}
+					}
 
 					if (mPageLock == false) {	// ページロック中じゃなければ
 						// 現在のページ幅合計以上移動したら前後のページに移動する
 						if (mOverScrollX > mDrawWidthSum || mOverScrollX > mDispWidth) {
 							mPageLock = true;
 							if (mPageWay == DEF.PAGEWAY_RIGHT) {
-								mParentAct.nextPage();
+								if (nextPage <= mImageManager.length()) {
+									mParentAct.nextPage();
+								}
 							} else {
-								mParentAct.prevPage();
+								if (prevPage >= 0) {
+									mParentAct.prevPage();
+								}
 							}
 						}
 						if (mOverScrollX < -(mDrawWidthSum) || mOverScrollX < -(mDispWidth)) {
 							mPageLock = true;
 							if (mPageWay == DEF.PAGEWAY_RIGHT) {
-								mParentAct.prevPage();
+								if (prevPage >= 0) {
+									mParentAct.prevPage();
+								}
 							} else {
-								mParentAct.nextPage();
+								if (nextPage <= mImageManager.length()) {
+									mParentAct.nextPage();
+								}
 							}
 						}
 					}
@@ -485,13 +540,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 					} else {
 						drawTop = mOverScrollX;
 					}
-
 				}
-				
-				int prev2Page = -1;
-				int prevPage = -1;
-				int nextPage = -1;
-				int next2Page = -1;
 
 				ImageData prev2Image = null;
 				ImageData prevImage = null;
@@ -503,23 +552,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				GradientDrawable prevGrad = null;
 				GradientDrawable nextGrad = null;
 
-				// 前のページと次のページのページ番号を求める
-				if (mImage[0] != null && mImage[1] == null ) {
-					prevPage = mImage[0].Page - 1;
-					nextPage = mImage[0].Page + 1;
-				}
-				if (mImage[0] == null && mImage[1] != null ) {
-					prevPage = mImage[1].Page - 1;
-					nextPage = mImage[1].Page + 1;
-				}
-				if (mImage[0] != null && mImage[1] != null ) {
-					prevPage = Math.min(mImage[0].Page, mImage[1].Page) - 1;
-					nextPage = Math.max(mImage[0].Page, mImage[1].Page) + 1;
-				}
-				prev2Page = prevPage - 1;
-				next2Page = nextPage + 1;
-
-				if (mScrlNext && effect == 3) {
+				if ((mScrlNext && !mScrlNextStop) && effect == 3) {
 
 					// 前のページを表示用Bitmapに書き込む
 					if (prevPage > 0 && prevPage < mImageManager.length()) {
@@ -747,7 +780,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 					}
 				}
 				// 「スクロールで前後のページへ移動」の設定が有効かつ、スクロール量超過していないなら前後のページにグラデーションを重ねる
-				else if (mScrlNext && effect == 3 && mOverScrollX == 0 && mViewNext) {
+				else if ((mScrlNext && !mScrlNextStop) && effect == 3 && mOverScrollX == 0 && mViewNext) {
 					if (pseLand == false) {
 						// 横持ち
 						dl = (int) drawLeft;
@@ -798,7 +831,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						}
 					}
 					// 「スクロールで前後のページへ移動」の設定が有効かつ、スクロール量超過していないなら前後のページにグラデーションを重ねる
-					if (mScrlNext && effect == 3 && mOverScrollX == 0 && mViewNext) {
+					if ((mScrlNext && !mScrlNextStop) && effect == 3 && mOverScrollX == 0 && mViewNext) {
 						if (prevGrad != null) {
 							prevGrad.draw(canvas);
 						}
@@ -892,7 +925,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
     			// オーバースクロール
 				//「スクロールで前後のページへ移動」の設定が無効のときスクロール量が超過していれば、引っ張りエフェクトを表示
-				if (mScrlNext == false && mOverScrollX != 0) {
+				if ((!mScrlNext || mScrlNextStop) && mOverScrollX != 0) {
     				// グラデーション幅算出
     				int grad_cx = Math.min(cx, cy) / 20;
     				int cen_x1, cen_x2;
@@ -944,7 +977,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 			}
 
 			if (effectRate != 0.0f) {
-				if (mScrlNext == false || mOverScrollX == 0) {
+				if ((!mScrlNext || mScrlNextStop) || mOverScrollX == 0) {
 					if (effect == 1) {
 						canvas.restore();
 					}
@@ -1275,7 +1308,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	public int checkFlick() {
 		int overX = mOverScrollX;
 		// 「スクロールで前後のページへ移動」の設定が無効なら、指をあげたらスクロール超過をリセットする
-		if (mScrlNext == false) {
+		if (!mScrlNext || mScrlNextStop) {
 			mOverScrollX = 0;
 		}
 		if (checkFlick(overX, mOverScrollMax)) {
@@ -1316,7 +1349,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 //		mScrollBaseX = x;
 //		mScrollBaseY = y;
 		// スクロールで前後のページへ移動が有効なら、スクロール超過をリセットしない
-		if (mScrlNext == false) {
+		if (!mScrlNext  || mScrlNextStop) {
 			mOverScrollX = 0;
 		}
 		mOverScrollMax = flickWidth * scroll;
@@ -1421,7 +1454,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 			// スクロール超過量を設定
 			mOverScrollX = (int)(moveX - (mDrawLeft - orgLeft));
 
-			if (mScrlNext == false) {
+			if (!mScrlNext || mScrlNextStop) {
 				// スクロールで前後のページへ移動が無効ならスクロール量を減衰キャンセルさせる
 				if (Math.abs(mOverScrollX) > mOverScrollMax) {
 					mOverScrollX = mOverScrollMax * (mOverScrollX > 0 ? 1 : -1);
@@ -1930,7 +1963,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		float pos_x[] = new float[2];
 		float pos_y[] = new float[2];
 
-		if (mScrlNext && mEffect == 3) {
+		if ((mScrlNext && !mScrlNextStop) && mEffect == 3) {
 			// 「スクロールで前後のページへ移動」の設定が有効ならスクロール分を補正する
 			pos_x[0] = (tch_x - (mDrawLeft + mDrawWidth[1] + cmgn) - mOverScrollX) / scale_x / fitScale1;
 		}
@@ -1944,7 +1977,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		rcSrc[0] = new RectF(pos_x[0] - src1_cx + offsetX, pos_y[0] - src1_cy, pos_x[0] + src1_cx + offsetX, pos_y[0] + src1_cy);
 
 		if (mDrawWidth[1] > 0) {
-			if (mScrlNext && mEffect == 3) {
+			if ((mScrlNext && !mScrlNextStop) && mEffect == 3) {
 				// 「スクロールで前後のページへ移動」の設定が有効ならスクロール分を補正する
 				pos_x[1] = (int)((tch_x - (mDrawLeft) - mOverScrollX) / scale_x / fitScale2);
 			}
@@ -1982,7 +2015,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 
 		// 「スクロールで前後のページへ移動」の設定が有効のとき
-		if (mScrlNext && mEffect == 3) {
+		if ((mScrlNext && !mScrlNextStop) && mEffect == 3) {
 
 			int prev2Page = -1;
 			int prevPage = -1;
@@ -2312,7 +2345,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		float pos_x[] = new float[2];
 		float pos_y[] = new float[2];
 
-		if (mScrlNext && mEffect == 3) {
+		if ((mScrlNext && !mScrlNextStop) && mEffect == 3) {
 			// 「スクロールで前後のページへ移動」の設定が有効ならスクロール分を補正する
 			pos_x[0] = (tch_x - (mDrawLeft + mDrawWidth[1] + cmgn) - mOverScrollX) / scale_x / fitScale1;
 		}
@@ -2331,7 +2364,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		}
 
 		if (mDrawWidth[1] > 0) {
-			if (mScrlNext && mEffect == 3) {
+			if ((mScrlNext && !mScrlNextStop) && mEffect == 3) {
 				// 「スクロールで前後のページへ移動」の設定が有効ならスクロール分を補正する
 				pos_x[1] = (int)((tch_x - (mDrawLeft) - mOverScrollX) / scale_x / fitScale2);
 			}
@@ -2439,7 +2472,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 
 		// 「スクロールで前後のページへ移動」の設定が有効のとき
-		if (mScrlNext && mEffect == 3) {
+		if ((mScrlNext && !mScrlNextStop) && mEffect == 3) {
 
 			int prev2Page = -1;
 			int prevPage = -1;

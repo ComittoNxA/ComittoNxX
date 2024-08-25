@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 
@@ -454,7 +455,8 @@ public class ThumbnailView extends View implements Runnable, Callback {
             
             			try {
             				synchronized (mLock) {
-            					// 読み込み処理とは排他する
+								Log.d("ThumbnailView", "run: Call loadThumbnailFromStream(" + page + ", " + thumDataW + ", " + thumDataH + ") start.");
+								// 読み込み処理とは排他する
             					bm = mImageMgr.loadThumbnailFromStream(page, thumDataW, thumDataH);
             				}
             			} catch (Exception ex) {

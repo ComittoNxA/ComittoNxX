@@ -207,8 +207,8 @@ public class TitleArea implements Handler.Callback {
 
 		// ビットマップリソースを読み込み
 		Resources res = mContext.getResources();
-		mMenuBitmapOn= ImageAccess.createIcon(res, R.raw.navi_menu, size * 2, mTextColor1);
-		mMenuBitmapOff= ImageAccess.createIcon(res, R.raw.navi_menu, size * 2, mTextColor2);
+		mMenuBitmapOn= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, mTextColor1);
+		mMenuBitmapOff= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, mTextColor2);
 	}
 
 	// 文字列の設定

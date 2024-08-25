@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import src.comitton.common.DEF;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import static src.comitton.stream.ImageManager.MSG_LOADING;
@@ -178,7 +179,7 @@ public class RarInputStream extends InputStream {
 					else if (DEF.WITH_AVIF && ext.equals(".avif")) {
 						skip = false;
 					}
-					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic"))) {
+					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 						skip = false;
 					}
 					else if (DEF.WITH_JXL && ext.equals(".jxl")) {

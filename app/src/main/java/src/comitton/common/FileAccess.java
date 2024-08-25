@@ -1,6 +1,7 @@
 package src.comitton.common;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -411,7 +412,7 @@ public class FileAccess {
 					else if (DEF.WITH_AVIF && ext.equals(".avif")) {
 						exttype = FileData.EXTTYPE_AVIF;
 					}
-					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic"))) {
+					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 						exttype = FileData.EXTTYPE_HEIF;
 					}
 					else if (DEF.WITH_JXL && ext.equals(".jxl")) {

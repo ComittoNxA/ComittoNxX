@@ -804,10 +804,10 @@ public class GuideView {
 		mOldMenu = oldmenu;
 
 		Resources res = mContext.getResources();
-		mBackBitmap = ImageAccess.createIcon(res, R.raw.navi_back, size * 2 / 3, Color.WHITE);
-		mMenuBitmap = ImageAccess.createIcon(res, R.raw.navi_menu, size * 2 / 3, Color.WHITE);
-		mLeftBitmap = ImageAccess.createIcon(res, R.raw.navi_left, size * 2 / 3, Color.WHITE);
-		mRightBitmap = ImageAccess.createIcon(res, R.raw.navi_right, size * 2 / 3, Color.WHITE);
+		mBackBitmap = ImageAccess.createIcon(res, R.drawable.navi_back, size * 2 / 3, Color.WHITE);
+		mMenuBitmap = ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2 / 3, Color.WHITE);
+		mLeftBitmap = ImageAccess.createIcon(res, R.drawable.navi_left, size * 2 / 3, Color.WHITE);
+		mRightBitmap = ImageAccess.createIcon(res, R.drawable.navi_right, size * 2 / 3, Color.WHITE);
 //		invalidate();
 		return;
 	}

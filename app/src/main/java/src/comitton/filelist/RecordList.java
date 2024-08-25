@@ -50,10 +50,10 @@ public class RecordList {
 	private static final int MENU_ITEM[] = {DEF.MENU_SHORTCUT, DEF.MENU_SIORI, DEF.MENU_THUMBDEL,
 			DEF.MENU_ROTATE, DEF.MENU_ONLINE, DEF.MENU_NOTICE, DEF.MENU_ABOUT, DEF.MENU_SETTING};
 
-	private static final int MENU_IMAGE[] = {R.raw.add_smartphone, R.raw.broom,
-			R.raw.broom, R.raw.rotate, R.raw.help,
-			R.raw.note, R.raw.info,
-			R.raw.config};
+	private static final int MENU_IMAGE[] = {R.drawable.add_smartphone, R.drawable.broom,
+			R.drawable.broom, R.drawable.rotate, R.drawable.help,
+			R.drawable.note, R.drawable.info,
+			R.drawable.config};
 
 	private static Context mContext;
 	/**

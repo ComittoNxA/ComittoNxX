@@ -10,7 +10,7 @@
 extern char	*gLoadBuffer;
 extern long	gLoadFileSize;
 
-int LoadImagePng(IMAGEDATA *pData, int page, int scale)
+int LoadImagePng(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
 {
     int ret = 0;
     uint32_t width;

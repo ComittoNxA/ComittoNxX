@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,9 +18,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
 import src.comitton.common.DEF;
 import src.comitton.common.FileAccess;
-import src.comitton.common.SimpleToast;
 import src.comitton.data.FileData;
 
 import android.annotation.SuppressLint;
@@ -103,17 +114,18 @@ public class ImageManager extends InputStream implements Runnable {
 	public static final int FILETYPE_DIR = 1;
 	public static final int FILETYPE_ZIP = 2;
 	public static final int FILETYPE_RAR = 3;
+	public static final int FILETYPE_IMAGE = 4;
 
 	public static final int FILETYPESUB_UNKNOWN = 0;
 	public static final int FILETYPESUB_NORMAL = 1;
 	public static final int FILETYPESUB_OLDVER = 2;
 
-	public static final int IMAGETYPE_JPEG = 1;
-	public static final int IMAGETYPE_PNG = 2;
-	public static final int IMAGETYPE_TXT = 3;
-//	public static final int IMAGETYPE_CCITT = 4;
-//	public static final int IMAGETYPE_FLATE = 5;
+	public static final int IMAGETYPE_NONE = 0;
+	public static final int IMAGETYPE_PDF = 3;
+	public static final int IMAGETYPE_JPEG = 4;
+	public static final int IMAGETYPE_PNG = 5;
 	public static final int IMAGETYPE_GIF = 6;
+	public static final int IMAGETYPE_TXT = 7;
 	public static final int IMAGETYPE_WEBP = 51;
 	public static final int IMAGETYPE_AVIF = 52;
 	public static final int IMAGETYPE_HEIF = 53;
@@ -268,15 +280,14 @@ public class ImageManager extends InputStream implements Runnable {
 			if (mFilePath.substring(mFilePath.length() - 1).equals("/")) {
 				mFileType = FILETYPE_DIR;
 			}
-			else if (FileData.isArchive(ext)) {
-				if (ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub")) {
-					mFileType = FILETYPE_ZIP;
-//				mFileTypeSub = FILETYPESUB_UNKNOWN;
-				}
-				else if (ext.equals(".rar") || ext.equals(".cbr")) {
-					mFileType = FILETYPE_RAR;
-				}
-				else throw new IOException("Illegal Path.");
+			else if (FileData.isZip(ext)) {
+				mFileType = FILETYPE_ZIP;
+			}
+			else if (FileData.isRar(ext)) {
+				mFileType = FILETYPE_RAR;
+			}
+			else if (FileData.isImage(ext)) {
+				mFileType = FILETYPE_IMAGE;
 			}
 			else {
 				throw new IOException("Illegal Path.");
@@ -293,13 +304,13 @@ public class ImageManager extends InputStream implements Runnable {
 				}
 
 				// ビューモードの時だけ初期化する
-				if (mOpenMode == OPENMODE_VIEW) {
+				//if (mOpenMode == OPENMODE_VIEW) {
 					// メモリキャッシュの初期化(JNI)
 					if (MemoryCacheInit(memsize, memnext, memprev, mFileList.length, mMaxOrgLength) == false) {
 						throw new IOException("ImgLibrary Memory Alloc Error.");
 					}
 					fileCacheInit(mFileList.length, (mHostType == HOSTTYPE_SAMBA));
-				}
+				//}
 			}
 			catch (IOException e) {
 				throw e;
@@ -445,7 +456,7 @@ public class ImageManager extends InputStream implements Runnable {
 						else if (DEF.WITH_AVIF && ext.equals(".avif")) {
 							fl.type = IMAGETYPE_AVIF;
 						}
-						else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic"))) {
+						else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 							fl.type = IMAGETYPE_HEIF;
 						}
 						else if (DEF.WITH_JXL && ext.equals(".jxl")) {
@@ -1391,14 +1402,14 @@ public class ImageManager extends InputStream implements Runnable {
 						int chkPage2 = mMemPriority[iPrio] + mCurrentPage + (mMemPriority[iPrio] >= 0 ? 1 : -1);
 
 						if (0 <= chkPage2 && chkPage2 < mFileList.length && mFileList[chkPage2].width <= 0) {
-							if (!loadBitmapFromStreamSizeCheck(chkPage2)) {
+							if (loadBitmapFromStreamSizeCheck(mFileList[chkPage2].type, chkPage2) < 0) {
 								break;
 							}
 						}
 
 						if (0 <= chkPage && chkPage < mFileList.length) {
 							if (mFileList[chkPage].width <= 0) {
-								if (!loadBitmapFromStreamSizeCheck(chkPage)) {
+								if (loadBitmapFromStreamSizeCheck(mFileList[chkPage].type, chkPage) < 0) {
 									break;
 								}
 							}
@@ -2219,7 +2230,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 	public int cheRead(byte buf[], int off, int len) throws IOException {
 		if (mRunningFlag == false) {
-			throw new IOException("User Canceled.");
+			throw new IOException("ImageManaget: cheRead: User Canceled.");
 		}
 		if (!mCheEnable) {
 			return -1;
@@ -2377,7 +2388,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 	public int cmpRead(byte buf[], int off, int len) throws IOException {
 		if (mRunningFlag == false) {
-			throw new IOException("User Canceled.");
+			throw new IOException("ImageManager: cmpDirectLength: User Canceled.");
 		}
 		else if (mCmpSize <= mCmpPos) {
 			// throw new IOException("This file format is not supported.");
@@ -2550,7 +2561,7 @@ public class ImageManager extends InputStream implements Runnable {
 					else if (DEF.WITH_AVIF && ext.equals(".avif")) {
 						type = IMAGETYPE_AVIF;
 					}
-					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic"))) {
+					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 						type = IMAGETYPE_HEIF;
 					}
 					else if (DEF.WITH_JXL && ext.equals(".jxl")) {
@@ -2633,7 +2644,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 	public int dirRead(byte buf[], int off, int len) throws IOException {
 		if (mRunningFlag == false) {
-			throw new IOException("User Canceled.");
+			throw new IOException("ImageManager: dirEndPage: User Canceled.");
 		}
 
 		int ret = 0;
@@ -2690,7 +2701,7 @@ public class ImageManager extends InputStream implements Runnable {
 		public boolean fScale[] = { false, false, false };
 	}
 
-	private boolean MemoryCacheInit(int memsize, int next, int prev, int total, int maxorglen) {
+	private boolean MemoryCacheInit(int memsize, int next, int prev, int total, long maxorglen) {
 		mMemNextPages = next;
 		if (mMemNextPages == 0) {
 			mMemNextPages = 1;
@@ -2873,22 +2884,29 @@ public class ImageManager extends InputStream implements Runnable {
 		return false;
 	}
 
-	public boolean loadBitmapFromStreamSizeCheck(int page) {
+	public int loadBitmapFromStreamSizeCheck(short type, int page) {
+		int returnCode = 0;
+		//Log.e("FromStreamSizeCheck", "page=" + page + ", type=" + type);
+		int width = -1;
+		int height = -1;
+
 		if (page < 0 || mFileList.length <= page) {
 			// 範囲外
-			return false;
+			return -1;
 		}
 		if (mFileList[page].width > 0) {
-			return true;
+			return -2;
 		}
 
-//		Log.d("loadBitmapFromStreamSizeCheck", "start");
+//		Log.d("FromStreamSizeCheck", "start");
 		if (mFileList[page].o_width == 0) {
 			BitmapFactory.Options option = new BitmapFactory.Options();
 			boolean fError = false;
 
 			mCheWriteFlag = false;
 			option.inJustDecodeBounds = true;
+			InputStream inputStream = this;
+
 			try {
 				setLoadBitmapStart(page, false);
 				if (mFileType == FILETYPE_ZIP) {
@@ -2897,16 +2915,41 @@ public class ImageManager extends InputStream implements Runnable {
 					ZipInputStream zipStream = new ZipInputStream(new BufferedInputStream(this, BIS_BUFFSIZE));
 					zipStream.getNextEntry();
 					mLoadingPage = page;
-					BitmapFactory.decodeStream(new CacheInputStream(zipStream), null, option);
+					inputStream = new BufferedInputStream(zipStream);
 				}
 				else if (mFileType == FILETYPE_RAR) {
 					// メモリキャッシュ読込時のみRAR展開する
 					// ファイルキャッシュを作成するときはRAR展開不要
-					mRarStream = new RarInputStream(new BufferedInputStream(this, BIS_BUFFSIZE), page, mFileList[page]);
-					BitmapFactory.decodeStream(mRarStream, null, option);
+					inputStream = new RarInputStream(new BufferedInputStream(this, BIS_BUFFSIZE), page, mFileList[page]);
 				}
 				else {
-					BitmapFactory.decodeStream(this, null, option);
+					inputStream = new BufferedInputStream(this, BIS_BUFFSIZE);
+				}
+
+				inputStream.mark(mFileList[page].orglen + 1);
+				BitmapFactory.decodeStream(new BufferedInputStream(inputStream), null, option);
+				width = option.outWidth;
+				height = option.outHeight;
+				if (width <= 0 || height <= 0) {
+					Log.d("ImageManager", "loadBitmapFromStreamSizeCheck: BitmapFactory decode failed. " + mFileList[page].name);
+					try {
+						inputStream.reset();
+					} catch (IOException e) {
+						Log.e("ImageManager", "loadBitmapFromStreamSizeCheck: inputStream.reset() failed. " + mFileList[page].name);
+						inputStream.close();
+						return -3;
+					}
+					int[] imagesize = new int[2];
+					returnCode = sizeCheckNative(page, inputStream, imagesize);
+					if (returnCode == 0 && imagesize[0] > 0 && imagesize[1] > 0) {
+						Log.d("ImageManager", "loadBitmapFromStreamSizeCheck: sizeCheckNative succeed. " + mFileList[page].name);
+						width = imagesize[0];
+						height = imagesize[1];
+					}
+					else {
+						Log.e("ImageManager", "loadBitmapFromStreamSizeCheck: sizeCheckNative failed. " + mFileList[page].name);
+						return -4;
+					}
 				}
 			}
 			catch (IOException e) {
@@ -2917,31 +2960,249 @@ public class ImageManager extends InputStream implements Runnable {
 				if (msg == null) {
 					msg = "";
 				}
-				Log.e("loadBitmapFromStream", "Load: " + msg);
-				fError = true;
+				Log.e("ImageManager", "loadBitmapFromStreamSizeCheck: Load:" + msg);
+				//fError = true;
 			}
 
+			Log.d("ImageManager", "loadBitmapFromStreamSizeCheck: width=" + width + ", height=" + height);
 			try {
 				setLoadBitmapEnd();
 			}
 			catch (Exception e) {
-				Log.e("loadBitmapFromStream", "End: " + e.getMessage());
+				Log.e("ImageManager", "loadBitmapFromStreamSizeCheck: Catch Exception. " + e.getMessage());
 				fError = true;
 			}
 
 			if (fError) {
-				return false;
+				return -5;
 			}
 			// mFileList[page].bmpsize = option.outWidth * option.outHeight * 2;
-			mFileList[page].o_width = option.outWidth;
-			mFileList[page].o_height = option.outHeight;
+			mFileList[page].o_width = width;
+			mFileList[page].o_height = height;
 		}
 		mFileList[page].scale = DEF.calcScale(mFileList[page].o_width, mFileList[page].o_height, mFileList[page].type, 3200, 3200);
 //		mFileList[page].scale = 1;
 		mFileList[page].width = DEF.divRoundUp(mFileList[page].o_width, mFileList[page].scale);
 		mFileList[page].height = DEF.divRoundUp(mFileList[page].o_height, mFileList[page].scale);
-//		Log.d("loadBitmapFromStreamSizeCheck", "end");
-		return true;
+//		Log.d("ImageManager", "loadBitmapFromStreamSizeCheck: End.");
+		return returnCode;
+	}
+
+	public int sizeCheckNative(int page, InputStream inputStream, int[] imagesize) {
+		int returnCode = 0;
+
+		if (page < -1 || mFileList.length <= page) {
+			// 範囲外
+			return -6;
+		}
+		if (mFileList[page].width > 0) {
+			return -7;
+		}
+
+		if (mFileList[page].o_width == 0) {
+			returnCode = sizeCheckNativeMain(inputStream, page, mFileList[page].type, mFileList[page].orglen, imagesize);
+			if (returnCode < 0) {
+				Log.e("ImageManager", "sizeCheckNative: sizeCheckNativeMain() failed.");
+				return -8;
+			}
+			Log.d("ImageManager", "sizeCheckNative: sizeCheckNativeMain() succeed.");
+		}
+		return returnCode;
+	}
+
+	public int sizeCheckNativeMain(InputStream inputStream, int page, int type, long orglen, int[] imagesize) {
+		int returnCode = 0;
+		Log.d("ImageManager", "sizeCheckNativeMain: Start. page=" + page + ", type=" + type + ", orglen=" + orglen);
+
+		// 読み込み準備
+		returnCode = CallImgLibrary.ImageSetFileSize(orglen);
+		if (returnCode < 0) {
+			Log.e("ImageManager", "sizeCheckNativeMain: ImageSetFileSize failed. return=" + returnCode);
+			return -9;
+		}
+		byte data[] = new byte[100 * 1024];
+		int total = 0;
+		while (true) {
+			int size = 0;
+			try {
+				size = inputStream.read(data, 0, data.length);
+				if (size < 0) {
+					break;
+				}
+			} catch (IOException e) {
+				if (total != orglen) {
+					String msg = null;
+					if (e != null) {
+						msg = e.getMessage();
+					}
+					if (msg == null) {
+						msg = "";
+					}
+					Log.e("ImageManager", "sizeCheckNativeMain: Catch IOException inputStream.read: " + msg);
+					return -10;
+				} else {
+					//必要なデータを読み終えていた場合に抜ける
+					break;
+				}
+			}
+			// メモリセットも中断する
+			if (mCacheBreak == true || mRunningFlag == false) {
+				Log.e("ImageManager", "sizeCheckNativeMain: canceled.");
+				return -11;
+			}
+			CallImgLibrary.ImageSetData(data, size);
+			total += size;
+		}
+		if (total < orglen) {
+			Log.e("ImageManager", "sizeCheckNativeMain: bufferd size is short. total=" + total + ", orglen=" + orglen);
+			return -12;
+		} else {
+			// 画像のサイズを取得する
+			returnCode = CallImgLibrary.ImageGetSize(type, imagesize);
+			if (returnCode < 0 && imagesize[0] < 0 && imagesize[1] < 0) {
+				Log.e("ImageManager", "sizeCheckNativeMain: CallImgLibrary.ImageGetSize() failed.");
+				return -13;
+			}
+		}
+		Log.d("ImageManager", "sizeCheckNativeMain: End.");
+		return returnCode;
+	}
+
+	// デバッグ用に画像をファイル出力する
+	private int SaveFile (Bitmap bitmap) {
+		try {
+			// sdcardフォルダを指定
+			File root = Environment.getExternalStorageDirectory();
+
+			// 日付でファイル名を作成　
+			Date mDate = new Date();
+			SimpleDateFormat fileName = new SimpleDateFormat("yyyyMMdd_HHmmss.SS");
+
+			// 保存処理開始
+			FileOutputStream fos = null;
+			fos = new FileOutputStream(new File(root, fileName.format(mDate) + ".jpg"));
+
+			// jpegで保存
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+			// 保存処理終了
+			fos.close();
+		} catch (Exception e) {
+			Log.e("Error", "" + e.toString());
+		}
+		return 0;
+	}
+
+	public Bitmap getBitmapNative(InputStream inputStream, int page, int scale, Bitmap bm) {
+		int ret = 0;
+		int returnCode = 0;
+
+		Log.d("ImageManager", "getBitmapNative: Start. page=" + page + ", scale=" + scale + ", " + mFileList[page].name);
+
+		if (page < 0 || mFileList.length <= page) {
+			// 範囲外
+			Log.e("ImageManager", "getBitmapNative: Page is out of range. " + mFileList[page].name);
+			return null;
+		}
+		if (mFileList[page].width <= 0 || mFileList[page].height <= 0) {
+			Log.e("ImageManager", "getBitmapNative: Image size is invalid. width=" + mFileList[page].width + "height=" + mFileList[page].height + ", " + mFileList[page].name);
+			return null;
+		}
+
+		bm = getBitmapNativeMain(inputStream, page, mFileList[page].type, scale, mFileList[page].orglen, mFileList[page].width, mFileList[page].height, bm);
+		if (bm == null) {
+			Log.e("ImageManager", "getBitmapNative: getBitmapNativeMain() failed. " + mFileList[page].name);
+		}
+		Log.d("ImageManager", "getBitmapNative: End. Bitmap=" + bm + ", " + mFileList[page].name);
+		return bm;
+	}
+
+	public Bitmap getBitmapNativeMain(InputStream inputStream, int page, int type, int scale, long orglen, int width, int height, Bitmap bm) {
+		int ret = 0;
+		int returnCode = 0;
+
+		Log.d("ImageManager", "getBitmapNativeMain: Start. page=" + page + ", type=" + type + ", scale=" + scale);
+
+		// 読み込み準備
+		returnCode = CallImgLibrary.ImageSetFileSize(orglen);
+		if (returnCode < 0) {
+			Log.e("ImageManager", "getBitmapNativeMain: ImageSetFileSize failed. return=" + returnCode);
+			return null;
+		}
+		byte data[] = new byte[100 * 1024];
+		int total = 0;
+		while (true) {
+			int size = 0;
+			try {
+				size = inputStream.read(data, 0, data.length);
+				if (size < 0) {
+					break;
+				}
+			} catch (IOException e) {
+				if (total != orglen) {
+					String msg = null;
+					if (e != null) {
+						msg = e.getMessage();
+					}
+					if (msg == null) {
+						msg = "";
+					}
+					Log.e("ImageManager", "getBitmapNativeMain: Catch IOException: " + msg);
+					return null;
+				} else {
+					//必要なデータを読み終えていた場合に抜ける
+					break;
+				}
+			}
+			// メモリセットも中断する
+			if (mCacheBreak == true || mRunningFlag == false) {
+				Log.e("NativeSizeCheck", "getBitmapNativeMain: canceled.");
+				return null;
+			}
+			returnCode = CallImgLibrary.ImageSetData(data, size);
+			if (returnCode < 0) {
+				Log.e("ImageManager", "getBitmapNativeMain: ImageSetData failed. return=" + returnCode);
+				return null;
+			}
+			total += size;
+		}
+		if (total < orglen) {
+			Log.e("ImageManager", "getBitmapNativeMain: bufferd size is short. total=" + total + ", orglen=" + orglen);
+			return null;
+		} else {
+			bm = Bitmap.createBitmap(width, height, Config.RGB_565);
+			try {
+				Log.d("ImageManager", "getBitmapNative: CallImgLibrary.ImageGetBitmap start. type=" + type + ", scale=" + scale);
+				ret = CallImgLibrary.ImageGetBitmap(type, scale, bm);
+			} catch (Exception e) {
+				Log.e("ImageManager", "getBitmapNative: CallImgLibrary.ImageGetBitmap error.");
+				if (e != null && e.getMessage() != null) {
+					Log.e("ImageManager", "getBitmapNative: error message. " + e.getMessage());
+					return null;
+				}
+			}
+
+		//SaveFile(bm);
+			if (ret < 0) {
+				Log.e("ImageManager", "getBitmapNative: CallImgLibrary.ImageConvertBitmap() failed. return=" + ret);
+				return null;
+			}
+			if (scale != 1) {
+				int Outwidth = width / scale;
+				int Outheight = height / scale;
+				Log.d("ImageManager", "getBitmapNative: Bitmap.createScaledBitmap start. width=" + Outwidth + ", height=" + Outheight);
+				bm = Bitmap.createScaledBitmap(bm, Outwidth, Outheight, true);
+				if (bm == null) {
+					Log.e("ImageManager", "getBitmapNative: Bitmap.createScaledBitmap failed.");
+					return null;
+				}
+			}
+		}
+		if (bm != null) {
+			Log.d("ImageManager", "getBitmapNative: End. Bitmap is not null.");
+		}
+		Log.d("ImageManager", "getBitmapNative: End. Bitmap=" + bm);
+		return bm;
 	}
 
 	private ImageData loadBitmapFromStream(int page, boolean notice) throws IOException {
@@ -2960,7 +3221,7 @@ public class ImageManager extends InputStream implements Runnable {
 //		Log.d("loadBitmapFromStream", "start");
 
 		if (mFileList[page].width <= 0) {
-			loadBitmapFromStreamSizeCheck(page);
+			loadBitmapFromStreamSizeCheck(mFileList[page].type, page);
 		}
 
 		if (!memWriteLock(page, 0, false)) {
@@ -3099,7 +3360,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 		//
 		if (mFileList[page].width <= 0) {
-			loadBitmapFromStreamSizeCheck(page);
+			loadBitmapFromStreamSizeCheck(mFileList[page].type, page);
 		}
 
 		pt.x = mFileList[page].width;
@@ -3124,8 +3385,13 @@ public class ImageManager extends InputStream implements Runnable {
 			// 範囲外
 			return null;
 		}
-		//
+
+		BitmapFactory.Options option = new BitmapFactory.Options();
 		Bitmap bm = null;
+
+		option.inJustDecodeBounds = false;
+		option.inPreferredConfig = Config.RGB_565;
+		InputStream inputStream;
 
 		ZipInputStream zipStream = null;
 		try {
@@ -3135,7 +3401,7 @@ public class ImageManager extends InputStream implements Runnable {
 				// ファイルキャッシュを作成するときはZIP展開不要
 				zipStream = new ZipInputStream(new BufferedInputStream(this, BIS_BUFFSIZE));
 				zipStream.getNextEntry();
-				bm = BitmapFactory.decodeStream(new CacheInputStream(zipStream));
+				inputStream = new CacheInputStream(zipStream);
 				// ファイル破損時に無限ループするのでコメント化
 				// zipStream.closeEntry();
 			}
@@ -3148,10 +3414,21 @@ public class ImageManager extends InputStream implements Runnable {
 				else {
 					mRarStream.initSeek();
 				}
-				bm = BitmapFactory.decodeStream(mRarStream);
+				inputStream = mRarStream;
 			}
 			else {
-				bm = BitmapFactory.decodeStream(this);
+				inputStream = this;
+			}
+			if (mFileList[page].type == IMAGETYPE_JPEG || mFileList[page].type == IMAGETYPE_PNG || mFileList[page].type == IMAGETYPE_GIF || mFileList[page].type == IMAGETYPE_WEBP) {
+				bm = BitmapFactory.decodeStream(inputStream, null, option);
+			}
+			else {
+				bm = getBitmapNative(inputStream, page, mFileList[page].scale, bm);
+				if (bm == null) {
+					Log.e("ImageManager", "loadBitmapByName: getBitmapNative failed. " + mFileList[page].name);
+					return null;
+				}
+				Log.d("ImageManager", "loadBitmapByName: getBitmapNative succeed. " + mFileList[page].name);
 			}
 		}
 		catch (IOException e) {
@@ -3173,7 +3450,7 @@ public class ImageManager extends InputStream implements Runnable {
 	public Bitmap loadThumbnailFromStream(int page, int width, int height) throws IOException {
 		//
 		if (mFileList[page].width <= 0) {
-			loadBitmapFromStreamSizeCheck(page);
+			loadBitmapFromStreamSizeCheck(mFileList[page].type, page);
 		}
 
 		int sampleSize = DEF.calcThumbnailScale(mFileList[page].width, mFileList[page].height, width, height);
@@ -3186,9 +3463,14 @@ public class ImageManager extends InputStream implements Runnable {
 		Bitmap bm = null;
 
 		option.inJustDecodeBounds = false;
+		option.inPreferredConfig = Config.RGB_565;
 		option.inSampleSize = sampleSize;
+		InputStream inputStream = null;
 
 		ZipInputStream zipStream = null;
+
+		Log.d("ImageManager", "loadThumbnailFromStreamMain: start. " + mFileList[page].name);
+
 		try {
 			setLoadBitmapStart(page, false);
 			if (mFileType == FILETYPE_ZIP) {
@@ -3196,7 +3478,7 @@ public class ImageManager extends InputStream implements Runnable {
 				// ファイルキャッシュを作成するときはZIP展開不要
 				zipStream = new ZipInputStream(new BufferedInputStream(this, BIS_BUFFSIZE));
 				zipStream.getNextEntry();
-				bm = BitmapFactory.decodeStream(new CacheInputStream(zipStream), null, option);
+				inputStream = new BufferedInputStream(zipStream);
 				// ファイル破損時に無限ループするのでコメント化
 				// zipStream.closeEntry();
 			}
@@ -3209,23 +3491,46 @@ public class ImageManager extends InputStream implements Runnable {
 				else {
 					mRarStream.initSeek();
 				}
-				bm = BitmapFactory.decodeStream(mRarStream, null, option);
+				inputStream = new BufferedInputStream(mRarStream);
 			}
 			else {
-				bm = BitmapFactory.decodeStream(this, null, option);
+				inputStream = new BufferedInputStream(this);
+			}
+			inputStream.mark(mFileList[page].orglen + 1);
+			bm = BitmapFactory.decodeStream(new BufferedInputStream(inputStream), null, option);
+			if (bm != null) {
+				// なにもしない
+				Log.d("ImageManager", "loadThumbnailFromStreamMain: BitmapFactory decode succeed. " + mFileList[page].name);
+			}
+			else {
+				Log.d("ImageManager", "loadThumbnailFromStreamMain: BitmapFactory decode failed. " + mFileList[page].name);
+				try {
+					inputStream.reset();
+				} catch (IOException e) {
+					Log.e("ImageManager", "loadThumbnailFromStreamMain: inputStream.reset() failed. " + mFileList[page].name);
+					inputStream.close();
+					return null;
+				}
+				bm = getBitmapNative(inputStream, page, sampleSize, bm);
+				if (bm == null) {
+					Log.e("ImageManager", "loadThumbnailFromStreamMain: getBitmapNative failed. " + mFileList[page].name);
+					return null;
+				}
+				Log.d("ImageManager", "loadThumbnailFromStreamMain: getBitmapNative succeed. " + mFileList[page].name);
 			}
 		}
 		catch (IOException e) {
-			Log.e("loadThumbnailFromStream", "Load: " + e.getMessage());
+			Log.e("ImageManager", "loadThumbnailFromStreamMain: Catch IOException: " + e.getMessage());
 		}
 
 		try {
 			setLoadBitmapEnd();
 		}
 		catch (Exception e) {
-			Log.e("loadThumbnailFromStream", "End: " + e.getMessage());
+			Log.e("ImageManager", "loadThumbnailFromStreamMain: Catch Exception: " + e.getMessage());
 		}
 
+		Log.d("ImageManager", "loadThumbnailFromStreamMain: end. " + mFileList[page].name);
 		// ファイルクローズは不要
 		return bm;
 	}
@@ -3233,105 +3538,116 @@ public class ImageManager extends InputStream implements Runnable {
 	// ビュアー表示用の画像読込
 	private ImageData LoadBitmapFile(int page, InputStream is, int orglen) throws IOException {
 
-		// スレッドからトーストを呼び出す準備
-		SimpleToast simpleToast = new SimpleToast(mActivity);
+		int ret = 0;
+		InputStream inputStream = new BufferedInputStream(is);
 
-		// 読み込み準備
-		int ret = CallImgLibrary.ImageSetPage(page, orglen);
-		if (ret < 0) {
-			return null;
-		}
+		BitmapFactory.Options option = new BitmapFactory.Options();
+		Bitmap bm = null;
+		option.inJustDecodeBounds = false;
+		option.inPreferredConfig = Config.RGB_565;
+		option.inSampleSize = mFileList[page].scale;
 
-//		Log.d("loadBitmapFile", "start : page=" + page);
-		byte data[] = new byte[100 * 1024];
-		int total = 0;
-		while (true) {
-			int size = 0;
-			try {
-				size = is.read(data, 0, data.length);
-				if (size <= 0) {
-					break;
-				}
-			}
-			catch (IOException e) {
-				if(total != orglen) {
-					throw new IOException("Can't read file.");
-				}
-				else {
-					//必要なデータを読み終えていた場合に抜ける
-					break;
-				}
-			}
-			// メモリセットも中断する
-			if (mCacheBreak == true || mRunningFlag == false) {
-				// throw new IOException("User Canceled in loadBitmapFile.");
+		ImageData id = null;
+
+		Log.d("ImageManager", "LoadBitmapFile: Start. " + mFileList[page].name);
+
+		inputStream.mark(orglen + 1);
+		bm = BitmapFactory.decodeStream(new BufferedInputStream(inputStream), null, option);
+		if (bm != null) {
+			Log.d("ImageManager", "LoadBitmapFile: BitmapFactory decode succeed. " + mFileList[page].name);
+			ret = CallImgLibrary.ImageSetPage(page, 0);
+			if (ret < 0) {
+				Log.e("ImageManager", "LoadBitmapFile: CallImgLibrary.ImageSetPage failed at BitmapFactory. return=" + ret + ", " + mFileList[page].name);
 				return null;
 			}
-			CallImgLibrary.ImageSetData(data, size);
-			total += size;
+			Log.d("ImageManager", "LoadBitmapFile: CallImgLibrary.ImageSetPage succeed. " + mFileList[page].name);
+			ret = CallImgLibrary.ImageSetBitmap(bm);
+			if (ret < 0) {
+				Log.e("ImageManager", "LoadBitmapFile: ImageSetBitmap failed. return=" +ret + ", " + mFileList[page].name);
+				return null;
+			}
+			Log.d("ImageManager", "LoadBitmapFile: CallImgLibrary.ImageSetBitmap succeed. " + mFileList[page].name);
+			bm.recycle();
+			// 読み込み成功
+			mMemCacheFlag[page].fSource = true;
+			id = new ImageData();
+			id.Page = page;
+			id.Width = mFileList[page].width;
+			id.Height = mFileList[page].height;
 		}
-		ImageData id = null;
-		int param[];
-		param = new int[1];
-		param[0] = mQuality;
+		else {
+			Log.d("ImageManager", "LoadBitmapFile: BitmapFactory decode failed. " + mFileList[page].name);
+			try {
+				inputStream.reset();
+			} catch (IOException e) {
+				Log.e("ImageManager", "LoadBitmapFile: inputStream.reset() failed. " + mFileList[page].name);
+				inputStream.close();
+				return null;
+			}
 
-		//		long sttime = SystemClock.uptimeMillis();
-		if (total < orglen) {
-			Log.e("ImageManager", "LoadBitmapFile total=" + total + ", orglen=" + orglen);
-			mFileList[page].error = true;
-			throw new IOException("File is broken.");
-		} else {
-			int returnCode = CallImgLibrary.ImageConvert(mFileList[page].type, mFileList[page].scale, param);
-			if (returnCode >= 0) {
-				// 読み込み成功
-				mMemCacheFlag[page].fSource = true;
-				id = new ImageData();
-				id.Page = page;
-				id.Width = mFileList[page].width;
-				id.Height = mFileList[page].height;
+			// 読み込み準備
+			ret = CallImgLibrary.ImageSetPage(page, orglen);
+			if (ret < 0) {
+				Log.e("ImageManager", "LoadBitmapFile: ImageSetPage failed at ImageConvert. return=" + ret + ", " + mFileList[page].name);
+				return null;
+			}
 
-				if (DEF.DEBUG) {
-					// スレッドからトーストを呼び出す
-					simpleToast.displaySimpleToast(
-							"ImageManager: LoadImage succeeded." +
-									"\nPage=" + page +
-									", returnCode=" + returnCode +
-									"\nWidth=" + mFileList[page].width +
-									", Height=" + mFileList[page].height +
-									", o_Width=" + mFileList[page].o_width +
-									", o_Height=" + mFileList[page].o_height +
-									"\nName=" + mFileList[page].name,
-							Toast.LENGTH_LONG
-					);
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {}
+//			Log.d("loadBitmapFile", "start : page=" + page);
+			byte data[] = new byte[100 * 1024];
+			int total = 0;
+			while (true) {
+				int size = 0;
+				try {
+					size = inputStream.read(data, 0, data.length);
+					if (size <= 0) {
+						break;
+					}
 				}
-			} else {
-				mFileList[page].error = true;
+				catch (IOException e) {
+					if(total != orglen) {
+						Log.e("ImageManager", "LoadBitmapFile: catch IOException. " + mFileList[page].name);
+						throw new IOException("Can't read file.");
+					}
+					else {
+						//必要なデータを読み終えていた場合に抜ける
+						break;
+					}
+				}
+				// メモリセットも中断する
+				if (mCacheBreak == true || mRunningFlag == false) {
+					Log.e("ImageManager", "LoadBitmapFile: User Canceled in loadBitmapFile. " + mFileList[page].name);
+					// throw new IOException("User Canceled in loadBitmapFile.");
+					return null;
+				}
+				CallImgLibrary.ImageSetData(data, size);
+				total += size;
+			}
 
-				if (DEF.DEBUG) {
-					// スレッドからトーストを呼び出す
-					simpleToast.displaySimpleToast(
-							"ImageManager: LoadImage failed." +
-									"\nPage=" + page +
-									", returnCode=" + returnCode +
-									"\nWidth=" + mFileList[page].width +
-									", Height=" + mFileList[page].height +
-									", o_Width=" + mFileList[page].o_width +
-									", o_Height=" + mFileList[page].o_height +
-									"\nName=" + mFileList[page].name,
-							Toast.LENGTH_LONG
-					);
-					try {
-						// 3秒間一時停止する
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {}
+			//		long sttime = SystemClock.uptimeMillis();
+			if (total < orglen) {
+				Log.e("ImageManager", "LoadBitmapFile: bufferd size is short. total=" + total + ", orglen=" + orglen + ", " + mFileList[page].name);
+				mFileList[page].error = true;
+				throw new IOException("File is broken.");
+			} else {
+				int returnCode = 0;
+				// 画像を取得してバッファに格納する
+				returnCode = CallImgLibrary.ImageConvert(mFileList[page].type, mFileList[page].scale);
+				if (returnCode >= 0 && mFileList[page].width > 0 && mFileList[page].height > 0) {
+					Log.d("ImageManager", "LoadBitmapFile: CallImgLibrary.ImageConvert succeed. " + mFileList[page].name);
+					// 読み込み成功
+					mMemCacheFlag[page].fSource = true;
+					id = new ImageData();
+					id.Page = page;
+					id.Width = mFileList[page].width;
+					id.Height = mFileList[page].height;
+				} else {
+					Log.e("ImageManager", "LoadBitmapFile: CallImgLibrary.ImageConvert failed. return=" + returnCode + ", " + mFileList[page].name);
+					mFileList[page].error = true;
 				}
 			}
-	}
+		}
 //		Log.i("ImageManager", "LoadBitmapFile time : " + (int)(SystemClock.uptimeMillis() - sttime));
-//		Log.d("ImageManager", "LoadBitmapFile end : page=" + page);
+		Log.d("ImageManager", "LoadBitmapFile: End. " + mFileList[page].name);
 		return id;
 	}
 

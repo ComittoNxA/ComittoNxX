@@ -28,6 +28,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 	private static final int LAYOUT_PADDING = 10;
 
 	private String mKey;
+	public int mMinValue;
 	public int mDefValue;
 	public int mMaxValue;
 
@@ -67,6 +68,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
 		int progress;
 		mSeekBar.setOnSeekBarChangeListener(this);
+		mSeekBar.setMin(mMinValue);
 		mSeekBar.setMax(mMaxValue);
 		progress = getValue();
 		mSeekBar.setProgress(progress);
@@ -103,7 +105,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 			mSummary1 = mContext.getString(R.string.scrlSumm1);
 			mSummary2 = mContext.getString(R.string.scrlSumm2);
 		}
-		else if (mKey.equals(DEF.KEY_LONGTAP) || mKey.equals(DEF.KEY_EFFECTTIME) || mKey.equals(DEF.KEY_AUTOPLAY)) {
+		else if (mKey.equals(DEF.KEY_LONGTAP) || mKey.equals(DEF.KEY_MENULONGTAP) || mKey.equals(DEF.KEY_EFFECTTIME) || mKey.equals(DEF.KEY_AUTOPLAY)) {
 			mSummary1 = mContext.getString(R.string.msecSumm1);
 			mSummary2 = "";
 		}
@@ -213,7 +215,10 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 			strSummary = DEF.getScrollStr(num, mSummary1, mSummary2);
 		}
 		else if (mKey.equals(DEF.KEY_LONGTAP)) {
-			strSummary = DEF.getMSecStr(num, mSummary1);
+			strSummary = DEF.getMSecStr200(num, mSummary1);
+		}
+		else if (mKey.equals(DEF.KEY_MENULONGTAP)) {
+			strSummary = DEF.getMSecStr100(num, mSummary1);
 		}
 		else if (mKey.equals(DEF.KEY_EFFECTTIME)) {
 			strSummary = DEF.getEffectTimeStr(num, mSummary1);

@@ -980,7 +980,11 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 			}
 		}
 		if (bmdraw == null) {
+			BitmapFactory.Options option = new BitmapFactory.Options();
 			Bitmap bm = null;
+
+			option.inJustDecodeBounds = false;
+			option.inPreferredConfig = Config.RGB_565;
 			try {
 				// ビットマップの読み込み
 				if (mImageMgr != null) {
@@ -990,7 +994,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 					else {
 						mTextStream.fileAccessInit(filename, mUser, mPass);
 						try {
-							bm = BitmapFactory.decodeStream(mTextStream);
+							bm = BitmapFactory.decodeStream(mTextStream, null, option);
 						}
 						catch (OutOfMemoryError e) {
 							;
@@ -1001,7 +1005,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				else {
 					mTextStream.fileAccessInit(filename, mUser, mPass);
 					try {
-						bm = BitmapFactory.decodeStream(mTextStream);
+						bm = BitmapFactory.decodeStream(mTextStream, null, option);
 					}
 					catch (OutOfMemoryError e) {
 						;

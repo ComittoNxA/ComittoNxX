@@ -10,7 +10,7 @@ public class CallImgLibrary {
 	public static final int RESULT_OK = 0;
 	public static final int RESULT_ALLOC_ERR = 1;
 	
-	public static native int ImageInitialize(int loadsize, int buffnum, int totalpage, int maxthreadnum);
+	public static native int ImageInitialize(long loadsize, int buffnum, int totalpage, int maxthreadnum);
 	public static native void ImageTerminate();
 	public static native int ImageGetFreeSize();
 //	public static native int ImageSave(int page, Bitmap bitmap); // 保存してハンドルを返す
@@ -18,10 +18,13 @@ public class CallImgLibrary {
 	public static native int ImageFree(int page);
 	public static native int ImageScaleFree(int page, int half);
 
-	public static native int ImageSetPage(int page, int size);
+	public static native int ImageSetPage(int page, long size);
 	public static native int ImageSetData(byte data[], int size);
-	public static native int ImageConvert(int type, int scale, int param[]);
-	public static native int ImageConvertBitmap(int type, int scale, int param[], Bitmap bitmap);
+	public static native int ImageSetFileSize(long size);
+	public static native int ImageGetSize(int type, int imagesize[]);
+	public static native int ImageSetBitmap(Bitmap bitmap);
+	public static native int ImageConvert(int type, int scale);
+	public static native int ImageGetBitmap(int type, int scale, Bitmap bitmap);
 
 	public static native int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, int Margin, int size[]);
 	public static native int ImageScale(int page, int half, int width, int height, int left, int right, int top, int bottom, int algorithm, int rotate, int margin, int bright, int gamma, int param, int size[]);

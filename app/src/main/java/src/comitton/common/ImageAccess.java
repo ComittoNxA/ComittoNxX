@@ -1,26 +1,19 @@
 package src.comitton.common;
 
-//import com.larvalabs.svgandroid.SVG;
-//import com.larvalabs.svgandroid.SVGParser;
-import com.caverock.androidsvg.SVG;
-import com.caverock.androidsvg.RenderOptions;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Picture;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import jp.dip.muracoro.comittonx.R;
-import src.comitton.stream.CallImgLibrary;
-import src.comitton.stream.ImageData;
-import src.comitton.stream.ImageManager;
+import androidx.core.content.res.ResourcesCompat;
+
+import java.util.Arrays;
 
 
 public class ImageAccess {
@@ -29,15 +22,18 @@ public class ImageAccess {
 	public static final int BMPALIGN_RIGHT = 2;
 	public static final int BMPALIGN_AUTO = 3;
 
+	private static boolean COLOR_CHECK(int rgb1, int rgb2) { return (((rgb1 ^ rgb2) & 0x00808080) == 0x00000000); }
+
 	// ビットマップをリサイズして切り出し
 	public static Bitmap resizeTumbnailBitmap(Bitmap bm, int thum_cx, int thum_cy, int align) {
 		if (bm == null || bm.isRecycled()) {
 			return null;
 		}
 
-		//Log.d("comitton", "resizeTumbnailBitmap thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", align=" + align);
+		Log.d("ImageAccess", "resizeTumbnailBitmap: Start. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", align=" + align);
 		int src_cx = bm.getWidth();
 		int src_cy = bm.getHeight();
+		Log.d("ImageAccess", "resizeTumbnailBitmap: Start. src_cx=" + src_cx + ", src_cy=" + src_cy);
 
 		int x = 0;
 		int y = 0;
@@ -49,78 +45,230 @@ public class ImageAccess {
 			int CutT = 0;
 			int CutB = 0;
 
+			int ColorL = 0;
+			int ColorR = 0;
+			int ColorT = 0;
+			int ColorB = 0;
+
+			int ColorArrayL[] = new int[src_cy];
+			int ColorArrayR[] = new int[src_cy];
+			int ColorArrayT[] = new int[src_cx];
+			int ColorArrayB[] = new int[src_cx];
+
 			int CheckCX = (int) (src_cx * 0.3);
 			int CheckCY = (int) (src_cy * 0.3);
 			int xx;
 			int	yy;
 			int overcnt;
 
+			// 上下左右の端のラインの色の最頻値を調べる
+			// 配列に左右端のラインの色を代入
+			for (yy = 0 ; yy < src_cy ; yy++) {
+				ColorArrayL[yy] = bm.getPixel(0, yy);
+				ColorArrayR[yy] = bm.getPixel(src_cx - 1, yy);
+			}
+			// 配列に上下端のラインの色を代入
+			for (xx = 0 ; xx < src_cx ; xx++) {
+				ColorArrayT[xx] = bm.getPixel(xx, 0);
+				ColorArrayB[xx] = bm.getPixel(xx, src_cy - 1);
+			}
+			// 昇順ソート
+			Arrays.sort(ColorArrayL);
+			Arrays.sort(ColorArrayR);
+			Arrays.sort(ColorArrayT);
+			Arrays.sort(ColorArrayB);
 
+			// 最頻値
+			int pre_modeL, pre_modeR, pre_modeT, pre_modeB;
+			int numL = 1, numR = 1, numT = 1, numB = 1; // テンポラリの出現回数
+			int max_numL = 1, max_numR = 1, max_numT = 1, max_numB = 1; // 最頻値の出現回数
+			int modeL, modeR, modeT, modeB;
+
+			// 初期値を代入
+			modeL = ColorArrayL[0];	// 色の最頻値の初期値
+			modeR = ColorArrayR[0];	// 色の最頻値の初期値
+			modeT = ColorArrayT[0];	// 色の最頻値の初期値
+			modeB = ColorArrayB[0];	// 色の最頻値の初期値
+
+			pre_modeL = ColorArrayL[0];	// 出現する回数を数える値
+			pre_modeR = ColorArrayR[0];	// 出現する回数を数える値
+			pre_modeT = ColorArrayL[0];	// 出現する回数を数える値
+			pre_modeB = ColorArrayR[0];	// 出現する回数を数える値
+
+			// 左右端のラインの色が出現する最頻値を求める
+			for (yy = 0 ; yy < src_cy ; yy++) {
+				// 左のライン
+				if (pre_modeL == ColorArrayL[yy]) {
+					// 同じ値の場合
+					// 出現回数に1を足す
+					++ numL;
+				}
+				else {
+					// 違う値の場合
+					// 出現回数が最頻値の出現回数より多ければ最頻値を更新する
+					if (numL > max_numL) {
+						modeL = pre_modeL;
+						max_numL = numL;
+					}
+
+					// 出現する回数を数える値を変更
+					pre_modeL = ColorArrayL[yy];
+					numL = 1;
+				}
+
+				// 右のライン
+				if (pre_modeR == ColorArrayR[yy]) {
+					// 同じ値の場合
+					// 出現回数に1を足す
+					++ numR;
+				}
+				else {
+					// 違う値の場合
+					// 出現回数が最頻値の出現回数より多ければ最頻値を更新する
+					if (numR > max_numR) {
+						modeR = pre_modeR;
+						max_numR = numR;
+					}
+
+					// 出現する回数を数える値を変更
+					pre_modeR = ColorArrayR[yy];
+					numR = 1;
+				}
+			}
+			// 後処理
+			if (numL > max_numL) {
+				modeL = pre_modeL;
+				max_numL = numL;
+			}
+			if (numR > max_numR) {
+				modeR = pre_modeR;
+				max_numR = numR;
+			}
+			ColorL = modeL;
+			ColorR = modeR;
+
+			// 上下端のラインの色が出現する最頻値を求める
+			for (xx = 0 ; xx < src_cx ; xx++) {
+				// 上のライン
+				if (pre_modeT == ColorArrayT[xx]) {
+					// 同じ値の場合
+					// 出現回数に1を足す
+					++ numT;
+				}
+				else {
+					// 違う値の場合
+					// 出現回数が最頻値の出現回数より多ければ最頻値を更新する
+					if (numT > max_numT) {
+						modeT = pre_modeT;
+						max_numT = numT;
+					}
+
+					// 出現する回数を数える値を変更
+					pre_modeT = ColorArrayT[xx];
+					numT = 1;
+				}
+				// 下のライン
+				if (pre_modeB == ColorArrayB[xx]) {
+					// 同じ値の場合
+					// 出現回数に1を足す
+					++ numB;
+				}
+				else {
+					// 違う値の場合
+					// 出現回数が最頻値の出現回数より多ければ最頻値を更新する
+					if (numB > max_numB) {
+						modeB = pre_modeB;
+						max_numB = numB;
+					}
+
+					// 出現する回数を数える値を変更
+					pre_modeB = ColorArrayB[xx];
+					numB = 1;
+				}
+			}
+			// 後処理
+			if (numT > max_numT) {
+				modeT = pre_modeT;
+				max_numT = numT;
+			}
+			if (numB > max_numB) {
+				modeB = pre_modeB;
+				max_numB = numB;
+			}
+			ColorT = modeT;
+			ColorB = modeB;
+
+			// 上の余白チェック
 			for (yy = 0 ; yy < CheckCY ; yy ++) {
 				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
-				overcnt = 0;	// 白でないカウンタ
+				overcnt = 0;	// 余白でないカウンタ
 				CutT = yy;
 				for (xx = 0 ; xx < src_cx ; xx ++) {
-					// 白チェック
-					if (bm.getPixel(xx, yy) != Color.WHITE) {
+					// 余白チェック
+					if (!COLOR_CHECK(bm.getPixel(xx, yy), ColorT)) {
 						overcnt ++;
 					}
 				}
-				// 0.8%以上がオーバーしたら余白ではないとする
-				if (overcnt >= src_cx * 0.008) {
-					// 0.8%以上
+				// 6%以上がオーバーしたら余白ではないとする
+				if (overcnt >= src_cx * 0.02) {
+					// 6%以上
 					break;
 				}
 			}
+			// 下の余白チェック
 			for (yy = src_cy - 1 ; yy >= src_cy - CheckCY ; yy --) {
 				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
-				overcnt = 0;	// 白でないカウンタ
+				overcnt = 0;	// 余白でないカウンタ
 				CutB = src_cy - 1 - yy;
 				for (xx = 0 ; xx < src_cx ; xx ++) {
-					// 白チェック
-					if (bm.getPixel(xx, yy) != Color.WHITE) {
+					// 余白チェック
+					if (!COLOR_CHECK(bm.getPixel(xx, yy), ColorB)) {
 						overcnt ++;
 					}
 				}
-				// 0.8%以上がオーバーしたら余白ではないとする
-				if (overcnt >= src_cx * 0.008) {
-					// 0.8%以上
+				// 6%以上がオーバーしたら余白ではないとする
+				if (overcnt >= src_cx * 0.02) {
+					// 6%以上
+					break;
+				}
+			}
+			// 左の余白チェック
+			for (xx = 0 ; xx < CheckCX ; xx ++) {
+				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
+				overcnt = 0;	// 余白でないカウンタ
+				CutL = xx;
+				for (yy = CutT + 1 ; yy < src_cy - CutB ; yy ++) {
+					// 余白チェック
+					if (!COLOR_CHECK(bm.getPixel(xx, yy), ColorL)) {
+						overcnt ++;
+					}
+				}
+				// 6%以上がオーバーしたら余白ではないとする
+				if (overcnt >= (src_cy - CutT - CutB) * 0.02) {
+					// 6%以上
+					break;
+				}
+			}
+			// 右の余白チェック
+			for (xx = src_cx - 1 ; xx >= src_cx - CheckCX ; xx --) {
+				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
+				overcnt = 0;	// 余白でないカウンタ
+				CutR = src_cx - 1 - xx;
+				for (yy = CutT + 1 ; yy < src_cy - CutB ; yy ++) {
+					// 余白チェック
+					if (!COLOR_CHECK(bm.getPixel(xx, yy), ColorR)) {
+						overcnt ++;
+					}
+				}
+				// 6%以上がオーバーしたら余白ではないとする
+				if (overcnt >= (src_cy - CutT - CutB) * 0.02) {
+					// 6%以上
+					Log.d("ImageAccess", "resizeTumbnailBitmap: Start. break xx=" + xx + ", overcnt=" + overcnt + "/" + (src_cy - CutT - CutB) + "=" + (double)overcnt / (src_cy - CutT - CutB));
 					break;
 				}
 			}
 
-			for (xx = 0 ; xx < CheckCX ; xx ++) {
-				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
-				overcnt = 0;	// 白でないカウンタ
-				CutL = xx;
-				for (yy = CutT + 1 ; yy < src_cy - CutB ; yy ++) {
-					// 白チェック
-					if (bm.getPixel(xx, yy) != Color.WHITE) {
-						overcnt ++;
-					}
-				}
-				// 0.8%以上がオーバーしたら余白ではないとする
-				if (overcnt >= (src_cy - CutT - CutB) * 0.008) {
-					// 0.8%以上
-					break;
-				}
-			}
-			for (xx = src_cx - 1 ; xx >= src_cx - CheckCX ; xx --) {
-				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
-				overcnt = 0;	// 白でないカウンタ
-				CutR = src_cx - 1 - xx;
-				for (yy = CutT + 1 ; yy < src_cy - CutB ; yy ++) {
-					// 白チェック
-					if (bm.getPixel(xx, yy) != Color.WHITE) {
-						overcnt ++;
-					}
-				}
-				// 0.8%以上がオーバーしたら余白ではないとする
-				if (overcnt >= (src_cy - CutT - CutB) * 0.008) {
-					// 0.8%以上
-					break;
-				}
-			}
+			Log.d("ImageAccess", "resizeTumbnailBitmap: Start. CutT=" + CutT + ", CutB=" + CutB + ", CutL=" + CutL + ", CutR=" + CutR);
 
 			// 余白削除後のサイズを初期サイズに設定
 			src_cx = src_cx - CutL -CutR;
@@ -193,34 +341,26 @@ public class ImageAccess {
 		return bm;
 	}
 
-	// SVGファイルからアイコンを作成(正方形)
+	// ベクターxmlファイルからアイコンを作成(正方形)
 	public static Bitmap createIcon(Resources res, int resid, int size, Integer drawcolor) {
 		return createIcon(res, resid, size, size, drawcolor);
 	}
 
-	// SVGファイルからアイコンを作成(比率不定)
+	// ベクターxmlファイルからアイコンを作成(比率不定)
 	public static Bitmap createIcon(Resources res, int resid, int sizeW, int sizeH, Integer drawcolor) {
-		// bitmap設定
 		Bitmap bm = null;
 		try {
-			bm = Bitmap.createBitmap(sizeW, sizeH, Config.ARGB_4444);
-		}
-		catch (Exception ex) {
-			// 読み込み失敗
-		}
-		if (bm == null) {
-			return null;
-		}
-		try {
-			Canvas canvas = new Canvas(bm);
-			SVG svg = SVG.getFromResource(res, resid);
-			Picture picture = svg.renderToPicture();
-			int w = picture.getWidth();
-			int h = picture.getHeight();
+			Drawable drawable = ResourcesCompat.getDrawable(res, resid, null);
+			Canvas canvas = new Canvas();
+			int w = drawable.getIntrinsicWidth();
+			int h = drawable.getIntrinsicHeight();
+			bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
+			canvas.setBitmap(bm);
+			drawable.setBounds(0, 0, w, h);
 			float dsW = (float)sizeW / (float)w;
 			float dsH = (float)sizeH / (float)h;
 			canvas.scale(dsW, dsH);
-			svg.renderToCanvas(canvas);
+			drawable.draw(canvas);
 			if (drawcolor != null) {
 				bm = setColor(bm,drawcolor);
 			}
@@ -232,31 +372,9 @@ public class ImageAccess {
 		return bm;
 	}
 
-	// SVGファイルからアイコンを作成
+	// ベクターxmlファイルからアイコンを作成
 	public static Bitmap createIconFromRawPicture(Resources res, int resid, int size) {
-		Bitmap bm = null;
-		try {
-			// bitmap設定
-			bm = Bitmap.createBitmap(size, size, Config.ARGB_4444);
-			if (bm == null) {
-				return null;
-			}
-
-			Canvas canvas = new Canvas(bm);
-			SVG svg = SVG.getFromResource(res, resid);
-			Picture picture = svg.renderToPicture();
-			int w = picture.getWidth();
-			int h = picture.getHeight();
-			float dsW = (float)size / (float)w;
-			float dsH = (float)size / (float)h;
-			canvas.scale(dsW, dsH);
-			svg.renderToCanvas(canvas);
-		}
-			catch (Exception ex) {
-			// 読み込み失敗
-		}
-
-		return bm;
+		return createIcon(res, resid, size, size, null);
 	}
 
 	/**

@@ -36,6 +36,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 	private ListThumbSeekbar mListThumbSeek;
 
 	private ThumbnailPreference mThumbnail;
+	private MenuLongTapSeekbar mMenuLongTap;
 
  	public static final int ListSortName[] =
 		{ R.string.lsort00		// ソートなし
@@ -90,6 +91,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		mThumbCache = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBCACHE);
 		mToolbarSeek = (ToolbarSeekbar)getPreferenceScreen().findPreference(DEF.KEY_TOOLBARSEEK);
 		mListThumbSeek = (ListThumbSeekbar)getPreferenceScreen().findPreference(DEF.KEY_LISTTHUMBSEEK);
+		//mMenuLongTap   = (MenuLongTapSeekbar)getPreferenceScreen().findPreference(DEF.KEY_MENULONGTAP);
 
 		// 項目選択
 		PreferenceScreen onlineHelp = (PreferenceScreen) findPreference(DEF.KEY_FILEHELP);
@@ -129,6 +131,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		mThumbCache.setSummary(getThumbCacheSummary(sharedPreferences));	// サムネイルキャッシュ保持数
 		mToolbarSeek.setSummary(getToolbarSeekSummary(sharedPreferences));		// ツールバー表示
 		mListThumbSeek.setSummary(getListThumbSeekSummary(sharedPreferences));		// リストサムネイルサイズ表示
+		//mMenuLongTap.setSummary(getMenuLongTapSummary(sharedPreferences));
 }
 
 	@Override
@@ -200,6 +203,10 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 			//
 			mFileRenMenu.setSummary(getFileRenMenuSummary(sharedPreferences));
 		}
+		//else if(key.equals(DEF.KEY_MENULONGTAP)){
+		//	// 長押し時間
+		//	mMenuLongTap.setSummary(getMenuLongTapSummary(sharedPreferences));
+		//}
 	}
 
 	// 設定の読込
@@ -444,6 +451,12 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		return flag;
 	}
 
+	//public static int getMenuLongTap(SharedPreferences sharedPreferences){
+	//	int num;
+	//	num = DEF.getInt(sharedPreferences, DEF.KEY_MENULONGTAP, DEF.DEFAULT_MENULONGTAP);
+	//	return num;
+	//}
+
 	// 設定を保存
 	public static void setThumbnail(SharedPreferences sharedPreferences, boolean value){
 		Editor ed = sharedPreferences.edit();
@@ -554,4 +567,11 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		Resources res = getResources();
 		return res.getString(ThumCacheName[val]);
 	}
+
+	//private String getMenuLongTapSummary(SharedPreferences sharedPreferences){
+	//	int val = getMenuLongTap(sharedPreferences);
+	//	Resources res = getResources();
+	//	String summ1 = res.getString(R.string.msecSumm1);
+	//	return	DEF.getMSecStr100(val, summ1);
+	//}
 }

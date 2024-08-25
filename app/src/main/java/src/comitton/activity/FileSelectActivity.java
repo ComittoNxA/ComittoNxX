@@ -17,6 +17,7 @@ import src.comitton.config.SetConfigActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
+import src.comitton.config.SetImageDetailActivity;
 import src.comitton.config.SetImageText;
 import src.comitton.config.SetRecorderActivity;
 import src.comitton.data.FileData;
@@ -82,6 +83,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -181,6 +183,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private boolean mResumeOpen;
 	private boolean mThumbnail;
 	private boolean mUseThumbnailTap;
+	private int mLongTapMenu = 800; // 長押し時間
+	private boolean mIsTouching; // タッチ中
 	// private ThumbnailLoad mThumbnailLoad;
 	private FileThumbnailLoader mThumbnailLoader;
 	private Handler mHandler;
@@ -623,6 +627,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			if (option.outHeight != -1 && option.outWidth != -1) {
 				// 縮小してファイル読込
 				option.inJustDecodeBounds = false;
+				option.inPreferredConfig = Bitmap.Config.RGB_565;
 				option.inSampleSize = DEF.calcThumbnailScale(option.outWidth, option.outHeight, thumW, thumH);
 				in = cr.openInputStream(uri);
 				bm = BitmapFactory.decodeStream(in, null, option);
@@ -746,6 +751,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		mSambaSave = SetRecorderActivity.getRecServer(mSharedPreferences);
 
 		mUseThumbnailTap = SetFileListActivity.getThumbnailTap(mSharedPreferences);	// サムネイルタップで長押しメニューの有効化フラグ
+		//mLongTapMenu = DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences));
 
 		if (mListRotaChg == false) {
 			// 手動で切り替えていない
@@ -1631,6 +1637,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		menu.add(0, DEF.MENU_NOTICE, Menu.NONE, R.string.noticeMenu).setIcon(android.R.drawable.ic_menu_info_details);
 		// バージョン情報
 		menu.add(0, DEF.MENU_ABOUT, Menu.NONE, res.getString(R.string.aboutMenu)).setIcon(android.R.drawable.ic_menu_info_details);
+		// ライセンス情報
+		//menu.add(0, DEF.MENU_LICENSE, Menu.NONE, res.getString(R.string.licenseMenu)).setIcon(android.R.drawable.ic_menu_info_details);
 		// 終了
 		//menu.add(0, DEF.MENU_QUIT, Menu.NONE, res.getString(R.string.exitMenu)).setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 		return ret;
@@ -1727,6 +1735,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			mInformation.showAbout();
 			// AboutDialog dlg = new AboutDialog(this);
 			// dlg.show();
+		}
+		else if (id == DEF.MENU_LICENSE) {
+			// ライセンス情報
 		}
 	}
 	/**
@@ -3588,7 +3599,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				}
 			}
 		}
-		return;
 	}
 
 	/**

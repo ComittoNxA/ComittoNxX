@@ -8,8 +8,8 @@ extern char	*gLoadBuffer;
 extern long	gLoadFileSize;
 extern int gMaxThreadNum;
 
-// avifの読み込み
-int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
+// 画像をBitmapに変換してバッファに入れる
+int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
 {
 
     int returnCode = 0;         // この関数のリターンコード
@@ -20,8 +20,10 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     avifRGBImage rgb;           // avifデコードで作成したいRGBの形式を指定する変数
     avifResult result;          // avif関数のリターンコード
 
+    LOGD("LoadImageAvif: Start. loadCommand=%d, page=%d, scale=%d", loadCommand, page, scale);
+
     if (gLoadBuffer == NULL) {
-        LOGD("LoadImageAvif : [error] gLoadBuffer is null");
+        LOGE("LoadImageAvif: gLoadBuffer is null");
         returnCode = -1;
         goto cleanup;
     }
@@ -30,7 +32,7 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     // avifのデコーダ
     decoder = avifDecoderCreate();
     if (decoder == NULL) {
-        LOGD("LoadImageAvif : [error] Memory allocation failure");
+        LOGE("LoadImageAvif: avifDecoderCreate() failed.");
         returnCode = -2;
         goto cleanup;
     }
@@ -39,7 +41,7 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     // バッファを取り込む
     result = avifDecoderSetIOMemory(decoder, (uint8_t *)gLoadBuffer, gLoadFileSize);
     if (result != AVIF_RESULT_OK) {
-        LOGD("LoadImageAvif : [error] Cannot set IO on avifDecoder");
+        LOGE("LoadImageAvif: avifDecoderSetIOMemory() failed. %s", avifResultToString(result));
         returnCode = -3;
         goto cleanup;
     }
@@ -48,7 +50,7 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     // 画像情報を取得する
     result = avifDecoderParse(decoder);
     if (result != AVIF_RESULT_OK) {
-        LOGD("LoadImageAvif : [error] Failed to decode image: %s", avifResultToString(result));
+        LOGE("LoadImageAvif: avifDecoderParse() failed. %s", avifResultToString(result));
         returnCode = -4;
         goto cleanup;
     }
@@ -64,7 +66,7 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     // avifは複数の画像を持つことができるので、最初の画像を取得する
     result = avifDecoderNextImage(decoder);
     if (result != AVIF_RESULT_OK) {
-        LOGD("LoadImageAvif : [error] Failed to decode image: %s", avifResultToString(result));
+        LOGE("LoadImageAvif: avifDecoderNextImage() failed. %s", avifResultToString(result));
         returnCode = -5;
         goto cleanup;
     }
@@ -89,7 +91,7 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     // メモリ開放は avifRGBImageFreePixels(&rgb) すること
     result = avifRGBImageAllocatePixels(&rgb);
     if (result != AVIF_RESULT_OK) {
-        LOGD("LoadImageAvif : [error] Pixels Memory allocation failure: %s", avifResultToString(result));
+        LOGE("LoadImageAvif: avifRGBImageAllocatePixels() failed. %s", avifResultToString(result));
         returnCode = -6;
         goto cleanup;
     }
@@ -98,7 +100,7 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     // YUVから指定したRGB形式に変換して結果をrgb.pixelsに入れる
     result = avifImageYUVToRGB(decoder->image, &rgb);
     if (result != AVIF_RESULT_OK) {
-        LOGD("LoadImageAvif : [error] Conversion from YUV failed: %s", avifResultToString(result));
+        LOGE("LoadImageAvif: avifImageYUVToRGB() failed. %s", avifResultToString(result));
         returnCode = -7;
         goto cleanup;
     }
@@ -106,19 +108,97 @@ int LoadImageAvif(IMAGEDATA *pData, int page, int scale)
     ///////////////////////////////////////////////
     // 自分で指定したのでエラーは出ない
     if (rgb.format != AVIF_RGB_FORMAT_RGB) {
-        LOGE("LoadImageAvif : [error] avif color_format error");
+        LOGE("LoadImageAvif: avif color_format error");
         returnCode = -8;
         goto cleanup;
     }
 
-    SetBuff(page, width, height, rgb.pixels, COLOR_FORMAT_RGB);
-
-    pData->UseFlag = 1;
-    pData->OrgWidth = width;
-    pData->OrgHeight = height;
+    if (loadCommand == SET_BUFFER) {
+        LOGD("LoadImageAvif: SetBuff() Start. page=%d, width=%d, height=%d", page, width, height);
+        returnCode = SetBuff(page, width, height, rgb.pixels, COLOR_FORMAT_RGB);
+        if (returnCode < 0) {
+            LOGE("LoadImageAvif: SetBuff() failed. return=%d", returnCode);
+            goto cleanup;
+        }
+        pData->UseFlag = 1;
+        pData->OrgWidth = width;
+        pData->OrgHeight = height;
+    }
+    else if (loadCommand == SET_BITMAP) {
+        LOGD("LoadImageAvif: SetBitmap() Start. page=%d, width=%d, height=%d", page, width, height);
+        returnCode = SetBitmap(page, width, height, rgb.pixels, COLOR_FORMAT_RGB, canvas);
+        if (returnCode < 0) {
+            LOGE("LoadImageAvif: SetBitmap() failed. return=%d", returnCode);
+            goto cleanup;
+        }
+    }
 
 cleanup:
     avifRGBImageFreePixels(&rgb); //  avifRGBImageAllocatePixels() で確保したメモリを開放する
     avifDecoderDestroy(decoder);
+    LOGD("LoadImageAvif: End. return=%d", returnCode);
+    return returnCode;
+}
+
+// 画像の幅と高さを返す
+int ImageGetSizeAvif(int type, jint *width, jint *height)
+{
+
+    int returnCode = 0;         // この関数のリターンコード
+
+    avifDecoder *decoder;       // avifデコーダーへのポインタ
+    avifResult result;          // avif関数のリターンコード
+
+    LOGD("ImageGetSizeAvif: Start.");
+
+    if (gLoadBuffer == NULL) {
+        LOGD("ImageGetSizeAvif: [error] gLoadBuffer is null");
+        returnCode = -1;
+        goto cleanup;
+    }
+    if (width == NULL) {
+        LOGD("ImageGetSizeAvif: [error] width is null");
+        returnCode = -1;
+        goto cleanup;
+    }
+    if (height == NULL) {
+        LOGD("ImageGetSizeAvif: [error] height is null");
+        returnCode = -1;
+        goto cleanup;
+    }
+
+    ///////////////////////////////////////////////
+    // avifのデコーダ
+    decoder = avifDecoderCreate();
+    if (decoder == NULL) {
+        LOGD("ImageGetSizeAvif: [error] Memory allocation failure");
+        returnCode = -2;
+        goto cleanup;
+    }
+
+    ///////////////////////////////////////////////
+    // バッファを取り込む
+    result = avifDecoderSetIOMemory(decoder, (uint8_t *)gLoadBuffer, gLoadFileSize);
+    if (result != AVIF_RESULT_OK) {
+        LOGD("ImageGetSizeAvif: [error] Cannot set IO on avifDecoder");
+        returnCode = -3;
+        goto cleanup;
+    }
+
+    ///////////////////////////////////////////////
+    // 画像情報を取得する
+    result = avifDecoderParse(decoder);
+    if (result != AVIF_RESULT_OK) {
+        LOGD("ImageGetSizeAvif: [error] Failed to decode image: %s", avifResultToString(result));
+        returnCode = -4;
+        goto cleanup;
+    }
+
+    *width  = decoder->image->width;
+    *height = decoder->image->height;
+
+cleanup:
+    avifDecoderDestroy(decoder);
+    LOGD("LoadImageAvif: End. return=%d, width=%d, height=%d", returnCode, *width, *height);
     return returnCode;
 }

@@ -30,11 +30,11 @@ import android.util.Log;
 public class FileListArea extends ListArea implements Handler.Callback {
 	private final int ICON_ID[] =
 	{
-		R.raw.thumb_parent, R.raw.thumb_text
+		R.drawable.thumb_parent, R.drawable.thumb_text
 	};
 	private final int FILEMARK_ID[] =
 	{
-		R.raw.thumb_dir, R.raw.thumb_pdf, R.raw.thumb_zip, R.raw.thumb_rar
+		R.drawable.thumb_dir, R.drawable.thumb_pdf, R.drawable.thumb_zip, R.drawable.thumb_rar
 	};
 
 	public static final short LISTMODE_LIST = 0;

@@ -15,12 +15,12 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 
 public class SetImageDetailActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-	private WAdjustSeekbar   mWAdjust;
+	private WAdjustSeekbar mWAdjust;
 	private WScalingSeekbar mWScaling;
 	private ScalingSeekbar mScaling;
-	private LongTapSeekbar   mLongTap;
-	private ScrlRngWSeekbar   mScrlRngW;
-	private ScrlRngHSeekbar   mScrlRngH;
+	private LongTapSeekbar mLongTap;
+	private ScrlRngWSeekbar mScrlRngW;
+	private ScrlRngHSeekbar mScrlRngH;
 	private AutoPlaySeekbar mAutoPlay;
 	private ListPreference mMaxThread;
 	private ListPreference mLoupeSize;
@@ -213,7 +213,7 @@ public class SetImageDetailActivity extends PreferenceActivity implements OnShar
 		Resources res = getResources();
 		String summ1 = res.getString(R.string.msecSumm1);
 
-		return	DEF.getMSecStr(val, summ1);
+		return	DEF.getMSecStr200(val, summ1);
 	}
 
 	private String getWAdjustSummary(SharedPreferences sharedPreferences){

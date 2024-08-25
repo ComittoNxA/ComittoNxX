@@ -9,7 +9,7 @@ extern long gLoadFileSize;
 
 //webpの読み込み
 //参考：https://daeudaeu.com/libwebp/
-int LoadImageWebp(IMAGEDATA* pData, int page, int scale)
+int LoadImageWebp(int loadCommand, IMAGEDATA* pData, int page, int scale, WORD *canvas)
 {
     int ret = 0;
     uint8_t* decodedData; //入力デコードデータ

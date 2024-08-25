@@ -119,6 +119,7 @@ public class DEF {
 	public static final int MENU_CSHADOW = Menu.FIRST + 102;
 	public static final int MENU_SETTHUMB = Menu.FIRST + 103;
 	public static final int MENU_SETTHUMBCROPPED = Menu.FIRST + 104;
+	public static final int MENU_LICENSE = Menu.FIRST + 105;
 
 	public static final int REQUEST_SETTING = 101;
 	public static final int REQUEST_FILE = 102;
@@ -128,6 +129,7 @@ public class DEF {
 	public static final int REQUEST_TEXT = 106;
 	public static final int REQUEST_EXPAND = 107;
 	public static final int REQUEST_RECORD = 108;
+	public static final int REQUEST_LICENSE = 109;
 	public static final int REQUEST_CROP = 1000;
 
 	public static final int VIEWPT_RIGHTTOP = 0;
@@ -347,6 +349,7 @@ public class DEF {
 	public static final String KEY_TOPSINGLE = "TopSingle";
 	public static final String KEY_MAXTHREAD = "MaxThread";
 	public static final String KEY_THUMBNAILTAP = "ThumbnailTap";
+	public static final String KEY_MENULONGTAP = "MenuLongTap";
 	public static final String KEY_LOUPESIZE = "LoupeSize";
 	public static final String KEY_SCRLNEXT = "ScrollNext";
 	public static final String KEY_VIEWNEXT = "ViewNextPage";
@@ -408,6 +411,7 @@ public class DEF {
 	public static final int DEFAULT_TAPRANGE = 6; // スクロール開始の感度
 	public static final int DEFAULT_MARGIN = 0;
 	public static final int DEFAULT_LONGTAP = 4;
+	public static final int DEFAULT_MENULONGTAP = 4;
 	public static final int DEFAULT_WADJUST = 25; // -25～+25(1%単位)
 	public static final int DEFAULT_WSCALING = 25; // -25～+25(1%単位)
 	public static final int DEFAULT_SCALING = 75; // -75～+125(1%単位)
@@ -432,7 +436,7 @@ public class DEF {
 	public static final int DEFAULT_AUTOPLAY = 2; // 1.5sec(0.5 * (5 + 1))
 	public static final boolean DEF_SAVEPAGE = true; // ページ移動時にしおりを保存
 	public static final int DEFAULT_TAPPATTERN = 0; // タッチ位置のパターン:左右分割
-	public static final int DEFAULT_TAPRATE = 0; // 10% : 90%
+	public static final int DEFAULT_TAPRATE = 4; // 50% : 50%
 	public static final boolean DEFAULT_CHGPAGE = true; // タップ操作の入替え:YES(縦書き、漫画)
 	public static final boolean DEFAULT_PREVREV = true; // 前ページに戻った時に逆から表示
 
@@ -461,6 +465,8 @@ public class DEF {
 	public static final int MAX_TAPRANGE = 50; // スクロール開始の感度
 	public static final int MAX_MARGIN = 20;
 	public static final int MAX_LONGTAP = 16;
+	public static final int MIN_MENULONGTAP = 6;
+	public static final int MAX_MENULONGTAP = 40;
 	public static final int MAX_WADJUST = DEFAULT_WADJUST * 2;
 	public static final int MAX_WSCALING = DEFAULT_WSCALING * 2;
 	public static final int MAX_SCALING = 225;
@@ -874,7 +880,12 @@ public class DEF {
 	}
 
 	// ミリ秒の計算
-	static public int calcMSec(int val) {
+	static public int calcMSec100(int val) {
+		return val * 100;
+	}
+
+	// ミリ秒の計算
+	static public int calcMSec200(int val) {
 		return val * 200;
 	}
 
@@ -1014,8 +1025,14 @@ public class DEF {
 	}
 
 	// サマリ文字列作成(ミリ秒)
-	static public String getMSecStr(int val, String summ1) {
-		int msec = calcMSec(val);
+	static public String getMSecStr100(int val, String summ1) {
+		int msec = calcMSec100(val);
+		return (msec / 1000) + "." + (msec / 100 % 10) + " " + summ1;
+	}
+
+	// サマリ文字列作成(ミリ秒)
+	static public String getMSecStr200(int val, String summ1) {
+		int msec = calcMSec200(val);
 		return (msec / 1000) + "." + (msec / 100 % 10) + " " + summ1;
 	}
 

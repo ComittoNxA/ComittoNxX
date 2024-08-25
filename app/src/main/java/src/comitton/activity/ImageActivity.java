@@ -1674,11 +1674,13 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			// サイズのみ取得
 			BitmapFactory.Options option = new BitmapFactory.Options();
 			option.inJustDecodeBounds = true;
+			option.inPreferredConfig = Bitmap.Config.RGB_565;
 			BitmapFactory.decodeStream(in, null, option);
 			in.close();
 			if (option.outHeight != -1 && option.outWidth != -1) {
 				// 縮小してファイル読込
 				option.inJustDecodeBounds = false;
+				option.inPreferredConfig = Bitmap.Config.RGB_565;
 				option.inSampleSize = DEF.calcThumbnailScale(option.outWidth, option.outHeight, thumW, thumH);
 				in = cr.openInputStream(uri);
 				bm = BitmapFactory.decodeStream(in, null, option);
@@ -1710,6 +1712,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		try {
 			Object lock = mImageMgr.getLockObject();
 			synchronized (lock) {
+				Log.d("ImageActivity", "setThumb: Call loadThumbnailFromStream(" + page + ", " + thumW + ", " + thumH + ") start.");
 				// 読み込み処理とは排他する
 				bm = mImageMgr.loadThumbnailFromStream(page, thumW, thumH);
 			}
@@ -3377,7 +3380,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 						else if (DEF.WITH_AVIF && ext.equals(".avif")) {
 							mime = "image/avif";
 						}
-						else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic"))) {
+						else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 							mime = "image/heif";
 						}
 						else if (DEF.WITH_JXL && ext.equals(".jxl")) {
@@ -3599,7 +3602,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			mClickArea = DEF.calcClickAreaPix(SetImageTextDetailActivity.getClickArea(sharedPreferences), mSDensity);
 			mPageRange = DEF.calcPageRangePix(SetImageTextDetailActivity.getPageRange(sharedPreferences), mSDensity);
 			mMoveRange = DEF.calcTapRangePix(SetImageTextDetailActivity.getTapRange(sharedPreferences), mSDensity);
-			mLongTapZoom = DEF.calcMSec(SetImageDetailActivity.getLongTap(sharedPreferences));
+			mLongTapZoom = DEF.calcMSec200(SetImageDetailActivity.getLongTap(sharedPreferences));
 			mWAdjust = DEF.calcWAdjust(SetImageDetailActivity.getWAdjust(sharedPreferences));
 			mWidthScale = DEF.calcWScaling(SetImageDetailActivity.getWScaling(sharedPreferences));
 			mImgScale = DEF.calcScaling(SetImageDetailActivity.getScaling(sharedPreferences));

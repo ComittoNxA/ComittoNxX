@@ -9,7 +9,7 @@ extern char			*gLoadBuffer;
 extern long			gLoadFileSize;
 extern int          gCancel;
 
-int LoadImageJpeg(IMAGEDATA *pData, int page, int scale)
+int LoadImageJpeg(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
 {
 
     uint32_t width;             // 画像の幅

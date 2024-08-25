@@ -233,7 +233,7 @@ public class RecordListArea extends ListArea {
 	public void setDrawInfo(int titlesize, int infosize, int margin) {
 		mTitleSize = titlesize;
 		mInfoSize = infosize;
-		mBitmapSize = (int)(mTitleSize * 1.6);
+		mBitmapSize = (int)(mTitleSize * 1.45);
 
 		mItemMargin = (short) margin;
 

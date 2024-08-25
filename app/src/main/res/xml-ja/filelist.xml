@@ -165,6 +165,15 @@
             android:key="ThumbnailTap"
             android:summary="サムネイルON時にリスト表示ではサムネイル、タイル表示ではファイル名をタップすると長押しメニューを出せる"
             android:title="サムネイルONで長押しメニューを有効" />
+<!--
+        <src.comitton.config.MenuLongTapSeekbar
+            android:dialogMessage="長押しの時間を選択"
+            android:dialogTitle="長押し操作の時間"
+            android:key="MenuLongTap"
+            android:negativeButtonText="@null"
+            android:summary="dummy"
+            android:title="長押し系操作の時間" />
+-->
     </PreferenceCategory>
     <PreferenceCategory android:title="オンラインヘルプ" >
         <PreferenceScreen

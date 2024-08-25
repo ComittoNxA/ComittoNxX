@@ -21,7 +21,7 @@ public class SelectorArea {
 
 	private final int ICON_ID[] =
 	{
-		R.raw.directory, R.raw.toolbar_server, R.raw.list_favorite, R.raw.list_history, R.raw.menu, R.raw.list_file,
+		R.drawable.directory, R.drawable.toolbar_server, R.drawable.list_favorite, R.drawable.list_history, R.drawable.menu, R.drawable.list_file,
 	};
 	private final int TEXT_ID[] =
 	{

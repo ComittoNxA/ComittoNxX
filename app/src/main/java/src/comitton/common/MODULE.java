@@ -15,12 +15,13 @@ public class MODULE {
 			+ "Using Library\n"
 			+ "  jcifs (codelibs) 2.1.38 (LGPL v2.1)\n"
 			+ "  unrar 6.20.1\n"			// (UnRAR licence)
-			+ (DEF.WITH_JPEG ? "  libjpg-turbo 2.1.91\n" : "") 		//  (BSD-3-Clause, IJG)
-			+ (DEF.WITH_PNG ? "  libpng 1.6.43\n" : "")				// (libpng License)
-			+ (DEF.WITH_WEBP ? "  libwebp 1.4.0\n" : "")			// (BSD-3-Clause)
 			+ (DEF.WITH_AVIF ? "  dav1d 1.4.3\n" : "")				// (BSD-2-Clause)
 			+ (DEF.WITH_AVIF ? "  libavif 1.1.1\n" : "")			// (LicenseRef-libavif)
-			+ "  AndroidSVG 1.4 (ASL v2.0)\n";
+			//+ (DEF.WITH_JPEG ? "  libjpg-turbo 2.1.91\n" : "") 		//  (BSD-3-Clause, IJG)
+			//+ (DEF.WITH_PNG ? "  libpng 1.6.43\n" : "")				// (libpng License)
+			//+ (DEF.WITH_WEBP ? "  libwebp 1.4.0\n" : "")			// (BSD-3-Clause)
+			//+ "  AndroidSVG 1.4 (ASL v2.0)\n"
+			;
 
 	public static boolean isFree() {
 		// false:有料版、true:無料版

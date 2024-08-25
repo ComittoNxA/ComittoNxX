@@ -98,12 +98,13 @@ public class DEF {
 	public static final int MENU_SHARPEN = Menu.FIRST + 30;
 	public static final int MENU_INVERT = Menu.FIRST + 31;
 	public static final int MENU_MGNCUT = Menu.FIRST + 32;
-	public static final int MENU_GRAY = Menu.FIRST + 33;
-	public static final int MENU_NOTICE = Menu.FIRST + 34;
-	public static final int MENU_ADDBOOKMARK = Menu.FIRST + 35;
-	public static final int MENU_SELBOOKMARK = Menu.FIRST + 36;
-	public static final int MENU_SORT = Menu.FIRST + 37;
-	public static final int MENU_ADDDIR = Menu.FIRST + 38;
+	public static final int MENU_MGNCUTCOLOR = Menu.FIRST + 33;
+	public static final int MENU_GRAY = Menu.FIRST + 34;
+	public static final int MENU_NOTICE = Menu.FIRST + 35;
+	public static final int MENU_ADDBOOKMARK = Menu.FIRST + 36;
+	public static final int MENU_SELBOOKMARK = Menu.FIRST + 37;
+	public static final int MENU_SORT = Menu.FIRST + 38;
+	public static final int MENU_ADDDIR = Menu.FIRST + 39;
 	public static final int MENU_LISTMODE = Menu.FIRST + 40;
 	public static final int MENU_AUTOPLAY = Menu.FIRST + 41;
 	public static final int MENU_TOP_SETTING = Menu.FIRST + 42;
@@ -323,6 +324,7 @@ public class DEF {
 	public static final String KEY_ROTATEBTN = "RotateBtn";
 	public static final String KEY_ACCESSLAMP = "AccessLamp";
 	public static final String KEY_MARGINCUT = "MarginCut";
+	public static final String KEY_MARGINCUTCOLOR = "MarginCutColor";
 	public static final String KEY_TAPEXPAND = "TapExpand";
 	public static final String KEY_TAPPATTERN = "TapPattern";
 	public static final String KEY_PAGENUMBER = "PageNumber";

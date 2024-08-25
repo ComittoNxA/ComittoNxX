@@ -137,7 +137,7 @@ int DrawScaleBitmap(int, int, int, int, int, int, int, int, int, int, void *, in
 int DrawBitmap(int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
 // int DrawBitmapReg90(int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
 
-int CreateScale(int, int, int, int, int, int, int, int, int, int, int, int, int, int, jint*);
+int CreateScale(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, jint*);
 
 int SetLinesPtr(int, int, int, int, int);
 int NextSclBuff(int, int, int, int*, int*, int);
@@ -146,8 +146,8 @@ int CopySclBuffMngToBuffMng(void);
 int RefreshSclLinesPtr(int, int, int, int, int);
 
 int ImageRotate(int, int, int, int, int, int);
-int GetMarginSize(int, int, int, int, int, int, int*, int*, int*, int*);
-int ImageMarginCut(int, int, int, int, int, int, int, int, int, int, int*, int*);
+int GetMarginSize(int, int, int, int, int, int, int, int*, int*, int*, int*);
+int ImageMarginCut(int, int, int, int, int, int, int, int, int, int, int, int*, int*);
 int ImageHalf(int, int, int, int, int);
 int ImageSharpen(int, int, int, int, int);
 int ImageBlur(int, int, int, int, int, int);

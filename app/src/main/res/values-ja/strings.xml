@@ -124,6 +124,7 @@
     <string name="gammaMenu">ガンマ補正(%)</string>
     <string name="bklightMenu">バックライト(%)</string>
     <string name="mgnCutMenu">余白削除</string>
+    <string name="mgnCutColorMenu">余白削除の色</string>
     <string name="imgRotaMenu">画像の回転</string>
     <string name="imgConfMenu">画像表示設定</string>
     <string name="txtConfMenu">テキスト表示設定</string>
@@ -347,8 +348,11 @@
     <string name="mgncut01">弱</string>
     <string name="mgncut02">中</string>
     <string name="mgncut03">強</string>
-    <string name="mgncut04">最強</string>
-    <string name="mgncut05">縦横比無視</string>
+    <string name="mgncut04">特上</string>
+    <string name="mgncut05">最強</string>
+    <string name="mgncut06">縦横比無視</string>
+    <string name="mgncutcolor00">白と黒</string>
+    <string name="mgncutcolor01">全ての色</string>
     <string name="effect00">なし</string>
     <string name="effect01">フリップ</string>
     <string name="effect02">フェードイン</string>

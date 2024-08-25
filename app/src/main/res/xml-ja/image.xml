@@ -33,6 +33,14 @@
             android:key="MarginCut"
             android:summary="dummy"
             android:title="余白の削除" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="余白の削除対象の色"
+            android:entries="@array/mgncut_color_name_list"
+            android:entryValues="@array/mgncut_color_value_list"
+            android:key="MarginCutColor"
+            android:summary="dummy"
+            android:title="余白の削除対象の色" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="Sharpen"

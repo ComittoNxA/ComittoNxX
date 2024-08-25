@@ -72,6 +72,43 @@ public class FileData {
 		return exttype;
 	}
 
+	public static short getExtType(String ext) {
+		if (ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub")) {
+			return EXTTYPE_ZIP;
+		}
+		if (ext.equals(".rar") || ext.equals(".cbr")) {
+			return EXTTYPE_RAR;
+		}
+		if (ext.equals(".pdf")) {
+			return EXTTYPE_PDF;
+		}
+		if (ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html")) {
+			return EXTTYPE_TXT;
+		}
+		if(DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))){
+			return EXTTYPE_JPG;
+		}
+		if(DEF.WITH_PNG && ext.equals(".png")){
+			return EXTTYPE_PNG;
+		}
+		if(DEF.WITH_GIF && ext.equals(".gif")){
+			return EXTTYPE_GIF;
+		}
+		if(DEF.WITH_WEBP && ext.equals(".webp")){
+			return EXTTYPE_WEBP;
+		}
+		if(DEF.WITH_AVIF && ext.equals(".avif")){
+			return EXTTYPE_AVIF;
+		}
+		if(DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+			return EXTTYPE_HEIF;
+		}
+		if(DEF.WITH_JXL && ext.equals(".jxl")){
+			return EXTTYPE_JXL;
+		}
+		return EXTTYPE_NONE;
+	}
+
 	public void setExtType(short exttype) {
 		this.exttype = exttype;
 	}
@@ -180,13 +217,16 @@ public class FileData {
 		return false;
 	}
 	public static boolean isArchive(String ext) {
-		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr") || ext.equals(".epub");
+		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr") || ext.equals(".epub") /*|| ext.equals(".pdf")*/;
 	}
 	public static boolean isZip(String ext) {
 		return ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub");
 	}
 	public static boolean isRar(String ext) {
 		return ext.equals(".rar") || ext.equals(".cbr");
+	}
+	public static boolean isPdf(String ext) {
+		return ext.equals(".pdf");
 	}
 	public static boolean isText(String ext) {
 		return ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html");

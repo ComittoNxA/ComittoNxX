@@ -189,9 +189,25 @@
 				android:layout_marginRight="10sp"
 				android:gravity="left"
 				android:text="@string/mgnCutMenu" />
-	
+
 			<Button
 				android:id="@+id/btn_mgncut"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+			<TextView
+				android:id="@+id/label_mgncutcolor"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:gravity="left"
+				android:text="@string/mgnCutColorMenu" />
+
+			<Button
+				android:id="@+id/btn_mgncutcolor"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"

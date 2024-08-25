@@ -124,6 +124,7 @@
     <string name="gammaMenu">Gamma compensation(%)</string>
     <string name="bklightMenu">Backlight(%)</string>
     <string name="mgnCutMenu">Remove white margin</string>
+    <string name="mgnCutColorMenu">Color to remove margin</string>
     <string name="imgRotaMenu">Image Rotate</string>
     <string name="imgConfMenu">Image Config</string>
     <string name="txtConfMenu">Text Config</string>
@@ -347,8 +348,11 @@
     <string name="mgncut01">Weak</string>
     <string name="mgncut02">Medium</string>
     <string name="mgncut03">Strong</string>
-    <string name="mgncut04">Overkill</string>
-    <string name="mgncut05">Ignore Aspect Ratio</string>
+    <string name="mgncut04">Special</string>
+    <string name="mgncut05">Overkill</string>
+    <string name="mgncut06">Ignore Aspect Ratio</string>
+    <string name="mgncutcolor00">Black and White</string>
+    <string name="mgncutcolor01">All colors</string>
     <string name="effect00">None</string>
     <string name="effect01">Flip</string>
     <string name="effect02">Fade In</string>

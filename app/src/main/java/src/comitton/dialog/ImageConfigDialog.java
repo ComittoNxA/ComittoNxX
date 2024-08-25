@@ -34,6 +34,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private final int SELLIST_VIEW_MODE  = 1;
 	private final int SELLIST_SCALE_MODE = 2;
 	private final int SELLIST_MARGIN_CUT = 3;
+	private final int SELLIST_MARGIN_CUTCOLOR = 4;
 
 	private final int SCALENAME_ORDER[] = { 0, 1, 6, 2, 3, 7, 4, 5 };
 
@@ -54,12 +55,14 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private int mDispMode;
 	private int mScaleMode;
 	private int mMgnCut;
+	private int mMgnCutColor;
 	private boolean mIsSave;
 
 	private int mAlgoModeTemp;
 	private int mDispModeTemp;
 	private int mScaleModeTemp;
 	private int mMgnCutTemp;
+	private int mMgnCutColorTemp;
 
 	private Button mBtnRevert;
 	private Button mBtnApply;
@@ -86,11 +89,13 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private Button mBtnDispMode;
 	private Button mBtnScaleMode;
 	private Button mBtnMgncut;
+	private Button mBtnMgncutColor;
 
 	private String mAlgoModeTitle;
 	private String mDispModeTitle;
 	private String mScaleModeTitle;
 	private String mMgnCutTitle;
+	private String mMgnCutColorTitle;
 
 	private String mBrightStr;
 	private String mGammaStr;
@@ -103,6 +108,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private String[] mDispModeItems;
 	private String[] mScaleModeItems;
 	private String[] mMgnCutItems;
+	private String[] mMgnCutColorItems;
 
 	private int mSelectMode;
 
@@ -166,9 +172,17 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		for (int i = 0; i < nItem; i++) {
 			mMgnCutItems[i] = res.getString(SetImageActivity.MgnCutName[i]);
 		}
+
+		// 余白削除の色
+		mMgnCutColorTitle = res.getString(R.string.mgnCutColorMenu);
+		nItem = SetImageActivity.MgnCutColorName.length;
+		mMgnCutColorItems = new String[nItem];
+		for (int i = 0; i < nItem; i++) {
+			mMgnCutColorItems[i] = res.getString(SetImageActivity.MgnCutColorName[i]);
+		}
 	}
 
-	public void setConfig(boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, boolean issave) {
+	public void setConfig(boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
 		mSharpen = sharpen;
 		mGray = gray;
 		mInvert = invert;
@@ -181,6 +195,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		mDispModeTemp  = mDispMode  = dispmode;
 		mScaleModeTemp = mScaleMode = scalemode;
 		mMgnCutTemp    = mMgnCut    = mgncut;
+		mMgnCutColorTemp    = mMgnCutColor    = mgncutcolor;
 
 		mIsSave = issave;
 	}
@@ -236,6 +251,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 //		mSpnDispMode = (Spinner) this.findViewById(R.id.spin_spread);
 //		mSpnScaleMode = (Spinner) this.findViewById(R.id.spin_scale);
 //		mSpnMgncut = (Spinner) this.findViewById(R.id.spin_mgncut);
+//		mSpnMgncutColor = (Spinner) this.findViewById(R.id.spin_mgncut);
 
 //		mSpnAlgoMode.setSelection(mAlgoMode);
 //		mSpnDispMode.setSelection(mDispMode);
@@ -246,16 +262,19 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		mBtnDispMode = (Button) this.findViewById(R.id.btn_spread);
 		mBtnScaleMode = (Button) this.findViewById(R.id.btn_scale);
 		mBtnMgncut = (Button) this.findViewById(R.id.btn_mgncut);
+		mBtnMgncutColor = (Button) this.findViewById(R.id.btn_mgncutcolor);
 
 		mBtnAlgoMode.setText(mAlgoModeItems[mAlgoMode]);
 		mBtnDispMode.setText(mDispModeItems[mDispMode]);
 		mBtnScaleMode.setText(mScaleModeItems[mScaleMode]);
 		mBtnMgncut.setText(mMgnCutItems[mMgnCut]);
+		mBtnMgncutColor.setText(mMgnCutColorItems[mMgnCutColor]);
 
 		mBtnAlgoMode.setOnClickListener(this);
 		mBtnDispMode.setOnClickListener(this);
 		mBtnScaleMode.setOnClickListener(this);
 		mBtnMgncut.setOnClickListener(this);
+		mBtnMgncutColor.setOnClickListener(this);
 
 		mBtnOK  = (Button) this.findViewById(R.id.btn_ok);
 		mBtnApply   = (Button) this.findViewById(R.id.btn_apply);
@@ -307,7 +326,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	public interface ImageConfigListenerInterface extends EventListener {
 
 	    // メニュー選択された
-	    public void onButtonSelect(int select, boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, boolean issave);
+	    public void onButtonSelect(int select, boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave);
 	    public void onClose();
 	}
 
@@ -349,6 +368,12 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 				items = mMgnCutItems;
 				selIndex = mMgnCutTemp;
 				break;
+			case SELLIST_MARGIN_CUTCOLOR:
+				// 余白削除
+				title = mMgnCutColorTitle;
+				items = mMgnCutColorItems;
+				selIndex = mMgnCutColorTemp;
+				break;
 			default:
 				return;
 		}
@@ -376,6 +401,11 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 						// 余白削除
 						mMgnCutTemp = index;
 						mBtnMgncut.setText(mMgnCutItems[index]);
+						break;
+					case SELLIST_MARGIN_CUTCOLOR:
+						// 余白削除
+						mMgnCutColorTemp = index;
+						mBtnMgncutColor.setText(mMgnCutColorItems[index]);
 						break;
 				}
 			}
@@ -412,6 +442,11 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 			showSelectList(SELLIST_MARGIN_CUT);
 			return;
 		}
+		if (mBtnMgncutColor == v) {
+			// 画像補間法
+			showSelectList(SELLIST_MARGIN_CUTCOLOR);
+			return;
+		}
 
 		int select = CLICK_REVERT;
 
@@ -425,7 +460,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 
 		if (select == CLICK_REVERT) {
 			// 戻すは元の値を通知
-			mListener.onButtonSelect(select, mSharpen, mGray, mInvert, mMoire, mTopSingle, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, mScaleMode, mMgnCut, mIsSave);
+			mListener.onButtonSelect(select, mSharpen, mGray, mInvert, mMoire, mTopSingle, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, mScaleMode, mMgnCut, mMgnCutColor, mIsSave);
 		}
 		else {
 			// OK/適用は設定された値を通知
@@ -442,9 +477,10 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 //			int dispmode = mSpnDispMode.getSelectedItemPosition();
 //			int scalemode = mSpnScaleMode.getSelectedItemPosition();
 //			int mgncut = mSpnMgncut.getSelectedItemPosition();
+//			int mgncutcolor = mSpnMgncutColor.getSelectedItemPosition();
 
 
-			mListener.onButtonSelect(select, sharpen, gray, invert, moire, topsingle, bright, gamma, bklight, mAlgoModeTemp, mDispModeTemp, mScaleModeTemp, mMgnCutTemp, issave);
+			mListener.onButtonSelect(select, sharpen, gray, invert, moire, topsingle, bright, gamma, bklight, mAlgoModeTemp, mDispModeTemp, mScaleModeTemp, mMgnCutTemp, mMgnCutColorTemp, issave);
 		}
 
 		if (select != CLICK_APPLY) {

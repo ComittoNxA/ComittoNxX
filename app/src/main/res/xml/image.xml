@@ -27,12 +27,20 @@
             android:title="Image Interpolation" />
         <ListPreference
             android:defaultValue="0"
-            android:dialogTitle="Remove the white margin"
+            android:dialogTitle="Remove the margin"
             android:entries="@array/mgncut_name_list"
             android:entryValues="@array/mgncut_value_list"
             android:key="MarginCut"
             android:summary="dummy"
-            android:title="Strength to remove the white margin." />
+            android:title="Strength to remove the margin." />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Color to remove margin"
+            android:entries="@array/mgncut_color_name_list"
+            android:entryValues="@array/mgncut_color_value_list"
+            android:key="MarginCutColor"
+            android:summary="dummy"
+            android:title="Color to remove margin" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="Sharpen"

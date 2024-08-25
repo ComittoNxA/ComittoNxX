@@ -26,7 +26,7 @@ extern int			gCancel;
 // RetSize 返却用ポインタ
 // RetSize[0] 完成サイズ(幅)
 // RetSize[1] 完成サイズ(高さ)
-int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int algorithm, int Rotate, int Margin, int Bright, int Gamma, int Param, jint *RetSize)
+int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int algorithm, int Rotate, int Margin, int MarginColor, int Bright, int Gamma, int Param, jint *RetSize)
 {
 	int Sharpen  = (Param & PARAM_SHARPEN) != 0 ? 1 : 0;
 	int Invert   = (Param & PARAM_INVERT) != 0 ? 1 : 0;;
@@ -57,7 +57,7 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 		}
 
 		// 余白カット
-		ret = ImageMarginCut(Page, Half, Index, SclWidth, SclHeight, left, right, top, bottom, Margin, &OrgWidth, &OrgHeight);
+		ret = ImageMarginCut(Page, Half, Index, SclWidth, SclHeight, left, right, top, bottom, Margin, MarginColor, &OrgWidth, &OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}

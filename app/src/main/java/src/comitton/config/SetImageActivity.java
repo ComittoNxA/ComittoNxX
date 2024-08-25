@@ -13,6 +13,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 
 public class SetImageActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private ListPreference mViewRota;
@@ -25,6 +26,7 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 	private ListPreference mZoomType;
 	private ListPreference mScrlWay;
 	private ListPreference mMgnCut;
+	private ListPreference mMgnCutColor;
 	private ListPreference mEffect;
 	private ListPreference mViewPt;
 	private ListPreference mVolKey;
@@ -99,8 +101,12 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		, R.string.mgncut01		// 弱
 		, R.string.mgncut02		// 中
 		, R.string.mgncut03		// 強
-		, R.string.mgncut04		// 最強
-		, R.string.mgncut05 };	// 縦横比無視
+		, R.string.mgncut04		// 特上
+		, R.string.mgncut05		// 最強
+		, R.string.mgncut06 };	// 縦横比無視
+	public static final int MgnCutColorName[] =
+			{ R.string.mgncutcolor00		// 白と黒
+			, R.string.mgncutcolor01 };		// 全ての色
 	public static final int EffectName[] =
 		{ R.string.effect00		// なし
 		, R.string.effect01		// フリップ
@@ -147,6 +153,7 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		mScrlWay    = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_SCRLWAY);
 
 		mMgnCut     = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_MARGINCUT);
+		mMgnCutColor = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_MARGINCUTCOLOR);
 		mEffect     = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_EFFECTLIST);
 
 		mTapPattern = (OperationPreference)getPreferenceScreen().findPreference(DEF.KEY_TAPPATTERN);
@@ -183,6 +190,7 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 	@Override
 	protected void onResume() {
 		super.onResume();
+
 		SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
@@ -200,6 +208,7 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		mScrlWay.setSummary(getScrlWaySummary(sharedPreferences));		// スクロール方向
 
 		mMgnCut.setSummary(getMgnCutSummary(sharedPreferences));		// 余白削除
+		mMgnCutColor.setSummary(getMgnCutColorSummary(sharedPreferences));		// 余白削除の色
 		mEffect.setSummary(getEffectSummary(sharedPreferences));		// エフェクト
 
 		mTapPattern.setSummary(SetImageText.getTapPatternSummary(mResources, sharedPreferences));	// 操作パターン
@@ -218,7 +227,6 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 	protected void onPause() {
 		super.onPause();
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
-
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -257,6 +265,10 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		else if(key.equals(DEF.KEY_MARGINCUT)){
 			//
 			mMgnCut.setSummary(getMgnCutSummary(sharedPreferences));
+		}
+		else if(key.equals(DEF.KEY_MARGINCUTCOLOR)){
+			//
+			mMgnCutColor.setSummary(getMgnCutColorSummary(sharedPreferences));
 		}
 		else if(key.equals(DEF.KEY_EFFECTLIST)){
 			//
@@ -368,6 +380,14 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 	public static int getMgnCut(SharedPreferences sharedPreferences){
 		int val = DEF.getInt(sharedPreferences, DEF.KEY_MARGINCUT, "0");
 		if (val < 0 || val >= MgnCutName.length){
+			val = 0;
+		}
+		return val;
+	}
+
+	public static int getMgnCutColor(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences, DEF.KEY_MARGINCUTCOLOR, "0");
+		if (val < 0 || val >= MgnCutColorName.length){
 			val = 0;
 		}
 		return val;
@@ -601,6 +621,13 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		int val = getMgnCut(sharedPreferences);
 		Resources res = getResources();
 		return res.getString(MgnCutName[val]);
+	}
+
+	private String getMgnCutColorSummary(SharedPreferences sharedPreferences){
+		int val = getMgnCutColor(sharedPreferences);
+		Resources res = getResources();
+		String ret = res.getString(MgnCutColorName[val]);
+		return ret;
 	}
 
 	private String getEffectSummary(SharedPreferences sharedPreferences){

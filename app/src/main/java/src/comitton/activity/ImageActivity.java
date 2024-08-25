@@ -125,6 +125,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	{
 		DEF.MENU_ROTATE,	// 画面方向
 		DEF.MENU_MGNCUT,	// 余白削除
+		DEF.MENU_MGNCUTCOLOR,	// 余白削除の色
 		DEF.MENU_IMGVIEW,	// 見開き設定
 		DEF.MENU_IMGSIZE,	// 画像サイズ
 		DEF.MENU_NOISE,		// 音操作
@@ -150,6 +151,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	{
 		R.string.rotateMenu,	// 画面方向
 		R.string.mgnCutMenu,	// 余白削除
+		R.string.mgnCutColorMenu,	// 余白削除の色
 		R.string.tguide02,		// 見開き設定
 		R.string.tguide03,		// 画像サイズ
 		R.string.noiseMenu,		// 音操作
@@ -193,7 +195,8 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	private final int SELLIST_VIEW_MODE = 2;
 	private final int SELLIST_SCALE_MODE = 3;
 	private final int SELLIST_MARGIN_CUT = 4;
-	private final int SELLIST_SCR_ROTATE = 5;
+	private final int SELLIST_MARGIN_CUTCOLOR = 5;
+	private final int SELLIST_SCR_ROTATE = 6;
 
 	private final int TOUCH_NONE      = 0;
 	private final int TOUCH_COMMAND   = 1;
@@ -231,6 +234,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	private int mScrlRngW;
 	private int mScrlRngH;
 	private int mMgnCut;
+	private int mMgnCutColor;
 	private int mEffect;
 	private int mLastMsg;
 	private int mPageSelect;
@@ -1744,7 +1748,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	private void setMgrConfig(boolean scaleinit) {
 		if (mImageMgr != null) {
 			mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode, mNoExpand, mAlgoMode, mRotate, mWAdjust
-					, mWidthScale, mImgScale, mPageWay, mMgnCut, 0, mBright, mGamma, mSharpen, mInvert, mGray, mPseLand, mMoire, mTopSingle, scaleinit);
+					, mWidthScale, mImgScale, mPageWay, mMgnCut, mMgnCutColor, 0, mBright, mGamma, mSharpen, mInvert, mGray, mPseLand, mMoire, mTopSingle, scaleinit);
 		}
 		// モードが変わればスケールは初期化
 		if (scaleinit) {
@@ -2626,6 +2630,16 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 					items[i] = res.getString(SetImageActivity.MgnCutName[i]);
 				}
 				break;
+			case SELLIST_MARGIN_CUTCOLOR:
+				// 余白削除
+				title = res.getString(R.string.mgnCutColorMenu);
+				selIndex = mMgnCutColor;
+				nItem = SetImageActivity.MgnCutColorName.length;
+				items = new String[nItem];
+				for (int i = 0; i < nItem; i++) {
+					items[i] = res.getString(SetImageActivity.MgnCutColorName[i]);
+				}
+				break;
 			case SELLIST_SCR_ROTATE:
 				// 画面方向
 				title = res.getString(R.string.rotateMenu);
@@ -2680,6 +2694,14 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 						// 余白削除
 						if (mMgnCut != index) {
 							mMgnCut = index;
+							setImageConfig();
+							setBitmapImage();
+						}
+						break;
+					case SELLIST_MARGIN_CUTCOLOR:
+						// 余白削除の色
+						if (mMgnCutColor != index) {
+							mMgnCutColor = index;
 							setImageConfig();
 							setBitmapImage();
 						}
@@ -2750,14 +2772,14 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				break;
 			}
 		}
-		mImageConfigDialog.setConfig(mSharpen, mGray, mInvert, mMoire, mTopSingle, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, selIndex, mMgnCut, mIsConfSave);
+		mImageConfigDialog.setConfig(mSharpen, mGray, mInvert, mMoire, mTopSingle, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, selIndex, mMgnCut, mMgnCutColor, mIsConfSave);
 		mImageConfigDialog.setImageConfigListner(new ImageConfigListenerInterface() {
 			@Override
-			public void onButtonSelect(int select, boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, boolean issave) {
+			public void onButtonSelect(int select, boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
 				// 選択状態を通知
 				boolean ischange = false;
 				// 変更があるかを確認(適用後のキャンセルの場合も含む)
-				if (mSharpen != sharpen || mGray != gray || mInvert != invert || mMoire != moire || mTopSingle != topsingle || mBright != bright || mGamma != gamma || mAlgoMode != algomode || mDispMode != dispmode || mMgnCut != mgncut) {
+				if (mSharpen != sharpen || mGray != gray || mInvert != invert || mMoire != moire || mTopSingle != topsingle || mBright != bright || mGamma != gamma || mAlgoMode != algomode || mDispMode != dispmode || mMgnCut != mgncut || mMgnCutColor != mgncutcolor) {
 					ischange = true;
 				}
 				mSharpen = sharpen;
@@ -2769,6 +2791,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				mGamma = gamma;
 				mAlgoMode = algomode;
 				mMgnCut = mgncut;
+				mMgnCutColor = mgncutcolor;
 				mIsConfSave = issave;
 
 				if (mScaleMode != SCALENAME_ORDER[scalemode]) {
@@ -2819,6 +2842,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 					ed.putString(DEF.KEY_ALGOMODE, Integer.toString(mAlgoMode));
 					ed.putString(DEF.KEY_INITVIEW, Integer.toString(mDispMode));
 					ed.putString(DEF.KEY_MARGINCUT, Integer.toString(mMgnCut));
+					ed.putString(DEF.KEY_MARGINCUTCOLOR, Integer.toString(mMgnCutColor));
 					ed.putString(DEF.KEY_INISCALE, Integer.toString(mScaleMode));
 					ed.commit();
 				}
@@ -3169,6 +3193,8 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		mMenuDialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
 		// 余白削除
 		mMenuDialog.addItem(DEF.MENU_MGNCUT, res.getString(R.string.mgnCutMenu));
+		// 余白削除
+		mMenuDialog.addItem(DEF.MENU_MGNCUTCOLOR, res.getString(R.string.mgnCutColorMenu));
 		// 画面回転
 		mMenuDialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
 
@@ -3262,6 +3288,11 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			case DEF.MENU_MGNCUT: {
 				// 余白削除
 				showSelectList(SELLIST_MARGIN_CUT);
+				break;
+			}
+			case DEF.MENU_MGNCUTCOLOR: {
+				// 余白削除
+				showSelectList(SELLIST_MARGIN_CUTCOLOR);
 				break;
 			}
 			case DEF.MENU_ROTATE: {
@@ -3642,6 +3673,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			mFlickPage = SetImageText.getFlickPage(sharedPreferences);
 
 			mMgnCut = SetImageActivity.getMgnCut(sharedPreferences);
+			mMgnCutColor = SetImageActivity.getMgnCutColor(sharedPreferences);
 			mBright = SetImageActivity.getBright(sharedPreferences);
 			mGamma = SetImageActivity.getGamma(sharedPreferences);
 			mBkLight = SetImageActivity.getBkLight(sharedPreferences);

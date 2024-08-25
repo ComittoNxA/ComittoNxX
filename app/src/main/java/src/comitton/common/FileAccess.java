@@ -430,6 +430,9 @@ public class FileAccess {
 					else if (ext.equals(".rar") || ext.equals(".cbr")) {
 						exttype = FileData.EXTTYPE_RAR;
 					}
+					else if (ext.equals(".pdf")) {
+						exttype = FileData.EXTTYPE_PDF;
+					}
 				}
 				else if (FileData.isText(ext)) {
 					type = FileData.FILETYPE_TXT;

@@ -3010,7 +3010,7 @@ public class ImageManager extends InputStream implements Runnable {
 		return returnCode;
 	}
 
-	public int sizeCheckNativeMain(InputStream inputStream, int page, int type, long orglen, int[] imagesize) {
+	public static int sizeCheckNativeMain(InputStream inputStream, int page, int type, long orglen, int[] imagesize) {
 		int returnCode = 0;
 		Log.d("ImageManager", "sizeCheckNativeMain: Start. page=" + page + ", type=" + type + ", orglen=" + orglen);
 
@@ -3044,11 +3044,6 @@ public class ImageManager extends InputStream implements Runnable {
 					//必要なデータを読み終えていた場合に抜ける
 					break;
 				}
-			}
-			// メモリセットも中断する
-			if (mCacheBreak == true || mRunningFlag == false) {
-				Log.e("ImageManager", "sizeCheckNativeMain: canceled.");
-				return -11;
 			}
 			CallImgLibrary.ImageSetData(data, size);
 			total += size;
@@ -3117,7 +3112,7 @@ public class ImageManager extends InputStream implements Runnable {
 		return bm;
 	}
 
-	public Bitmap getBitmapNativeMain(InputStream inputStream, int page, int type, int scale, long orglen, int width, int height, Bitmap bm) {
+	public static Bitmap getBitmapNativeMain(InputStream inputStream, int page, int type, int scale, long orglen, int width, int height, Bitmap bm) {
 		int ret = 0;
 		int returnCode = 0;
 
@@ -3153,11 +3148,6 @@ public class ImageManager extends InputStream implements Runnable {
 					//必要なデータを読み終えていた場合に抜ける
 					break;
 				}
-			}
-			// メモリセットも中断する
-			if (mCacheBreak == true || mRunningFlag == false) {
-				Log.e("NativeSizeCheck", "getBitmapNativeMain: canceled.");
-				return null;
 			}
 			returnCode = CallImgLibrary.ImageSetData(data, size);
 			if (returnCode < 0) {
@@ -3419,27 +3409,17 @@ public class ImageManager extends InputStream implements Runnable {
 			else {
 				inputStream = this;
 			}
-			if (mFileList[page].type == IMAGETYPE_JPEG || mFileList[page].type == IMAGETYPE_PNG || mFileList[page].type == IMAGETYPE_GIF || mFileList[page].type == IMAGETYPE_WEBP) {
-				bm = BitmapFactory.decodeStream(inputStream, null, option);
-			}
-			else {
-				bm = getBitmapNative(inputStream, page, mFileList[page].scale, bm);
-				if (bm == null) {
-					Log.e("ImageManager", "loadBitmapByName: getBitmapNative failed. " + mFileList[page].name);
-					return null;
-				}
-				Log.d("ImageManager", "loadBitmapByName: getBitmapNative succeed. " + mFileList[page].name);
-			}
+			bm = BitmapFactory.decodeStream(inputStream, null, option);
 		}
 		catch (IOException e) {
-			Log.e("loadBitmapByName/Load", e.getMessage());
+			Log.e("ImageManager","loadBitmapByName: " + e.getMessage());
 		}
 
 		try {
 			setLoadBitmapEnd();
 		}
 		catch (Exception e) {
-			Log.e("loadBitmapByName/End", e.getMessage());
+			Log.e("ImageManager","loadBitmapByName: " + e.getMessage());
 		}
 
 		// ファイルクローズは不要
@@ -3663,6 +3643,7 @@ public class ImageManager extends InputStream implements Runnable {
 	private int mScrWidthScale; // 幅調整
 	private int mScrImgScale; // 拡大
 	private int mMarginCut; // 余白削除
+	private int mMarginCutColor; // 余白削除の色
 	private int mSharpen;	// シャープ化
 	private int mInvert;	// カラー反転
 	private int mGray;		// グレースケール
@@ -3693,7 +3674,7 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	// 設定変更
-	public void setConfig(int mode, int center, boolean fFitDual, int dispMode, boolean noExpand, int algoMode, int rotate, int wadjust, int wscale, int scale, int pageway, int mgncut, int quality, int bright, int gamma, boolean sharpen, boolean invert, boolean gray, boolean pseland, boolean moire, boolean topsingle, boolean scaleinit) {
+	public void setConfig(int mode, int center, boolean fFitDual, int dispMode, boolean noExpand, int algoMode, int rotate, int wadjust, int wscale, int scale, int pageway, int mgncut, int mgncutcolor, int quality, int bright, int gamma, boolean sharpen, boolean invert, boolean gray, boolean pseland, boolean moire, boolean topsingle, boolean scaleinit) {
 		Log.d("ImageManager", "setConfig wscale=" + wscale + ", scale=" + scale);
 		mScrScaleMode = mode;
 		if (scaleinit) {
@@ -3710,6 +3691,7 @@ public class ImageManager extends InputStream implements Runnable {
 		mScrImgScale = scale;
 		mPageWay = pageway;
 		mMarginCut = mgncut;
+		mMarginCutColor = mgncutcolor;
 		mBright = bright;
 		mGamma = gamma;
 		mSharpen = sharpen ? 1 : 0;
@@ -3824,7 +3806,7 @@ public class ImageManager extends InputStream implements Runnable {
 		if (mMarginCut != 0) {
 			// 余白カットありの場合
 			// 余白のサイズを計測
-			if (CallImgLibrary.GetMarginSize(page1, half1, 0, disp_x, disp_y, mMarginCut, margin) > 0) {
+			if (CallImgLibrary.GetMarginSize(page1, half1, 0, disp_x, disp_y, mMarginCut, mMarginCutColor, margin) > 0) {
 				left[0] = margin[0];
 				right[0] = margin[1];
 				top[0] = margin[2];
@@ -3847,14 +3829,14 @@ public class ImageManager extends InputStream implements Runnable {
 			if (mMarginCut != 0) {
 				// 余白カットありの場合
 				// 余白のサイズを計測
-				if (CallImgLibrary.GetMarginSize(page2, half2, 0, disp_x2, disp_y, mMarginCut, margin) > 0) {
+				if (CallImgLibrary.GetMarginSize(page2, half2, 0, disp_x2, disp_y, mMarginCut, mMarginCutColor, margin) > 0) {
 					left[1] = margin[0];
 					right[1] = margin[1];
 					top[1] = margin[2];
 					bottom[1] = margin[3];
 				}
 			}
-			CallImgLibrary.GetMarginSize(page2, half2, 0, disp_x2, disp_y, mMarginCut, margin);
+			CallImgLibrary.GetMarginSize(page2, half2, 0, disp_x2, disp_y, mMarginCut, mMarginCutColor, margin);
 			Log.d("ImageManager", "ImageScaling Page=" + page2 + ", Half=" + half1 + ", マージン:P2 左=" + left[1] + ", 右=" + right[1] + ", 上=" + top[1] + ", 下=" + bottom[1]);
 		}
 
@@ -3878,7 +3860,7 @@ public class ImageManager extends InputStream implements Runnable {
 			}
 		}
 
-		if (mMarginCut != 0 && mMarginCut != 5) {
+		if (mMarginCut != 0 && mMarginCut != 6) {
 			// 余白カットありで縦横比を維持の場合
 
 			if (page2 != -1) {
@@ -4018,7 +4000,7 @@ public class ImageManager extends InputStream implements Runnable {
 		}
 
 
-		if(mMarginCut == 5) {
+		if(mMarginCut == 6) {
 			// 余白削除モードが縦横比無視の場合
 			// 元画像の縦横比を画面サイズにする
 			src_x[0] = disp_x;
@@ -4282,7 +4264,7 @@ public class ImageManager extends InputStream implements Runnable {
 					sendMessage(mHandler, MSG_CACHE, 0, 2, null);
 //					long sttime = SystemClock.uptimeMillis();
 					int param = CallImgLibrary.ImageScaleParam(mSharpen, mInvert, mGray, 0, mMoire, pseland);
-					if (CallImgLibrary.ImageScale(page1, half1, width[0], height[0], left[0], right[0], top[0], bottom[0], mScrAlgoMode, mScrRotate, mMarginCut, mBright, mGamma, param, size) >= 0) {
+					if (CallImgLibrary.ImageScale(page1, half1, width[0], height[0], left[0], right[0], top[0], bottom[0], mScrAlgoMode, mScrRotate, mMarginCut, mMarginCutColor, mBright, mGamma, param, size) >= 0) {
 						Log.d("ImageManager", "ImageScaling Page=" + page1 + ", Half=" + half1 + ", 完成サイズP1 size_w=" + size[0] + ", size_h=" + size[1]);
 						mMemCacheFlag[page1].fScale[half1] = true;
 						if (img1 != null) {
@@ -4326,7 +4308,7 @@ public class ImageManager extends InputStream implements Runnable {
 					sendMessage(mHandler, MSG_CACHE, 0, 2, null);
 //					long sttime = SystemClock.uptimeMillis();
 					int param = CallImgLibrary.ImageScaleParam(mSharpen, mInvert, mGray, 0, mMoire, pseland);
-					if (CallImgLibrary.ImageScale(page2, half2, width[1], height[1], left[1], right[1], top[1], bottom[1], mScrAlgoMode, mScrRotate, mMarginCut, mBright, mGamma, param, size) >= 0) {
+					if (CallImgLibrary.ImageScale(page2, half2, width[1], height[1], left[1], right[1], top[1], bottom[1], mScrAlgoMode, mScrRotate, mMarginCut, mMarginCutColor, mBright, mGamma, param, size) >= 0) {
 						Log.d("ImageManager", "ImageScaling Page=" + page2 + ", Half=" + half2 + ", 完成サイズP2 size_w=" + size[0] + ", size_h=" + size[1]);
 						mMemCacheFlag[page2].fScale[half2] = true;
 						if (img2 != null) {

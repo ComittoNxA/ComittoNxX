@@ -6,21 +6,21 @@
             android:title="Settings for File List">
             <intent
                 android:targetClass="src.comitton.config.SetFileListActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="RecorderSet"
             android:title="Settings for Recoder">
             <intent
                 android:targetClass="src.comitton.config.SetRecorderActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="FileColor"
             android:title="Color Settings for File List">
             <intent
                 android:targetClass="src.comitton.config.SetFileColorActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Image &amp; Text Viewer Settings" >
@@ -29,35 +29,35 @@
             android:title="Settings for Image Viewer" >
             <intent
                 android:targetClass="src.comitton.config.SetImageActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="DetailSet"
             android:title="Detail Settings for Image Viewer" >
             <intent
                 android:targetClass="src.comitton.config.SetImageDetailActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="TextSet"
             android:title="Settings for Text Viewer" >
             <intent
                 android:targetClass="src.comitton.config.SetTextActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="ImTxDetailSet"
             android:title="Detail Settings for Image &amp; Text" >
             <intent
                 android:targetClass="src.comitton.config.SetImageTextDetailActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="ImageTextColor"
             android:title="Color Settings for Image &amp; Text" >
             <intent
                 android:targetClass="src.comitton.config.SetImageTextColorActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Common" >
@@ -66,7 +66,7 @@
             android:title="Settings for Common Operation" >
             <intent
                 android:targetClass="src.comitton.config.SetCommonActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Other Settings" >
@@ -75,7 +75,7 @@
             android:title="Settings for Noise Operation" >
             <intent
                 android:targetClass="src.comitton.config.SetNoiseActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="MemoryCache"
@@ -83,7 +83,7 @@
             android:title="Settings for memory cache" >
             <intent
                 android:targetClass="src.comitton.config.SetCacheActivity"
-                android:targetPackage="jp.dip.muracoro.comittonx" />
+                android:targetPackage="@string/application_id" />
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Save settings to file" >

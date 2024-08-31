@@ -65,6 +65,7 @@
     <string name="formatting">ページ構築中</string>
     <string name="readxref">XREF読込中</string>
     <string name="readpage">Page構造読込中</string>
+    <string name="download">ダウンロード中</string>
     <string name="loaderr">画像の読込みに失敗しました</string>
     <string name="localStrage">ローカル</string>
     <string name="undefine">＊ 未定義 ＊</string>
@@ -114,7 +115,7 @@
     <string name="reverseMenu">ページ並びを逆にする</string>
     <string name="rotateMenu">画面方向切替</string>
     <string name="pageselMenu">ページ選択</string>
-    <string name="sharpenMenu">画像シャープ化</string>
+    <string name="sharpenMenu">画像シャープ化(%)</string>
     <string name="invertMenu">色反転</string>
     <string name="grayMenu">グレースケール化</string>
     <string name="coloringMenu">自動着色</string>
@@ -306,6 +307,11 @@
     <string name="thumbcache02">最大500ファイル</string>
     <string name="thumbcache03">最大1000ファイル</string>
     <string name="thumbcache04">削除しない(手動削除)</string>
+    <string name="thumbcrop00">中央</string>
+    <string name="thumbcrop01">左</string>
+    <string name="thumbcrop02">右</string>
+    <string name="thumbcrop03">全体を表示</string>
+    <string name="thumbcrop04">紙の表紙カバーに合わせる</string>
     <string name="fsort00">ソートなし</string>
     <string name="fsort01">ファイル名-昇順</string>
     <string name="fsort02">ファイル名-降順</string>

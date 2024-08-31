@@ -38,7 +38,7 @@
 			android:layout_height="wrap_content"
 			android:padding="8dip"
 			android:orientation="vertical" >
-		
+<!--
 			<CheckBox
 				android:id="@+id/chk_sharpen"
 				android:layout_width="fill_parent"
@@ -47,7 +47,7 @@
 				android:gravity="left|center"
 				android:textSize="17sp"
 				android:text= "@string/sharpenMenu" />
-	
+-->
 			<CheckBox
 				android:id="@+id/chk_gray"
 				android:layout_width="fill_parent"
@@ -81,7 +81,24 @@
 				android:gravity="left|center"
 				android:textSize="17sp"
 				android:text= "@string/topsingleMenu" />
-	
+
+			<TextView
+				android:id="@+id/label_sharpen"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/sharpenMenu" />
+
+			<SeekBar
+				android:id="@+id/seek_sharpen"
+				style="@style/PageSeekBar"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="4sp"
+				android:paddingRight="4sp" />
+
 			<TextView
 				android:id="@+id/label_bright"
 				android:layout_width="fill_parent"

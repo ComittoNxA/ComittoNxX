@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -20,6 +22,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import jp.dip.muracoro.comittonx.R;
 import android.view.View.OnClickListener;
+import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class Information implements DialogInterface.OnDismissListener {
@@ -168,12 +171,17 @@ public class Information implements DialogInterface.OnDismissListener {
 	}
 
 	public class AboutDialog extends AlertDialog {
+		private WebView mWebView;
+
 		@SuppressWarnings("deprecation")
 		public AboutDialog(Context context) {
 			super(context);
 			setIcon(R.drawable.icon);
 			setTitle(MODULE.aboutTitle(mContext));
-			setMessage(MODULE.ABOUT_INFO);
+			TextView tv = new TextView(mContext);
+			tv.setText(Html.fromHtml(MODULE.ABOUT_INFO));
+			tv.setMovementMethod(LinkMovementMethod.getInstance());
+			setView(tv);
 			setButton(context.getResources().getString(MODULE.getAboutOk()),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {

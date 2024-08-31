@@ -65,6 +65,7 @@
     <string name="formatting">Formatting</string>
     <string name="readxref">Loading XRef</string>
     <string name="readpage">Loading Page Object</string>
+    <string name="download">Downloading File</string>
     <string name="loaderr">Image Load Error.</string>
     <string name="localStrage">Local Storage</string>
     <string name="undefine">Undefined</string>
@@ -306,6 +307,11 @@
     <string name="thumbcache02">Max 500 files</string>
     <string name="thumbcache03">Max 1000 files</string>
     <string name="thumbcache04">Delete manually</string>
+    <string name="thumbcrop00">Center</string>
+    <string name="thumbcrop01">Left</string>
+    <string name="thumbcrop02">Right</string>
+    <string name="thumbcrop03">Fit screen</string>
+    <string name="thumbcrop04">Fit to paper cover</string>
     <string name="fsort00">None</string>
     <string name="fsort01">File Name(Ascending)</string>
     <string name="fsort02">File Name(Descending)</string>

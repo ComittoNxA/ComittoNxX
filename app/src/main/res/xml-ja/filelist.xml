@@ -36,6 +36,7 @@
             android:summary="zip/rar/pdfのタップでファイル内容を展開表示する"
             android:title="タップでファイル展開表示" />
         <CheckBoxPreference
+            android:layout_height="wrap_content"
             android:defaultValue="true"
             android:key="ParentMove"
             android:summary="ファイルリストに親ディレクトリへの移動項目(上矢印)を表示する"
@@ -165,7 +166,6 @@
             android:key="ThumbnailTap"
             android:summary="サムネイルON時にリスト表示ではサムネイル、タイル表示ではファイル名をタップすると長押しメニューを出せる"
             android:title="サムネイルONで長押しメニューを有効" />
-<!--
         <src.comitton.config.MenuLongTapSeekbar
             android:dialogMessage="長押しの時間を選択"
             android:dialogTitle="長押し操作の時間"
@@ -173,7 +173,22 @@
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="長押し系操作の時間" />
--->
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="サムネイルの切り取り位置"
+            android:entries="@array/thumcrop_name_list"
+            android:entryValues="@array/thumcrop_value_list"
+            android:key="ThumbCrop"
+            android:summary="dummy"
+            android:title="サムネイルの切り取り位置" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="サムネイルの余白削除"
+            android:entries="@array/thummargin_name_list"
+            android:entryValues="@array/thummargin_value_list"
+            android:key="ThumbMargin"
+            android:summary="dummy"
+            android:title="サムネイルの余白削除" />
     </PreferenceCategory>
     <PreferenceCategory android:title="オンラインヘルプ" >
         <PreferenceScreen

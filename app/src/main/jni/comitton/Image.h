@@ -30,17 +30,27 @@
 #define RGB565_GREEN(rgb) ((rgb>>5) & 0x003F)
 #define RGB565_BLUE(rgb) (rgb & 0x001F)
 
+#define WHITE_CHECK(rgb, mask) ((rgb & mask) == mask)
+#define BLACK_CHECK(rgb, mask) ((rgb & mask) == 0x0000)
+
+#define COLOR_CHECK(rgb1, rgb2, mask) \
+( \
+    ( \
+        REMAKE565( \
+            std::abs(RGB565_RED(rgb1) - RGB565_RED(rgb2)) , \
+            std::abs(RGB565_GREEN(rgb1) - RGB565_GREEN(rgb2)) , \
+            std::abs(RGB565_BLUE(rgb1) - RGB565_BLUE(rgb2))) \
+        & mask \
+    ) \
+    == 0x0000 \
+)
+
 //#define RED_RANGE(rr) (rr < 0 ? 0 : (rr > 0x001F ? 0x001F : rr))
 //#define GREEN_RANGE(gg) (gg < 0 ? 0 : (gg > 0x003F ? 0x003F : gg))
 //#define BLUE_RANGE(bb) (bb < 0 ? 0 : (bb > 0x001F ? 0x001F : bb))
 #define LIMIT_RGB(color) ((color)<0x00?0x00:((color)>0xff?0xff:(color)))
 
 #define ROUNDUP_DIV(v,d)	(v / d + (v % d != 0 ? 1 : 0))
-
-//#define WHITE_CHECK(rgb) (((rgb>>11) & 0x0010) && ((rgb>>5) & 0x0020) && (rgb & 0x0010))
-#define WHITE_CHECK(rgb) ((rgb & 0x8410) == 0x8410)
-#define BLACK_CHECK(rgb) ((rgb & 0x8410) == 0x0000)
-#define COLOR_CHECK(rgb1, rgb2) (((rgb1 ^ rgb2) & 0x8410) == 0x0000)
 
 #define HOKAN_DOTS	4
 #define SCLBUFFNUM	500
@@ -113,9 +123,10 @@ int ThumbnailAlloc(long long, int, int, int);
 int ThumbnailSetNone(long long, int);
 int ThumbnailCheck(long long, int);
 int ThumbnailCheckAll(long long);
-int ThumbnailSizeCheck(long long, int, int);
+int ThumbnailMemorySizeCheck(long long, int, int);
 int ThumbnailImageAlloc(long long, int, int);
 int ThumbnailSave(long long, int, int, int, int, BYTE*);
+int ThumbnailImageSize(long long, int);
 int ThumbnailDraw(long long, int, int, int, int, BYTE*);
 void ThumbnailFree(long long);
 
@@ -137,7 +148,7 @@ int DrawScaleBitmap(int, int, int, int, int, int, int, int, int, int, void *, in
 int DrawBitmap(int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
 // int DrawBitmapReg90(int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
 
-int CreateScale(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, jint*);
+int CreateScale(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, jint*);
 
 int SetLinesPtr(int, int, int, int, int);
 int NextSclBuff(int, int, int, int*, int*, int);
@@ -149,7 +160,7 @@ int ImageRotate(int, int, int, int, int, int);
 int GetMarginSize(int, int, int, int, int, int, int, int*, int*, int*, int*);
 int ImageMarginCut(int, int, int, int, int, int, int, int, int, int, int, int*, int*);
 int ImageHalf(int, int, int, int, int);
-int ImageSharpen(int, int, int, int, int);
+int ImageSharpen(int, int, int, int, int, int);
 int ImageBlur(int, int, int, int, int, int);
 int ImageInvert(int, int, int, int, int);
 int ImageGray(int, int, int, int, int);

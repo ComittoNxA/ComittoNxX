@@ -43,11 +43,11 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 
 	private ListDialog mListDialog;
 
-	private boolean mSharpen;
 	private boolean mInvert;
 	private boolean mGray;
 	private boolean mMoire;
 	private boolean mTopSingle;
+	private int mSharpen;
 	private int mBright;
 	private int mGamma;
 	private int mBkLight;
@@ -67,15 +67,17 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private Button mBtnRevert;
 	private Button mBtnApply;
 	private Button mBtnOK;
-	private CheckBox mChkSharpen;
+	//private CheckBox mChkSharpen;
 	private CheckBox mChkGray;
 	private CheckBox mChkInvert;
 	private CheckBox mChkMoire;
 	private CheckBox mChkTopSingle;
 	private CheckBox mChkIsSave;
+	private TextView mTxtSharpen;
 	private TextView mTxtBright;
 	private TextView mTxtGamma;
 	private TextView mTxtBkLight;
+	private SeekBar mSkbSharpen;
 	private SeekBar mSkbBright;
 	private SeekBar mSkbGamma;
 	private SeekBar mSkbBkLight;
@@ -97,6 +99,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private String mMgnCutTitle;
 	private String mMgnCutColorTitle;
 
+	private String mSharpenStr;
 	private String mBrightStr;
 	private String mGammaStr;
 	private String mBkLightStr;
@@ -182,12 +185,12 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		}
 	}
 
-	public void setConfig(boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
-		mSharpen = sharpen;
+	public void setConfig(boolean gray, boolean invert, boolean moire, boolean topsingle, int sharpen, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
 		mGray = gray;
 		mInvert = invert;
 		mMoire = moire;
 		mTopSingle = topsingle;
+		mSharpen = sharpen;
 		mBright = bright;
 		mGamma = gamma;
 		mBkLight = bklight;
@@ -205,37 +208,40 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 
 		setContentView(R.layout.imageconfigdialog);
 
-		mChkSharpen = (CheckBox) this.findViewById(R.id.chk_sharpen);
 		mChkGray = (CheckBox) this.findViewById(R.id.chk_gray);
 		mChkInvert = (CheckBox) this.findViewById(R.id.chk_invert);
 		mChkMoire = (CheckBox) this.findViewById(R.id.chk_moire);
 		mChkTopSingle = (CheckBox) this.findViewById(R.id.chk_topsingle);
 		mChkIsSave = (CheckBox) this.findViewById(R.id.chk_save);
 
-		mChkSharpen.setChecked(mSharpen);
 		mChkGray.setChecked(mGray);
 		mChkInvert.setChecked(mInvert);
 		mChkMoire.setChecked(mMoire);
 		mChkTopSingle.setChecked(mTopSingle);
 		mChkIsSave.setChecked(mIsSave);
 
+		mTxtSharpen = (TextView)this.findViewById(R.id.label_sharpen);
 		mTxtBright = (TextView)this.findViewById(R.id.label_bright);
 		mTxtGamma = (TextView)this.findViewById(R.id.label_gamma);
 		mTxtBkLight = (TextView)this.findViewById(R.id.label_bklight);
 
+		mSharpenStr = mTxtSharpen.getText().toString();
 		mBrightStr = mTxtBright.getText().toString();
 		mGammaStr = mTxtGamma.getText().toString();
 		mBkLightStr = mTxtBkLight.getText().toString();
 
+		mTxtSharpen.setText(mSharpenStr.replaceAll("%", getSharpenStr(mSharpen)));
 		mTxtBright.setText(mBrightStr.replaceAll("%", getBrightGammaStr(mBright)));
 		mTxtGamma.setText(mGammaStr.replaceAll("%", getBrightGammaStr(mGamma)));
 		mTxtBkLight.setText(mBkLightStr.replaceAll("%", getBkLight(mBkLight)));
 
-
+		mSkbSharpen = (SeekBar)this.findViewById(R.id.seek_sharpen);
 		mSkbBright = (SeekBar)this.findViewById(R.id.seek_bright);
 		mSkbGamma = (SeekBar)this.findViewById(R.id.seek_gamma);
 		mSkbBkLight = (SeekBar)this.findViewById(R.id.seek_bklight);
 
+		mSkbSharpen.setMax(32);
+		mSkbSharpen.setOnSeekBarChangeListener(this);
 		mSkbBright.setMax(10);
 		mSkbBright.setOnSeekBarChangeListener(this);
 		mSkbGamma.setMax(10);
@@ -243,6 +249,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		mSkbBkLight.setMax(11);
 		mSkbBkLight.setOnSeekBarChangeListener(this);
 
+		mSkbSharpen.setProgress(mSharpen);
 		mSkbBright.setProgress(mBright + 5);
 		mSkbGamma.setProgress(mGamma + 5);
 		mSkbBkLight.setProgress(mBkLight);
@@ -326,7 +333,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	public interface ImageConfigListenerInterface extends EventListener {
 
 	    // メニュー選択された
-	    public void onButtonSelect(int select, boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave);
+	    public void onButtonSelect(int select, boolean gray, boolean invert, boolean moire, boolean topsingle, int sharpen, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave);
 	    public void onClose();
 	}
 
@@ -460,16 +467,16 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 
 		if (select == CLICK_REVERT) {
 			// 戻すは元の値を通知
-			mListener.onButtonSelect(select, mSharpen, mGray, mInvert, mMoire, mTopSingle, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, mScaleMode, mMgnCut, mMgnCutColor, mIsSave);
+			mListener.onButtonSelect(select, mGray, mInvert, mMoire, mTopSingle, mSharpen, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, mScaleMode, mMgnCut, mMgnCutColor, mIsSave);
 		}
 		else {
 			// OK/適用は設定された値を通知
-			boolean sharpen = mChkSharpen.isChecked();
 			boolean gray = mChkGray.isChecked();
 			boolean invert = mChkInvert.isChecked();
 			boolean moire = mChkMoire.isChecked();
 			boolean topsingle = mChkTopSingle.isChecked();
 			boolean issave = mChkIsSave.isChecked();
+			int sharpen = mSkbSharpen.getProgress();
 			int bright = mSkbBright.getProgress() - 5;
 			int gamma = mSkbGamma.getProgress() - 5;
 			int bklight = mSkbBkLight.getProgress();
@@ -480,7 +487,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 //			int mgncutcolor = mSpnMgncutColor.getSelectedItemPosition();
 
 
-			mListener.onButtonSelect(select, sharpen, gray, invert, moire, topsingle, bright, gamma, bklight, mAlgoModeTemp, mDispModeTemp, mScaleModeTemp, mMgnCutTemp, mMgnCutColorTemp, issave);
+			mListener.onButtonSelect(select, gray, invert, moire, topsingle, sharpen, bright, gamma, bklight, mAlgoModeTemp, mDispModeTemp, mScaleModeTemp, mMgnCutTemp, mMgnCutColorTemp, issave);
 		}
 
 		if (select != CLICK_APPLY) {
@@ -497,7 +504,11 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		// 変更通知
-		if (seekBar == mSkbBkLight) {
+		if (seekBar == mSkbSharpen) {
+			String str = getSharpenStr(progress);
+			mTxtSharpen.setText(mSharpenStr.replaceAll("%", str));
+		}
+		else if (seekBar == mSkbBkLight) {
 			String str = getBkLight(progress);
 			mTxtBkLight.setText(mBkLightStr.replaceAll("%", str));
 		}
@@ -510,9 +521,24 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 				mTxtGamma.setText(mGammaStr.replaceAll("%", str));
 			}
 		}
-		return;
 	}
 
+	private String getSharpenStr(int progress) {
+		String str;
+		if (progress == 0) {
+			str = mNoneStr;
+		}
+		else if (progress < 16) {
+			str = String.valueOf(progress % 16) + "/16";
+		}
+		else if (progress % 16 == 0) {
+			str = String.valueOf(progress / 16);
+		}
+		else {
+			str =  String.valueOf(progress / 16) + " + " + String.valueOf(progress % 16) + "/16";
+		}
+		return str;
+	}
 	private String getBkLight(int progress) {
 		String str;
 		if (progress >= 11) {

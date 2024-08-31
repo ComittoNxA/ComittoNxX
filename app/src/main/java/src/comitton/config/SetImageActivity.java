@@ -13,7 +13,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
-import android.util.Log;
 
 public class SetImageActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private ListPreference mViewRota;
@@ -478,10 +477,9 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		return val;
 	}
 
-	public static boolean getSharpen(SharedPreferences sharedPreferences){
-		boolean flag;
-		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_SHARPEN, false);
-		return flag;
+	public static int getSharpen(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences, DEF.KEY_SHARPEN, "0");
+		return val;
 	}
 
 	public static boolean getGray(SharedPreferences sharedPreferences){

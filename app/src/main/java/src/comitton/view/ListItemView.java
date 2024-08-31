@@ -13,6 +13,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 public class ListItemView extends View {
@@ -72,6 +73,7 @@ public class ListItemView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
+		boolean debug = false;
 		//		super.onDraw(canvas);
 		int cx = getWidth();
 		int cy = getHeight();
@@ -126,14 +128,35 @@ public class ListItemView extends View {
     				int retValue = CallImgLibrary.ThumbnailDraw(mThumbId, mThumbBitmap, mThumbIndex);
     				int width = retValue >> 16;
     				int height = retValue & 0xFFFF;
-    				int dstWidth = width * draw_cy / height;
-    				int dstHeight = draw_cy;
+
+					int dstWidth = 0;
+					int dstHeight = 0;
+
+					if (debug) {Log.d("ListItemView", "onDraw: width/height=" + ((float)width / (float)height) + ", draw_cx/draw_cy=" + ((float)draw_cx / (float)draw_cy));}
+					if ((float)width / height > (float)draw_cx / draw_cy) {
+						if (debug) {Log.d("ListItemView", "onDraw: 幅に合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
+						// 幅に合わせる
+						dstWidth = draw_cx;
+						dstHeight = height * draw_cx / width;
+					}
+					else {
+						if (debug) {Log.d("ListItemView", "onDraw: 高さに合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
+						// 高さに合わせる
+						dstWidth = width * draw_cy / height;
+						dstHeight = draw_cy;
+					}
+
     				int dstX = 0;
+					int dstY = 0;
     				if (dstWidth < draw_cx) {
     					dstX = (draw_cx - dstWidth) / 2;
     				}
-    				mSrcRect.set(0, 0, width, height);
-    				mDstRect.set(dstX + mItemMargin, mItemMargin, dstX + dstWidth + mItemMargin, dstHeight + mItemMargin);
+					if (dstHeight < draw_cy) {
+						dstY = (draw_cy - dstHeight) / 2;
+					}
+
+					mSrcRect.set(0, 0, width, height);
+    				mDstRect.set(dstX + mItemMargin, dstY + mItemMargin, dstX + dstWidth + mItemMargin, dstY + dstHeight + mItemMargin);
     				canvas.drawBitmap(mThumbBitmap, mSrcRect, mDstRect, null);
 				}
 			}

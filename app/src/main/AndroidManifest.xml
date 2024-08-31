@@ -99,10 +99,6 @@
             android:maxAspectRatio="3.0"
             android:name="src.comitton.config.SetTextActivity" >
         </activity>
-        <activity
-            android:maxAspectRatio="3.0"
-            android:name="src.comitton.activity.LicensesActivity" >
-    </activity>
 <!--
         <activity
             android:label="@string/app_name"

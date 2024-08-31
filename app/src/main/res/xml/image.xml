@@ -41,10 +41,12 @@
             android:key="MarginCutColor"
             android:summary="dummy"
             android:title="Color to remove margin" />
+<!--
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="Sharpen"
             android:title="Sharpen image" />
+-->
     </PreferenceCategory>
     <PreferenceCategory android:title="Display Settings" >
         <CheckBoxPreference

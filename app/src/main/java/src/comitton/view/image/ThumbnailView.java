@@ -181,11 +181,33 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	}
 
 	private Rect drawBitmap(Canvas canvas, int page, int x, int y, float rate, int flag) {
-//		Log.d("thview_drawBmp", "page=" + page);
+		boolean debug = false;
+		if (debug) {Log.d("ThumbnailView", "drawBitmap: 開始します. canvas=[" + canvas.getWidth() + ", " + canvas.getHeight() + "], page=" + page +", x=" + x + ", y=" + y + ", rate=" + rate + ", flag=" + flag);}
 		page = calcReversePage(page);
 
-		// int retValue = (200<<16) | 200;
-		int retValue = CallImgLibrary.ThumbnailDraw(mThumID, mDrawBitmap, page);
+		int retValue;
+
+		if (debug) {Log.d("ThumbnailView", "drawBitmap: キャッシュの画像サイズを取得します.");}
+		retValue = CallImgLibrary.ThumbnailImageSize(mThumID, page);
+		if (retValue <= 0) {
+			if (debug) {Log.d("ThumbnailView", "drawBitmap: キャッシュの画像サイズが取得できませんでした.");}
+		}
+		else {
+			int w = retValue >> 16;
+			int h = retValue & 0xFFFF;
+			if (debug) {Log.d("ThumbnailView", "drawBitmap: キャッシュの画像サイズを取得しました. w=" + w + ", h=" + h);}
+			try {
+				if (debug) {Log.d("ThumbnailView", "drawBitmap: 空のビットマップを作成します. width=" + w + ", height=" + h);}
+				mDrawBitmap = Bitmap.createBitmap(w, h, Config.RGB_565);
+				if (debug) {Log.d("ThumbnailView", "drawBitmap: 空のビットマップを作成しました.");}
+			}
+			catch (Exception e) {
+				if (debug) {Log.e("ThumbnailView", "drawBitmap: 空のビットマップの作成でエラーになりました.");}
+				return null;
+			}
+		}
+
+		retValue = CallImgLibrary.ThumbnailDraw(mThumID, mDrawBitmap, page);
 		Rect rcSrc;
 		Rect rcDst;
 
@@ -195,30 +217,44 @@ public class ThumbnailView extends View implements Runnable, Callback {
 			int w2 = w * mThumQuality;
 			int h2 = h * mThumQuality;
 
-			int dstWidth = w2 * mThumH / h2;
-			int dstHeight = mThumH;
-			int posx = (int) (w2 / 2 * rate);
+			int dstWidth = 0;
+			int dstHeight = 0;
+			if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + ", w/h=" + ((float)w / (float)h) + ", mThumW/mThumH=" + ((float)mThumW / (float)mThumH));}
+			if ((float)w / h > (float)mThumW / mThumH) {
+				if (debug) {Log.d("ThumbnailView", "drawBitmap: 幅に合わせます. page=" + page + ", w=" + w + ", h=" + h + ", mThumW=" + mThumW + ", mThumH=" + mThumH);}
+				dstWidth = mThumW;
+				dstHeight = h2 * mThumW / w2;
+			}
+			else {
+				if (debug) {Log.d("ThumbnailView", "drawBitmap: 高さに合わせます. page=" + page + ", w=" + w + ", h=" + h + ", mThumW=" + mThumW + ", mThumH=" + mThumH);}
+				dstWidth = w2 * mThumH / h2;
+				dstHeight = mThumH;
+			}
+			if (debug) {Log.d("ThumbnailView", "drawBitmap: サイズを取得しました. page=" + page + ", w=" + w + ", h=" + h + ", w2=" + w2 + ", h2=" + h2 + ", mThumW=" + mThumW + ", mThumH=" + mThumH + ", dstWidth=" + dstWidth + ", dstHeight=" + dstHeight);}
+
+			int posx = (int) (dstWidth / 2 * rate);
+			int posy = (int) ((mThumH - dstHeight) / 2);
 			rcSrc = new Rect(0, 0, w, h);
-			rcDst = new Rect(x - posx, MARGIN_HEIGHT, x - posx + dstWidth, dstHeight + MARGIN_HEIGHT);
+			rcDst = new Rect(x - posx, MARGIN_HEIGHT + posy, x - posx + dstWidth, MARGIN_HEIGHT + posy + dstHeight);
 			if (flag == DRAW_CENTER) {
-				rcDst.offset(w2 / 2 * -1, 0);
+				rcDst.offset(dstWidth / 2 * -1, 0);
 			}
 			else if (flag == DRAW_RIGHT) {
-				rcDst.offset(w2 * -1, 0);
+				rcDst.offset(dstWidth * -1, 0);
 			}
-			if (w2 < mPageWidth) {
+			if (dstWidth < mPageWidth) {
 				if (flag == DRAW_LEFT) {
-					rcDst.offset((mPageWidth - w2) / 2, 0);
+					rcDst.offset((mPageWidth - dstWidth) / 2, 0);
 				}
 				else if (flag == DRAW_RIGHT) {
-					rcDst.offset((mPageWidth - w2) / 2 * -1, 0);
+					rcDst.offset((mPageWidth - dstWidth) / 2 * -1, 0);
 				}
 			}
 			canvas.drawBitmap(mDrawBitmap, rcSrc, rcDst, null);
 
-			if (w2 < mPageWidth) {
-				rcDst.left -= (mPageWidth - w2) / 2;
-				rcDst.right += (mPageWidth - w2) / 2;
+			if (dstWidth < mPageWidth) {
+				rcDst.left -= (mPageWidth - dstWidth) / 2;
+				rcDst.right += (mPageWidth - dstWidth) / 2;
 			}
 		}
 		else {
@@ -400,6 +436,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 
 	// スレッド開始
 	public void run() {
+		boolean debug = false;
 		// Log.d("thumb", "Thread - start page:" + mCurPage + ", disp:" +
 		// mDispPage);
 
@@ -455,9 +492,10 @@ public class ThumbnailView extends View implements Runnable, Callback {
             
             			try {
             				synchronized (mLock) {
-								Log.d("ThumbnailView", "run: Call loadThumbnailFromStream(" + page + ", " + thumDataW + ", " + thumDataH + ") start.");
+								if (debug) {Log.d("ThumbnailView", "run: LoadThumbnailを実行します. page=" + page + ", width=" + thumDataW + ", height=" + thumDataH);}
 								// 読み込み処理とは排他する
-            					bm = mImageMgr.loadThumbnailFromStream(page, thumDataW, thumDataH);
+								bm = mImageMgr.LoadThumbnail(page, thumDataW, thumDataH);
+								if (debug) {Log.d("ThumbnailView", "run: LoadThumbnailを実行しました. width=" + bm.getWidth() + ", height=" + bm.getHeight());}
             				}
             			} catch (Exception ex) {
             				;
@@ -465,41 +503,48 @@ public class ThumbnailView extends View implements Runnable, Callback {
             
             			// ビットマップをサムネイルサイズぴったりにリサイズする
             			if (bm != null) {
-            				bm = ImageAccess.resizeTumbnailBitmap(bm, thumDataW, thumDataH, ImageAccess.BMPALIGN_CENTER);
+            				bm = ImageAccess.resizeTumbnailBitmap(bm, thumDataW, thumDataH, ImageAccess.BMPCROP_FIT_SCREEN, ImageAccess.BMPMARGIN_NONE);
+							if (debug) {Log.d("ThumbnailView", "run: resizeTumbnailBitmapを実行しました. width=" + bm.getWidth() + ", height=" + bm.getHeight());}
             			}
-            			if (bm != null) {
-            				int w = bm.getWidth();
-            				int h = bm.getHeight();
-            				boolean chg = false;
-            				if (w > thumDataW) {
-            					w = thumDataW;
-            					chg = true;
-            				}
-            				if (h > thumDataH) {
-            					h = thumDataH;
-            					chg = true;
-            				}
-            
-            				// ビットマップを切り出す
-            				if (chg || bm.getConfig() != Config.RGB_565) {
-            					Bitmap bm2 = Bitmap.createBitmap(w, h, Config.RGB_565);
-            					bm = Bitmap.createBitmap(bm, 0, 0, w, h);
-            					//Paint drawBmp = new Paint();
-            					Canvas offScreen = new Canvas(bm2);
-            					offScreen.drawColor(0xFFFFFFFF);
-            					//drawBmp.setStyle(Style.FILL);
-            					//offScreen.drawRect(0, 0, w, h, drawBmp);
-            					offScreen.drawBitmap(bm, 0, 0, null);
-            					bm = bm2;
-            					// Log.d("thumb", "w=" + bm2.getWidth() + ", h=" +
-            					// bm2.getHeight());
-            				}
-            			}
-            
+
+						if (bm != null) {
+							int x = 0;
+							int y = 0;
+							int w = bm.getWidth();
+							int h = bm.getHeight();
+							boolean chg = false;
+							if (thumDataW / 2 > w) {
+								x = ((thumDataW / 2) - w) / 2;
+								chg = true;
+							}
+							if (thumDataH > h) {
+								y = (thumDataH - h) / 2;
+								chg = true;
+							}
+							if (debug) {Log.d("ThumbnailView", "run: 切り出すサイズを決定します. width=" + w + ", height=" + h);}
+
+							// ビットマップを切り出す
+							if (chg || bm.getConfig() != Config.RGB_565) {
+								Bitmap bm2;
+								if (thumDataW / 2 > w) {
+									bm2 = Bitmap.createBitmap(thumDataW / 2, thumDataH, Config.RGB_565);
+								}
+								else {
+									bm2 = Bitmap.createBitmap(w, thumDataH, Config.RGB_565);
+								}
+								bm = Bitmap.createBitmap(bm, 0, 0, w, h);
+								Canvas offScreen = new Canvas(bm2);
+								offScreen.drawColor(0xFFFFFFFF);
+								//offScreen.drawRect(0, 0, w, h, drawBmp);
+								offScreen.drawBitmap(bm, x, y, null);
+								bm = bm2;
+							}
+						}
+
             			boolean save = false;
             			if (bm != null) {
             				// 空きメモリがあるかをチェック
-            				int result = CallImgLibrary.ThumbnailSizeCheck(mThumID, bm.getWidth(), bm.getHeight());
+            				int result = CallImgLibrary.ThumbnailMemorySizeCheck(mThumID, bm.getWidth(), bm.getHeight());
 //            				Log.d("thview_run", "sizecheck:page=" + page + ", result=" + result);
             				if (result == 0) {
             					// メモリあり
@@ -517,9 +562,17 @@ public class ThumbnailView extends View implements Runnable, Callback {
             			}
             			if (bm != null && save) {
 //            				Log.d("thview_run", "save:page=" + page);
-            				if (CallImgLibrary.ThumbnailSave(mThumID, bm, page) < 0) {
-            					bm = null;
-            				}
+							if (bm.getConfig() != Config.RGB_565) {
+								bm= bm.copy(Config.RGB_565, true);
+							}
+							if (debug) {Log.d("ThumbnailView", "run: ThumbnailSaveを実行します. width=" + bm.getWidth() + ", height=" + bm.getHeight() + ", page=" + page);}
+							if (CallImgLibrary.ThumbnailSave(mThumID, bm, page) < 0) {
+								if (debug) {Log.e("ThumbnailView", "run: ThumbnailSaveの実行に失敗しました.");}
+								bm = null;
+							}
+							else {
+								if (debug) {Log.d("ThumbnailView", "run: ThumbnailSaveを実行しました.");}
+							}
             			}
         
             			// 通知

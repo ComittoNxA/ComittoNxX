@@ -74,6 +74,8 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 
 	private int mOrientation;
 
+	private int mDuration = 800; // 長押し時間
+
 	// アプリ制御
 	private SurfaceHolder mHolder;
 	private Thread mUpdateThread;
@@ -95,6 +97,12 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 
 	private Paint mFillPaint;
 	private int mBakColor;
+
+	public ListScreenView(Context context, int duration) {
+		this(context);
+		Log.d("ListScreenView", "ロングタッチ遅延時間=" + duration);
+		mFileListArea.setDuration(duration);
+	}
 
 	public ListScreenView(Context context) {
 		super(context);

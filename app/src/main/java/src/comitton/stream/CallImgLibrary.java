@@ -27,7 +27,7 @@ public class CallImgLibrary {
 	public static native int ImageGetBitmap(int type, int scale, Bitmap bitmap);
 
 	public static native int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, int Margin, int MarginColor, int size[]);
-	public static native int ImageScale(int page, int half, int width, int height, int left, int right, int top, int bottom, int algorithm, int rotate, int margin, int margincolor, int bright, int gamma, int param, int size[]);
+	public static native int ImageScale(int page, int half, int width, int height, int left, int right, int top, int bottom, int algorithm, int rotate, int margin, int margincolor, int sharpen, int bright, int gamma, int param, int size[]);
 	public static native int ImageDraw(int page, int half, int x, int y, Bitmap bitmap);
 	public static native int ImageScaleDraw(int page, int rotate, int sx, int sy, int scx, int scy, int dx, int dy, int dcx, int dcy, int psel, Bitmap bm, int cutLeft, int cutRight, int cutTop, int cutBottom);
 	public static native int ImageCancel(int flag);
@@ -36,18 +36,18 @@ public class CallImgLibrary {
 	public static native int ThumbnailCheck(long id, int index);
 	public static native int ThumbnailSetNone(long id, int index);
 	public static native int ThumbnailCheckAll(long id);
-	public static native int ThumbnailSizeCheck(long id, int width, int height);
+	public static native int ThumbnailMemorySizeCheck(long id, int width, int height);
 	public static native int ThumbnailImageAlloc(long id, int blocks, int index);
 	public static native int ThumbnailSave(long id, Bitmap bitmap, int index);
+	public static native int ThumbnailImageSize(long id, int index);
 	public static native int ThumbnailDraw(long id, Bitmap bitmap, int index);
 	public static native int ThumbnailFree(long id);
 
 	// スレッド数設定
 	public static native int SetParameter(int threadnum);
 
-	public static int ImageScaleParam(int sharpen, int invert, int gray, int coloring, int moire, int pseland) {
-		int val = (sharpen != 0 ? 1 : 0)
-				+ (invert != 0 ? 2 : 0)
+	public static int ImageScaleParam(int invert, int gray, int coloring, int moire, int pseland) {
+		int val = (invert != 0 ? 2 : 0)
 				+ (gray != 0 ? 4 : 0)
 				+ (coloring != 0 ? 8 : 0)
 				+ (moire != 0 ? 16 : 0)

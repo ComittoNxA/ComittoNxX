@@ -41,10 +41,12 @@
             android:key="MarginCutColor"
             android:summary="dummy"
             android:title="余白の削除対象の色" />
+<!--
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="Sharpen"
             android:title="画像のシャープ化" />
+-->
     </PreferenceCategory>
     <PreferenceCategory android:title="表示関連の設定（＊はテキストと共通の設定）" >
         <CheckBoxPreference

@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -88,8 +89,15 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	protected String mListTitle2;
 
 	private float mDensity;
+	private int mDuration = 800; // 長押し時間
 
-	// コンストラクタ
+
+	public void setDuration(int duration) {
+		mDuration = duration;
+		Log.d("ListArea", "ロングタッチ遅延時間=" + mDuration);
+	}
+
+		// コンストラクタ
 	public ListArea(Context context, int listtype) {
 		mDensity = context.getResources().getDisplayMetrics().scaledDensity;
 		mRangeCancel = (int) (20 * mDensity);
@@ -599,7 +607,8 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	}
 
 	private void startItemLongClick(int index) {
-		long NextTime = SystemClock.uptimeMillis() + TERM_LONGCLICK;
+		//long NextTime = SystemClock.uptimeMillis() + TERM_LONGCLICK;
+		long NextTime = SystemClock.uptimeMillis() + mDuration;
 		mLongClickMsg = mHandler.obtainMessage(HMSG_LONGCLICK, index, 0);
 		mHandler.sendMessageAtTime(mLongClickMsg, NextTime);
 	}
@@ -651,6 +660,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		else if (msg.what == HMSG_LONGCLICK) {
 			// ロングタップ
 			if (mLongClickMsg == msg) {
+				/*
 				if (mTouchCounter < 32) {
 					if (mTouchTime < SystemClock.uptimeMillis() - 200) {
 						mTouchDraw = true;
@@ -663,12 +673,20 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 					mHandler.sendMessageAtTime(mLongClickMsg, NextTime);
 				}
 				else {
+					Log.d("ListArea", "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));
 					mLongClickMsg = null;
 					mTouchIndex = -1;
 					mTouchDraw = false;
 					mTouchCounter = 0;
 					mListNoticeListener.onItemLongClick(mListType, msg.arg1);
 				}
+				*/
+				Log.d("ListArea", "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));
+				mLongClickMsg = null;
+				mTouchIndex = -1;
+				mTouchDraw = false;
+				mTouchCounter = 0;
+				mListNoticeListener.onItemLongClick(mListType, msg.arg1);
 				update(false);
 			}
 		}

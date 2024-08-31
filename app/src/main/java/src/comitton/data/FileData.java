@@ -16,8 +16,9 @@ public class FileData {
 	public static final short FILETYPE_DIR = 1;
 	public static final short FILETYPE_ARC = 2;
 	public static final short FILETYPE_IMG = 3;
-	public static final short FILETYPE_TXT = 4;
-	public static final short FILETYPE_NONE = 5;
+	public static final short FILETYPE_PDF = 4;
+	public static final short FILETYPE_TXT = 5;
+	public static final short FILETYPE_NONE = 6;
 
 	public static final short EXTTYPE_NONE = 0;
 	public static final short EXTTYPE_ZIP = 1;
@@ -47,7 +48,9 @@ public class FileData {
 	public String getName() {
 		return name;
 	}
-
+	public static String getName(String filepath) {
+		return filepath.substring(filepath.lastIndexOf("/") + 1);
+	}
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -72,7 +75,15 @@ public class FileData {
 		return exttype;
 	}
 
-	public static short getExtType(String ext) {
+	public static short getExtType(String filepath) {
+		int lastIndex = filepath.lastIndexOf(".");
+		String ext = filepath;
+		if (lastIndex == -1) {
+			return EXTTYPE_NONE;
+		}
+		else {
+			ext = filepath.substring(lastIndex);
+		}
 		if (ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub")) {
 			return EXTTYPE_ZIP;
 		}
@@ -217,7 +228,7 @@ public class FileData {
 		return false;
 	}
 	public static boolean isArchive(String ext) {
-		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr") || ext.equals(".epub") /*|| ext.equals(".pdf")*/;
+		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr") || ext.equals(".epub");
 	}
 	public static boolean isZip(String ext) {
 		return ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub");

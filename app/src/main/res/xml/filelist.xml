@@ -164,7 +164,6 @@
             android:defaultValue="true"
             android:key="ThumbnailTap"
             android:title="Thumbnail on Menu" />
-<!--
         <src.comitton.config.MenuLongTapSeekbar
             android:dialogMessage="Select the long press hold time."
             android:dialogTitle="Long press time"
@@ -172,7 +171,22 @@
             android:negativeButtonText="@null"
             android:summary="Time until long press operations are accepted in the file list and recorder menu"
             android:title="Time to long tap" />
--->
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Thumbnail crop position"
+            android:entries="@array/thumcrop_name_list"
+            android:entryValues="@array/thumcrop_value_list"
+            android:key="ThumbCrop"
+            android:summary="dummy"
+            android:title="Thumbnail crop position" />
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="Margin cut from thumbnails"
+            android:entries="@array/thummargin_name_list"
+            android:entryValues="@array/thummargin_value_list"
+            android:key="ThumbMargin"
+            android:summary="dummy"
+            android:title="Margin cut from thumbnails" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Online Help" >
         <PreferenceScreen

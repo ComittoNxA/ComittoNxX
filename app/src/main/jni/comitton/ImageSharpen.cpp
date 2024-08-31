@@ -21,6 +21,8 @@ extern char gDitherX_2bit[4][4];
 extern char gDitherY_3bit[8];
 extern char gDitherY_2bit[4];
 
+int mAmount = 16;
+
 void *ImageSharpen_ThreadFunc(void *param)
 {
 	int *range = (int*)param;
@@ -39,7 +41,7 @@ void *ImageSharpen_ThreadFunc(void *param)
 	int		xx;	// サイズ変更後のx座標
 	int		yy;	// サイズ変更後のy座標
 
-	int		rr, gg, bb;
+	int	rr = 0, gg = 0, bb = 0;
 	int		yd3, yd2;
 
 	for (yy = stindex ; yy < edindex ; yy ++) {
@@ -62,27 +64,39 @@ void *ImageSharpen_ThreadFunc(void *param)
 		yd2 = gDitherY_2bit[yy & 0x03];
 		for (xx =  0 ; xx < OrgWidth ; xx++) {
 			// 
-			rr =  RGB565_RED_256(orgbuff2[xx]) * 5;
-			rr -= RGB565_RED_256(orgbuff1[xx]);
-			rr -= RGB565_RED_256(orgbuff2[xx - 1]);
-			rr -= RGB565_RED_256(orgbuff2[xx + 1]);
-			rr -= RGB565_RED_256(orgbuff3[xx]);
+            rr -= RGB565_RED_256(orgbuff1[xx - 1]) * mAmount;
+            rr -= RGB565_RED_256(orgbuff1[xx + 0]) * mAmount * 2;
+            rr -= RGB565_RED_256(orgbuff1[xx + 1]) * mAmount;
+            rr -= RGB565_RED_256(orgbuff2[xx - 1]) * mAmount * 2;
+            rr += RGB565_RED_256(orgbuff2[xx + 0]) * (16 + (mAmount * 12));
+            rr -= RGB565_RED_256(orgbuff2[xx + 1]) * mAmount * 2;
+            rr -= RGB565_RED_256(orgbuff3[xx - 1]) * mAmount;
+            rr -= RGB565_RED_256(orgbuff3[xx + 0]) * mAmount * 2;
+            rr -= RGB565_RED_256(orgbuff3[xx + 1]) * mAmount;
+            rr /= 16;
 
-			gg =  RGB565_GREEN_256(orgbuff2[xx]) * 5;
-			gg -= RGB565_GREEN_256(orgbuff1[xx]);
-			gg -= RGB565_GREEN_256(orgbuff2[xx - 1]);
-			gg -= RGB565_GREEN_256(orgbuff2[xx + 1]);
-			gg -= RGB565_GREEN_256(orgbuff3[xx]);
+            gg -= RGB565_GREEN_256(orgbuff1[xx - 1]) * mAmount;
+            gg -= RGB565_GREEN_256(orgbuff1[xx + 0]) * mAmount * 2;
+            gg -= RGB565_GREEN_256(orgbuff1[xx + 1]) * mAmount;
+            gg -= RGB565_GREEN_256(orgbuff2[xx - 1]) * mAmount * 2;
+            gg += RGB565_GREEN_256(orgbuff2[xx + 0]) * (16 + (mAmount * 12));
+            gg -= RGB565_GREEN_256(orgbuff2[xx + 1]) * mAmount * 2;
+            gg -= RGB565_GREEN_256(orgbuff3[xx - 1]) * mAmount;
+            gg -= RGB565_GREEN_256(orgbuff3[xx + 0]) * mAmount * 2;
+            gg -= RGB565_GREEN_256(orgbuff3[xx + 1]) * mAmount;
+            gg /= 16;
 
-			bb =  RGB565_BLUE_256(orgbuff2[xx]) * 5;
-			bb -= RGB565_BLUE_256(orgbuff1[xx]);
-			bb -= RGB565_BLUE_256(orgbuff2[xx - 1]);
-			bb -= RGB565_BLUE_256(orgbuff2[xx + 1]);
-			bb -= RGB565_BLUE_256(orgbuff3[xx]);
+            bb -= RGB565_BLUE_256(orgbuff1[xx - 1]) * mAmount;
+            bb -= RGB565_BLUE_256(orgbuff1[xx + 0]) * mAmount * 2;
+            bb -= RGB565_BLUE_256(orgbuff1[xx + 1]) * mAmount;
+            bb -= RGB565_BLUE_256(orgbuff2[xx - 1]) * mAmount * 2;
+            bb += RGB565_BLUE_256(orgbuff2[xx + 0]) * (16 + (mAmount * 12));
+            bb -= RGB565_BLUE_256(orgbuff2[xx + 1]) * mAmount * 2;
+            bb -= RGB565_BLUE_256(orgbuff3[xx - 1]) * mAmount;
+            bb -= RGB565_BLUE_256(orgbuff3[xx + 0]) * mAmount * 2;
+            bb -= RGB565_BLUE_256(orgbuff3[xx + 1]) * mAmount;
+            bb /= 16;
 
-//			rr = RED_RANGE(rr);
-//			gg = GREEN_RANGE(gg);
-//			bb = BLUE_RANGE(bb);
 			// 0～255に収める
 			rr = LIMIT_RGB(rr);
 			gg = LIMIT_RGB(gg);
@@ -99,9 +113,7 @@ void *ImageSharpen_ThreadFunc(void *param)
 				bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
 			}
 
-//			buffptr[xx] = REMAKE565(rr, gg, bb);
 			buffptr[xx] = MAKE565(rr, gg, bb);
-//			buffptr[xx] = orgbuff2[xx];
 		}
 
 		// 補完用の余裕
@@ -116,13 +128,15 @@ void *ImageSharpen_ThreadFunc(void *param)
 // Margin     : 画像の何%まで余白チェックするか(0～20%)
 // pOrgWidth  : 余白カット後の幅を返す
 // pOrgHeight : 余白カット後の高さを返す
-int ImageSharpen(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
+int ImageSharpen(int Page, int Sharpen, int Half, int Index, int OrgWidth, int OrgHeight)
 {
-//	LOGD("ImageSharpen : p=%d, h=%d, i=%d, ow=%d, oh=%d", Page, Half, Index, OrgWidth, OrgHeight);
+	LOGD("ImageSharpen : Page=%d, Sharpen=%d, Half=%d, Index=%d, OrgWidth=%d, OrgHeight=%d", Page, Sharpen, Half, Index, OrgWidth, OrgHeight);
 
 	int ret = 0;
 
 	int linesize;
+
+    mAmount = Sharpen;
 
 	// ラインサイズ
 	linesize  = OrgWidth + HOKAN_DOTS;

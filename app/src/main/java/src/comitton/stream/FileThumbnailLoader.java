@@ -1,6 +1,5 @@
 package src.comitton.stream;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import jcifs.smb.SmbException;
@@ -46,8 +45,8 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	private boolean mOut_of_memory = false;
 
-	public FileThumbnailLoader(Activity activity, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int filesort, String charset, boolean hidden, boolean thumbsort) {
-		super(uri, path, handler, id, files, sizeW, sizeH, cachenum);
+	public FileThumbnailLoader(Activity activity, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int filesort, String charset, boolean hidden, boolean thumbsort, int crop, int margin) {
+		super(uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
 
 		mActivity = activity;
 
@@ -93,8 +92,8 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		}
 	}
 
-	public FileThumbnailLoader(String uri, String path, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum) {
-		super(uri, path, handler, id, files, sizeW, sizeH, cachenum);
+	public FileThumbnailLoader(String uri, String path, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int crop, int margin) {
+		super(uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
 	}
 
 	// スレッド開始
@@ -259,11 +258,13 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	}
 
 	private boolean loadBitmap(int index, int thum_cx, int thum_cy, boolean firstloop, boolean priority) {
+		boolean debug = false;
+
 		int result = CallImgLibrary.ThumbnailCheck(mID, index);
 		boolean ret = false;
 		if (result > 0) {
 			// 既に読み込み済み
-			Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap 読み込み済みです.");
+			if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap 読み込み済みです.");}
 			return true;
 		}
 		// ファイル情報取得
@@ -272,11 +273,11 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			return false;
 		}
 		FileData file = mFiles.get(index);
-		Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap Filename=" + file.getName());
+		if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap Filename=" + file.getName());}
 		String filename = file.getName();
 		String filepath = mUri + mPath + filename;
 		String pathcode = DEF.makeCode(filepath, thum_cx, thum_cy);
-		Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap Filename=" + file.getName() + ", pathcode=" + pathcode);
+		if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap Filename=" + file.getName() + ", pathcode=" + pathcode);}
 		int filetype = file.getType();
 
 		if (filename.equals("..")) {
@@ -299,7 +300,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		if (firstloop == false && ret == false) {
 			// 2周目で画像セーブに失敗していたら
 			CallImgLibrary.ThumbnailSetNone(mID, index);
-			Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap 空で登録しました.");
+			if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap 空で登録しました.");}
 		}
 
 		if ((firstloop == true && ret == true) || firstloop == false) {
@@ -310,13 +311,15 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			message.arg1 = ret == true ? index : DEF.THUMBSTATE_ERROR;
 			message.obj = getFilename(index);
 			mHandler.sendMessage(message);
-			Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap 通知しました arg1=" + message.arg1);
+			if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap 通知しました arg1=" + message.arg1);}
 		}
 		return !mOut_of_memory;
 	}
 
 	private boolean loadBitmap2(String filename, int index, int thum_cx, int thum_cy, boolean firstloop, boolean priority, String pathcode, int inindex, ArrayList<FileData> files) {
-		Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2  Filename=" + filename);
+		boolean debug = false;
+
+		if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2  Filename=" + filename);}
 		boolean ret = false;
 		Bitmap bm = null;
 
@@ -334,31 +337,31 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 		// キャッシュから読込
 		if (checkThumbnailCache(pathcode)) {
-			Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュに登録済みです.");
+			if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュに登録済みです.");}
 			bm = loadThumbnailCache(pathcode);
 			if (bm == null) {
-				Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュが空でした.スキップします.");
+				if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュが空でした.スキップします.");}
 				return true;
 			}
 			else {
-				Log.d("FileThumbnailLoader", "index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュがありました.");
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュがありました.");}
 				loadMemory(index, thum_cx, thum_cy, bm, priority, pathcode);
 				//saveBitmap(bm, pathcode);
 				return true;
 			}
 		}
 		else {
-			Log.d("FileThumbnailLoader", "index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュに登録済されていません.");
+			if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 キャッシュに登録済されていません.");}
 		}
 
 		if (mThreadBreak == true) {
-			Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 中断されました.");
+			if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 中断されました.");}
 			return false;
 		}
 
 		if (firstloop && bm == null) {
 			// 初回ループはキャッシュからのみ読み込み
-			Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 スキップします.");
+			if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 スキップします.");}
 			return false;
 		}
 
@@ -367,7 +370,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		if (bm == null) {
 			// ディレクトリの場合は中のファイルを参照
 			if (filename.endsWith("/")) {
-				Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中を検索します.");
+				if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中を検索します.");}
 				try {
 					infile = FileAccess.listFiles(mUri + mPath + filename, mUser, mPass);
 				} catch (SmbException e) {
@@ -375,18 +378,18 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				}
 
 				if (infile.size() == 0) {
-					Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中は空でした.");
+					if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中は空でした.");}
 					return false;
 				}
-				Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリに " + infile.size() + " 個のファイルがあります.");
+				if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリに " + infile.size() + " 個のファイルがあります.");}
 				for (int i = 0; i < infile.size(); i++) {
 					if (infile.get(i).getName().endsWith("/")) {
-						Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中にディレクトリがあります. infilename=" + infile.get(i).getName());
+						if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中にディレクトリがあります. infilename=" + infile.get(i).getName());}
 						if (loadBitmap2(filename + infile.get(i).getName(), index, thum_cx, thum_cy, firstloop, priority, pathcode, i, infile)) {
 								return true;
 						}
 					} else if (infile.get(i) != null) {
-						Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中にファイルがあります. infilename=" + infile.get(i).getName());
+						if (debug) {Log.d("FileThumbnailLoader","index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中にファイルがあります. infilename=" + infile.get(i).getName());}
 						if (loadBitmap3(filename + infile.get(i).getName(), index, thum_cx, thum_cy, priority, pathcode, i, infile)) {
 							return true;
 						}
@@ -405,23 +408,28 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	}
 
 	private boolean loadBitmap3(String filename, int index, int thum_cx, int thum_cy, boolean priority, String pathcode, int inindex, ArrayList<FileData> files) {
-		Log.d("FileThumbnailLoader","index=" + index + " loadBitmap3 Filename=" + filename);
+		boolean debug = false;
+		if (debug) {Log.d("FileThumbnailLoader","index=" + index + " loadBitmap3 Filename=" + filename);}
 		// ビットマップ読み込み
 		Bitmap bm = null;
 		BitmapFactory.Options option = new BitmapFactory.Options();
 		String uripath = mUri + mPath;
 		String pathfile = mPath + filename;
 		String ext = DEF.getExtension(filename);
-		Log.d("FileThumbnailLoader","index=" + index + " loadBitmap3 拡張子を取得します. ext=" + ext);
+		if (debug) {Log.d("FileThumbnailLoader","index=" + index + " loadBitmap3 拡張子を取得します. ext=" + ext);}
 
 		if (pathfile != null) {
 			int type = FILETYPE_IMG;
-			if (FileData.isZip(ext)) {
-				Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=zip");
+			if (FileData.isPdf(ext)) {
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=zip");}
+				type = FILETYPE_PDF;
+			}
+			else if (FileData.isZip(ext)) {
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=zip");}
 				type = FILETYPE_ZIP;
 			}
 			else if (FileData.isRar(ext)) {
-				Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=rar");
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=rar");}
 				type = FILETYPE_RAR;
 			}
 			else if (FileData.isImage(ext)) {
@@ -440,128 +448,32 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 					openmode = ImageManager.OPENMODE_THUMBNAIL;
 				}
 				mImageMgr = new ImageManager(mActivity, uripath, filename, mUser, mPass, mFileSort, mHandler, mCharset, mHidden, openmode, 1);
-				if (type == FILETYPE_ZIP || type == FILETYPE_RAR) {
-					Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 圧縮ファイルを開きます.");
-					mImageMgr.LoadImageList(0, 0, 0);
-					try {
-						Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: Call loadThumbnailFromStream(" + 0 + ", " + mThumbSizeW + ", " + mThumbSizeH + ") start.");
-						bm = mImageMgr.loadThumbnailFromStream(0, mThumbSizeW, mThumbSizeH);
-						if (bm != null) {
-							Log.e("FileThumbnailLoader", "loadBitmap3: mImageMgr.loadThumbnailFromStream() failed.");
-						}
-						Log.d("FileThumbnailLoader", "loadBitmap3: mImageMgr.loadThumbnailFromStream() succeed.");
-						} catch (Exception ex) {
-						Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーになりました.");
-						String s = "exception";
-						if (ex != null && ex.getMessage() != null) {
-							s = ex.getMessage();
-							return false;
-						}
-						Log.i("Thumbnail", s);
-					} finally {
-						Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 圧縮ファイルを開きました.");
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得します.");}
+				mImageMgr.LoadImageList(0, 0, 0);
+				try {
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: LoadThumbnail を実行します. page=0, , width=" + mThumbSizeW + ", height=" + mThumbSizeH);}
+					bm = mImageMgr.LoadThumbnail(0, mThumbSizeW, mThumbSizeH);
+					if (bm != null) {
+						Log.e("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail の実行に失敗しました.");
 					}
-
-					if (bm == null) {
-						// NoImageであればステータス設定
-						//CallImgLibrary.ThumbnailSetNone(mID, index);
-						Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 取得できませんでした.");
+					else {
+						if (debug) {Log.d("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail() の実行に成功しました.");}
+					}
+				} catch (Exception e) {
+					Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得でエラーになりました.");
+					if (e != null && e.getMessage() != null) {
+						Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーメッセージ. " + e.getMessage());
 						return false;
 					}
-				} else {
-					Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージファイルを開きます. mUri=" + mUri + ", pathfile=" + pathfile + ", mUser=" + mUser + ", mPass=" + mPass);
-					WorkStream ws = new WorkStream(mUri, pathfile, mUser, mPass, type == FILETYPE_ZIP);
-					try {
-						int ret = 0;
-						int width = -1;
-						int height = -1;
-						// ファイル情報取得
-						if (inindex >= files.size()) {
-							Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 ファイルのindexが範囲外です. index＝" + inindex + ", size=" + files.size());
-							return false;
-						}
-						FileData file = files.get(inindex);
-						short extType = file.getExtType();
-						long orglen = file.getSize();
+				} finally {
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 圧縮ファイルを開きました.");}
+				}
 
-						// サイズのみ取得
-						Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サイズを取得します.");
-						option.inJustDecodeBounds = true;
-						try {
-							BitmapFactory.decodeStream(ws, null, option);
-						} catch (Exception e) {
-							Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 サイズ取得(BitmapFactory)でエラーが発生しました.");
-							if (e != null && e.getMessage() != null) {
-								Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーメッセージ. " + e.getMessage());
-								return false;
-							}
-						}
-						width = option.outWidth;
-						height = option.outHeight;
-						if (width > 0 && height > 0) {
-							Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サイズ取得(BitmapFactory)に成功しました.");
-						} else {
-							Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サイズ取得(BitmapFactory)に失敗しました.");
-							ws.seek(0);
-							ret = CallImgLibrary.ImageInitialize(orglen * 2, 0, 1, 1);
-							if (ret < 0) {
-								return false;
-							}
-							int[] imagesize = new int[2];
-							Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3  サイズ取得(Native)を実行します. type=" + extType + ", orglen=" + orglen);
-							ret = mImageMgr.sizeCheckNativeMain(ws, -1, extType, orglen, imagesize);
-							if (ret == 0 && imagesize[0] > 0 && imagesize[1] > 0) {
-								Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サイズ取得(Native)に成功しました.");
-								width = imagesize[0];
-								height = imagesize[1];
-							}
-							else {
-								Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 サイズ取得(Native)に失敗しました.");
-								return false;
-							}
-						}
-						Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージファイルのサイズ. width=" + width + ", height=" + height);
-
-						if (width > 0 && height > 0) {
-							// 縮小してファイル読込
-							Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージデータを取得します.");
-							option.inJustDecodeBounds = false;
-							option.inPreferredConfig = Config.RGB_565;
-							int sampleSize = DEF.calcThumbnailScale(width, height, mThumbSizeW, mThumbSizeH);
-							option.inSampleSize = sampleSize;
-							ws.seek(0);
-							try {
-								bm = BitmapFactory.decodeStream(new BufferedInputStream(ws, 100 * 1024), null, option);
-							} catch (Exception e) {
-								Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージデータ取得(BitmapFactory)でエラーが発生しました.");
-								if (e != null && e.getMessage() != null) {
-									Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーメッセージ. " + e.getMessage());
-									return false;
-								}
-							}
-							if (bm != null) {
-								Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージデータ取得(BitmapFactory)に成功しました.");
-							} else {
-								Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージデータ取得(BitmapFactory)に失敗しました.");
-								ws.seek(0);
-								bm = mImageMgr.getBitmapNativeMain(ws, -1, extType, sampleSize, orglen, width, height, bm);
-								if (bm != null) {
-									Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージデータ取得(Native)に成功しました.");
-								} else {
-									Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージデータ取得(Native)に失敗しました.");
-									return false;
-								}
-							}
-							if (bm == null) {
-								Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージファイルを取得できませんでした.");
-								// NoImageであればステータス設定
-								return false;
-								//CallImgLibrary.ThumbnailSetNone(mID, index);
-							}
-						}
-					} finally {
-						Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 イメージファイルを開きました.");
-					}
+				if (bm == null) {
+					// NoImageであればステータス設定
+					//CallImgLibrary.ThumbnailSetNone(mID, index);
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 取得できませんでした.");}
+					return false;
 				}
 			} catch (Exception e) {
 				Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーが発生しました.");
@@ -581,10 +493,10 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			}
 			if (mThreadBreak == true) {
 				// 読み込み中断
-				Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 中断されました.");
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 中断されました.");}
 				return true;
 			}
-			Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 キャッシュに登録します.");
+			if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 キャッシュに登録します.");}
 			loadMemory(index, thum_cx, thum_cy, bm, priority, pathcode);
 			saveCache(bm, pathcode);
 			bm.recycle();
@@ -595,21 +507,23 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	}
 
 	private void loadMemory(int index, int thum_cx, int thum_cy, Bitmap bm, boolean priority, String pathcode) {
+		boolean debug = false;
+
 		int result;
 		boolean save = false;
 
 		if (bm != null) {
-			Log.d("FileThumbnailLoader", "index=" + index + " loadMemory NULLじゃないです");
+			if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory NULLじゃないです");}
 		} else {
-			Log.d("FileThumbnailLoader", "index=" + index + " loadMemory NULLです");
+			if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory NULLです");}
 		}
 		// ビットマップをサムネイルサイズぴったりにリサイズする
 		if (bm != null) {
-			Log.d("FileThumbnailLoader", "index=" + index + " loadMemory リサイズします");
-			bm = ImageAccess.resizeTumbnailBitmap(bm, thum_cx, thum_cy, ImageAccess.BMPALIGN_AUTO);
+			if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory リサイズします. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", crop=" + mThumbCrop + ", margin=" + mThumbMargin);}
+			bm = ImageAccess.resizeTumbnailBitmap(bm, thum_cx, thum_cy, mThumbCrop, mThumbMargin);
 		}
 		if (bm != null) {
-			Log.d("FileThumbnailLoader", "index=" + index + " loadMemory 切り出します");
+			if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory 切り出します");}
 			int w = bm.getWidth();
 			int h = bm.getHeight();
 			boolean chg = false;
@@ -638,21 +552,21 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 		if (bm != null) {
 			// 空きメモリがあるかをチェック
-			result = CallImgLibrary.ThumbnailSizeCheck(mID, bm.getWidth(), bm.getHeight());
+			result = CallImgLibrary.ThumbnailMemorySizeCheck(mID, bm.getWidth(), bm.getHeight());
 			if (result == 0) {
 				// メモリあり
-				Log.d("FileThumbnailLoader", "index=" + index + " loadMemory 空きメモリがありました");
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory 空きメモリがありました");}
 				save = true;
 			} else if (result > 0 && priority) {
 				// 表示の中心から外れたものを解放してメモリを空ける
 				result = CallImgLibrary.ThumbnailImageAlloc(mID, result, (mFirstIndex + mLastIndex) / 2);
 				if (result == 0) {
 					// メモリ獲得成功
-					Log.d("FileThumbnailLoader", "index=" + index + " loadMemory メモリを解放しました");
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory メモリを解放しました");}
 					save = true;
 				} else {
 					// メモリなし
-					Log.d("FileThumbnailLoader", "index=" + index + " loadMemory 空きメモリがありません");
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory 空きメモリがありません");}
 					mOut_of_memory = true;
 					save = false;
 				}
@@ -662,19 +576,20 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				result = CallImgLibrary.ThumbnailSave(mID, bm, index);
 				if (result != CallImgLibrary.RESULT_OK) {
 					// メモリ保持失敗
-					Log.d("FileThumbnailLoader", "index=" + index + " loadMemory メモリに保持できません");
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadMemory メモリに保持できません");}
 					mOut_of_memory = true;
 					save = false;
 				}
 			}
 		}
-		return;
 	}
 
 	private void saveCache(Bitmap bm, String pathcode) {
+		boolean debug = false;
+
 		int result;
 		if (bm != null) {
-			Log.d("FileThumbnailLoader", "saveCache  キャッシュにセーブします pathcode=" + pathcode);
+			if (debug) {Log.d("FileThumbnailLoader", "saveCache  キャッシュにセーブします pathcode=" + pathcode);}
 			saveThumbnailCache(pathcode, bm);
 			return;
 		}

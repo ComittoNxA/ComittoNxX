@@ -12,7 +12,6 @@ import src.comitton.stream.CallImgLibrary;
 
 import jp.dip.muracoro.comittonx.R;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -24,13 +23,12 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class FileListArea extends ListArea implements Handler.Callback {
 	private final int ICON_ID[] =
 	{
-		R.drawable.thumb_parent, R.drawable.thumb_text
+		R.drawable.thumb_parent, R.drawable.txt, R.drawable.pdf
 	};
 	private final int FILEMARK_ID[] =
 	{
@@ -42,6 +40,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 	private final int ICON_PARENT = 0;
 	private final int ICON_TEXT = 1;
+	private final int ICON_PDF = 2;
+
 	private final int FILEMARK_DIR = 0;
 	private final int FILEMARK_PDF = 1;
 	private final int FILEMARK_ZIP = 2;
@@ -163,6 +163,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 	// タイルモード時の描画
 	private void drawTileItems(Canvas canvas, int baseX, int baseY) {
+		boolean debug = false;
+
 //		int cx = mAreaWidth;
 		int cy = mAreaHeight;
 		int x;
@@ -254,7 +256,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 				else {
 					switch (fd.getState()) {
 						case -1:
-							if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_TXT) {
+							if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT) {
 								color = mBefColor;
 							}
 							else {
@@ -274,7 +276,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 				mLinePaint.setStrokeWidth(3);
 
 				if (mThumbFlag) {
-					if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR || type == FileData.FILETYPE_TXT) {
+					if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR) {
 						// ビットマップ表示
 						canvas.drawRect(x - 1, y - 1, x + mIconWidth, y + mIconHeight, mLinePaint);
 //						canvas.drawRect(x - 1, y - 1, x + mIconWidth, y + mIconHeight, paint);
@@ -290,6 +292,9 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							else if (exttype == FileData.EXTTYPE_RAR) {
 								bmMark = mMark[FILEMARK_RAR];
 							}
+							else if (exttype == FileData.EXTTYPE_PDF) {
+								bmMark = mMark[FILEMARK_PDF];
+							}
 						}
 
 						int retBitmap = CallImgLibrary.ThumbnailCheck(mThumbnailId, index);
@@ -297,14 +302,35 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							int retValue = CallImgLibrary.ThumbnailDraw(mThumbnailId, mDrawBitmap, index);
 							int width = (retValue >> 16) & 0xFFFF;
 							int height = retValue & 0xFFFF;
-							int dstWidth = width * mIconHeight / height;
-							int dstHeight = mIconHeight;
+
+							int dstWidth = 0;
+							int dstHeight = 0;
+
+							if (debug) {Log.d("FileListArea", "drawTileItems: width/height=" + ((float)width / (float)height) + ", mIconWidth/mIconHeight=" + ((float)mIconWidth / (float)mIconHeight));}
+							if ((float)width / height > (float)mIconWidth / mIconHeight) {
+								if (debug) {Log.d("FileListArea", "drawTileItems: 幅に合わせます.  width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
+								// 幅に合わせる
+								dstWidth = mIconWidth;
+								dstHeight = height * mIconWidth / width;
+							}
+							else {
+								if (debug) {Log.d("FileListArea", "drawTileItems: 高さに合わせます.  width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
+								// 高さに合わせる
+								dstWidth = width * mIconHeight / height;
+								dstHeight = mIconHeight;
+							}
+
 							int dstX = 0;
+							int dstY = 0;
 							if (dstWidth < mIconWidth) {
 								dstX = (mIconWidth - dstWidth) / 2;
 							}
+							if (dstHeight < mIconHeight) {
+								dstY = (mIconHeight - dstHeight) / 2;
+							}
+
 							mSrcRect.set(0, 0, width, height);
-							mDstRect.set(x + dstX, y, x + dstX + dstWidth, y + dstHeight);
+							mDstRect.set(x + dstX, y + dstY, x + dstX + dstWidth, y + dstY + dstHeight);
 							canvas.drawBitmap(mDrawBitmap, mSrcRect, mDstRect, mBitmapPaint);
 
 							if (bmMark != null) {
@@ -333,25 +359,38 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							}
 						}
 					}
-					else {
-						Bitmap bm;
+					else if (type == FileData.FILETYPE_PARENT || type == FileData.FILETYPE_TXT) {
+						Bitmap bm =null;
+						int iconWidth = mIconWidth;
+						int	iconHeight = mIconHeight;
 						if (type == FileData.FILETYPE_PARENT) {
 							bm = mIcon[ICON_PARENT];
 						}
-						else {
+						else if (type == FileData.FILETYPE_TXT) {
 							bm = mIcon[ICON_TEXT];
+							// 未読・既読で色を変える
+							bm = ImageAccess.setColor(bm, mLinePaint.getColor());
+							canvas.drawRect(x - 1, y - 1, x + iconWidth, y + iconHeight, mLinePaint);
 						}
 						int dstWidth = bm.getWidth();
 						int dstHeight = bm.getHeight();
+						float dsW = (float)iconWidth / (float)dstWidth;
+						float dsH = (float)iconHeight / (float)dstHeight;
+						float dsMin = Math.min(dsW, dsH);
+
+						int w = (int)(dstWidth * dsMin);
+						int h = (int)(dstHeight * dsMin);
 						int dstX = 0;
 						int dstY = 0;
-						if (dstWidth < mIconWidth) {
-							dstX = (mIconWidth - dstWidth) / 2;
+						if (w < iconWidth) {
+							dstX = (iconWidth - w) / 2;
 						}
-						if (dstHeight < mIconHeight) {
-							dstY = (mIconHeight - dstHeight) / 2;
+						if (h < iconHeight) {
+							dstY = (iconHeight - h) / 2;
 						}
-						canvas.drawBitmap(bm, x + dstX, y + dstY, mBitmapPaint);
+						mSrcRect.set(0, 0, dstWidth, dstHeight);
+						mDstRect.set(x + dstX, y + dstY, x + dstX + (int)(dstWidth * dsMin), y + dstY + (int)(dstHeight * dsMin));
+						canvas.drawBitmap(bm, mSrcRect, mDstRect, mBitmapPaint);
 					}
 				}else{ // タイル表示・サムネ無しの場合は枠で囲む
 					canvas.drawRect(baseX + mDrawLeft + ix * mItemWidth + mItemMargin, y + mIconHeight,
@@ -455,6 +494,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	}
 
 	private void drawListItems(Canvas canvas, int baseX, int baseY) {
+		boolean debug = false;
+
 		int cx = mAreaWidth;
 		int cy = mAreaHeight;
 		int y;
@@ -533,7 +574,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			else {
 				switch (fd.getState()) {
 					case -1:
-						if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_TXT) {
+						if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT) {
 							color = mBefColor;
 						}
 						else {
@@ -561,7 +602,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
                 int iconWidth = mIconWidth * iconHeight / mIconHeight;
 				int retBitmap = CallImgLibrary.ThumbnailCheck(mThumbnailId, index);
 
-				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR || type == FileData.FILETYPE_TXT) {
+				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR) {
 					// ビットマップ表示
                     canvas.drawRect(x - 1, y - 1, x + iconWidth, y + iconHeight, mLinePaint);
 
@@ -582,14 +623,34 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						int retValue = CallImgLibrary.ThumbnailDraw(mThumbnailId, mDrawBitmap, index);
 						int width = (retValue >> 16) & 0xFFFF;
 						int height = retValue & 0xFFFF;
-                        int dstWidth = width * iconHeight / height;
-                        int dstHeight = iconHeight;
+
+						int dstWidth = 0;
+						int dstHeight = 0;
+
+						if (debug) {Log.d("FileListArea", "drawListItems: width/height=" + ((float)width / (float)height) + ", iconWidth/iconHeight=" + ((float)iconWidth / (float)iconHeight));}
+						if ((float)width / height > (float)iconWidth / iconHeight) {
+							if (debug) {Log.d("FileListArea", "drawListItems: 幅に合わせます.  width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
+							// 幅に合わせる
+							dstWidth = iconWidth;
+							dstHeight = height * iconWidth / width;
+						}
+						else {
+							if (debug) {Log.d("FileListArea", "drawListItems: 高さに合わせます.  width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
+							// 高さに合わせる
+							dstWidth = width * iconHeight / height;
+							dstHeight = iconHeight;
+						}
+
 						int dstX = 0;
-                        if (dstWidth < iconWidth) {
+						int dstY = 0;
+						if (dstWidth < iconWidth) {
                             dstX = (iconWidth - dstWidth) / 2;
 						}
+						if (dstHeight < iconHeight) {
+							dstY = (iconHeight - dstHeight) / 2;
+						}
 						mSrcRect.set(0, 0, width, height);
-						mDstRect.set(x + dstX, y, x + dstX + dstWidth, y + dstHeight);
+						mDstRect.set(x + dstX, y +dstY, x + dstX + dstWidth, y + dstY + dstHeight);
 						canvas.drawBitmap(mDrawBitmap, mSrcRect, mDstRect, mBitmapPaint);
 
 						if (bmMark != null) {
@@ -618,17 +679,36 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						}
 					}
 				}
-				else {
-					Bitmap bm;
+				else if (type == FileData.FILETYPE_PARENT || type == FileData.FILETYPE_TXT) {
+					Bitmap bm =null;
 					if (type == FileData.FILETYPE_PARENT) {
 						bm = mIcon[ICON_PARENT];
 					}
-					else {
+					else if (type == FileData.FILETYPE_TXT) {
 						bm = mIcon[ICON_TEXT];
+						// 未読・既読で色を変える
+						bm = ImageAccess.setColor(bm, mLinePaint.getColor());
+						canvas.drawRect(x - 1, y - 1, x + iconWidth, y + iconHeight, mLinePaint);
 					}
-                    mSrcRect.set(0, 0, bm.getWidth(), bm.getHeight());
-                    mDstRect.set(x, y, x + iconWidth, y + iconHeight);
-                    canvas.drawBitmap(bm, mSrcRect, mDstRect, mBitmapPaint);
+					int dstWidth = bm.getWidth();
+					int dstHeight = bm.getHeight();
+					float dsW = (float)iconWidth / (float)dstWidth;
+					float dsH = (float)iconHeight / (float)dstHeight;
+					float dsMin = Math.min(dsW, dsH);
+
+					int w = (int)(dstWidth * dsMin);
+					int h = (int)(dstHeight * dsMin);
+					int dstX = 0;
+					int dstY = 0;
+					if (w < iconWidth) {
+						dstX = (iconWidth - w) / 2;
+					}
+					if (h < iconHeight) {
+						dstY = (iconHeight - h) / 2;
+					}
+					mSrcRect.set(0, 0, dstWidth, dstHeight);
+					mDstRect.set(x + dstX, y + dstY, x + dstX + (int)(dstWidth * dsMin), y + dstY + (int)(dstHeight * dsMin));
+					canvas.drawBitmap(bm, mSrcRect, mDstRect, mBitmapPaint);
 				}
 				// タイトルはアイコンの右側に表示
                 x += iconWidth + mItemMargin;
@@ -755,8 +835,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			mIcon = new Bitmap[ICON_ID.length];
 			int thumbmin = Math.min(sizew, sizeh);
 			for (int i = 0; i < mIcon.length; i++) {
-//				mBitmap[i] = BitmapFactory.decodeResource(res, BITMAP_ID[i]);
-				mIcon[i] = ImageAccess.createIcon(res, ICON_ID[i], thumbmin, mDirColor);
+				mIcon[i] = ImageAccess.createIcon(res, ICON_ID[i], mIconWidth, mIconHeight, mDirColor);
 			}
 			mMark = new Bitmap[FILEMARK_ID.length];
 			float density = res.getDisplayMetrics().scaledDensity;

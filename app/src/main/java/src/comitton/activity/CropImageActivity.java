@@ -60,128 +60,18 @@ public class CropImageActivity extends Activity implements Runnable, TextWatcher
         if(mCropPath != null) {
             try {
                 Log.d("CropImageActivity", "run: イメージファイルを開きます. mUri=" + mPath + ", mFile=" + mFile);
-                int ret;
-                int width;
-                int height;
-                WorkStream ws = null;
-                File fileObj;
-                int extType = 0;
-                long orglen = 0;
-
-                String path = mCropPath.substring(0, mCropPath.lastIndexOf("/") + 1);
-                String file = mCropPath.substring(mCropPath.lastIndexOf("/") + 1);
-
-                BitmapFactory.Options option = new BitmapFactory.Options();
-                option.inJustDecodeBounds = true;
-
-                Log.d("CropImageActivity", "run: サイズ取得(BitmapFactory)を実行します. pathname=" + mCropPath);
-                BitmapFactory.decodeFile(mCropPath, option);
-                width = option.outWidth;
-                height = option.outHeight;
-
-                if (width > 0 && height > 0) {
-                    Log.d("CropImageActivity", "run: サイズ取得(BitmapFactory)に成功しました.");
-                } else {
-                    Log.d("CropImageActivity", "run: サイズ取得(BitmapFactory)に失敗しました.");
-                    Log.d("CropImageActivity", "run: ImageManagerを作成します. path=" + path + ", cmpfile=" + file);
-                    //imageMgr = new ImageManager(this, path, file, "", "", ImageManager.FILESORT_NAME_UP, handler, "", true, ImageManager.OPENMODE_THUMBSORT, 1);
-                    Log.d("CropImageActivity", "run: WorkStreamを作成します. uri=" + path + ", path=" + file);
-                    ws = new WorkStream("", mCropPath, "", "", false);
-                    Log.d("CropImageActivity", "run: Fileオブジェクトを作成します. pathname=" + mPath + mFile);
-                    try {
-                        fileObj = new File(path + file);
-                    } catch (Exception e) {
-                        Log.e("CropImageActivity", "run: Fileオブジェクトを作成中にエラーが発生しました.");
-                        if (e != null && e.getMessage() != null) {
-                            Log.e("CropImageActivity", "run: エラーメッセージ. " + e.getMessage());
-                        }
-                        throw new RuntimeException(e);
-                    }
-                    Log.d("CropImageActivity", "run: ファイルサイズを取得します.");
-                    try {
-                        orglen = fileObj.length();
-                    } catch (Exception e) {
-                        Log.e("CropImageActivity", "run: ファイルサイズの取得中にエラーが発生しました.");
-                        if (e != null && e.getMessage() != null) {
-                            Log.e("CropImageActivity", "run: エラーメッセージ. " + e.getMessage());
-                        }
-                        throw new RuntimeException(e);
-                    }
-                    if (orglen == 0) {
-                        Log.e("CropImageActivity", "run: ファイルサイズの取得に失敗しました.");
-                    }
-                    Log.d("CropImageActivity", "run: ファイルタイプを取得します.");
-                    if (file.lastIndexOf(".") != -1) {
-                        extType = FileData.getExtType(file.substring(file.lastIndexOf(".")));
-                    } else {
-                        Log.e("CropImageActivity", "run: 拡張子がありません.");
-                    }
-                    //Log.d("CropImageActivity", "run: イメージバッファを作成します.");
-                    //ret = CallImgLibrary.ImageInitialize(orglen * 2, 0, 1, 1);
-                    //if (ret < 0) {
-                    //    Log.e("CropImageActivity", "run: イメージバッファの作成に失敗しました.");
-                    //   return;
-                    //}
-                    int[] imagesize = new int[2];
-                    Log.d("CropImageActivity", "run: サイズ取得(Native)を実行します. type=" + extType + ", orglen=" + orglen);
-                    ret = ImageManager.sizeCheckNativeMain(ws, -1, extType, orglen, imagesize);
-                    if (ret == 0 && imagesize[0] > 0 && imagesize[1] > 0) {
-                        Log.d("CropImageActivity", "run: サイズ取得(Native)に成功しました.");
-                        width = imagesize[0];
-                        height = imagesize[1];
-                    } else {
-                        Log.e("CropImageActivity", "run: サイズ取得(Native)に失敗しました.");
-                        return;
-                    }
+                mBitmap = ImageManager.GetBitmapFromPath(mCropPath);
+                if (mBitmap == null) {
+                    Log.e("CropImageActivity", "run: ビットマップ取得に失敗しました.");
                 }
-                Log.d("CropImageActivity", "run: イメージファイルのサイズ. width=" + width + ", height=" + height);
-
-                if (width > 0 && height > 0) {
-                    // 縮小してファイル読込
-                    Log.d("CropImageActivity", "run: イメージデータを取得します.");
-                    option.inJustDecodeBounds = false;
-                    option.inPreferredConfig = Bitmap.Config.RGB_565;
-                    // 最低縦1000pxに縮小して画像読込
-                    int sampleSize = DEF.calcThumbnailScale(option.outWidth, option.outHeight, 0, 1000);
-                    option.inSampleSize = sampleSize;
-
-                    Log.d("CropImageActivity", "run: イメージデータ取得(BitmapFactory)を実行します. pathname=" + mCropPath);
-                    mBitmap = BitmapFactory.decodeFile(mCropPath, option);
-                    if (mBitmap != null) {
-                        message.what = DEF.HMSG_LOAD_END;
-                    }
-                    ws.seek(0);
-                    try {
-                        mBitmap = BitmapFactory.decodeFile(mCropPath, option);
-                    } catch (Exception e) {
-                        Log.e("CropImageActivity", "run: イメージデータ取得(BitmapFactory)でエラーが発生しました.");
-                        if (e != null && e.getMessage() != null) {
-                            Log.e("CropImageActivity", "run: エラーメッセージ. " + e.getMessage());
-                            return;
-                        }
-                    }
-                    if (mBitmap != null) {
-                        Log.d("CropImageActivity", "run: イメージデータ取得(BitmapFactory)に成功しました.");
-                    } else {
-                        Log.d("CropImageActivity", "run: イメージデータ取得(BitmapFactory)に失敗しました.");
-                        ws.seek(0);
-                        mBitmap = ImageManager.getBitmapNativeMain(ws, -1, extType, sampleSize, orglen, width, height, mBitmap);
-                        if (mBitmap != null) {
-                            Log.d("CropImageActivity", "run: イメージデータ取得(Native)に成功しました.");
-                        } else {
-                            Log.e("CropImageActivity", "run: イメージデータ取得(Native)に失敗しました.");
-                            return;
-                        }
-                    }
-                    if (mBitmap == null) {
-                        Log.d("CropImageActivity", "run: イメージファイルを取得できませんでした.");
-                        // NoImageであればステータス設定
-                        return;
-                        //CallImgLibrary.ThumbnailSetNone(mID, index);
-                    } else {
-                        Log.d("CropImageActivity", "run: イメージファイルを取得できました.");
-                        message.what = DEF.HMSG_LOAD_END;
-                    }
+                else {
+                    Log.e("CropImageActivity", "run: ビットマップ取得に成功しました.");
+                    message.what = DEF.HMSG_LOAD_END;
+                }
+                if (mBitmap.getHeight() > 1000) {
+                    Log.e("CropImageActivity", "run: ビットマップを縮小します.");
+                    float dsH = (float)1000 / (float)mBitmap.getHeight();
+                    mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth() * dsH), (int)(mBitmap.getHeight() * dsH), true);
                 }
             } catch (Exception e) {
                 Log.e("CropImageActivity", "run: エラーが発生しました.");
@@ -217,6 +107,11 @@ public class CropImageActivity extends Activity implements Runnable, TextWatcher
                 case DEF.HMSG_ERROR:
                     setResult(RESULT_CANCELED);
                     finish();
+                    break;
+                case DEF.HMSG_PROGRESS:
+                    if (message.obj != null) {
+                        mProgress.setMessage(message.obj.toString());
+                    }
                     break;
             }
         }

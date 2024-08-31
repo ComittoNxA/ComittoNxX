@@ -239,6 +239,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	private int mLastMsg;
 	private int mPageSelect;
 	private int mMomentMode;
+	private int mSharpen;
 	private int mBright;
 	private int mGamma;
 	private int mBkLight;
@@ -279,7 +280,6 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	// private boolean mBackMode = false;
 	private boolean mAccessLamp = true;
 	private boolean mTapScrl = false;
-	private boolean mSharpen;
 	private boolean mInvert;
 	private boolean mGray;
 	private boolean mMoire;
@@ -516,10 +516,11 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		// mLoadingStr = res.getString(R.string.loading);
 		// mResizingStr = res.getString(R.string.resizing);
 		mLoadErrStr = res.getString(R.string.loaderr);
-		mReadingMsg = new String[3];
+		mReadingMsg = new String[4];
 		mReadingMsg[0] = res.getString(R.string.reading);
 		mReadingMsg[1] = res.getString(R.string.readxref);
 		mReadingMsg[2] = res.getString(R.string.readpage);
+		mReadingMsg[3] = res.getString(R.string.download);
 
 		// this.mDisplayModeTextView = (TextView)
 		// this.findViewById(R.id.display_mode);
@@ -764,9 +765,9 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		public void run() {
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, mFileSort, handler, mCharset, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
-			Log.d("ImageActivity", "run \n" + getMemoryString());
+			Log.d("ImageActivity", "run メモリ利用状況.\n" + getMemoryString());
 			mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
-			Log.d("ImageActivity", "run \n" + getMemoryString());
+			Log.d("ImageActivity", "run メモリ利用状況.(2回目)\n" + getMemoryString());
 			setMgrConfig(true);
 			// mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode,
 			// mNoExpand, mAlgoMode, mRotate, mWAdjust, mImgScale, mPageWay,
@@ -1207,13 +1208,18 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				if (mReadDialog != null) {
 					// ページ読み込み中
 					String readmsg;
-					if (mReadingMsg[msg.arg2] != null) {
+					if (msg.arg2 < mReadingMsg.length && mReadingMsg[msg.arg2] != null) {
 						readmsg = mReadingMsg[msg.arg2];
 					}
 					else {
 						readmsg = "Loading...";
 					}
-					mReadDialog.setMessage(readmsg + " (" + msg.arg1 + ")");
+					if(msg.arg2 == 3) {
+						mReadDialog.setMessage(msg.obj.toString());
+					}
+					else {
+						mReadDialog.setMessage(readmsg + " (" + msg.arg1 + ")");
+					}
 				}
 				return true;
 
@@ -1698,9 +1704,9 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			return;
 		}
 
-		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPALIGN_LEFT);
+		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 		if (bm != null) {
-			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0);
+			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 			loader.deleteThumbnailCache(mFilePath, thumW, thumH);
 			loader.setThumbnailCache(mFilePath, bm);
 			Toast.makeText(this, "サムネイルに設定しました", Toast.LENGTH_SHORT).show();
@@ -1716,18 +1722,18 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		try {
 			Object lock = mImageMgr.getLockObject();
 			synchronized (lock) {
-				Log.d("ImageActivity", "setThumb: Call loadThumbnailFromStream(" + page + ", " + thumW + ", " + thumH + ") start.");
+				Log.d("ImageActivity", "setThumb: Call LoadThumbnail(" + page + ", " + thumW + ", " + thumH + ") start.");
 				// 読み込み処理とは排他する
-				bm = mImageMgr.loadThumbnailFromStream(page, thumW, thumH);
+				bm = mImageMgr.LoadThumbnail(page, thumW, thumH);
 			}
 		} catch (Exception e) {
 			Log.e("ImageActivity", "setThumb error");
 		}
 		if (bm != null) {
-			bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPALIGN_LEFT);
+			bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 		}
 		if (bm != null) {
-			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0);
+			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 			loader.deleteThumbnailCache(mFilePath, thumW, thumH);
 			loader.setThumbnailCache(mFilePath,bm);
 			Toast.makeText(this, "サムネイルに設定しました", Toast.LENGTH_SHORT).show();
@@ -2772,21 +2778,21 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				break;
 			}
 		}
-		mImageConfigDialog.setConfig(mSharpen, mGray, mInvert, mMoire, mTopSingle, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, selIndex, mMgnCut, mMgnCutColor, mIsConfSave);
+		mImageConfigDialog.setConfig(mGray, mInvert, mMoire, mTopSingle, mSharpen, mBright, mGamma, mBkLight, mAlgoMode, mDispMode, selIndex, mMgnCut, mMgnCutColor, mIsConfSave);
 		mImageConfigDialog.setImageConfigListner(new ImageConfigListenerInterface() {
 			@Override
-			public void onButtonSelect(int select, boolean sharpen, boolean gray, boolean invert, boolean moire, boolean topsingle, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
+			public void onButtonSelect(int select, boolean gray, boolean invert, boolean moire, boolean topsingle, int sharpen, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
 				// 選択状態を通知
 				boolean ischange = false;
 				// 変更があるかを確認(適用後のキャンセルの場合も含む)
-				if (mSharpen != sharpen || mGray != gray || mInvert != invert || mMoire != moire || mTopSingle != topsingle || mBright != bright || mGamma != gamma || mAlgoMode != algomode || mDispMode != dispmode || mMgnCut != mgncut || mMgnCutColor != mgncutcolor) {
+				if (mGray != gray || mInvert != invert || mMoire != moire || mTopSingle != topsingle || mSharpen != sharpen || mBright != bright || mGamma != gamma || mAlgoMode != algomode || mDispMode != dispmode || mMgnCut != mgncut || mMgnCutColor != mgncutcolor) {
 					ischange = true;
 				}
-				mSharpen = sharpen;
 				mGray = gray;
 				mInvert = invert;
 				mMoire = moire;
 				mTopSingle = topsingle;
+				mSharpen = sharpen;
 				mBright = bright;
 				mGamma = gamma;
 				mAlgoMode = algomode;
@@ -2831,11 +2837,11 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				if (issave) {
 					// 設定を指定
 					Editor ed = mSharedPreferences.edit();
-					ed.putBoolean(DEF.KEY_SHARPEN, mSharpen);
 					ed.putBoolean(DEF.KEY_GRAY, mGray);
 					ed.putBoolean(DEF.KEY_INVERT, mInvert);
 					ed.putBoolean(DEF.KEY_MOIRE, mMoire);
 					ed.putBoolean(DEF.KEY_TOPSINGLE, mTopSingle);
+					ed.putString(DEF.KEY_SHARPEN, Integer.toString(mSharpen));
 					ed.putString(DEF.KEY_BRIGHT, Integer.toString(mBright));
 					ed.putString(DEF.KEY_GAMMA, Integer.toString(mGamma));
 					ed.putString(DEF.KEY_BKLIGHT, Integer.toString(mBkLight));
@@ -3300,13 +3306,13 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				showSelectList(SELLIST_SCR_ROTATE);
 				break;
 			}
-			case DEF.MENU_SHARPEN: {
-				// シャープ化
-				mSharpen = mSharpen ? false : true;
-				setImageConfig();
-				setBitmapImage();
-				break;
-			}
+			//case DEF.MENU_SHARPEN: {
+			//	// シャープ化
+			//	mSharpen = mSharpen ? false : true;
+			//	setImageConfig();
+			//	setBitmapImage();
+			//	break;
+			//}
 			case DEF.MENU_INVERT: {
 				// 白黒反転
 				mInvert = mInvert ? false : true;

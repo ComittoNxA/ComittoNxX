@@ -26,15 +26,17 @@ extern int			gCancel;
 // RetSize 返却用ポインタ
 // RetSize[0] 完成サイズ(幅)
 // RetSize[1] 完成サイズ(高さ)
-int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int algorithm, int Rotate, int Margin, int MarginColor, int Bright, int Gamma, int Param, jint *RetSize)
+int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int algorithm, int Rotate, int Margin, int MarginColor, int Sharpen, int Bright, int Gamma, int Param, jint *RetSize)
 {
-	int Sharpen  = (Param & PARAM_SHARPEN) != 0 ? 1 : 0;
-	int Invert   = (Param & PARAM_INVERT) != 0 ? 1 : 0;;
+    int Invert   = (Param & PARAM_INVERT) != 0 ? 1 : 0;;
 	int Gray     = (Param & PARAM_GRAY) != 0 ? 1 : 0;
 	int Moire    = (Param & PARAM_MOIRE) != 0 ? 1 : 0;
 	int Pseland  = (Param & PARAM_PSELAND) != 0 ? 1 : 0;
 
-	IMAGEDATA *pData = &gImageData[Page];
+    LOGD("CreateScale: Page=%d, Half=%d, SclWidth=%d, SclHeight=%d, left=%d, right=%d, top=%d, bottom=%d, algorithm=%d, Rotate=%d, Margin=%d, MarginColor=%d, Sharpen=%d, Bright=%d, Gamma=%d", Page, Half, SclWidth, SclHeight, left, right, top, bottom, algorithm, Rotate, Margin, MarginColor, Sharpen, Bright, Gamma);
+    LOGD("CreateScale: Param[Invert=%d, Gray=%d, Moire=%d, Pseland=%d]", Invert, Gray, Moire, Pseland);
+
+    IMAGEDATA *pData = &gImageData[Page];
 	
 	pData->SclFlag[Half] = 0;
 
@@ -256,7 +258,7 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 		}
 
 		// シャープ化
-		ret = ImageSharpen(Page, Half, Index, scl_w, scl_h);
+		ret = ImageSharpen(Page, Sharpen, Half, Index, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}

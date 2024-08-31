@@ -183,14 +183,15 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private boolean mResumeOpen;
 	private boolean mThumbnail;
 	private boolean mUseThumbnailTap;
-	private int mLongTapMenu = 800; // 長押し時間
-	private boolean mIsTouching; // タッチ中
+	private int mDuration = 800; // 長押し時間
 	// private ThumbnailLoad mThumbnailLoad;
 	private FileThumbnailLoader mThumbnailLoader;
 	private Handler mHandler;
 	private int mThumbSizeW;
 	private int mThumbSizeH;
 	private int mThumbNum;
+	private int mThumbCrop;
+	private int mThumbMargin;
 	private short mListMode;
 	private int mListThumbSizeH;
 
@@ -282,7 +283,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		}
 
 		FrameLayout layout = new FrameLayout(this);
-		mListScreenView = new ListScreenView(this);
+		mListScreenView = new ListScreenView(this, mDuration);
 		layout.addView(mListScreenView);
 		setContentView(layout);
 
@@ -525,11 +526,11 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d("FileSelectActivity", "onActivityResult requestCode=" + requestCode + ", resultCode=" + resultCode);
+		Log.d("FileSelectActivity", "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);
 
 		if (requestCode == WRITE_REQUEST_CODE || requestCode == REQUEST_SDCARD_ACCESS) {
 			// リネームか削除かダウンロードのとき
-			Log.d("FileSelectActivity", "onActivityResult WRITE_REQUEST_CODE || REQUEST_SDCARD_ACCESS");
+			Log.d("FileSelectActivity", "onActivityResult: WRITE_REQUEST_CODE || REQUEST_SDCARD_ACCESS");
 
 			if (resultCode == RESULT_OK) {}
 		}
@@ -552,12 +553,16 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			mListScreenView.updateRecordList();
 
 			if (requestCode == DEF.REQUEST_IMAGE || requestCode == DEF.REQUEST_TEXT || requestCode == DEF.REQUEST_EXPAND) {
+				Log.d("FileSelectActivity", "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EXPAND");
 				if (resultCode == RESULT_OK && data != null) {
+					Log.d("FileSelectActivity", "onActivityResult: RESULT_OK. ビュアーから復帰しました.");
 					// ビュアーからの復帰
 					int nextopen = data.getExtras().getInt("nextopen", -1);
 					String file = data.getExtras().getString("lastfile");
 					String path = data.getExtras().getString("lastpath");
+					Log.d("FileSelectActivity", "onActivityResult: nextopen=" + nextopen + ", file=" + file + ", path=" + path);
 					if (nextopen != CloseDialog.CLICK_CLOSE) {
+						Log.d("FileSelectActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");
 						if (mIsLoading == true || mFileList.getFileList() == null) {
 							// リストデータがない場合は読み込むまで待つ
 							mLoadListNextOpen = nextopen;
@@ -584,10 +589,14 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 							}
 						}
 					}
+					else {
+						Log.d("FileSelectActivity", "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");
+					}
 				}
 			}
 
 			if (mIsLoading == false && mFileList.getFileList() != null) {
+				Log.d("FileSelectActivity", "onActivityResult: mIsLoading == false");
 				// 他画面から戻ったときは設定＆リスト更新
 				// サムネイル解放
 				releaseThumbnail();
@@ -596,18 +605,22 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				// updateListView();
 				// 画面遷移によって設定反映
 				if (checkConfigChange()) {
+					Log.d("FileSelectActivity", "onActivityResult: checkConfigChange() == true");
 					// 変更されている
 					// 設定の読込
+					// スクロール位置は最初に戻る
 					readConfig();
 					refreshFileSelect();
 				}
 				else {
+					Log.d("FileSelectActivity", "onActivityResult: checkConfigChange() == false");
 					// 設定は変更されていない
 					updateListView();
 					loadThumbnail();
 				}
 			}
 		}
+		Log.d("FileSelectActivity", "onActivityResult: 終了します");
 	}
 
 	public void setThumb(Uri uri) {
@@ -639,9 +652,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			Log.e("ImageActivity", "setThumb error");
 		}
 
-		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPALIGN_LEFT);
+		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 		if (bm != null) {
-			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0);
+			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, mThumbCrop, mThumbMargin);
 			loader.deleteThumbnailCache(mURI + mPath + mFileData.getName(), thumW, thumH);
 			loader.setThumbnailCache(mURI + mPath + mFileData.getName(), bm);
 			Toast.makeText(this, "サムネイルに設定しました", Toast.LENGTH_SHORT).show();
@@ -721,6 +734,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		mThumbSizeH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
 		mListThumbSizeH = DEF.calcThumbnailSize(SetFileListActivity.getListThumbSizeH(mSharedPreferences));
 		mThumbNum = SetFileListActivity.getThumbCacheNum(mSharedPreferences);
+		mThumbCrop = SetFileListActivity.getThumbCrop(mSharedPreferences);
+		mThumbMargin = SetFileListActivity.getThumbMargin(mSharedPreferences);
 		mRotateBtn = DEF.RotateBtnList[SetCommonActivity.getRotateBtn(mSharedPreferences)];
 		mClearTop = SetFileListActivity.getCrearTop(mSharedPreferences);
 		mShowExt = SetFileListActivity.getExtension(mSharedPreferences);
@@ -751,7 +766,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		mSambaSave = SetRecorderActivity.getRecServer(mSharedPreferences);
 
 		mUseThumbnailTap = SetFileListActivity.getThumbnailTap(mSharedPreferences);	// サムネイルタップで長押しメニューの有効化フラグ
-		//mLongTapMenu = DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences));
+		mDuration = DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences));
 
 		if (mListRotaChg == false) {
 			// 手動で切り替えていない
@@ -848,6 +863,12 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		if (mThumbNum != SetFileListActivity.getThumbCacheNum(mSharedPreferences)) {
 			return true;
 		}
+		if (mThumbCrop != SetFileListActivity.getThumbCrop(mSharedPreferences)) {
+			return true;
+		}
+		if (mThumbMargin != SetFileListActivity.getThumbMargin(mSharedPreferences)) {
+			return true;
+		}
 		if (mBackMode != SetFileListActivity.getBackMode(mSharedPreferences)) {
 			return true;
 		}
@@ -885,6 +906,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			return true;
 		}
 		if (mShowRenMenu != SetFileListActivity.getFileRenMenu(mSharedPreferences)) {
+			return true;
+		}
+		if (mDuration != DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences))) {
 			return true;
 		}
 		// if (mHistCount !=
@@ -1870,7 +1894,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				FileData data = files.get(i);
 				String name = data.getName();
 				int type = data.getType();
-				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_DIR) {
+				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_DIR) {
 					int state = sharedPreferences.getInt(DEF.createUrl(path + name, user, pass), -1);
 					data.setState(state);
 				}
@@ -2185,7 +2209,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			renmenu = true;
 		}
 
-
 		int i = 0;
 		if (mFileData.getType() == FileData.FILETYPE_IMG) {
 			if (mURI.equals("")) {
@@ -2404,7 +2427,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 							if (type == FileData.FILETYPE_TXT) {
 								openTextFile(name, -1);
 							}
-							else if (type == FileData.FILETYPE_ARC) {
+							else if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF) {
 								// zip/rar/pdfファイルを開く
 								openCompFile(name, "");
 							}
@@ -2847,20 +2870,13 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	 * 親フォルダに移動
 	 */
 	private void moveParentDir() {
-		int next = 0, pos = 0, prev = 0;
+		int pos = 0;
 		String cursor = "";
 		String path;
-		while (true) {
-			pos = mPath.indexOf("/", next + 1);
-			if (pos == -1) {
-				break;
-			}
-			prev = next;
-			next = pos;
-		}
-		if (mPath.length() > prev + 1) {
-			cursor = mPath.substring(prev + 1);
-			path = mPath.substring(0, prev + 1);
+		pos = mPath.substring(0, mPath.length() - 2).lastIndexOf("/");
+		if (mPath.length() > pos + 1) {
+			cursor = mPath.substring(pos + 1);
+			path = mPath.substring(0, pos + 1);
 		}
 		else {
 			path = "/";
@@ -3275,7 +3291,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		String user = mServer.getUser();
 		String pass = mServer.getPass();
 		int filesort = SetImageActivity.getFileSort(mSharedPreferences);
-		mThumbnailLoader = new FileThumbnailLoader(this, mURI, mPath, user, pass, mHandler, mThumbID, mFileList.getFileList(), mThumbSizeW, mThumbSizeH, mThumbNum, filesort, mCharset, mHidden, mThumbSort);
+		mThumbnailLoader = new FileThumbnailLoader(this, mURI, mPath, user, pass, mHandler, mThumbID, mFileList.getFileList(), mThumbSizeW, mThumbSizeH, mThumbNum, filesort, mCharset, mHidden, mThumbSort, mThumbCrop, mThumbMargin);
 		mThumbnailLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
 
 		// 現在時をIDに設定
@@ -3525,6 +3541,11 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						// サムネイル解放
 						releaseThumbnail();
 						openTextFile(name, -1);
+					} else if (type == FileData.FILETYPE_PDF) {
+						// サムネイル解放
+						releaseThumbnail();
+						// zip/rar/pdfファイルを開く
+						openCompFile(name, "");
 					} else if (type == FileData.FILETYPE_ARC) {
 						if (mTapExpand) {
 							// zip/rar/pdfファイルを展開

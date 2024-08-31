@@ -14,19 +14,17 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
-	protected static final int FILETYPE_TXT = 3;
-
 	private ImageManager mImageMgr = null;
 
 	Thread mThread;
 
-	public ExpandThumbnailLoader(String uri, String path, Handler handler, long id, ImageManager imagemgr, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum) {
-		super(uri, path, handler, id, files, sizeW, sizeH, cachenum);
+	public ExpandThumbnailLoader(String uri, String path, Handler handler, long id, ImageManager imagemgr, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int crop, int margin) {
+		super(uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
 
 		mImageMgr = imagemgr;
-
 		// スレッド起動
 		mThread = new Thread(this);
 		mThread.start();
@@ -58,49 +56,63 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	// スレッド開始
 	public void run() {
+		boolean debug = false;
+		if (debug) {Log.d("ExpandThumbnailLoader", "run: 開始します.");}
 //		synchronized (mLock) {
 			if (mThreadBreak == true || mCachePath == null || mFiles == null) {
+				Log.e("ExpandThumbnailLoader", "run: mThreadBreak == true || mCachePath == null || mFiles == null です.");
 				return;
 			}
 			int fileNum = mFiles.size();
 			if (fileNum <= 0) {
+				Log.e("ExpandThumbnailLoader", "run: ファイルの数が0以下です.");
 				return;
 			}
 			// サムネイル保持領域初期化
 			int ret = CallImgLibrary.ThumbnailInitialize(mID, DEF.THUMBNAIL_PAGESIZE, DEF.THUMBNAIL_MAXPAGE, fileNum);
 			if (ret < 0) {
+				Log.e("ExpandThumbnailLoader", "run: サムネイル保持領域初期化に失敗しました.");
 				return;
 			}
 			
 			int thum_cx = mThumbSizeW;
 			int thum_cy = mThumbSizeH;
 			int firstindex = -1;
-			int lastindex;
+			int lastindex = -1;
 
+		if (debug) {Log.d("ExpandThumbnailLoader", "run: mFirstIndex=" + mFirstIndex+ ", mLastIndex=" + mLastIndex);}
+			if (debug) {Log.d("ExpandThumbnailLoader", "run: メインループを開始します.");}
 			while (mThreadBreak == false) {
 				// 初回又は変化があるかのチェック
-				if (firstindex != mFirstIndex) {
+				if (firstindex != mFirstIndex || lastindex != mLastIndex) {
+					if (debug) {Log.d("ExpandThumbnailLoader", "run: firstindex != mFirstIndex です. firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
 					// 表示範囲
 					firstindex = mFirstIndex;
 					lastindex = mLastIndex;
 					
 					// 最初は表示範囲を優先
 					for (int loop = 0 ; loop < 2 ; loop ++) {
+						//if (debug) {Log.d("ExpandThumbnailLoader", "run: loop=" + loop + "です.");}
 						// 1週目キャッシュからのみ、2週目は実体も
-						for (int i = firstindex ; i <= lastindex && firstindex == mFirstIndex ; i++) {
+						for (int i = firstindex ; i <= lastindex && firstindex == mFirstIndex; i++) {
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: ループします. i=" + i + ", lastindex=" + lastindex + ", firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
 							if (i < 0 || i >= fileNum) {
+								if (debug) {Log.d("ExpandThumbnailLoader", "run: 範囲外です. i=" + i + ", fileNum=" + fileNum);}
 								// 範囲内だけ処理する
 								continue;
 							}
 
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: キャッシュから読み込みます. index=" + i);}
 							// 1周目は新たに読み込みしない
 							loadBitmap(i, thum_cx, thum_cy, loop == 0, true);
 							if (mThreadBreak == true) {
+								if (debug) {Log.d("ExpandThumbnailLoader", "run: mThreadBreak == true です.");}
 								return;
 							}
 						}
 					}
 					if (firstindex != mFirstIndex) {
+						if (debug) {Log.d("ExpandThumbnailLoader", "run: 再チェックします(1). firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
 						// 選択範囲が変わったら再チェック
 						continue;
 					}
@@ -112,11 +124,14 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 					boolean prevflag = false;
 					boolean nextflag = false;
 					for (int count = 1 ; count <= range && isBreak == false ; count ++) {
+						if (debug) {Log.d("ExpandThumbnailLoader", "run: count=" + count + "です.(1)");}
 						if ((prevflag && nextflag) || firstindex != mFirstIndex) {
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: 範囲オーバーです. prevflag=" + prevflag + ", nextflag=" + nextflag + ", firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
 							// 範囲オーバー、選択範囲変更 
 							break;
 						}
-						for (int way = 0 ; way < 2 && firstindex == mFirstIndex ; way ++) {
+						for (int way = 0 ; way < 2 && firstindex == mFirstIndex; way ++) {
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: way=" + way);}
 							if (mThreadBreak == true) {
 								return;
 							}
@@ -140,6 +155,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 									continue;
 								}
 							}
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: キャッシュから読み込みます. index=" + index);}
 							// キャッシュからのみ読み込み
 							if (loadBitmap(index, thum_cx, thum_cy, true, false) == false) {
 								// メモリ不足で中断
@@ -149,6 +165,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 						}
 					}
 					if (firstindex != mFirstIndex) {
+						if (debug) {Log.d("ExpandThumbnailLoader", "run: 再チェックします(2). firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
 						continue;
 					}
 
@@ -158,11 +175,14 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 					prevflag = false;
 					nextflag = false;
 					for (int count = 1 ; count <= range && firstindex == mFirstIndex ; count ++) {
+						if (debug) {Log.d("ExpandThumbnailLoader", "run: count=" + count + "です.(2)");}
 						if ((prevflag && nextflag) || firstindex != mFirstIndex) {
-							// 範囲オーバー、選択範囲変更 
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: 範囲オーバーです. prevflag=" + prevflag + ", nextflag=" + nextflag + ", firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
+							// 範囲オーバー、選択範囲変更
 							break;
 						}
-						for (int way = 0 ; way < 2 && firstindex == mFirstIndex ; way ++) {
+						for (int way = 0 ; way < 2 && firstindex == mFirstIndex; way ++) {
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: way=" + way);}
 							if (mThreadBreak == true) {
 								return;
 							}
@@ -186,6 +206,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 									continue;
 								}
 							}
+							if (debug) {Log.d("ExpandThumbnailLoader", "run: キャッシュから読み込みます. index=" + index);}
 							// キャッシュからのみ読み込み
 							if (loadBitmap(index, thum_cx, thum_cy, false, true) == false) {
 								break;
@@ -193,16 +214,18 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 						}
 					}
 					if (firstindex != mFirstIndex) {
+						if (debug) {Log.d("ExpandThumbnailLoader", "run: 再チェックします(3). firstindex=" + firstindex + ", mFirstIndex=" + mFirstIndex);}
 						continue;
 					}
-
 				}
 				
 				if (CallImgLibrary.ThumbnailCheckAll(mID) == 0) {
+					if (debug) {Log.d("ExpandThumbnailLoader", "run: CallImgLibrary.ThumbnailCheckAll(mID) == 0, mID=" + mID);}
 					// 全部読み込めた
 					break;
 				}
 				else {
+					if (debug) {Log.d("ExpandThumbnailLoader", "run: CallImgLibrary.ThumbnailCheckAll(mID) != 0, mID=" + mID);}
 					// ページ選択待ちに入る
 					try {
 						Thread.sleep(60000);
@@ -211,6 +234,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 					}
 				}
 			}
+		if (debug) {Log.d("ExpandThumbnailLoader", "run: メインループを終了しました.");}
 
 			if (mThreadBreak == false) {
 				// サムネイルキャッシュ削除
@@ -219,10 +243,12 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 				}
 			}
 //		}
+		if (debug) {Log.d("ExpandThumbnailLoader", "run: 終了します.");}
 	}
 
 	// ビットマップ読み込み
 	private boolean loadBitmap(int index, int thum_cx, int thum_cy, boolean firstloop, boolean priority) {
+		boolean debug = false;
 		// 読み込み済みチェック
 		int result = CallImgLibrary.ThumbnailCheck(mID, index);
 		if (result > 0) {
@@ -262,7 +288,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 		if (skipFile == false) {
 			if (bm == null) {
 				try {
-					bm = mImageMgr.loadThumbnailFromStream(index, mThumbSizeW, mThumbSizeH);
+					bm = mImageMgr.LoadThumbnail(index, mThumbSizeW, mThumbSizeH);
 				}
 				catch (Exception ex) {
 					Message message = new Message();
@@ -277,9 +303,24 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 				}
 			}
 
+			if (bm.getConfig() != Config.RGB_565) {
+				if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: RGB_565に変換します.");}
+				bm = bm.copy(Config.RGB_565, true);
+				if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: RGB_565に変換しました.");}
+			}
+			if (bm != null) {
+				// キャッシュとして保存
+				saveThumbnailCache(pathcode, bm);
+				if (retval == false) {
+					// メモリ保持失敗の場合は描画しない
+					bm = null;
+				}
+			}
+
 			// ビットマップをサムネイルサイズぴったりにリサイズする
 			if (bm != null) {
-				bm = ImageAccess.resizeTumbnailBitmap(bm, thum_cx, thum_cy, ImageAccess.BMPALIGN_LEFT);
+				if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: リサイズします. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", crop=" + mThumbCrop + ", margin=" + mThumbMargin);}
+				bm = ImageAccess.resizeTumbnailBitmap(bm, thum_cx, thum_cy, mThumbCrop, mThumbMargin);
 			}
 			if (bm != null) {
 				int w = bm.getWidth();
@@ -311,7 +352,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 			boolean save = false;
 			if (bm != null) {
 				// 空きメモリがあるかをチェック
-				result = CallImgLibrary.ThumbnailSizeCheck(mID, bm.getWidth(), bm.getHeight());
+				result = CallImgLibrary.ThumbnailMemorySizeCheck(mID, bm.getWidth(), bm.getHeight());
 				if (result == 0) {
 					// メモリあり
 					save = true;
@@ -335,14 +376,6 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 					// メモリ保持成功
 					retval = false;
 				}
-			}
-		}
-		if (bm != null) {
-			// キャッシュとして保存
-			saveThumbnailCache(pathcode, bm);
-			if (retval == false) {
-				// メモリ保持失敗の場合は描画しない
-				bm = null;
 			}
 		}
 		// 通知

@@ -221,20 +221,20 @@ int ThumbnailCheckAll(long long id)
 	return 0;
 }
 
-int ThumbnailSizeCheck(long long id, int bmp_width, int bmp_height)
+int ThumbnailMemorySizeCheck(long long id, int bmp_width, int bmp_height)
 {
 #ifdef DEBUG
-	LOGD("ThumbnailSizeCheck : id=%lld, width=%d, height=%d", id, bmp_width, bmp_height);
+	LOGD("ThumbnailMemorySizeCheck : id=%lld, width=%d, height=%d", id, bmp_width, bmp_height);
 #endif
 	// IDの一致チェック
 	if (gThumbnailId != id) {
 		// 初期化したIDと異なる
-//		LOGD("ThumbnailSizeCheck : Illegal thumbnail ID(id=%lld)", id);
+//		LOGD("ThumbnailMemorySizeCheck: Illegal thumbnail ID(id=%lld)", id);
 		return -1;
 	}
 	if (gThPageBuff == NULL) {
 		// 獲得されていない
-//		LOGD("ThumbnailSizeCheck : Memory Not Alloced");
+//		LOGD("ThumbnailMemorySizeCheck: Memory Not Alloced");
 		return -2;
 	}
 
@@ -242,7 +242,7 @@ int ThumbnailSizeCheck(long long id, int bmp_width, int bmp_height)
 	int lines = THUMB_BLOCKSIZE / (bmp_width * sizeof(WORD));
 	int blocks = (bmp_height + (lines - 1)) / lines;
 
-//	LOGD("ThumbnailSizeCheck : blocknum=%d, usenum=%d, chknum=%d, lines=%d", gThBlockNum, gThUseBlockNum, blocks, lines);
+//	LOGD("ThumbnailMemorySizeCheck: blocknum=%d, usenum=%d, chknum=%d, lines=%d", gThBlockNum, gThUseBlockNum, blocks, lines);
 	if (gThBlockNum - gThUseBlockNum < blocks) {
 		return blocks;
 	}
@@ -444,6 +444,34 @@ ERROREND:
 	pthread_mutex_unlock( &gThMutex );
 //	LOGD("ThumbnailSave : Mutex Unlock/Aft");
 	return ret;
+}
+
+int ThumbnailImageSize(long long id, int index)
+{
+    LOGD("ImageThumbnail: ThumbnailImageSize: 開始します. id=%lld, index=%d", id, index);
+    // IDの一致チェック
+    if (gThumbnailId != id) {
+        // 初期化したIDと異なる
+        return -1;
+    }
+    if (gThPageBuff == NULL || gThImageMng == NULL) {
+        // 獲得されていない
+        return -2;
+    }
+    if (index < 0 || index >= gThImageNum) {
+        return -3;
+    }
+        // 保存されていなければ終了
+    else if (gThImageMng[index].BlockIndex < 0) {
+        return -4;
+    }
+
+    // 保存されている画像のサイズ
+    int width = gThImageMng[index].Width;
+    int height = gThImageMng[index].Height;
+    LOGD("ImageThumbnail: ThumbnailImageSize: 画像のサイズを取得しました. width=%d, height=%d", width, height);
+
+    return (width << 16 | height);
 }
 
 int ThumbnailDraw(long long id, int index, int bmp_width, int bmp_height, int bmp_stride, BYTE* canvas)

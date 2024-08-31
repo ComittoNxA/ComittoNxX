@@ -10,17 +10,28 @@ public class MODULE {
 	public static String aboutTitle(Context context) {
 		return context.getString(R.string.app_name);
 	}
-	public static final String ABOUT_INFO = "\nLast Update : " + DEF.BUILD_DATE + "\n"
-			+ "  Version " + BuildConfig.VERSION_NAME + "\n\n"
-			+ "Using Library\n"
-			+ "  jcifs (codelibs) 2.1.38 (LGPL v2.1)\n"
-			+ "  unrar 6.20.1\n"			// (UnRAR licence)
-			+ (DEF.WITH_AVIF ? "  dav1d 1.4.3\n" : "")				// (BSD-2-Clause)
-			+ (DEF.WITH_AVIF ? "  libavif 1.1.1\n" : "")			// (LicenseRef-libavif)
-			//+ (DEF.WITH_JPEG ? "  libjpg-turbo 2.1.91\n" : "") 		//  (BSD-3-Clause, IJG)
-			//+ (DEF.WITH_PNG ? "  libpng 1.6.43\n" : "")				// (libpng License)
-			//+ (DEF.WITH_WEBP ? "  libwebp 1.4.0\n" : "")			// (BSD-3-Clause)
-			//+ "  AndroidSVG 1.4 (ASL v2.0)\n"
+	public static final String ABOUT_INFO =
+			  "		Build date :		" + DEF.BUILD_DATE + "<br>"
+			+ "		Version :				" + BuildConfig.VERSION_NAME + "<br>"
+			+ "		License :				<a href=\"https://raw.githubusercontent.com/ComittoNxA/ComittoNxX/master/LICENSE\">Unlicense license</a><br><br>"
+			+ "Using Library<br><br>"
+			+ "		jcifs (codelibs) 2.1.38 :<br>"
+			+ "				License :		<a href=\"https://raw.githubusercontent.com/codelibs/jcifs/master/LICENSE\">LGPL v2.1</a><br><br>"
+			+ "		unrar 6.20.1 :<br>"
+			+ "				License :		<a href=\"https://raw.githubusercontent.com/pmachapman/unrar/master/license.txt\">unRAR restriction</a><br><br>"
+			+ "		dav1d 1.4.3 :<br>"
+			+ "				License :		<a href=\"https://raw.githubusercontent.com/videolan/dav1d/master/COPYING\">BSD-2-Clause</a><br><br>"
+			+ "		libavif 1.1.1 :<br>"
+			+ "				License :		<a href=\"https://raw.githubusercontent.com/AOMediaCodec/libavif/main/LICENSE\">BSD License</a><br><br>"
+			// 以下利用を終了したライブラリ
+			//+ " 		libjpg-turbo 2.1.91 :<br>"
+			//+ "				BSD-3-Clause, IJG<br>"
+			//+ "		libpng 1.6.43 :<br>"
+			//+ "				libpng License<br><br>"
+			//+ "		libwebp 1.4.0 :<br>"
+			//+ "				BSD-3-Clause<br><br>"
+			//+ "		AndroidSVG 1.4 :<br>"
+			//+ "				ASL v2.0<br><br>"
 			;
 
 	public static boolean isFree() {

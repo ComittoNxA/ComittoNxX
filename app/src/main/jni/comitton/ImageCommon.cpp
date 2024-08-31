@@ -46,7 +46,7 @@ int DrawBitmap(int page, int half, int x, int y, void *canvas, int width, int he
 	int		image_height;
 
 	if (pData->SclFlag[half] == 0) {
-		LOGE("DrawBitmap/0: SclFlag[%d] == 0", half);
+		//LOGE("DrawBitmap/0: SclFlag[%d] == 0", half);
 		return -5;
 	}
 

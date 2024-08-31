@@ -3,14 +3,18 @@
 <img src="app/src/main/res/drawable-hdpi/icon.png" width="100" align="right" alt="logo">
 
 ComittoNxXはオープンソースの画像ビューワーです.  
-対応バージョンはAndroid5.0以上15までです.
+対応バージョンはAndroid5.0以上15までです.  
+- 
+- 対応する電子書籍ファイルの形式：  
+  PDF、EPUB(画像のみ)、TEXT、青空文庫  
+
 - 対応する画像ファイルの形式：  
-  JPEG、GIF、PNG、WebP、AVIF、HEIF(Android 8.0以上)
+  JPEG、GIF、PNG、WebP、AVIF、HEIF(Android 8.0以上)  
 
 - 対応する圧縮ファイルの形式：  
-  ZIP、RAR
+  ZIP、RAR  
 
-- Windowsファイル共有(SMB)に対応
+- Windowsファイル共有(SMB)に対応  
 
 ## 注意事項
 
@@ -26,6 +30,7 @@ ComittoNxXはオープンソースの画像ビューワーです.
 - PNG形式で表示できないファイルがあったのを修正.
 - AVIF形式画像の表示に対応.
 - HEIF形式画像の表示に対応.(Android 8.0以上)
+- PDF形式電子書籍の表示に対応.
 
 ## ビルド
 

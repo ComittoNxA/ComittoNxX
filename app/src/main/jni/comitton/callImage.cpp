@@ -83,13 +83,13 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailCheck (J
 }
 
 // サムネイルの残り領域確認
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSizeCheck (JNIEnv *env, jclass obj, jlong id, jint width, jint height)
+JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailMemorySizeCheck (JNIEnv *env, jclass obj, jlong id, jint width, jint height)
 {
 #ifdef DEBUG
-	LOGD("ThumbnailSizeCheck : id=%lld, width=%d, height=%d", id, width, height);
+	LOGD("ThumbnailMemorySizeCheck : id=%lld, width=%d, height=%d", id, width, height);
 #endif
 
-	int ret = ThumbnailSizeCheck(id, width, height);
+	int ret = ThumbnailMemorySizeCheck(id, width, height);
 	return ret;
 }
 
@@ -136,7 +136,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSave (JN
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("Bitmap format is not RGB_565 !");
+		LOGE("ThumbnailSave: Bitmap format is not RGB_565 !");
 		return -3;
 	}
 
@@ -149,6 +149,13 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSave (JN
 
 	AndroidBitmap_unlockPixels(env, bitmap);
 	return ret;
+}
+
+// サムネイル描画
+JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailImageSize(JNIEnv *env, jclass obj, jlong id, jint index)
+{
+    LOGD("callImage: ThumbnailImageSize: 開始します. id=%ld, index=%d", id, index);
+    return ThumbnailImageSize(id, index);
 }
 
 // サムネイル描画
@@ -173,7 +180,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailDraw(JNI
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("Bitmap format is not RGB_565 !");
+		LOGE("ThumbnailDraw: Bitmap format is not RGB_565 !");
 		return -3;
 	}
 
@@ -702,7 +709,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_GetMarginSize (JN
  * Method:    ImageScale
  * Signature: ()V
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScale (JNIEnv *env, jclass obj, jint page, jint half, jint width, jint height, jint left, jint right, jint top, jint bottom, jint algorithm, jint rotate, jint margin, jint margincolor, jint bright, jint gamma, jint param, jintArray size)
+JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScale (JNIEnv *env, jclass obj, jint page, jint half, jint width, jint height, jint left, jint right, jint top, jint bottom, jint algorithm, jint rotate, jint margin, jint margincolor, jint sharpen, jint bright, jint gamma, jint param, jintArray size)
 {
 	if (page < 0 || gTotalPages <= page) {
 		LOGE("ImageScale : Illegal Page.(%d)", page);
@@ -713,7 +720,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScale (JNIEn
 #endif
 
     jint *retsize = env->GetIntArrayElements(size, NULL);
-	int ret = CreateScale(page, half, width, height, left, right, top, bottom, algorithm, rotate, margin, margincolor, bright, gamma, param, retsize);
+	int ret = CreateScale(page, half, width, height, left, right, top, bottom, algorithm, rotate, margin, margincolor, sharpen, bright, gamma, param, retsize);
     env->ReleaseIntArrayElements(size, retsize, 0);
 	return ret;
 //	return 
@@ -795,7 +802,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageDraw (JNIEnv
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("Bitmap format is not RGB_565 !");
+		LOGE("ImageDraw: Bitmap format is not RGB_565 !");
 		return -3;
 	}
 
@@ -846,7 +853,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScaleDraw (J
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("Bitmap format is not RGB_565 !");
+		LOGE("ImageScaleDraw: Bitmap format is not RGB_565 !");
 		return -4;
 	}
 

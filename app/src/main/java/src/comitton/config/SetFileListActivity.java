@@ -29,14 +29,16 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 	private FontSubSeekbar    mFontSub;
 	private FontTileSeekbar   mFontTile;
 	private ItemMarginSeekbar mItemMrgn;
+	private MenuLongTapSeekbar mMenuLongTap;
 
 	private ListPreference mThumbCache;
+	private ListPreference mThumbCrop;
+	private ListPreference mThumbMargin;
 
 	private ToolbarSeekbar mToolbarSeek;
 	private ListThumbSeekbar mListThumbSeek;
 
 	private ThumbnailPreference mThumbnail;
-	private MenuLongTapSeekbar mMenuLongTap;
 
  	public static final int ListSortName[] =
 		{ R.string.lsort00		// ソートなし
@@ -69,6 +71,19 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		, R.string.thumbcache02		// 500まで
 		, R.string.thumbcache03		// 1000まで
 		, R.string.thumbcache04 };	// 手動で削除
+	public static final int ThumCropName[] =
+			{ R.string.thumbcrop00		// 中央
+			, R.string.thumbcrop01		// 左
+			, R.string.thumbcrop02		// 右
+			, R.string.thumbcrop03	// 幅に合わせる
+			, R.string.thumbcrop04 };	// 紙の表紙カバーに合わせる
+	public static final int ThumMarginName[] =
+			{ R.string.mgncut00		// なし
+			, R.string.mgncut01		// 弱
+			, R.string.mgncut02		// 中
+			, R.string.mgncut03		// 強
+			, R.string.mgncut04		// 特上
+			, R.string.mgncut05 };		// 最強
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -89,9 +104,11 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		mItemMrgn  = (ItemMarginSeekbar)getPreferenceScreen().findPreference(DEF.KEY_ITEMMRGN);
 		mThumbnail = (ThumbnailPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBSEEK);
 		mThumbCache = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBCACHE);
+		mThumbCrop = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBCROP);
+		mThumbMargin = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBMARGIN);
 		mToolbarSeek = (ToolbarSeekbar)getPreferenceScreen().findPreference(DEF.KEY_TOOLBARSEEK);
 		mListThumbSeek = (ListThumbSeekbar)getPreferenceScreen().findPreference(DEF.KEY_LISTTHUMBSEEK);
-		//mMenuLongTap   = (MenuLongTapSeekbar)getPreferenceScreen().findPreference(DEF.KEY_MENULONGTAP);
+		mMenuLongTap   = (MenuLongTapSeekbar)getPreferenceScreen().findPreference(DEF.KEY_MENULONGTAP);
 
 		// 項目選択
 		PreferenceScreen onlineHelp = (PreferenceScreen) findPreference(DEF.KEY_FILEHELP);
@@ -129,9 +146,11 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		mItemMrgn.setSummary(getItemMarginSummary(sharedPreferences));	// 余白サイズ
 		mThumbnail.setSummary(getThumbnailSummary(sharedPreferences));	// サムネイルサイズ
 		mThumbCache.setSummary(getThumbCacheSummary(sharedPreferences));	// サムネイルキャッシュ保持数
+		mThumbCrop.setSummary(getThumbCropSummary(sharedPreferences));	// サムネイルキャッシュ保持数
+		mThumbMargin.setSummary(getThumbMarginSummary(sharedPreferences));	// サムネイルキャッシュ保持数
 		mToolbarSeek.setSummary(getToolbarSeekSummary(sharedPreferences));		// ツールバー表示
 		mListThumbSeek.setSummary(getListThumbSeekSummary(sharedPreferences));		// リストサムネイルサイズ表示
-		//mMenuLongTap.setSummary(getMenuLongTapSummary(sharedPreferences));
+		mMenuLongTap.setSummary(getMenuLongTapSummary(sharedPreferences));
 }
 
 	@Override
@@ -183,6 +202,14 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 			//
 			mThumbCache.setSummary(getThumbCacheSummary(sharedPreferences));
 		}
+		else if(key.equals(DEF.KEY_THUMBCROP)){
+			//
+			mThumbCrop.setSummary(getThumbCropSummary(sharedPreferences));
+		}
+		else if(key.equals(DEF.KEY_THUMBMARGIN)){
+			//
+			mThumbMargin.setSummary(getThumbMarginSummary(sharedPreferences));
+		}
 		else if(key.equals(DEF.KEY_TOOLBARSEEK)){
 			//
 			mToolbarSeek.setSummary(getToolbarSeekSummary(sharedPreferences));
@@ -203,10 +230,10 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 			//
 			mFileRenMenu.setSummary(getFileRenMenuSummary(sharedPreferences));
 		}
-		//else if(key.equals(DEF.KEY_MENULONGTAP)){
-		//	// 長押し時間
-		//	mMenuLongTap.setSummary(getMenuLongTapSummary(sharedPreferences));
-		//}
+		else if(key.equals(DEF.KEY_MENULONGTAP)){
+			// 長押し時間
+			mMenuLongTap.setSummary(getMenuLongTapSummary(sharedPreferences));
+		}
 	}
 
 	// 設定の読込
@@ -368,6 +395,22 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		return val;
 	}
 
+	public static int getThumbCrop(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences, DEF.KEY_THUMBCROP, "0");
+		if (val < 0 || val >= ThumCropName.length){
+			val = 0;
+		}
+		return val;
+	}
+
+	public static int getThumbMargin(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences, DEF.KEY_THUMBMARGIN, "0");
+		if (val < 0 || val >= ThumMarginName.length){
+			val = 0;
+		}
+		return val;
+	}
+
 	public static int getThumbCacheNum(SharedPreferences sharedPreferences){
 		int val = getThumbCache(sharedPreferences);
 		int num = 500;
@@ -451,11 +494,11 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		return flag;
 	}
 
-	//public static int getMenuLongTap(SharedPreferences sharedPreferences){
-	//	int num;
-	//	num = DEF.getInt(sharedPreferences, DEF.KEY_MENULONGTAP, DEF.DEFAULT_MENULONGTAP);
-	//	return num;
-	//}
+	public static int getMenuLongTap(SharedPreferences sharedPreferences){
+		int num;
+		num = DEF.getInt(sharedPreferences, DEF.KEY_MENULONGTAP, DEF.DEFAULT_MENULONGTAP);
+		return num;
+	}
 
 	// 設定を保存
 	public static void setThumbnail(SharedPreferences sharedPreferences, boolean value){
@@ -568,10 +611,22 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		return res.getString(ThumCacheName[val]);
 	}
 
-	//private String getMenuLongTapSummary(SharedPreferences sharedPreferences){
-	//	int val = getMenuLongTap(sharedPreferences);
-	//	Resources res = getResources();
-	//	String summ1 = res.getString(R.string.msecSumm1);
-	//	return	DEF.getMSecStr100(val, summ1);
-	//}
+	private String getThumbCropSummary(SharedPreferences sharedPreferences){
+		int val = getThumbCrop(sharedPreferences);
+		Resources res = getResources();
+		return res.getString(ThumCropName[val]);
+	}
+
+	private String getThumbMarginSummary(SharedPreferences sharedPreferences){
+		int val = getThumbMargin(sharedPreferences);
+		Resources res = getResources();
+		return res.getString(ThumMarginName[val]);
+	}
+
+	private String getMenuLongTapSummary(SharedPreferences sharedPreferences){
+		int val = getMenuLongTap(sharedPreferences);
+		Resources res = getResources();
+		String summ1 = res.getString(R.string.msecSumm1);
+		return	DEF.getMSecStr100(val, summ1);
+	}
 }

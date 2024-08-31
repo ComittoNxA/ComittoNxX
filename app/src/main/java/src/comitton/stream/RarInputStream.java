@@ -8,7 +8,6 @@ import src.comitton.common.DEF;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import static src.comitton.stream.ImageManager.MSG_LOADING;
 
 public class RarInputStream extends InputStream {
 	public static final int OFFSET_RAR_HCRC = 0;
@@ -303,7 +302,7 @@ public class RarInputStream extends InputStream {
 					int prog = (int) ((long) (datasize - remain) * 100 / datasize);
 					int rate = (int) ((long) (datasize - remain) * 10 / (nowTime - startTime));
 					Message message = new Message();
-					message.what = MSG_LOADING;
+					message.what = DEF.HMSG_LOADING;
 					message.arg1 = prog << 24;
 					message.arg2 = rate;
 					message.obj = null;

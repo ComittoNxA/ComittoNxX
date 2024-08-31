@@ -321,6 +321,8 @@ public class DEF {
 	public static final String KEY_SCRLWAY = "ScrlWay";
 	public static final String KEY_THUMBNAIL = "Thumbnail";
 	public static final String KEY_THUMBCACHE = "ThumbCache";
+	public static final String KEY_THUMBCROP = "ThumbCrop";
+	public static final String KEY_THUMBMARGIN = "ThumbMargin";
 	public static final String KEY_ROTATEBTN = "RotateBtn";
 	public static final String KEY_ACCESSLAMP = "AccessLamp";
 	public static final String KEY_MARGINCUT = "MarginCut";
@@ -413,7 +415,7 @@ public class DEF {
 	public static final int DEFAULT_TAPRANGE = 6; // スクロール開始の感度
 	public static final int DEFAULT_MARGIN = 0;
 	public static final int DEFAULT_LONGTAP = 4;
-	public static final int DEFAULT_MENULONGTAP = 4;
+	public static final int DEFAULT_MENULONGTAP = 8; // 0.8秒
 	public static final int DEFAULT_WADJUST = 25; // -25～+25(1%単位)
 	public static final int DEFAULT_WSCALING = 25; // -25～+25(1%単位)
 	public static final int DEFAULT_SCALING = 75; // -75～+125(1%単位)
@@ -467,8 +469,8 @@ public class DEF {
 	public static final int MAX_TAPRANGE = 50; // スクロール開始の感度
 	public static final int MAX_MARGIN = 20;
 	public static final int MAX_LONGTAP = 16;
-	public static final int MIN_MENULONGTAP = 6;
-	public static final int MAX_MENULONGTAP = 40;
+	public static final int MIN_MENULONGTAP = 0; // 0.5秒
+	public static final int MAX_MENULONGTAP = 40; // 4秒
 	public static final int MAX_WADJUST = DEFAULT_WADJUST * 2;
 	public static final int MAX_WSCALING = DEFAULT_WSCALING * 2;
 	public static final int MAX_SCALING = 225;

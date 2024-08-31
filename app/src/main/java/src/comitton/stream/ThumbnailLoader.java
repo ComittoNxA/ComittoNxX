@@ -42,8 +42,10 @@ public class ThumbnailLoader {
 	protected int mLastIndex;
 
 	protected int mThumbCacheNum;
+	protected int mThumbCrop;
+	protected int mThumbMargin;
 
-	public ThumbnailLoader(String uri, String path, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum) {
+	public ThumbnailLoader(String uri, String path, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum,int crop, int margin) {
 		super();
 		mHandler = handler;
 		mThreadBreak = false;
@@ -55,6 +57,8 @@ public class ThumbnailLoader {
 		mFirstIndex = 0;
 		mLastIndex = files.size() - 1;
 		mThumbCacheNum = cachenum;
+		mThumbCrop = crop;
+		mThumbMargin = margin;
 
 		// キャッシュフォルダ
 		mCachePath = DEF.getBaseDirectory() + "thumb/";

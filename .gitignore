@@ -23,7 +23,7 @@ output.json
 *.iml
 .idea/workspace.xml
 .idea/usage.statistics.xml
-.idea/usage.statistics.xml
+.idea/assetWizardSettings.xml
 
 # Keystore files
 *.jks

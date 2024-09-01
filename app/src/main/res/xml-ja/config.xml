@@ -98,12 +98,14 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="設定のファイル保存" >
         <src.comitton.config.ExportSettingPreference
-            android:dialogMessage="出力先のファイル名を入力\n※拡張子不要"
+            android:dialogTitle="設定の保存"
+            android:dialogMessage="ファイルを選択または入力してOKで保存\n※拡張子不要"
             android:key="ExportSetting"
             android:summary="現在の設定に名前をつけてファイルに出力します。\n（[sdcard]/comittona/conf/*.setに保存）"
             android:title="設定の保存" />
         <src.comitton.config.ImportSettingPreference
             android:dialogTitle="設定ファイルの適用"
+            android:dialogMessage="ファイルを選択してOKで適用"
             android:key="ImportSetting"
             android:summary="選択したファイルの内容を現在の設定に上書します。\n ([sdcard]/comittona/conf/*.setを参照)"
             android:title="設定ファイルの適用" />

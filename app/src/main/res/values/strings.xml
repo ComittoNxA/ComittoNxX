@@ -425,6 +425,11 @@
     <string name="desc"></string>
     <string name="none">None</string>
     <string name="auto">Default</string>
+    <string name="selectFile">Select File.</string>
+    <string name="selectOrEnterFile">Select or enter a file.</string>
+    <string name="SaveConfig">Save settings to file.</string>
+    <string name="LoadConfig">Load setting from file.</string>
+    <string name="FileNotExist">File not exist.</string>
 
     <string name="fontdlMsg">You text file for display setting to download the font.\nRun Download If you have selected more than once downloaded, the existing file is overwritten.</string>
     <string name="fontdlInfo">You need to agree "IPA Font License v1.0" If you want to use the IPA font.</string>

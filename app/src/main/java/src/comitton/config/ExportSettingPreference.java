@@ -1,12 +1,9 @@
 package src.comitton.config;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 
 import android.app.Dialog;
@@ -44,6 +42,9 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 	private Context mContext;
 	private SharedPreferences mSp;
 
+	private String mNoName = "(No Name)";
+
+	private Button mButtonOk;
 	private EditText mEditView;
 	private TextView mMsgView;
 	private ListView mListView;
@@ -66,7 +67,7 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 		mMsgView = new TextView(mContext);
 		mEditView = new EditText(mContext);
 		mEditView.setMaxLines(1);
-		mEditView.setHint("Abcde");
+		mEditView.setHint(R.string.selectOrEnterFile);
 		mListView = new ListView(mContext);
 		mListView.setScrollingCacheEnabled(false);
 		mListView.setOnItemClickListener(this);
@@ -88,9 +89,9 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 
 	    Dialog dialog = getDialog();
 	    if (dialog != null) {
-	        Button btnOk = (Button)dialog.findViewById(android.R.id.button1);
-	        if (btnOk != null) {
-	        	btnOk.setOnClickListener(this);
+	        mButtonOk = (Button)dialog.findViewById(android.R.id.button1);
+	        if (mButtonOk != null) {
+				mButtonOk.setOnClickListener(this);
 	        }
 	    }
 	}
@@ -105,7 +106,11 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 			for (File file : files) {
 				if (file != null && file.isFile()) {
 					String filename = file.getName();
-					items.add(filename.substring(0, filename.length()-4));
+					filename = filename.substring(0, filename.length()-4);
+					if (filename.length() == 0){
+						filename = mNoName;
+					}
+					items.add(filename);
 				}
 			}
 			Collections.sort(items);
@@ -129,87 +134,94 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-		// 選択
-		String filename = mItemArrayAdapter.mItems.get(position);
-		mEditView.setText(filename, TextView.BufferType.NORMAL);
+		if (parent == mListView) {
+			// ファイルリスト選択
+			String filename = mItemArrayAdapter.mItems.get(position);
+			mEditView.setText(filename, TextView.BufferType.NORMAL);
+		}
 	}
 
 //	@Override
 	public void onClick(View v) {
-		// OKボタン処理
-		String filepath = getFilePath();
-		filepath += mEditView.getText() + DEF.EXTENSION_SETTING;
+		if (v == mButtonOk) {
+			// OKボタン処理
+			String filepath = getFilePath();
+			String filename = mEditView.getText().toString();
+			if (filename.length() == 0) {
+				Toast.makeText(mContext, R.string.selectOrEnterFile, Toast.LENGTH_SHORT).show();
+				return;
+			} else if (filename.equals(mNoName)) {
+				filename = "";
+			}
 
-		FileOutputStream os;
-		OutputStreamWriter sw;
-		BufferedWriter bw;
+			filepath += filename + DEF.EXTENSION_SETTING;
 
-		try {
-			// ファイルオープン
-			os = new FileOutputStream(filepath, false);
-			sw = new OutputStreamWriter(os, "UTF-8");
-			bw = new BufferedWriter(sw, 8192);
-		}
-		catch (Exception e) {
-			// ファイル作成失敗
-			errorToast("ファイル作成エラー", e);
-			return;
-		}
+			FileOutputStream os;
+			OutputStreamWriter sw;
+			BufferedWriter bw;
 
-		try {
-			Map<String, ?> keyMap = mSp.getAll();
-			if (keyMap != null) {
-				String line;
-				Set<String> keys = keyMap.keySet();
-				// キーをソートする
-				keys = new TreeSet<String>(keys);
-				for (String key : keys) {
-					if (DEF.checkExportKey(key) == false) {
-						continue;
-					}
-					// NxT専用キーチェック
-					boolean ex = DEF.checkTonlyExportKey( key );
+			try {
+				// ファイルオープン
+				os = new FileOutputStream(filepath, false);
+				sw = new OutputStreamWriter(os, "UTF-8");
+				bw = new BufferedWriter(sw, 8192);
+			} catch (Exception e) {
+				// ファイル作成失敗
+				errorToast("ファイル作成エラー", e);
+				return;
+			}
 
-					Object value = keyMap.get(key);
-					String className = value.getClass().getName();
-					if (className.equals("java.lang.String")) {
-						line = (ex ? "s:" : "S:") + key + "=" + value.toString();
+			try {
+				Map<String, ?> keyMap = mSp.getAll();
+				if (keyMap != null) {
+					String line;
+					Set<String> keys = keyMap.keySet();
+					// キーをソートする
+					keys = new TreeSet<String>(keys);
+					for (String key : keys) {
+						if (DEF.checkExportKey(key) == false) {
+							continue;
+						}
+						// NxT専用キーチェック
+						boolean ex = DEF.checkTonlyExportKey(key);
+
+						Object value = keyMap.get(key);
+						String className = value.getClass().getName();
+						if (className.equals("java.lang.String")) {
+							line = (ex ? "s:" : "S:") + key + "=" + value.toString();
+						} else if (className.equals("java.lang.Boolean")) {
+							line = (ex ? "b:" : "B:") + key + "=" + value.toString();
+						} else if (className.equals("java.lang.Float")) {
+							line = (ex ? "f:" : "F:") + key + "=" + value.toString();
+						} else if (className.equals("java.lang.Integer")) {
+							line = (ex ? "i:" : "I:") + key + "=" + value.toString();
+						} else if (className.equals("java.lang.Long")) {
+							line = (ex ? "l:" : "L:") + key + "=" + value.toString();
+						} else {
+							continue;
+						}
+						bw.write(line);
+						bw.newLine();
 					}
-					else if (className.equals("java.lang.Boolean")) {
-						line = (ex ? "b:" : "B:") + key + "=" + value.toString();
-					}
-					else if (className.equals("java.lang.Float")) {
-						line = (ex ? "f:" : "F:") + key + "=" + value.toString();
-					}
-					else if (className.equals("java.lang.Integer")) {
-						line = (ex ? "i:" : "I:") + key + "=" + value.toString();
-					}
-					else if (className.equals("java.lang.Long")) {
-						line = (ex ? "l:" : "L:") + key + "=" + value.toString();
-					}
-					else {
-						continue;
-					}
-					bw.write(line);
-					bw.newLine();
 				}
+			} catch (Exception e) {
+				errorToast("ファイル書き込みエラー", e);
+			}
+
+			try {
+				bw.flush();
+				bw.close();
+			} catch (Exception e) {
+				// クローズエラー
+				errorToast("ファイルクローズエラー", e);
+			}
+
+			Toast.makeText(mContext, mContext.getResources().getString(R.string.SaveConfig) + "\n" + filepath, Toast.LENGTH_SHORT).show();
+			Dialog dialog = getDialog();
+			if (dialog != null) {
+				dialog.dismiss();
 			}
 		}
-		catch (Exception e) {
-			errorToast("ファイル書き込みエラー", e);
-		}
-
-		try {
-			bw.flush();
-			bw.close();
-		}
-		catch (Exception e) {
-			// クローズエラー
-			errorToast("ファイルクローズエラー", e);
-		}
-
-		Toast.makeText(mContext, "Saved to " + filepath, Toast.LENGTH_SHORT).show();
-		getDialog().dismiss();
 	}
 
 	private String getFilePath() {

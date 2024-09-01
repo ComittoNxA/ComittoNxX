@@ -3906,6 +3906,11 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 			// アクセス状態表示
 			mAccessLamp = SetImageDetailActivity.getAccessLamp(sharedPreferences);
+
+			// 上部メニューの設定を読み込み
+			loadTopMenuState();
+			// 上部メニューの文字列情報をガイドに設定
+			mGuideView.setTopCommandStr(mCommandStr);
 		}
 		catch (Exception e) {
 			Log.e("ImageActivity", "ReadSetting error.");

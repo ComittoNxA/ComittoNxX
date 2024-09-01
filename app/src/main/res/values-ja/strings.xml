@@ -425,6 +425,11 @@
     <string name="desc"></string>
     <string name="none">なし</string>
     <string name="auto">既定</string>
+    <string name="selectFile">ファイルを選択してください.</string>
+    <string name="selectOrEnterFile">ファイルを選択または入力してください.</string>
+    <string name="SaveConfig">設定を保存しました.</string>
+    <string name="LoadConfig">設定ファイルを適用しました.</string>
+    <string name="FileNotExist">ファイルが存在しません.</string>
 
     <string name="fontdlMsg">フォントをダウンロードしてテキストファイルの表示に使用します。\n複数回ダウンロードを選択した場合もダウンロードは実行し、既存ファイルが上書きされます。</string>
     <string name="fontdlInfo">独立行政法人情報処理推進機構(IPA)によって配布されているIPAフォントをダウンロードして使用します。\nIPAフォントを使用する場合は「IPAフォントライセンスv1.0」への同意が必要となります。</string>

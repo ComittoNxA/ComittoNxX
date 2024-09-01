@@ -11,6 +11,8 @@
 
 #include "Image.h"
 
+//#define DEBUG
+
 extern IMAGEDATA	*gImageData;
 extern WORD			**gLinesPtr;
 extern WORD			**gSclLinesPtr;
@@ -32,10 +34,10 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 	int Gray     = (Param & PARAM_GRAY) != 0 ? 1 : 0;
 	int Moire    = (Param & PARAM_MOIRE) != 0 ? 1 : 0;
 	int Pseland  = (Param & PARAM_PSELAND) != 0 ? 1 : 0;
-
+#ifdef DEBUG
     LOGD("CreateScale: Page=%d, Half=%d, SclWidth=%d, SclHeight=%d, left=%d, right=%d, top=%d, bottom=%d, algorithm=%d, Rotate=%d, Margin=%d, MarginColor=%d, Sharpen=%d, Bright=%d, Gamma=%d", Page, Half, SclWidth, SclHeight, left, right, top, bottom, algorithm, Rotate, Margin, MarginColor, Sharpen, Bright, Gamma);
     LOGD("CreateScale: Param[Invert=%d, Gray=%d, Moire=%d, Pseland=%d]", Invert, Gray, Moire, Pseland);
-
+#endif
     IMAGEDATA *pData = &gImageData[Page];
 	
 	pData->SclFlag[Half] = 0;
@@ -485,7 +487,7 @@ int RefreshSclLinesPtr(int Page, int Half, int Index, int Height, int LineSize)
 		ret = NextSclBuff(Page, Half, Index, &buffindex, &buffpos, LineSize);
 //		LOGD("RefreshSclLinePtr : buffindex=%d, buffpos=%d, LineSize=%d", buffindex, buffpos, LineSize);
 		if (ret < 0) {
-			LOGD("RefreshSclLinePtr : NextSclBuff error=%d", ret);
+			LOGE("RefreshSclLinePtr : NextSclBuff error=%d", ret);
 			return ret;
 		}
 

@@ -526,11 +526,12 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d("FileSelectActivity", "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);
+		boolean debug = true;
+		if (debug) {Log.d("FileSelectActivity", "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);}
 
 		if (requestCode == WRITE_REQUEST_CODE || requestCode == REQUEST_SDCARD_ACCESS) {
 			// リネームか削除かダウンロードのとき
-			Log.d("FileSelectActivity", "onActivityResult: WRITE_REQUEST_CODE || REQUEST_SDCARD_ACCESS");
+			if (debug) {Log.d("FileSelectActivity", "onActivityResult: WRITE_REQUEST_CODE || REQUEST_SDCARD_ACCESS");}
 
 			if (resultCode == RESULT_OK) {}
 		}
@@ -553,16 +554,16 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			mListScreenView.updateRecordList();
 
 			if (requestCode == DEF.REQUEST_IMAGE || requestCode == DEF.REQUEST_TEXT || requestCode == DEF.REQUEST_EXPAND) {
-				Log.d("FileSelectActivity", "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EXPAND");
+				if (debug) {Log.d("FileSelectActivity", "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EXPAND");}
 				if (resultCode == RESULT_OK && data != null) {
-					Log.d("FileSelectActivity", "onActivityResult: RESULT_OK. ビュアーから復帰しました.");
+					if (debug) {Log.d("FileSelectActivity", "onActivityResult: RESULT_OK. ビュアーから復帰しました.");}
 					// ビュアーからの復帰
 					int nextopen = data.getExtras().getInt("nextopen", -1);
 					String file = data.getExtras().getString("lastfile");
 					String path = data.getExtras().getString("lastpath");
-					Log.d("FileSelectActivity", "onActivityResult: nextopen=" + nextopen + ", file=" + file + ", path=" + path);
+					if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen=" + nextopen + ", file=" + file + ", path=" + path);}
 					if (nextopen != CloseDialog.CLICK_CLOSE) {
-						Log.d("FileSelectActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");
+						if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");}
 						if (mIsLoading == true || mFileList.getFileList() == null) {
 							// リストデータがない場合は読み込むまで待つ
 							mLoadListNextOpen = nextopen;
@@ -590,13 +591,13 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						}
 					}
 					else {
-						Log.d("FileSelectActivity", "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");
+						if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");}
 					}
 				}
 			}
 
 			if (mIsLoading == false && mFileList.getFileList() != null) {
-				Log.d("FileSelectActivity", "onActivityResult: mIsLoading == false");
+				if (debug) {Log.d("FileSelectActivity", "onActivityResult: mIsLoading == false");}
 				// 他画面から戻ったときは設定＆リスト更新
 				// サムネイル解放
 				releaseThumbnail();

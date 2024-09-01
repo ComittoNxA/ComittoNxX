@@ -98,7 +98,8 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	// スレッド開始
 	public void run() {
-		Log.d("FileThumbnailLoader"," 0 DirName=" + mPath);
+		boolean debug = false;
+		if (debug) {Log.d("FileThumbnailLoader","run: DirName=" + mPath);}
 
 //		synchronized (mLock) {
 		if (mThreadBreak == true || mCachePath == null || mFiles == null) {
@@ -135,11 +136,11 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 							continue;
 						}
 
-						Log.d("FileThumbnailLoader","index=" + i + " " + (loop+1) + "周目 run");
+						if (debug) {Log.d("FileThumbnailLoader","run: index=" + i + " " + (loop+1) + "周目 run");}
 						// 1周目は新たに読み込みしない
 						loadBitmap(i, thum_cx, thum_cy, loop == 0, true);
 						if (mThreadBreak == true) {
-							Log.d("FileThumbnailLoader", "index=" + i + " " + (loop+1) + "周目 run 中断されました.");
+							if (debug) {Log.d("FileThumbnailLoader", "run: index=" + i + " " + (loop+1) + "周目 run 中断されました.");}
 							return;
 						}
 					}

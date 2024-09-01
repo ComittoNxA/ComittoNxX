@@ -40,10 +40,15 @@ ComittoNxXはオープンソースの画像ビューワーです.
 <details><summary><b>ビルドに必要なファイルの作成手順</b></summary>
 <p>
 
+###### Android SDKインストールパスの設定
+
+Android studio の場合は [File] > [Project Structure] > [SDK Location] から設定します.
+インストールから実行する場合は [Tools] > [SDK Manager] から実行します.
+
 ###### 署名の作成
 
 キーストアファイルを作成して保存します.  
-Android studio の場合は「Build」>「Generate Signed Bundle/APK」から作成します.
+Android studio の場合は [Build] > [Generate Signed Bundle/APK] から作成します.
 
 ###### signingConfigs/release.gradle の作成
 

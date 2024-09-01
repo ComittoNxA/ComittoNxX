@@ -121,6 +121,33 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	private final int mSdkVersion = android.os.Build.VERSION.SDK_INT;
 
+
+	private final int COMMAND_INDEX[] =
+	{
+			0,	// 画面方向
+			1,	// 余白削除
+			21,	// 余白削除の色
+			2,	// 見開き設定
+			3,	// 画像サイズ
+			4,		// 音操作
+			5,	// オートプレイ開始
+			6,// ブックマーク追加
+			7,// ブックマーク選択
+			//8,	// シャープ化
+			9,	// 白黒反転
+			10,		// グレースケール
+			11,	// 画像回転
+			12,	// 画像補間方式
+			13, 	// ページ逆順
+			14,	// 操作入れ替え
+			15,	// 表紙方向
+			16,	// スクロール方向入れ替え
+			17,// 上部メニュー設定
+			18,	// 設定
+			19,	// 中央余白表示
+			20	// 中央影表示
+	};
+
 	private final int COMMAND_ID[] =
 	{
 		DEF.MENU_ROTATE,	// 画面方向
@@ -132,7 +159,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		DEF.MENU_AUTOPLAY,	// オートプレイ開始
 		DEF.MENU_ADDBOOKMARK,// ブックマーク追加
 		DEF.MENU_SELBOOKMARK,// ブックマーク選択
-		DEF.MENU_SHARPEN,	// シャープ化
+		//DEF.MENU_SHARPEN,	// シャープ化
 		DEF.MENU_INVERT,	// 白黒反転
 		DEF.MENU_GRAY,		// グレースケール
 		DEF.MENU_IMGROTA,	// 画像回転
@@ -145,7 +172,6 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		DEF.MENU_SETTING,	// 設定
 		DEF.MENU_CMARGIN,	// 中央余白表示
 		DEF.MENU_CSHADOW	// 中央影表示
-
 	};
 	private final int COMMAND_RES[] =
 	{
@@ -158,7 +184,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		R.string.playMenu,		// オートプレイ開始
 		R.string.addBookmarkMenu,// ブックマーク追加
 		R.string.selBookmarkMenu,// ブックマーク選択
-		R.string.sharpenMenu,	// シャープ化
+		//R.string.sharpenMenu,	// シャープ化
 		R.string.invertMenu,	// 白黒反転
 		R.string.grayMenu,		// グレースケール
 		R.string.imgRotaMenu,	// 画像回転
@@ -2909,38 +2935,89 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	// 上部メニューの設定を読み込み
 	private boolean[] loadTopMenuState() {
-		Resources res = getResources();
+		boolean debug = true;
+		if (debug) {Log.d("ImageActivity", "loadTopMenuState: 開始します.");}
 
-		boolean states[] = new boolean[COMMAND_ID.length];
-		int count = 0;
-		for (int i = 0 ; i < COMMAND_ID.length ; i ++) {
-			states[i] = mSharedPreferences.getBoolean(DEF.KEY_TOPMENU + i, i < 4 ? true : false);
-			if (states[i] == true) {
-				// 表示する個数
-				count ++;
+		boolean states[] = null;
+		try {
+			Resources res = getResources();
+
+			if (debug) {Log.d("ImageActivity", "loadTopMenuState: 保存された設定を取得します.");}
+			states = new boolean[COMMAND_INDEX.length];
+			int count = 0;
+			for (int i = 0; i < states.length; i++) {
+				try {
+					states[i] = mSharedPreferences.getBoolean(DEF.KEY_TOPMENU + COMMAND_INDEX[i], COMMAND_INDEX[i] < 4 ? true : false);
+					if (states[i] == true) {
+						// 表示する個数
+						count++;
+					}
+				}
+				catch (Exception e) {
+					Log.e("ImageActivity", "loadTopMenuState: ループ1でエラーが発生しました.");
+					if (e != null && e.getMessage() != null) {
+						Log.e("ImageActivity", "loadTopMenuState: エラーメッセージ. " + e.getMessage());
+					}
+					Log.e("ImageActivity", "loadTopMenuState: i=" + i);
+					Log.e("ImageActivity", "loadTopMenuState: COMMAND_INDEX[i]=" + COMMAND_INDEX[i]);
+				}
+			}
+
+			if (debug) {Log.d("ImageActivity", "loadTopMenuState: 表示するコマンドを設定します.");}
+			mCommandId = new int[count];
+			mCommandStr = new String[count];
+			count = 0;
+			for (int i = 0; i < states.length; i++) {
+				try {
+					if (states[i]) {
+						// 表示するコマンドを設定
+						mCommandId[count] = COMMAND_ID[i];
+						mCommandStr[count] = res.getString(COMMAND_RES[i]);
+						count++;
+					}
+				}
+				catch (Exception e) {
+					Log.e("ImageActivity", "loadTopMenuState: ループ2でエラーが発生しました.");
+					if (e != null && e.getMessage() != null) {
+						Log.e("ImageActivity", "loadTopMenuState: エラーメッセージ. " + e.getMessage());
+					}
+					Log.e("ImageActivity", "loadTopMenuState: i=" + i);
+					Log.e("ImageActivity", "loadTopMenuState: COMMAND_INDEX[i]=" + COMMAND_INDEX[i]);
+				}
+			}
+			if (debug) {
+				Log.d("ImageActivity", "loadTopMenuState: 終了します.");
 			}
 		}
-		mCommandId = new int[count];
-		mCommandStr = new String[count];
-		count = 0;
-    	for (int i = 0 ; i < states.length ; i ++) {
-    		if (states[i]) {
-    			// 表示するコマンドを設定
-    			mCommandId[count] = COMMAND_ID[i];
-    			mCommandStr[count] = res.getString(COMMAND_RES[i]);
-    			count ++;
-    		}
-    	}
-    	return states;
+		catch (Exception e) {
+			Log.e("ImageActivity", "loadTopMenuState: エラーが発生しました.");
+			if (e != null && e.getMessage() != null) {
+				Log.e("ImageActivity", "loadTopMenuState: エラーメッセージ. " + e.getMessage());
+			}
+		}
+		if (debug) {Log.d("ImageActivity", "loadTopMenuState: 終了します.");}
+		return states;
 	}
 
 	// 上部メニューの設定を保存
 	private void saveTopMenuState(boolean states[]) {
+		boolean debug = true;
+		if (debug) {Log.d("ImageActivity", "saveTopMenuState: 開始します. states.length=" + states.length);}
+
 		Editor ed = mSharedPreferences.edit();
-		for (int i = 0 ; i < COMMAND_ID.length ; i ++) {
-			ed.putBoolean(DEF.KEY_TOPMENU + i, states[i]);
+		for (int i = 0 ; i < states.length ; i ++) {
+			try {
+				ed.putBoolean(DEF.KEY_TOPMENU + COMMAND_INDEX[i], states[i]);
+			}
+			catch (Exception e) {
+				Log.e("ImageActivity", "saveTopMenuState: エラーが発生しました.");
+				if (e != null && e.getMessage() != null) {
+					Log.e("ImageActivity", "saveTopMenuState: エラーメッセージ. " + e.getMessage());
+				}
+			}
 		}
 		ed.commit();
+		if (debug) {Log.d("ImageActivity", "saveTopMenuState: 終了します.");}
 	}
 
 	// 座標から選択するページを求める
@@ -3627,6 +3704,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	// 設定の読み込み
 	private void ReadSetting(SharedPreferences sharedPreferences) {
+		boolean debug = false;
 		// 設定値取得
 		try {
 			mFileSort = SetImageActivity.getFileSort(sharedPreferences);
@@ -3643,7 +3721,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			mWAdjust = DEF.calcWAdjust(SetImageDetailActivity.getWAdjust(sharedPreferences));
 			mWidthScale = DEF.calcWScaling(SetImageDetailActivity.getWScaling(sharedPreferences));
 			mImgScale = DEF.calcScaling(SetImageDetailActivity.getScaling(sharedPreferences));
-			Log.d("ImageActivity", "ReadSetting mWidthScale=" + mWidthScale + ", mImgScale=" + mImgScale);
+			if (debug) {Log.d("ImageActivity", "ReadSetting mWidthScale=" + mWidthScale + ", mImgScale=" + mImgScale);}
 			
 			mEffectTime = DEF.calcEffectTime(SetImageTextDetailActivity.getEffectTime(sharedPreferences));
 			mAutoPlayTerm = DEF.calcAutoPlay(SetImageDetailActivity.getAutoPlay(sharedPreferences));

@@ -113,6 +113,9 @@ public class DEF {
 	public static final int MENU_SEARCHJUMP = Menu.FIRST + 45;
 	public static final int MENU_IMGALGO = Menu.FIRST + 46;
 	public static final int MENU_TXTCONF = Menu.FIRST + 47;
+	public static final int MENU_BRIGHT = Menu.FIRST + 48;
+	public static final int MENU_GAMMA = Menu.FIRST + 49;
+	public static final int MENU_BKLIGHT = Menu.FIRST + 50;
 	public static final int MENU_BOOKMARK = Menu.FIRST + 1000;
 	public static final int MENU_CHAPTER = Menu.FIRST + 2000;
 

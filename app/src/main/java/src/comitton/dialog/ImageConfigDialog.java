@@ -2,6 +2,7 @@ package src.comitton.dialog;
 
 import java.util.EventListener;
 
+import src.comitton.common.DEF;
 import src.comitton.config.SetImageActivity;
 import src.comitton.dialog.ListDialog.ListSelectListener;
 import jp.dip.muracoro.comittonx.R;
@@ -20,7 +21,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
@@ -114,11 +114,12 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private String[] mMgnCutColorItems;
 
 	private int mSelectMode;
+	private int mCommandId;
 
 	String mTitle;
 	int mLayoutId;
 
-	public ImageConfigDialog(Activity context) {
+	public ImageConfigDialog(Activity context, int command_id) {
 		super(context);
 		Window dlgWindow = getWindow();
 
@@ -140,6 +141,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
 
+		mCommandId = command_id;
 		mContext = context;
 
 		int nItem;
@@ -206,7 +208,43 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
+		// ビューのレイアウトをxmlファイルから取得し表示する要素を追加する
 		setContentView(R.layout.imageconfigdialog);
+
+		if (mCommandId != DEF.MENU_IMGCONF) {
+			this.findViewById(R.id.chk_gray).setVisibility(View.GONE);
+			this.findViewById(R.id.chk_invert).setVisibility(View.GONE);
+			this.findViewById(R.id.chk_moire).setVisibility(View.GONE);
+			this.findViewById(R.id.chk_topsingle).setVisibility(View.GONE);
+
+			this.findViewById(R.id.label_algomode).setVisibility(View.GONE);
+			this.findViewById(R.id.label_spread).setVisibility(View.GONE);
+			this.findViewById(R.id.label_scale).setVisibility(View.GONE);
+			this.findViewById(R.id.label_mgncut).setVisibility(View.GONE);
+			this.findViewById(R.id.label_mgncutcolor).setVisibility(View.GONE);
+
+			this.findViewById(R.id.btn_algomode).setVisibility(View.GONE);
+			this.findViewById(R.id.btn_spread).setVisibility(View.GONE);
+			this.findViewById(R.id.btn_scale).setVisibility(View.GONE);
+			this.findViewById(R.id.btn_mgncut).setVisibility(View.GONE);
+			this.findViewById(R.id.btn_mgncutcolor).setVisibility(View.GONE);
+		}
+		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_SHARPEN) {
+			this.findViewById(R.id.label_sharpen).setVisibility(View.GONE);
+			this.findViewById(R.id.seek_sharpen).setVisibility(View.GONE);
+		}
+		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_BRIGHT) {
+			this.findViewById(R.id.label_bright).setVisibility(View.GONE);
+			this.findViewById(R.id.seek_bright).setVisibility(View.GONE);
+		}
+		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_GAMMA) {
+			this.findViewById(R.id.label_gamma).setVisibility(View.GONE);
+			this.findViewById(R.id.seek_gamma).setVisibility(View.GONE);
+		}
+		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_BKLIGHT) {
+			this.findViewById(R.id.label_bklight).setVisibility(View.GONE);
+			this.findViewById(R.id.seek_bklight).setVisibility(View.GONE);
+		}
 
 		mChkGray = (CheckBox) this.findViewById(R.id.chk_gray);
 		mChkInvert = (CheckBox) this.findViewById(R.id.chk_invert);
@@ -539,6 +577,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		}
 		return str;
 	}
+
 	private String getBkLight(int progress) {
 		String str;
 		if (progress >= 11) {

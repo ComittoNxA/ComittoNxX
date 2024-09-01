@@ -7,7 +7,7 @@ def packageName = "jp.dip.muracoro.comittonx"
 def applicationName = "ComittoNxX"
 def versionMajor = 1
 def versionMinor = 2
-def versionPatch = 0
+def versionPatch = 1
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -23,7 +23,7 @@ apply from:'../signingConfigs/release.gradle', to: android
 android {
 
     namespace packageName
-    compileSdk 35
+    compileSdk 35 // Android 15("Vanilla Ice Cream")
 
     // C言語の書式でビルドエラーが発生する場合はndkバージョンを24まで下げること
     ndkVersion "27.0.12077973"
@@ -31,10 +31,10 @@ android {
 
     defaultConfig {
         applicationId packageName
-        minSdk 21
+        minSdk 21 // Android 5.0("Lollipop")
         // targetSdk11以降でSMBまわりでNetworkOnMainThreadExceptionエラー発生の可能性
         // targetSdk29はrequestLegacyExternalStorageをセットできる
-        targetSdk 29
+        targetSdk 29 // Android 10.0("Q")
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"

@@ -121,28 +121,33 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	private final int mSdkVersion = android.os.Build.VERSION.SDK_INT;
 
-
+	// 古い設定ファイルとの互換性維持のための番号
+	// ここに追加や削除する場合は番号を変更しないこと
 	private final int COMMAND_INDEX[] =
 	{
 			0,	// 画面方向
 			1,	// 余白削除
 			21,	// 余白削除の色
+			22,	// 画像表示設定
 			2,	// 見開き設定
 			3,	// 画像サイズ
-			4,		// 音操作
+			4,	// 音操作
 			5,	// オートプレイ開始
-			6,// ブックマーク追加
-			7,// ブックマーク選択
-			//8,	// シャープ化
+			6,	// ブックマーク追加
+			7,	// ブックマーク選択
+			8,	// シャープ化
+			23,	// 明るさ補正
+			24,	// ガンマ補正
+			25,	// バックライト
 			9,	// 白黒反転
-			10,		// グレースケール
+			10,	// グレースケール
 			11,	// 画像回転
 			12,	// 画像補間方式
-			13, 	// ページ逆順
+			13, // ページ逆順
 			14,	// 操作入れ替え
 			15,	// 表紙方向
 			16,	// スクロール方向入れ替え
-			17,// 上部メニュー設定
+			17,	// 上部メニュー設定
 			18,	// 設定
 			19,	// 中央余白表示
 			20	// 中央影表示
@@ -153,13 +158,17 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		DEF.MENU_ROTATE,	// 画面方向
 		DEF.MENU_MGNCUT,	// 余白削除
 		DEF.MENU_MGNCUTCOLOR,	// 余白削除の色
+		DEF.MENU_IMGCONF,	// 画像表示設定
 		DEF.MENU_IMGVIEW,	// 見開き設定
 		DEF.MENU_IMGSIZE,	// 画像サイズ
 		DEF.MENU_NOISE,		// 音操作
 		DEF.MENU_AUTOPLAY,	// オートプレイ開始
 		DEF.MENU_ADDBOOKMARK,// ブックマーク追加
 		DEF.MENU_SELBOOKMARK,// ブックマーク選択
-		//DEF.MENU_SHARPEN,	// シャープ化
+		DEF.MENU_SHARPEN,	// シャープ化
+		DEF.MENU_BRIGHT,	// 明るさ補正
+		DEF.MENU_GAMMA,		// ガンマ補正
+		DEF.MENU_BKLIGHT,	// バックライト
 		DEF.MENU_INVERT,	// 白黒反転
 		DEF.MENU_GRAY,		// グレースケール
 		DEF.MENU_IMGROTA,	// 画像回転
@@ -178,13 +187,17 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		R.string.rotateMenu,	// 画面方向
 		R.string.mgnCutMenu,	// 余白削除
 		R.string.mgnCutColorMenu,	// 余白削除の色
+		R.string.imgConfMenu,	// 画像表示設定
 		R.string.tguide02,		// 見開き設定
 		R.string.tguide03,		// 画像サイズ
 		R.string.noiseMenu,		// 音操作
 		R.string.playMenu,		// オートプレイ開始
 		R.string.addBookmarkMenu,// ブックマーク追加
 		R.string.selBookmarkMenu,// ブックマーク選択
-		//R.string.sharpenMenu,	// シャープ化
+		R.string.sharpenMenu,	// シャープ化
+		R.string.brightMenu,	// 明るさ補正
+		R.string.gammaMenu,		// ガンマ補正
+		R.string.bklightMenu,	// バックライト
 		R.string.invertMenu,	// 白黒反転
 		R.string.grayMenu,		// グレースケール
 		R.string.imgRotaMenu,	// 画像回転
@@ -2790,11 +2803,11 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		return;
 	}
 
-	private void showImageConfigDialog() {
+	private void showImageConfigDialog(int command_id) {
 		if (mImageConfigDialog != null) {
 			return;
 		}
-		mImageConfigDialog = new ImageConfigDialog(this);
+		mImageConfigDialog = new ImageConfigDialog(this, command_id);
 
 		// 画像サイズの選択項目を求める
 		int selIndex = 0;
@@ -2907,7 +2920,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		nItem = COMMAND_ID.length;
 		items = new String[nItem];
 		for (int i = 0; i < nItem; i++) {
-			items[i] = res.getString(COMMAND_RES[i]);
+			items[i] = res.getString(COMMAND_RES[i]).replaceAll("\\(%\\)", "");
 		}
 
 		boolean[] states = loadTopMenuState();
@@ -2972,7 +2985,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 					if (states[i]) {
 						// 表示するコマンドを設定
 						mCommandId[count] = COMMAND_ID[i];
-						mCommandStr[count] = res.getString(COMMAND_RES[i]);
+						mCommandStr[count] = res.getString(COMMAND_RES[i]).replaceAll("\\(%\\)", "");
 						count++;
 					}
 				}
@@ -3345,7 +3358,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		switch (id) {
 			case DEF.MENU_IMGCONF: {
 				// 画像表示設定
-				showImageConfigDialog();
+				showImageConfigDialog(DEF.MENU_IMGCONF);
 				break;
 			}
 			case DEF.MENU_IMGALGO: {
@@ -3383,13 +3396,29 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				showSelectList(SELLIST_SCR_ROTATE);
 				break;
 			}
-			//case DEF.MENU_SHARPEN: {
-			//	// シャープ化
-			//	mSharpen = mSharpen ? false : true;
-			//	setImageConfig();
-			//	setBitmapImage();
-			//	break;
-			//}
+			case DEF.MENU_SHARPEN: {
+				// シャープ化
+				//mSharpen = mSharpen ? false : true;
+				//setImageConfig();
+				//setBitmapImage();
+				showImageConfigDialog(DEF.MENU_SHARPEN);
+				break;
+			}
+			case DEF.MENU_BRIGHT: {
+				// 明るさ補正
+				showImageConfigDialog(DEF.MENU_BRIGHT);
+				break;
+			}
+			case DEF.MENU_GAMMA: {
+				// ガンマ補正
+				showImageConfigDialog(DEF.MENU_GAMMA);
+				break;
+			}
+			case DEF.MENU_BKLIGHT: {
+				// バックライト
+				showImageConfigDialog(DEF.MENU_BKLIGHT);
+				break;
+			}
 			case DEF.MENU_INVERT: {
 				// 白黒反転
 				mInvert = mInvert ? false : true;

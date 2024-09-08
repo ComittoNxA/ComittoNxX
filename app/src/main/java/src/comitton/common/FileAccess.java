@@ -138,14 +138,16 @@ public class FileAccess {
 			smbAuth = new NtlmPasswordAuthenticator(domain, user, pass);
 			context = SingletonContext.getInstance().withCredentials(smbAuth);
 
-		} else if (user != null && user.length() != 0) {
+		} else if (user != null && user.length() != 0 && !user.equalsIgnoreCase("guest")) {
 			smbAuth = new NtlmPasswordAuthenticator(user, pass);
 			context = SingletonContext.getInstance().withCredentials(smbAuth);
 
+		} else if (user.equalsIgnoreCase("guest")) {
+			// Guest認証を期待するWindows共有の接続向け
+			context = SingletonContext.getInstance().withGuestCrendentials();
 		} else {
 			// Connect with anonymous mode
 			context = SingletonContext.getInstance().withAnonymousCredentials();
-//			context = SingletonContext.getInstance().withGuestCrendentials();
 		}
 
 		sfile = new SmbFile(url, context);

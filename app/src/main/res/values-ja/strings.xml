@@ -159,7 +159,7 @@
     <string name="svTitle">サーバ設定</string>
     <string name="svNameTitle">表示名</string>
     <string name="svHostTitle">ホスト情報 （サーバ/共有フォルダ）</string>
-    <string name="svUserTitle">アカウント名</string>
+    <string name="svUserTitle">アカウント名（匿名は空欄、ゲストはguest）</string>
     <string name="svPassTitle">パスワード</string>
     <string name="svNameHist">Comics Server</string>
     <string name="svHostHist">192.168.1.120/comics (例)</string>

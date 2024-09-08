@@ -159,7 +159,7 @@
     <string name="svTitle">Server Settings</string>
     <string name="svNameTitle">Display Name</string>
     <string name="svHostTitle">Host (Server/Shared Folder)</string>
-    <string name="svUserTitle">Account Name</string>
+    <string name="svUserTitle">Account Name (Anonymous is blank, guest is guest)</string>
     <string name="svPassTitle">Password</string>
     <string name="svNameHist">Comics Server</string>
     <string name="svHostHist">192.168.1.120/comics (Example)</string>

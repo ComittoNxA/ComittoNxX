@@ -360,6 +360,7 @@ public class DEF {
 	public static final String KEY_LOUPESIZE = "LoupeSize";
 	public static final String KEY_SCRLNEXT = "ScrollNext";
 	public static final String KEY_VIEWNEXT = "ViewNextPage";
+	public static final String KEY_NEXTFILTER = "NextPageFilter";
 
 	public static final String KEY_SHOWTOOLBAR = "ShowToolbar";
 	public static final String KEY_SHOWSELECTOR = "ShowSelector";

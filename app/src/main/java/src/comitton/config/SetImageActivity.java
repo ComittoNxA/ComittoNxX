@@ -554,6 +554,12 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		return flag;
 	}
 
+	public static boolean getNextFilter(SharedPreferences sharedPreferences){
+		boolean flag;
+		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_NEXTFILTER, true);
+		return flag;
+	}
+
 	//	public static boolean getEffect(SharedPreferences sharedPreferences){
 //		boolean flag;
 //		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_EFFECT, true);

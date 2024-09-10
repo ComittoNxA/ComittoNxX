@@ -237,6 +237,11 @@
             android:key="ViewNextPage"
             android:summary="Display the next page when there is free display area to the side"
             android:title="Display next pages" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="NextPageFilter"
+            android:summary="Show gradation when displaying the next page"
+            android:title="Show gradation" />
         <ListPreference
             android:defaultValue="2"
             android:dialogTitle="Page select operation"

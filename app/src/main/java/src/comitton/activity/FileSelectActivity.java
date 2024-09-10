@@ -972,6 +972,20 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						switchFileList(); // ファイルリストをアクティブ化
 						return true;
 					}
+
+					// ジェスチャーナビゲーションのBack操作中に長押し判定が発生していた場合にキャンセルする
+					if (mTouchArea == ListScreenView.AREATYPE_FILELIST) {
+						mListScreenView.mFileListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_DIRLIST) {
+						mListScreenView.mDirListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_SERVERLIST) {
+						mListScreenView.mServerListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_FAVOLIST) {
+						mListScreenView.mFavoListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_HISTLIST) {
+						mListScreenView.mHistListArea.cancelOperation();
+					}
+
 					if (mBackMode == BACKMODE_EXIT) {
 						checkExitTimer();
 						return true;

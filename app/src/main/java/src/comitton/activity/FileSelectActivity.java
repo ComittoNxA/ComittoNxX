@@ -942,6 +942,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 			switch (keycode) {
 				case KeyEvent.KEYCODE_ENTER:
+				case KeyEvent.KEYCODE_DPAD_CENTER:
 					if (mEnterDown == false) {
 						mListScreenView.moveCursor(keycode, true);
 						mEnterDown = true;
@@ -1072,6 +1073,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					}
 					break;
 				case KeyEvent.KEYCODE_ENTER:
+				case KeyEvent.KEYCODE_DPAD_CENTER:
 					if (mEnterDown == true) {
 						mListScreenView.moveCursor(keycode, false);
 					}

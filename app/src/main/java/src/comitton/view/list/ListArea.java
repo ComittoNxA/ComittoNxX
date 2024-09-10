@@ -788,7 +788,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		doOperation(true);
 		updateBottomRowPos();
 
-		if (mCursorDisp == true && keycode == KeyEvent.KEYCODE_ENTER) {
+		if (mCursorDisp == true && keycode == KeyEvent.KEYCODE_ENTER || keycode == KeyEvent.KEYCODE_DPAD_CENTER) {
 			// 改行はカーソル移動とは分けて処理
 			int index = mCursorPosY * mColumnNum + mCursorPosX; 
 			if (isDown) {

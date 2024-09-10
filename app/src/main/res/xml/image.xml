@@ -250,6 +250,11 @@
             android:key="PageSelect"
             android:summary="dummy"
             android:title="Page select operation(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPageKey"
+            android:summary="When checked, Key to cover direction(if left cover then left key) will move to the previous page."
+            android:title="Swap the LR key operation(*)" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Online Help" >
         <PreferenceScreen

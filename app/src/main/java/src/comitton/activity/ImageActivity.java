@@ -329,6 +329,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 	private boolean mScrlNext = false; // スクロールで前後のページへ移動
 	private boolean mViewNext = false; // 次のページを表示
 	private boolean mNextFilter = true;
+	private boolean mChgPageKey = false;
 
 	private String mCharset;
 
@@ -931,7 +932,8 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				case KeyEvent.KEYCODE_DPAD_RIGHT:
 				case KeyEvent.KEYCODE_DPAD_LEFT: {
 					// カーソル左右でページ遷移
-					if ((code == KeyEvent.KEYCODE_DPAD_RIGHT && mPageWay == DEF.PAGEWAY_RIGHT) || (code == KeyEvent.KEYCODE_DPAD_LEFT && mPageWay != DEF.PAGEWAY_RIGHT)) {
+					if ((code == (!mChgPageKey ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT) && mPageWay == DEF.PAGEWAY_RIGHT) ||
+						(code == (!mChgPageKey ? KeyEvent.KEYCODE_DPAD_LEFT : KeyEvent.KEYCODE_DPAD_RIGHT) && mPageWay != DEF.PAGEWAY_RIGHT)) {
 						// 次ページへ
 						nextPage();
 					}
@@ -3873,6 +3875,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			mVolKeyMode = SetImageText.getVolKey(sharedPreferences); // 音量キー操作
 			mTapPattern = SetImageText.getTapPattern(sharedPreferences); // タップパターン
 			mTapRate = SetImageText.getTapRate(sharedPreferences); // タップの比率
+			mChgPageKey = SetImageText.getChgPageKey(sharedPreferences); // 左右キー操作入れ替え
 
 			mPnumDisp = SetImageActivity.getPnumDisp(sharedPreferences); // ページ表示有無
 			mPnumFormat = SetImageActivity.getPnumFormat(sharedPreferences); // ページ表示書式
@@ -3902,7 +3905,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 			mScrlNext = SetImageActivity.getScrlNext(sharedPreferences); // スクロールで次のページへ移動
 			mViewNext = SetImageActivity.getViewNext(sharedPreferences); // 次のページを表示
-			mNextFilter = SetImageActivity.getNextFilter(sharedPreferences);
+			mNextFilter = SetImageActivity.getNextFilter(sharedPreferences); // 次のページのエフェクト表示
 
 			mRotateBtn = DEF.RotateBtnList[SetCommonActivity.getRotateBtn(sharedPreferences)];
 

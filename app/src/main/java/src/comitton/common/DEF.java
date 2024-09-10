@@ -361,6 +361,7 @@ public class DEF {
 	public static final String KEY_SCRLNEXT = "ScrollNext";
 	public static final String KEY_VIEWNEXT = "ViewNextPage";
 	public static final String KEY_NEXTFILTER = "NextPageFilter";
+	public static final String KEY_CHGPAGEKEY = "ChgPageKey";
 
 	public static final String KEY_SHOWTOOLBAR = "ShowToolbar";
 	public static final String KEY_SHOWSELECTOR = "ShowSelector";
@@ -447,6 +448,7 @@ public class DEF {
 	public static final int DEFAULT_TAPRATE = 4; // 50% : 50%
 	public static final boolean DEFAULT_CHGPAGE = true; // タップ操作の入替え:YES(縦書き、漫画)
 	public static final boolean DEFAULT_PREVREV = true; // 前ページに戻った時に逆から表示
+	public static final boolean DEFAULT_CHGPAGEKEY = false; // 左右キー操作の入替え
 
 	public static final boolean DEFAULT_PNUMDISP = false; // ページ番号表示しない
 	public static final int DEFAULT_PNUMFORMAT = 0; // page / total

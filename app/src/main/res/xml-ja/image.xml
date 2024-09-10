@@ -250,6 +250,11 @@
             android:key="PageSelect"
             android:summary="dummy"
             android:title="ページ選択方法" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPageKey"
+            android:summary="チェックにより表紙方向キー(右表紙なら右キー)が前ページの移動になります"
+            android:title="左右キー操作の入替え＊" />
     </PreferenceCategory>
     <PreferenceCategory android:title="オンラインヘルプ" >
         <PreferenceScreen

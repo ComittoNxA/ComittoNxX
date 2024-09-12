@@ -235,7 +235,7 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="ViewNextPage"
-            android:summary="左右に表示領域が余っているときに次のページを表示する"
+            android:summary="スクロール操作で前後のページへ移動が有効の時、スクロール量が0でも左右に表示領域が余っているときに次のページを表示する"
             android:title="次のページを表示" />
         <CheckBoxPreference
             android:defaultValue="true"

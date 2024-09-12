@@ -235,7 +235,7 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="ViewNextPage"
-            android:summary="Display the next page when there is free display area to the side"
+            android:summary="When scrolling to the next page is enabled, the next page will be displayed the next page when there is free display area to the side even if the scroll amount is 0."
             android:title="Display next pages" />
         <CheckBoxPreference
             android:defaultValue="true"

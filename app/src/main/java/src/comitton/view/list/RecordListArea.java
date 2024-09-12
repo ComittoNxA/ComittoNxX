@@ -350,6 +350,9 @@ public class RecordListArea extends ListArea {
 					if (rd.getType() == RecordItem.TYPE_IMAGE) {
 						work = rd.getImage();
 					}
+					else if (rd.getType() == RecordItem.TYPE_EPUB) {
+						work = String.format("Chapter : %d, Page : %d, PageRate : %.2f%%", (rd.getChapter() + 1), (rd.getPage() + 1), (rd.getPageRate() * 100));
+					}
 					else {
 						work = "Page : " + (rd.getPage() + 1);
 					}

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Image & Text Viewer Settings</title>
+    <link rel="stylesheet" href="../help.css">
+    <style>
+        h1, h2, h3, li {
+          color: #1c4587;
+          font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div id="banners">
+    <div id="title-banner">
+        <div id="title">Image & Text Viewer Settings</div>
+    </div>
+</div>
+
+<div id="contents">
+    <h1>Settings for Image & Text Viewer</h1>
+    <font color="red">The following is a machine translation.</font><br>
+    <font color="red">Content is not checked.</font><br>
+    Settings related to display and manipulate selection screen file.<br>
+
+    <h2>Initial Settings</h2>
+    <h3>Initial Scale Mode</h3>
+    Select the initial value of the display size of the image when you open the filestartup.<br>
+    Changing the mode expansion in the area at the top of the screen, so operation is temporary, you want to apply to zoom mode when the file open, please set here.<br>
+    Setting does "Not Expand" If the effect does not expand to greater than or equal to the size of the original image.<br>
+
+    <ul>
+        <li>Original Size</li>
+        Display the image size remains size.<br>
+
+        <li>Fit Width</li>
+        And displays  shrinking / expanding the width of the screen while the aspect ratio of the image the width.<br>
+
+        <li>Fit Height</li>
+        And displays the shrinking / expanding the height of the screen while the aspect ratio of the image height.<br>
+
+        <li>Fit Screen</li>
+        And displays the shrinking / expanding so as not to protrude from the screen aspect ratio of the image remains.<br>
+
+        <li>Full Screen</li>
+        And displays the shrinking / expanding to fill the screen to ignore the aspect ratio of the image is screen.<br>
+
+    </ul>
+
+    <h3>Initial View Mode</h3>
+    Select how you want to view facing pages mode.<br>
+
+    <ul>
+        <li>Normal</li>
+        Displays images one by one.<br>
+
+        <li>Dual View</li>
+        The two side-by-side display next to the portrait if the image.<br>
+        One to display the image as if the landscape.<br>
+
+        <li>Half View</li>
+        To display left and right halves if divided into Vertical image.<br>
+        To display the images if the image as it is a portrait.<br>
+
+    </ul>
+
+    <h3>Image Interpolation</h3>
+    Select the algorithm to interpolate the image each time shrinking / expanding method.<br>
+
+    <ul>
+        <li>Nearest Neighbor</li>
+        processing speed is the fastest.<br>
+        Such as in the reduction process will be difficult to read character by sampling the line to show the way.<br>
+        In the enlargement process will be expanded to the shape of the dot as it is not blurry.<br>
+
+        <li>Bi-Linear</li>
+        Is faster than Bi-Cubic interpolation, the contour will be feeling blurry compared to the Bi-Cubic interpolation.<br>
+
+        <li>Bi-Linear (2 Step)</li>
+        to reduce size less than or equal to about 75%, make the final size reduction to further reduce the size of the middle from there once in a Bi-Linear interpolation method.<br>
+        It is grainy image is missing information at once small and shrinking will be a little better.<br>
+
+        <li>Bi-Cubic</li>
+        I think beautiful, but takes more time than Bi-Linear interpolation.(It is an impression of individual)<br>
+        Contour will be feeling sharp than to Bi-Linear interpolation.<br>
+
+        <li>Bi-Cubic (2 Step)</li>
+        to reduce size less than or equal to about 75%, make the further reduction to final size shrinks to the size of the middle from there once in a Bi-Cubic interpolation method.<br>
+        It is grainy image is missing information at once small and shrinking will be a little better.<br>
+    </ul>
+
+
+    <h2>Display Settings</h2>
+    <h3>Hide the Notification Area</h3>
+    You can hide the notification area of the Android settings.<br>
+    After closing will take effect once the display screen image.<br>
+
+    <h3>Screen Orientation</h3>
+    Set the direction to display the display screen image direction.<br>
+    By the camera rotation button will only work <font color="red"><b>if a vertical fixed or horizontal fixed</b></font>.<br>
+
+    <ul>
+        <li>Auto Rotate</li>
+        To rotate the screen automatically according to the orientation of the body rotate.<br>
+
+        <li>Portrait</li>
+        To secure it to the display screen in portrait orientation regardless of the orientation of the body.<br>
+
+        <li>Landscape</li>
+        To secure it to the display screen sideways orientation of the body regardless of the side.<br>
+
+        <li>Portrait(Rotated 90deg)</li>
+        This setting is for the terminal since the status bar Android3.x is indelible.<br>
+        But to secure it to the display screen in portrait orientation regardless of the orientation of the body, drawing and manipulation by the application will be state of the landscape.<br>
+        Because the status bar will display to the right side when you have a terminal in this state, you can use to draw all of the image height of the screen.<br>
+    </ul>
+
+    <h3>Show Image Order</h3>
+    Set up how to sort the page for which you want to view images sorting.<br>
+
+    <ul>
+        <li>None</li>
+        When viewing a compressed file sorting,display the image in the order in which they are stored in a compressed file.<br>
+        When you view an image file and display the image in the order that they can get the file list.<br>
+
+        <li>File Name(Ascending)</li>
+        To display the image in the order in which they were sort in ascending order the name of the file name.<br>
+
+        <li>File Name(Descending)</li>
+        To display an image on a descending sort order in which they were the name of the file name.<br>
+    </ul>
+
+    <h3>Turning the Page Direction</h3>
+    Set the cover or left cover right.<br>
+    Please change to suit also "initial display position of the image" if you have changed.<br>
+    Also affects such as whether the previous page to be either right or left in the "single page view", when the position and align the two images in the "tile".<br>
+
+    <ul>
+        <li>Right to Left</li>
+        <li>Left to Right</li>
+    </ul>
+
+    <h3>First Image Position</h3>
+    Sets whether to display anywhere in the image relative to the image when you view the left.<br>
+    I think a good start if you set the position of the image reading.(“Right Top” if it is cover left, “Left Top” if it is Cover Right)<br>
+
+    <ul>
+        <li>Right Top</li>
+        <li>Left Top</li>
+        <li>Right Bottom</li>
+        <li>Left Bottom</li>
+        <li>Center</li>
+    </ul>
+
+    <h3>Prev Page to Reverse Position</h3>
+    Criteria you set in "position the initial display of the image" when you return the page Sets whether to reverse the left and right of the position and the reference position.<br>
+
+    <h3>Not Expand</h3>
+    Set the image size that you specify if you want to in the "How to adjust size", or image for a larger size than the original image.<br>
+    To "align the height in side-by-side view" even if the setting that does not affect expansion.<br>
+
+    <h3>Adjust Height</h3>
+    will expand to fit the larger the image height is smaller in"tile".<br>
+    Without being affected even if "setting does not expand" is enabled, will expand to more than the original image size.<br>
+
+    <h3>Magnification of the Loupe</h3>
+    Select the magnification of the larger image that appears when you press and hold the image view.<br>
+    You can choose from two magnification patterns of standard criteria and display the original image size.<br>
+
+    <ul>
+        <li>Original x1.0 - x3.0</li>
+        <li>Display x1.5 - x3.0</li>
+    </ul>
+
+    <h3>Center Margin</h3>
+    Leave a margin between when you are viewing the two images in the "tile"size.<br>
+    The width of the margin can be set in the "margin width in the middle" of the Advanced Settings.<br>
+
+    <h3>Draw Shadow</h3>
+    Draws the shadow in the center like the center of the page when you are viewing the two images in the "Dual View".<br>
+    The width of the shadow can be set in the "Shadow Width" of the Detail Settings.<br>
+
+    <h3>Page turning effect</h3>
+    will be drawn from the side to scroll through a new page when you change the page that displays effect.<br>
+
+    <h2>Operation Settings</h2>
+    <h3>Show Last Page Message</h3>
+    When the operation on the next page while viewing the last page set whether to display a confirmation message.<br>
+
+    <h3>Exchange Next/Prev Page Tap</h3>
+    Tap the screen on the next page left, tap right of the screen will be the previous page to check.<br>
+
+    <h3>Operation Vibrate</h3>
+    The vibration check in accordance with the operation and vibration.<br>
+
+    <h3>Operation of Vol Key</h3>
+    Set the use of page-turning operation by key & scroll volume buttons.<br>
+
+    <ul>
+        <li>No Use</li>
+        <li>Vol-Up:Prev / Down:Next</li>
+        <li>Vol-Up:Next / Down:Prev</li>
+    </ul>
+
+</div>
+</body>
+</html>

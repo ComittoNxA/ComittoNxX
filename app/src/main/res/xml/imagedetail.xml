@@ -74,10 +74,10 @@
             android:summary="dummy"
             android:title="Max number of processing threads" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="IDtlHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="Displays the help for these settings."
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

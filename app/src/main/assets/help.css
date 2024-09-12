@@ -1,0 +1,89 @@
+  body {
+    margin: 0;
+  }
+
+  #banners {
+    align-items: center;
+    background: white;
+    display: block;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+  }
+
+  #banners #title-banner {
+    background: white;
+    border-bottom: 1px #ccc solid;
+    display: flex;
+    flex: 1 1 0%;
+    height: 60px;
+    width: 100%;
+  }
+
+  #banners #title-banner #title {
+    flex-grow: 1;
+    margin: auto 0 auto 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 70%;
+  }
+
+  #banners #title-banner #interval {
+    margin: auto 25px auto 0;
+    font-size: small;
+  }
+
+  #footer {
+    background: #f0f0f0;
+    border-bottom: 1px #ccc solid;
+    bottom: 0;
+    font-size: small;
+    padding: 10px 10px;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+  }
+
+  @media only screen and (max-device-width: 800px) {
+    #banners #title-banner {
+      border-bottom-width: 5px;
+      height: auto;
+      display: block;
+    }
+
+    #banners #title-banner #title {
+      font-size: 2em;
+      margin: auto 0 auto 20px;
+      width: 90%;
+    }
+  }
+
+  #contents {
+    padding: 50px 20% 20px 20%;
+  }
+
+  @media only screen and (max-device-width: 800px) {
+    #contents {
+      padding: 50px 5% 20px 5%;
+    }
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  a,a:hover,a:visited{
+    color: inherit;
+  }
+
+  h3:before {
+    content:"\025a0";
+  }
+
+
+  ul {
+    list-style-type: circle;
+  }

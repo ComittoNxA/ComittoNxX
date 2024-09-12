@@ -1900,7 +1900,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		mMenuDialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
 
 		mMenuDialog.addSection(res.getString(R.string.otherSec));
-		// オンラインヘルプ
+		// ヘルプ
 		mMenuDialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
 		// 操作確認
 		mMenuDialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
@@ -2032,9 +2032,10 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			case DEF.MENU_ONLINE: {
 				// 操作方法画面に遷移
 				Resources res = getResources();
-				String url = res.getString(R.string.url_operatetext); // 操作説明
-				Uri uri = Uri.parse(url);
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				String url = res.getString(R.string.url_operatetext);	// 設定画面
+				Intent intent;
+				intent = new Intent(TextActivity.this, HelpActivity.class);
+				intent.putExtra("Url", url);
 				startActivity(intent);
 				break;
 			}

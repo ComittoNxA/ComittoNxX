@@ -20,7 +20,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.graphics.Paint.FontMetrics;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;

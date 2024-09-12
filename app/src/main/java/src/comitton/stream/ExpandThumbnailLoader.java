@@ -303,12 +303,12 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 				}
 			}
 
-			if (bm.getConfig() != Config.RGB_565) {
-				if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: RGB_565に変換します.");}
-				bm = bm.copy(Config.RGB_565, true);
-				if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: RGB_565に変換しました.");}
-			}
 			if (bm != null) {
+				if (bm.getConfig() != Config.RGB_565) {
+					if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: RGB_565に変換します.");}
+					bm = bm.copy(Config.RGB_565, true);
+					if (debug) {Log.d("ExpandThumbnailLoader", "loadBitmap: RGB_565に変換しました.");}
+				}
 				// キャッシュとして保存
 				saveThumbnailCache(pathcode, bm);
 				if (retval == false) {

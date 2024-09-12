@@ -14,10 +14,10 @@ import src.comitton.common.FileAccess;
 import src.comitton.common.ImageAccess;
 import src.comitton.config.SetCommonActivity;
 import src.comitton.config.SetConfigActivity;
+import src.comitton.config.SetEpubActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
-import src.comitton.config.SetImageDetailActivity;
 import src.comitton.config.SetImageText;
 import src.comitton.config.SetRecorderActivity;
 import src.comitton.data.FileData;
@@ -83,7 +83,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewConfiguration;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -105,6 +104,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private static final int OPERATE_RENAME = 6;
 	private static final int OPERATE_DELCACHE = 7;
 	private static final int OPERATE_FIRST = 8;
+	private static final int OPERATE_EPUB = 9;
 	private static final int OPERATE_SETTHUMBASDIR = 100;
 	private static final int OPERATE_SETTHUMBCROPPED = 101;
 
@@ -125,6 +125,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private String mLoadListNextPath;
 	private String mLoadListNextFile;
 	private String mLoadListNextInFile;
+	private int mLoadListNextChapter;
+	private float mLoadListNextPageRate;
 	private int mLoadListNextPage;
 
 	// ダイアログ情報
@@ -179,6 +181,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private int mMaxLines;
 	private int mShowDelMenu;
 	private int mShowRenMenu;
+	private boolean mEpubViewer;
 
 	private boolean mResumeOpen;
 	private boolean mThumbnail;
@@ -553,8 +556,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			// 履歴の内容を更新する
 			mListScreenView.updateRecordList();
 
-			if (requestCode == DEF.REQUEST_IMAGE || requestCode == DEF.REQUEST_TEXT || requestCode == DEF.REQUEST_EXPAND) {
-				if (debug) {Log.d("FileSelectActivity", "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EXPAND");}
+			if (requestCode == DEF.REQUEST_IMAGE || requestCode == DEF.REQUEST_TEXT || requestCode == DEF.REQUEST_EPUB || requestCode == DEF.REQUEST_EXPAND) {
+				if (debug) {Log.d("FileSelectActivity", "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EPUB || REQUEST_EXPAND");}
 				if (resultCode == RESULT_OK && data != null) {
 					if (debug) {Log.d("FileSelectActivity", "onActivityResult: RESULT_OK. ビュアーから復帰しました.");}
 					// ビュアーからの復帰
@@ -565,26 +568,33 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					if (nextopen != CloseDialog.CLICK_CLOSE) {
 						if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");}
 						if (mIsLoading == true || mFileList.getFileList() == null) {
+							if (debug) {Log.d("FileSelectActivity", "onActivityResult: mIsLoading == true");}
 							// リストデータがない場合は読み込むまで待つ
 							mLoadListNextOpen = nextopen;
 							mLoadListNextFile = file;
 							mLoadListNextPath = path;
 							mLoadListNextInFile = "";
+							mLoadListNextChapter = -2;
+							mLoadListNextPageRate = -2f;
 							mLoadListNextPage = -2;
 							return;
 						}
 						else if (path != null && path.equals(mPath) == false) {
+							if (debug) {Log.d("FileSelectActivity", "onActivityResult: mIsLoading == false, path.equals(mPath) == false");}
 							// パス移動後読み込み終了まで待つ
 							moveFileSelect(mURI, path, file, true);
 							mLoadListNextOpen = nextopen;
 							mLoadListNextFile = file;
 							mLoadListNextPath = path;
 							mLoadListNextInFile = "";
+							mLoadListNextChapter = -2;
+							mLoadListNextPageRate = -2f;
 							mLoadListNextPage = -2;
 							return;
 						}
 						else {
-							if (nextFileOpen(nextopen, path, file, "", -1) == true) {
+							if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextFileOpen");}
+							if (nextFileOpen(nextopen, path, file, "", -1, -1f, -1) == true) {
 								// オープンできた
 								return;
 							}
@@ -663,16 +673,21 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	}
 
 	// 次のファイルを開く
-	private boolean nextFileOpen(int nextopen, String path, String file, String image, int page) {
+	private boolean nextFileOpen(int nextopen, String path, String file, String image, int chapter, float pagerate, int page) {
+		Log.d("FileSelectActivity", "nextFileOpen: 開始します. nextopen=" + nextopen + ", path=" + path + ", image=" + image + ", page=" + page);
 		// 次のファイル検索
 		FileData nextfile = searchNextFile(mFileList.getFileList(), file, nextopen);
 		if (nextfile != null && nextfile.getName().length() > 0) {
+			Log.d("FileSelectActivity", "nextFileOpen: nextfile != null");
+
 			switch (nextopen) {
 				case CloseDialog.CLICK_PREVTOP:
 				case CloseDialog.CLICK_NEXTTOP: {
 					Editor ed = mSharedPreferences.edit();
 					String user = mServer.getUser();
 					String pass = mServer.getPass();
+					ed.remove(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#chapter");
+					ed.remove(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#pageRate");
 					ed.remove(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass));
 					ed.commit();
 					break;
@@ -682,6 +697,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					Editor ed = mSharedPreferences.edit();
 					String user = mServer.getUser();
 					String pass = mServer.getPass();
+					ed.putInt(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#chapter", -2);
+					ed.putFloat(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#pageRate", -2f);
 					ed.putInt(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass), -2);
 					ed.commit();
 					updateListView();
@@ -689,8 +706,11 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				}
 			}
 		}
+
 		if (nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE) {
-			if (openFile(nextfile, image, page) == true) {
+			Log.d("FileSelectActivity", "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");
+
+			if (openFile(nextfile, image, chapter, pagerate, page, mEpubViewer) == true) {
 				// サムネイル解放
 				releaseThumbnail();
 				return true;
@@ -768,6 +788,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 		mUseThumbnailTap = SetFileListActivity.getThumbnailTap(mSharedPreferences);	// サムネイルタップで長押しメニューの有効化フラグ
 		mDuration = DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences));
+
+		mEpubViewer = SetFileListActivity.getEpubViewer(mSharedPreferences);
 
 		if (mListRotaChg == false) {
 			// 手動で切り替えていない
@@ -910,6 +932,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			return true;
 		}
 		if (mDuration != DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences))) {
+			return true;
+		}
+		if (mEpubViewer != SetFileListActivity.getEpubViewer(mSharedPreferences)) {
 			return true;
 		}
 		// if (mHistCount !=
@@ -1434,9 +1459,11 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				} catch (Exception ex) {
 					break;
 				}
+				int lastView = mSharedPreferences.getInt("LastOpen", -1);
 				String path = mSharedPreferences.getString("LastPath", "");
 				String lastFile = mSharedPreferences.getString("LastFile", "");
 				String lastText = mSharedPreferences.getString("LastText", "");
+				String lastEpub = mSharedPreferences.getString("LastEpub", "");
 				String uri = "";
 				if (svrindex != ServerSelect.INDEX_LOCAL) {
 					ServerSelect server = new ServerSelect(mSharedPreferences, this);
@@ -1446,8 +1473,11 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 				Resources res = getResources();
 				String msg = res.getString(R.string.rsMsg) + "\n\n" + uri + path + lastFile;
-				if (lastText != null && lastText.length() > 0) {
+				if (lastView == DEF.LASTOPEN_TEXT && lastText != null && lastText.length() > 0) {
 					msg += "\n" + lastText;
+				}
+				else if (lastView == DEF.LASTOPEN_EPUB && lastEpub != null && lastEpub.length() > 0) {
+					msg += "\n" + lastEpub;
 				}
 				dialogBuilder.setTitle(R.string.rsTitle);
 				dialogBuilder.setMessage(msg);
@@ -1459,6 +1489,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						String path = mSharedPreferences.getString("LastPath", "");
 						String lastFile = mSharedPreferences.getString("LastFile", "");
 						String lastText = mSharedPreferences.getString("LastText", "");
+						String lastEpub = mSharedPreferences.getString("LastEpub", "");
 
 						// 起動処理終了を保存
 						if (mInitialize != 0) {
@@ -1484,6 +1515,21 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 								mLoadListNextFile = lastText;
 								mLoadListNextPath = path;
 							}
+							mLoadListNextPage = -1;
+						} else if (lastView == DEF.LASTOPEN_EPUB) {
+							if (lastFile != null && lastFile.length() != 0) {
+								// 最後に開いていた圧縮ファイル展開
+								// 圧縮ファイルを設定
+								mLoadListNextFile = lastFile;
+								mLoadListNextPath = path;
+								mLoadListNextInFile = lastEpub;
+							} else {
+								// 最後に開いたテキストオープン
+								mLoadListNextFile = lastEpub;
+								mLoadListNextPath = path;
+							}
+							mLoadListNextChapter = -1;
+							mLoadListNextPageRate = -1f;
 							mLoadListNextPage = -1;
 						} else if (lastView == DEF.LASTOPEN_IMAGE) {
 							// 最後に開いたイメージオープン
@@ -1672,7 +1718,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		if (mListRota == DEF.ROTATE_PORTRAIT || mListRota == DEF.ROTATE_LANDSCAPE) {
 			menu.add(0, DEF.MENU_ROTATE, Menu.NONE, res.getString(R.string.rotateMenu)).setIcon(android.R.drawable.ic_menu_rotate);
 		}
-		// オンラインヘルプ
+		// ヘルプ
 		menu.add(0, DEF.MENU_ONLINE, Menu.NONE, res.getString(R.string.onlineMenu)).setIcon(android.R.drawable.ic_menu_set_as);
 		// 動作・使用上の注意
 		menu.add(0, DEF.MENU_NOTICE, Menu.NONE, R.string.noticeMenu).setIcon(android.R.drawable.ic_menu_info_details);
@@ -1747,9 +1793,10 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		else if (id == DEF.MENU_ONLINE) {
 			// 操作方法画面に遷移
 			Resources res = getResources();
-			String url = res.getString(R.string.url_filer); // 操作説明
-			Uri uri = Uri.parse(url);
-			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+			String url = res.getString(R.string.url_filer);	// 設定画面
+			Intent intent;
+			intent = new Intent(FileSelectActivity.this, HelpActivity.class);
+			intent.putExtra("Url", url);
 			startActivity(intent);
 		}
 		else if (id == DEF.MENU_QUIT) {
@@ -1880,7 +1927,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 		boolean thumbload = true;
 		if (mLoadListNextOpen != -1) {
-			if (nextFileOpen(mLoadListNextOpen, mLoadListNextPath, mLoadListNextFile, mLoadListNextInFile, mLoadListNextPage) == true) {
+			if (nextFileOpen(mLoadListNextOpen, mLoadListNextPath, mLoadListNextFile, mLoadListNextInFile, mLoadListNextChapter, mLoadListNextPageRate, mLoadListNextPage) == true) {
 				// オープンできた
 				thumbload = false;
 			}
@@ -1911,7 +1958,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				FileData data = files.get(i);
 				String name = data.getName();
 				int type = data.getType();
-				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_DIR) {
+				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_EPUB || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_DIR) {
 					int state = sharedPreferences.getInt(DEF.createUrl(path + name, user, pass), -1);
 					data.setState(state);
 				}
@@ -2209,6 +2256,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		String ope7 = res.getString(R.string.ope07); // zip/rar/pdfを開く
 		String ope8 = res.getString(R.string.ope08); // ファイル名変更
 		String ope9 = res.getString(R.string.ope09); // サムネイルキャッシュ削除
+		String ope11 = res.getString(R.string.ope11); // Epubビュアーで開く
 		String ope100 = res.getString(R.string.ope100);;// 親ディレクトリのサムネイルに設定
 		String ope101 = res.getString(R.string.ope101);;// 1枚目を切り抜いてサムネイルに設定
 		String ope10 = res.getString(R.string.ope10); // 先頭から読む
@@ -2262,7 +2310,14 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		else {
 			int state = mFileData.getState();
 			int itemnum = 0;
-			if (mFileData.getType() != FileData.FILETYPE_DIR && mFileData.getType() != FileData.FILETYPE_TXT) {
+			if (mFileData.getType() != FileData.FILETYPE_DIR && mFileData.getType() != FileData.FILETYPE_TXT && mFileData.getType() != FileData.FILETYPE_EPUB) {
+				// zip/rar/pdfファイルを展開
+				itemnum++;
+			}
+			if (mFileData.getType() == FileData.FILETYPE_EPUB) {
+				// zip/rar/pdfファイルを展開
+				itemnum++;
+				// Epubビュアーで開く
 				itemnum++;
 			}
 			if (state != -1) {
@@ -2311,7 +2366,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			// ここから設定
 			items = new String[itemnum];
 
-			if (mFileData.getType() != FileData.FILETYPE_DIR && mFileData.getType() != FileData.FILETYPE_TXT) {
+			if (mFileData.getType() != FileData.FILETYPE_DIR && mFileData.getType() != FileData.FILETYPE_TXT && mFileData.getType() != FileData.FILETYPE_EPUB) {
 				if (mTapExpand) {
 					// zip/rar/pdfファイルを開く
 					items[i] = ope7;
@@ -2321,6 +2376,22 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					items[i] = ope5;
 				}
 				mOperate[i] = OPERATE_EXPAND;
+				i++;
+			}
+
+			if (mFileData.getType() == FileData.FILETYPE_EPUB) {
+				// zip/rar/pdfファイルを展開
+				items[i] = ope5;
+				mOperate[i] = OPERATE_EXPAND;
+				i++;
+				if (DEF.EPUB_VIEWER == mEpubViewer) {
+					// zip/rar/pdfファイルを開く
+					items[i] = ope7;
+				} else {
+					// Epubビュアーで開く
+					items[i] = ope11;
+				}
+				mOperate[i] = OPERATE_EPUB;
 				i++;
 			}
 
@@ -2416,7 +2487,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						// サムネイル解放
 						releaseThumbnail();
 
-						if (mTapExpand) {
+						if (mTapExpand && mFileData.getType() != FileData.FILETYPE_EPUB) {
 							// zip/rar/pdfファイルを開く
 							openCompFile(mFileData.getName(), "");
 						}
@@ -2426,12 +2497,25 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						}
 						break;
 					}
+					case OPERATE_EPUB: // ビュワーで開く
+						if (DEF.EPUB_VIEWER == mEpubViewer) {
+							// zip/rar/pdfファイルを開く
+							openCompFile(mFileData.getName(), "");
+						} else {
+							// Epubビュアーで開く
+							openEpubFile(mFileData.getName(), -1, -1f, -1);
+						}
+						break;
 					case OPERATE_NONREAD: // 未読にする
 					case OPERATE_FIRST: { // 先頭から読む
 						ed = mSharedPreferences.edit();
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
 						ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass));
+						if (mFileData.getType() == FileData.FILETYPE_EPUB) {
+							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#chapter");
+							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#pageRate");
+						}
 						ed.commit();
 						updateListView();
 						if (mOperate[item] == OPERATE_FIRST) {
@@ -2461,6 +2545,10 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
 						ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass), -2);
+						if (mFileData.getType() == FileData.FILETYPE_EPUB) {
+							ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#chapter", -2);
+							ed.putFloat(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#pageRate", -2f);
+						}
 						ed.commit();
 						updateListView();
 						break;
@@ -3046,7 +3134,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	/**
 	 * ファイルオープン
 	 */
-	private boolean openFile(FileData fd, String infile, int page) {
+	private boolean openFile(FileData fd, String infile, int chapter, float pagerate, int page, boolean epubviewer) {
 		// ファイルを表示
 		if (fd == null) {
 			if (page != -2) {
@@ -3078,9 +3166,51 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				case FileData.FILETYPE_TXT:
 					openTextFile(fd.getName(), page);
 					break;
+				case FileData.FILETYPE_PDF:
+					openCompFile(fd.getName(), infile);
+					break;
+				case FileData.FILETYPE_EPUB:
+					if (DEF.EPUB_VIEWER == epubviewer) {
+						Log.d("FileSelectActivity", "openFile: DEF.EPUB_VIEWER");
+						// Epubビューワーで開く
+						openEpubFile(fd.getName(), chapter, pagerate, page);
+					}
+					else {
+						Log.d("FileSelectActivity", "openFile: DEF.IMAGE_VIEWER");
+						// zipのイメージ表示
+						openCompFile(fd.getName(), infile);
+					}
+					break;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Epubファイルオープン
+	 */
+	private void openEpubFile(String name, int chapter, float pageRate, int page) {
+		// saveLastOpenComp(mServer.getCode(), mPath, null, name,
+		// DEF.LASTOPEN_TEXT);
+		// 描画停止
+
+		setDrawEnable();
+
+		Intent intent;
+		intent = new Intent(FileSelectActivity.this, EpubActivity.class);
+		intent.putExtra("Server", mServer.getSelect());
+		intent.putExtra("Uri", mURI);
+		intent.putExtra("Path", mPath);
+		intent.putExtra("User", mServer.getUser());
+		intent.putExtra("Pass", mServer.getPass());
+		intent.putExtra("File", "");
+		intent.putExtra("Epub", name);
+		intent.putExtra("Chapter", chapter);
+		intent.putExtra("PageRate", pageRate);
+		intent.putExtra("Page", page);
+		startActivityForResult(intent, DEF.REQUEST_EPUB);
+
+		return;
 	}
 
 	/**
@@ -3351,6 +3481,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				case FileData.FILETYPE_DIR: // ディレクトリ
 				case FileData.FILETYPE_TXT: // テキスト
 				case FileData.FILETYPE_ARC: // ZIP
+				case FileData.FILETYPE_EPUB: // Epub
 					sortfiles.add(fd);
 					break;
 				case FileData.FILETYPE_IMG: // イメージ
@@ -3563,6 +3694,19 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						releaseThumbnail();
 						// zip/rar/pdfファイルを開く
 						openCompFile(name, "");
+					} else if (type == FileData.FILETYPE_EPUB) {
+						// サムネイル解放
+						releaseThumbnail();
+						if (DEF.EPUB_VIEWER == mEpubViewer) {
+							Log.d("FileSelectActivity", "onItemClick: DEF.EPUB_VIEWER");
+							// EpubViewerで開く
+							openEpubFile(name, -1, -1f, -1);
+						}
+						else {
+							Log.d("FileSelectActivity", "onItemClick: DEF.IMAGE_VIEWER");
+							// zip/rar/pdfファイルを開く
+							openCompFile(name, "");
+						}
 					} else if (type == FileData.FILETYPE_ARC) {
 						if (mTapExpand) {
 							// zip/rar/pdfファイルを展開
@@ -3591,6 +3735,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				String file = rd.getFile();
 				String path = rd.getPath();
 				String image = rd.getImage();
+				int chapter = rd.getChapter();
+				float pagerate = rd.getPageRate();
 				int page = rd.getPage();
 				int type = rd.getType();
 
@@ -3624,6 +3770,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					moveFileSelectFromServer(server, mLoadListNextPath);
 					if (type != RecordItem.TYPE_NONE) {
 						mLoadListNextOpen = CloseDialog.CLICK_THIS;
+						mLoadListNextChapter = chapter;
+						mLoadListNextPageRate = pagerate;
 						mLoadListNextPage = page;
 					}
 				}

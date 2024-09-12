@@ -82,10 +82,10 @@
             android:summary="dummy"
             android:title="Search Hit Color" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="ImgTxtClrHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="Displays the help for these settings."
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

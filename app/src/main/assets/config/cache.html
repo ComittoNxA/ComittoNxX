@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Memory Cache Settings</title>
+    <link rel="stylesheet" href="../help.css">
+    <style>
+        h1, h2, h3, li {
+          color: #1c4587;
+          font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div id="banners">
+    <div id="title-banner">
+        <div id="title">Memory Cache Settings</div>
+    </div>
+</div>
+
+<div id="contents">
+    <h1>Settings for Memory Cache</h1>
+        <font color="red">The following is a machine translation.</font><br>
+        <font color="red">Content is not checked.</font><br>
+        Parameter setting is to be cached in memory the image cache.<br>
+        Configuration changes will be reflected in the image display screen at a time after closing.<br>
+        Image will continue to remain in the cache to read ahead background processing.<br>
+        The cache can be displayed instantly in a state to hold the image is resized.<br>
+
+    <h3>Memory Cache Size</h3>
+        Set the memory size to hold the image data size.<br>
+        The cache memory stores the image you change the size for display on screen and read the original image.<br>
+        To save an image change requires two bytes per pixel.(if used 768KBytes image of<br>
+        and to increase the memory size is too used <font color="red"><b>stopped forced</b></font> Please note that would have been800x480).<br>
+        ※ We will stop forcing more and more apps running Android when it determines there is little remaining memory.<br>
+
+    <h3>Cache Pages (Next)</h3>
+        Specifies the number of pages to be saved in the cache since the of the currently displayed page page.<br>
+        If you do not have enough memory to cache the number of pages specified, determines the number of pages to be held in the percentage of the "number of cache pages before the current page."<br>
+
+    <h3>Cache Pages (Prev)</h3>
+        before page of the currently displayed the Specify the number of pages to be saved in the cache page.<br>
+        If you do not have enough memory to cache the number of pages specified, the number of pages to be held in the percentage of the "number of the current page after page cache" is determined.<br>
+</div>
+</body>
+</html>

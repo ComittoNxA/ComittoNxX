@@ -256,10 +256,10 @@
             android:summary="チェックにより表紙方向キー(右表紙なら右キー)が前ページの移動になります"
             android:title="左右キー操作の入替え＊" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="オンラインヘルプ" >
+    <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen
             android:key="ImageHelp"
-            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:summary="設定項目についてのヘルプを表示します。"
             android:title="設定項目の説明" >
         </PreferenceScreen>
     </PreferenceCategory>

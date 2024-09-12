@@ -52,6 +52,14 @@
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
+            android:key="EpubSet"
+            android:title="Epub表示画面の設定"
+            android:summary="Epub表示画面の起動時の表示や操作を設定する">
+            <intent
+                android:targetClass="src.comitton.config.SetEpubActivity"
+                android:targetPackage="@string/application_id" />
+        </PreferenceScreen>
+        <PreferenceScreen
             android:key="ImageTextDetailSet"
             android:title="共通の表示詳細設定"
             android:summary="イメージ／テキスト表示画面で共通なパラメータを設定する">
@@ -110,10 +118,10 @@
             android:summary="選択したファイルの内容を現在の設定に上書します。\n ([sdcard]/comittona/conf/*.setを参照)"
             android:title="設定ファイルの適用" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="オンラインヘルプ" >
+    <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen
             android:key="ConfHelp"
-            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:summary="設定項目についてのヘルプを表示します。"
             android:title="設定項目の説明" >
         </PreferenceScreen>
     </PreferenceCategory>

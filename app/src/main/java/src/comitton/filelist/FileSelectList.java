@@ -217,6 +217,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				if (fileList.get(i).getType() == FileData.FILETYPE_DIR
 						|| fileList.get(i).getType() == FileData.FILETYPE_ARC
 						|| fileList.get(i).getType() == FileData.FILETYPE_PDF
+						|| fileList.get(i).getType() == FileData.FILETYPE_EPUB
 						|| fileList.get(i).getType() == FileData.FILETYPE_TXT) {
 					state = mSp.getInt(DEF.createUrl(mUri + mPath + name, mUser, mPass), -1);
 					fileList.get(i).setState(state);

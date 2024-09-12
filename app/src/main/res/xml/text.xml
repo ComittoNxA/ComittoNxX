@@ -26,18 +26,7 @@
             android:summary="dummy"
             android:title="Paper Size" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Display Settings" >
-        <PreferenceScreen
-            android:key="txFontDL"
-            android:summary="Transition to the font download screen."
-            android:title="Font Download" >
-        </PreferenceScreen>
-        <ListPreference
-            android:defaultValue=""
-            android:dialogTitle="Select Font"
-            android:key="txFontName"
-            android:summary="dummy"
-            android:title="Select Font" />
+    <PreferenceCategory android:title="Display Settings(* is common to the text/Epub setting)" >
         <ListPreference
             android:defaultValue="0"
             android:dialogTitle="Illustrations Size"
@@ -113,7 +102,7 @@
             android:summary="dummy"
             android:title="Time and Buttery(*)" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Operation Settings" >
+    <PreferenceCategory android:title="Operation Settings(* is common to the text/Epub setting)" >
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="ConfirmBack"
@@ -191,7 +180,13 @@
             android:summary="When checked, right key will move to the previous page."
             android:title="Swap the LR key operation(*)" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Size Settings" >
+    <PreferenceCategory android:title="Font Settings(* is common to the Epub setting)" >
+        <ListPreference
+            android:defaultValue=""
+            android:dialogTitle="Select Font (Select from [sdcard]/comittona/font/)"
+            android:key="txFontName"
+            android:summary="dummy"
+            android:title="Select Font (Select from [sdcard]/comittona/font/)" />
         <src.comitton.config.TextFontTopSeekbar
             android:dialogMessage="Select font size of head."
             android:dialogTitle="Head Font Size"
@@ -205,7 +200,7 @@
             android:key="txFontBodySp"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="Body Font Size" />
+            android:title="Body Font Size(*)" />
         <src.comitton.config.TextFontRubiSeekbar
             android:dialogMessage="Select font size of Rubi."
             android:dialogTitle="Rubi Font Size"
@@ -219,7 +214,7 @@
             android:key="txFontInfoSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="Information Font Size" />
+            android:title="Information Font Size(*)" />
         <src.comitton.config.TextSpaceWSeekbar
             android:dialogMessage="Select size of Lines between."
             android:dialogTitle="Lines between Size"
@@ -240,19 +235,19 @@
             android:key="txMarginW"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="Left and Right Margins Size" />
+            android:title="Left and Right Margins Size(*)" />
         <src.comitton.config.TextMarginHSeekbar
             android:dialogMessage="Select size of Top and Bottom Margins."
             android:dialogTitle="Top and Bottom Margins Size"
             android:key="txMarginH"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="Top and Bottom Margins Size" />
+            android:title="Top and Bottom Margins Size(*)" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="TextHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="Displays the help for these settings."
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

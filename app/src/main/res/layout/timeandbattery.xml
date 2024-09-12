@@ -30,7 +30,6 @@
 				android:layout_width="80sp"
 				android:layout_height="wrap_content"
 				android:gravity="left|center"
-				android:textColor="#FFFFFFFF"
 				android:text="@string/pnTxtFormat" />
 
 			<Spinner
@@ -53,7 +52,6 @@
 				android:layout_width="80sp"
 				android:layout_height="wrap_content"
 				android:gravity="left|center"
-				android:textColor="#FFFFFFFF"
 				android:text="@string/pnTxtPos" />
 
 			<Spinner
@@ -76,15 +74,13 @@
 				android:layout_width="80sp"
 				android:layout_height="wrap_content"
 				android:gravity="left|center"
-				android:textColor="#FFFFFFFF"
 				android:text="@string/pnTxtSize" />
 
 			<TextView
 				android:id="@+id/text_size"
 				android:layout_width="80sp"
 				android:layout_height="wrap_content"
-				android:gravity="left|center"
-				android:textColor="#FFFFFFFF" />
+				android:gravity="left|center" />
 		</LinearLayout>
 
 		<SeekBar
@@ -107,7 +103,6 @@
 				android:layout_width="80sp"
 				android:layout_height="wrap_content"
 				android:gravity="left|center"
-				android:textColor="#FFFFFFFF"
 				android:text="@string/pnTxtColor" />
 
 			<Spinner

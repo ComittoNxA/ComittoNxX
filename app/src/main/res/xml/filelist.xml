@@ -36,6 +36,11 @@
             android:summary="Expands to display the contents of the file by tapping zip/rar/pdf file."
             android:title="Expanded file on tap" />
         <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="epubViewer"
+            android:summary="Open in image viewer instead of epub viewer"
+            android:title="Open the Epub file in Image viewer" />
+        <CheckBoxPreference
             android:defaultValue="true"
             android:key="ParentMove"
             android:summary="Display the move to parent directory in file list."
@@ -188,7 +193,7 @@
             android:summary="dummy"
             android:title="Margin cut from thumbnails" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="FileHelp"
             android:summary="dummy"

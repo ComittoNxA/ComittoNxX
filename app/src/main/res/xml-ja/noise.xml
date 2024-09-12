@@ -36,10 +36,10 @@
             android:summary="音での操作中にマイクの入力レベルを表示する"
             android:title="マイクの入力レベルを表示" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="オンラインヘルプ" >
+    <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen
             android:key="NoiseHelp"
-            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:summary="設定項目についてのヘルプを表示します。"
             android:title="設定項目の説明" >
         </PreferenceScreen>
     </PreferenceCategory>

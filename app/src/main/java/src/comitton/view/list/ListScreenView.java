@@ -74,8 +74,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 
 	private int mOrientation;
 
-	private int mDuration = 800; // 長押し時間
-
 	// アプリ制御
 	private SurfaceHolder mHolder;
 	private Thread mUpdateThread;

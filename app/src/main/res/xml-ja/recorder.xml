@@ -40,10 +40,10 @@
             android:summary="dummy"
             android:title="履歴の保持件数" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="オンラインヘルプ" >
+    <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen
             android:key="RecordHelp"
-            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:summary="設定項目についてのヘルプを表示します。"
             android:title="設定項目の説明" >
         </PreferenceScreen>
     </PreferenceCategory>

@@ -23,6 +23,8 @@ public class MODULE {
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/videolan/dav1d/master/COPYING\">BSD-2-Clause</a><br><br>"
 			+ "		libavif 1.1.1 :<br>"
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/AOMediaCodec/libavif/main/LICENSE\">BSD License</a><br><br>"
+			+ "		epub4j 4.2.0 :<br>"
+			+ "				License :		<a href=\"https://raw.githubusercontent.com/documentnode/epub4j/main/LICENSE\">ASL v2.0</a><br><br>"
 			// 以下利用を終了したライブラリ
 			//+ " 		libjpg-turbo 2.1.91 :<br>"
 			//+ "				BSD-3-Clause, IJG<br>"

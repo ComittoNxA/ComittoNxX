@@ -329,7 +329,7 @@ void ErrorHandler::Throw(RAR_EXIT Code)
   if (Code==RARX_USERBREAK && !EnableBreak)
     return;
 #if !defined(SILENT)
-  // Do not write "aborted" when just displaying online help.
+  // Do not write "aborted" when just displaying help.
   if (Code!=RARX_SUCCESS && Code!=RARX_USERERROR)
     mprintf(L"\n%s\n",St(MProgAborted));
 #endif

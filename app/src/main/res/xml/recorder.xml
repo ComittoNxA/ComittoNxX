@@ -40,10 +40,10 @@
             android:summary="dummy"
             android:title="Number of saved history" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="RecordHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="Displays the help for these settings."
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

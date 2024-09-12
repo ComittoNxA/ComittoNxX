@@ -1,5 +1,6 @@
 package src.comitton.config;
 
+import src.comitton.activity.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Intent;
@@ -118,8 +119,9 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 				// Activityの遷移
 				Resources res = getResources();
 				String url = res.getString(R.string.url_filelist);	// 設定画面
-				Uri uri = Uri.parse(url);
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				Intent intent;
+				intent = new Intent(SetFileListActivity.this, HelpActivity.class);
+				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;
 			}
@@ -437,6 +439,12 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 	public static boolean getTapExpand(SharedPreferences sharedPreferences){
 		boolean flag;
 		flag = DEF.getBoolean(sharedPreferences, DEF.KEY_TAPEXPAND, false);
+		return flag;
+	}
+
+	public static boolean getEpubViewer(SharedPreferences sharedPreferences){
+		boolean flag;
+		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_EP_VIEWER, false);
 		return flag;
 	}
 

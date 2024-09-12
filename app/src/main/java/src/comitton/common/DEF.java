@@ -134,6 +134,7 @@ public class DEF {
 	public static final int REQUEST_EXPAND = 107;
 	public static final int REQUEST_RECORD = 108;
 	public static final int REQUEST_LICENSE = 109;
+	public static final int REQUEST_EPUB = 110;
 	public static final int REQUEST_CROP = 1000;
 
 	public static final int VIEWPT_RIGHTTOP = 0;
@@ -520,6 +521,7 @@ public class DEF {
 	public static final String KEY_TX_FONTNAME = "txFontName";
 	public static final String KEY_TX_PAGESELECT = "txPageSelect";
 	public static final String KEY_TX_ASCMODE = "txAscMode";
+	public static final String KEY_EP_VIEWER = "epubViewer";
 
 	public static final String KEY_TX_MGNRGB = "txMgnRGB";
 	public static final String KEY_TX_CNTRGB = "txCntRGB";
@@ -606,6 +608,7 @@ public class DEF {
 	public static final int LASTOPEN_NONE = 0;
 	public static final int LASTOPEN_TEXT = 1;
 	public static final int LASTOPEN_IMAGE = 2;
+	public static final int LASTOPEN_EPUB = 3;
 
 	public static final int SHOWMENU_NONE = 0;
 	public static final int SHOWMENU_ALWAYS = 1;
@@ -660,6 +663,9 @@ public class DEF {
 	public static final int THUMBNAIL_PAGESIZE = 2 * 1024 * 1024;	// サムネイルバッファサイズ(4MB)
 	public static final int THUMBNAIL_BLOCK = 8 * 1024;				// サムネイルブロックサイズ(8KB)
 	public static final int THUMBNAIL_MAXPAGE = 4;					// サムネイルバッファ数
+
+	public static final boolean EPUB_VIEWER = false;
+	public static final boolean IMAGE_VIEWER = true;
 
 	// 縦長チェック
 	static public boolean checkPortrait(int cx, int cy) {
@@ -1844,7 +1850,7 @@ public class DEF {
 			strval = sp.getString(key, defval);
 		}
 		catch (Exception e) {
-			Log.e("DEF.getInt", "getStr error(key=" + key + ")");
+			Log.e("DEF.getInt", "getInt error(key=" + key + ")");
 		}
 
 		try {

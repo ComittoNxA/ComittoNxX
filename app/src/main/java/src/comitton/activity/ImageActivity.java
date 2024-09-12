@@ -594,10 +594,12 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 		// 上部メニューの設定を読み込み
 		loadTopMenuState();
-		// 上部メニューの文字列情報をガイドに設定
-		mGuideView.setTopCommandStr(mCommandStr);
-		// 時刻＆バッテリー表示の情報をガイドに設定
-		mGuideView.setTimeFormat(mTimeDisp, mTimeFormat, mTimePos, mTimeSize, mTimeColor);
+		if (mGuideView != null) {
+			// 上部メニューの文字列情報をガイドに設定
+			mGuideView.setTopCommandStr(mCommandStr);
+			// 時刻＆バッテリー表示の情報をガイドに設定
+			mGuideView.setTimeFormat(mTimeDisp, mTimeFormat, mTimePos, mTimeSize, mTimeColor);
+		}
 
 		setViewConfig();
 
@@ -2935,8 +2937,10 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				saveTopMenuState(states);
 				// 読み込みなおし
 				loadTopMenuState();
-				// 上部メニューの文字列情報をガイドに設定
-				mGuideView.setTopCommandStr(mCommandStr);
+				if (mGuideView != null) {
+					// 上部メニューの文字列情報をガイドに設定
+					mGuideView.setTopCommandStr(mCommandStr);
+				}
 			}
 
 			@Override
@@ -3257,7 +3261,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 		// 一時設定
 		mMenuDialog.addSection(res.getString(R.string.otherSec));
-		// オンラインヘルプ
+		// ヘルプ
 		mMenuDialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
 		// 操作確認
 		mMenuDialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
@@ -3448,9 +3452,10 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			case DEF.MENU_ONLINE: {
 				// 操作方法画面に遷移
 				Resources res = getResources();
-				String url = res.getString(R.string.url_operate); // 操作説明
-				Uri uri = Uri.parse(url);
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				String url = res.getString(R.string.url_operate);	// 設定画面
+				Intent intent;
+				intent = new Intent(ImageActivity.this, HelpActivity.class);
+				intent.putExtra("Url", url);
 				startActivity(intent);
 				break;
 			}
@@ -3914,8 +3919,10 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 			// 上部メニューの設定を読み込み
 			loadTopMenuState();
-			// 上部メニューの文字列情報をガイドに設定
-			mGuideView.setTopCommandStr(mCommandStr);
+			if (mGuideView != null) {
+				// 上部メニューの文字列情報をガイドに設定
+				mGuideView.setTopCommandStr(mCommandStr);
+			}
 		}
 		catch (Exception e) {
 			Log.e("ImageActivity", "ReadSetting error.");

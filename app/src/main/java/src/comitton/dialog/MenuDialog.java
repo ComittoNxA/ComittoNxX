@@ -74,7 +74,7 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 
 		// 画面下に表示
 		WindowManager.LayoutParams wmlp=dlgWindow.getAttributes();
-		wmlp.gravity =(top ? Gravity.TOP : Gravity.BOTTOM) | (halfview ? Gravity.RIGHT : 0);
+		wmlp.gravity =(top ? Gravity.TOP : Gravity.CENTER) | (halfview ? Gravity.RIGHT : 0);
 		dlgWindow.setAttributes(wmlp);
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);

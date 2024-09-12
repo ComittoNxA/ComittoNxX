@@ -5,9 +5,9 @@ plugins {
 
 def packageName = "jp.dip.muracoro.comittonx"
 def applicationName = "ComittoNxX"
-def versionMajor = 1
-def versionMinor = 2
-def versionPatch = 3
+def versionMajor = 2
+def versionMinor = 0
+def versionPatch = 0
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -131,7 +131,11 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
 
-    // SMB接続用ライブラリ(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
+    // SMB接続用ライブラリjcifs(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
     implementation 'org.codelibs:jcifs:2.1.38'
-    implementation 'androidx.compose.ui:ui-graphics-android:1.6.8'
+
+    // Epub表示用ライブラリepub4j
+    implementation('io.documentnode:epub4j-core:4.2.1') {
+        exclude group: 'xmlpull'
+    }
 }

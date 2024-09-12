@@ -1,5 +1,6 @@
 package src.comitton.config;
 
+import src.comitton.activity.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Intent;
@@ -49,9 +50,10 @@ public class SetImageTextDetailActivity extends PreferenceActivity implements On
 			public boolean onPreferenceClick(Preference preference) {
 				// Activityの遷移
 				Resources res = getResources();
-				String url = res.getString(R.string.url_imagetextdetail); // 設定画面
-				Uri uri = Uri.parse(url);
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				String url = res.getString(R.string.url_imagetextdetail);	// 設定画面
+				Intent intent;
+				intent = new Intent(SetImageTextDetailActivity.this, HelpActivity.class);
+				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;
 			}

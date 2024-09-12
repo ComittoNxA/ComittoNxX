@@ -228,6 +228,7 @@
     <string name="ope08">名称変更</string>
     <string name="ope09">サムネイルキャッシュ削除</string>
     <string name="ope10">先頭ページを開く</string>
+    <string name="ope11">Epubビュアーで表示</string>
     <string name="lmTitle">表示モード</string>
     <string name="listmode00">リスト表示 (サムネイルON)</string>
     <string name="listmode01">リスト表示 (サムネイルOFF)</string>
@@ -437,24 +438,26 @@
     <string name="fontdlMincho">IPA明朝をダウンロードして使用</string>
     <string name="fontdlGothic">IPAゴシックをダウンロードして使用</string>
     
-    <string name="url_config">https://docs.google.com/document/pub?id=1MGW-bhu1fEZsMKHXBsz4gs4oR681tFOzYBf242fIuho</string>
-    <string name="url_filelist">https://docs.google.com/document/pub?id=197jmNnXY3BP4F9HHmJCuroWslbTFH8nWTBVWbn8T4dE</string>
-    <string name="url_filecolor">https://docs.google.com/document/pub?id=1XUlScyomqVeZqzRzMYw3S1kgbOWo2iiVYcrC9tXmAKQ</string>
-    <string name="url_image">https://docs.google.com/document/pub?id=1VcLHVgi4zqm-9hz5WMbG3WBi8NaBhbrmrm93qfZLs1M</string>
-    <string name="url_imagedetail">https://docs.google.com/document/pub?id=101FueAocKWvoA4saKRIjYVI4BPY5Q-GkAPdkNL7ggJc</string>
-    <string name="url_text">https://docs.google.com/document/pub?id=1s_GbfBMC6LeaGbLj-_hdPQYdQO-qRqeQaPTuj16d8Z0</string>
-    <string name="url_imagetext">https://docs.google.com/document/pub?id=1lVM93MoKFhhTPljX-7XvakzLOoWXr4w7LY0C8YA4bPE</string>
-    <string name="url_imagetextdetail">https://docs.google.com/document/pub?id=1DNfu1TliREak19Ct5CBUUI-R99EfpnGCYgM7BYM1B6o</string>
-    <string name="url_imagetextcolor">https://docs.google.com/document/pub?id=1wugnHkHdMghonWl6lhux7NA2soipjEpKqWdDQotjyvc</string>
-    <string name="url_common">https://docs.google.com/document/pub?id=13ds8eT94PKHnRrL4mGiosG_RNe8GfpI6OijZDsRWSMQ</string>
-    <string name="url_noise">https://docs.google.com/document/pub?id=1v7j65bQ4NQ1Jy3TG-UKtLDBIggGTuu6GO2KGpf391sk</string>
-    <string name="url_cache">https://docs.google.com/document/pub?id=1TMtcG1OGZYEnDzzYG75LTbkbNmeZhHyBLDeYUMAl0sg</string>
-    <string name="url_operate">https://docs.google.com/document/pub?id=1etIzocq1eYXdzahk6LYDi9iWL4HHQ36Ocovoi4obmyc</string>
-    <string name="url_operatetext">https://docs.google.com/document/pub?id=1JmA4tDYx99W71gE534WlxGDEGkEO0gxYfWnyXNPtCJY</string>
-    <string name="url_server">https://docs.google.com/document/pub?id=1oSDZ-wORbjXI_Y2gl3RJWMBZSpoMdodXl9K_mQ8EUrE</string>
-    <string name="url_filer">https://docs.google.com/document/pub?id=1pMlBQrM4FktvVhieHavKTqziOvjHawxutClDhtDHYSo</string>
-    <string name="url_complist">https://docs.google.com/document/pub?id=1vJ_qMS_oqV7rdHynIkhSXvvOEQajqvsH-21AD25XB4c</string>
-    <string name="url_recordlist">https://docs.google.com/document/d/1xDnc39qnJRzX6eEXWHxmksqj-qZDK6lfJrbsRcqZwXU/pub</string>
+    <string name="url_config">config-ja/config.html</string>
+    <string name="url_filelist">config-ja/file_list.html</string>
+    <string name="url_filecolor">config-ja/file_color.html</string>
+    <string name="url_image">config-ja/image.html</string>
+    <string name="url_imagedetail">config-ja/image_detail.html</string>
+    <string name="url_text">config-ja/text.html</string>
+    <string name="url_imagetext">config-ja/image_text.html</string>
+    <string name="url_imagetextdetail">config-ja/image_text_detail.html</string>
+    <string name="url_imagetextcolor">config-ja/image_text_color.html</string>
+    <string name="url_common">config-ja/common.html</string>
+    <string name="url_noise">config-ja/noise.html</string>
+    <string name="url_cache">config-ja/cache.html</string>
+    <string name="url_operate">config-ja/operate.html</string>
+    <string name="url_operatetext">config-ja/operate_text.html</string>
+    <string name="url_server">config-ja/server.html</string>
+    <string name="url_filer">config-ja/filer.html</string>
+    <string name="url_complist">config-ja/comp_list.html</string>
+    <string name="url_recordlist">config-ja/record_list.html</string>
+    <string name="url_epub">config-ja/epub.html</string>
+    <string name="url_operateepub">config-ja/operate_epub.html</string>
 
     <string name="url_fontlicense">http://ipafont.ipa.go.jp/ipa_font_license_v1.html</string>
     <string name="url_fontdownload1">http://drive.google.com/uc?export=view&amp;id=0Bzx6UxEo3Pg0MzdZMkN5ZHU0NU0</string>

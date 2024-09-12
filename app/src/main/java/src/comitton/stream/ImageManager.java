@@ -126,17 +126,6 @@ public class ImageManager extends InputStream implements Runnable {
 	public static final int FILETYPESUB_NORMAL = 1;
 	public static final int FILETYPESUB_OLDVER = 2;
 
-	public static final int IMAGETYPE_NONE = 0;
-	public static final int IMAGETYPE_PDF = 3;
-	public static final int IMAGETYPE_JPEG = 4;
-	public static final int IMAGETYPE_PNG = 5;
-	public static final int IMAGETYPE_GIF = 6;
-	public static final int IMAGETYPE_TXT = 7;
-	public static final int IMAGETYPE_WEBP = 51;
-	public static final int IMAGETYPE_AVIF = 52;
-	public static final int IMAGETYPE_HEIF = 53;
-	public static final int IMAGETYPE_JXL = 54;
-
 	public static final int HOSTTYPE_LOCAL = 0;
 	public static final int HOSTTYPE_SAMBA = 1;
 	public static final int HOSTTYPE_WEBDAV = 2;
@@ -466,31 +455,40 @@ public class ImageManager extends InputStream implements Runnable {
 				if (mHidden == false || !DEF.checkHiddenFile(fl.name)) {
 					String ext = DEF.getFileExt(fl.name);
 					fl.type = 0;
+					fl.exttype = 0;
 					if (FileData.isImage(ext)) {
 						if (DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))) {
-							fl.type = IMAGETYPE_JPEG;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_JPG;
 						}
 						else if (DEF.WITH_PNG && ext.equals(".png")) {
-							fl.type = IMAGETYPE_PNG;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_PNG;
 						}
 						else if (DEF.WITH_GIF && ext.equals(".gif")) {
-							fl.type = IMAGETYPE_GIF;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_GIF;
 						}
 						else if (DEF.WITH_WEBP && ext.equals(".webp")) {
-							fl.type = IMAGETYPE_WEBP;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_WEBP;
 						}
 						else if (DEF.WITH_AVIF && ext.equals(".avif")) {
-							fl.type = IMAGETYPE_AVIF;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_AVIF;
 						}
 						else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-							fl.type = IMAGETYPE_HEIF;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_HEIF;
 						}
 						else if (DEF.WITH_JXL && ext.equals(".jxl")) {
-							fl.type = IMAGETYPE_JXL;
+							fl.type = FileData.FILETYPE_IMG;
+							fl.exttype = FileData.EXTTYPE_JXL;
 						}
 					}
 					else if (FileData.isText(ext) && (mOpenMode == OPENMODE_LIST || mOpenMode == OPENMODE_TEXTVIEW)) {
-						fl.type = 3;
+						fl.type = FileData.FILETYPE_TXT;
+						fl.exttype = FileData.EXTTYPE_TXT;
 					}
 
 					if (fl.type != 0) {
@@ -1222,6 +1220,8 @@ public class ImageManager extends InputStream implements Runnable {
 				BufferedOutputStream bos;
 
 				// ローカルディスクに一時ファイルを作成する
+				new File(DEF.getBaseDirectory()).mkdirs();
+				new File(DEF.getBaseDirectory() + "share/").mkdirs();
 				String tmpPath = DEF.getBaseDirectory() + "share/pdftmp";
 				File targetFile = new File(tmpPath);
 
@@ -1294,7 +1294,8 @@ public class ImageManager extends InputStream implements Runnable {
 		for (int page = 0; page < maxPage; page++) {
 
 			FileListItem filelist = new FileListItem();
-			filelist.type = IMAGETYPE_PDF;
+			filelist.type = FileData.FILETYPE_PDF;
+			filelist.exttype = FileData.EXTTYPE_PDF;
 			filelist.name = "Page" + (page+1);
 			filelist.orglen = 0; // ファイルリスト読込中
 			mFileList[page] = filelist;
@@ -2731,31 +2732,40 @@ public class ImageManager extends InputStream implements Runnable {
 
 				String ext = DEF.getFileExt(name);
 				short type = 0;
+				short exttype = 0;
 				if (FileData.isImage(ext)) {
 					if (DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))) {
-						type = IMAGETYPE_JPEG;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_JPG;
 					}
 					else if (DEF.WITH_PNG && ext.equals(".png")) {
-						type = IMAGETYPE_PNG;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_PNG;
 					}
 					else if (DEF.WITH_GIF && ext.equals(".gif")) {
-						type = IMAGETYPE_GIF;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_GIF;
 					}
 					else if (DEF.WITH_WEBP && ext.equals(".webp")) {
-						type = IMAGETYPE_WEBP;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_WEBP;
 					}
 					else if (DEF.WITH_AVIF && ext.equals(".avif")) {
-						type = IMAGETYPE_AVIF;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_AVIF;
 					}
 					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-						type = IMAGETYPE_HEIF;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_HEIF;
 					}
 					else if (DEF.WITH_JXL && ext.equals(".jxl")) {
-						type = IMAGETYPE_JXL;
+						type = FileData.FILETYPE_IMG;
+						exttype = FileData.EXTTYPE_JXL;
 					}
 				}
 				else if (FileData.isText(ext) && (mOpenMode == OPENMODE_LIST || mOpenMode == OPENMODE_TEXTVIEW)) {
-					type = 3;
+					type = FileData.FILETYPE_TXT;
+					exttype = FileData.EXTTYPE_TXT;
 				}
 
 				if (type != 0) {
@@ -2763,6 +2773,7 @@ public class ImageManager extends InputStream implements Runnable {
 					FileListItem imgfile = new FileListItem();
 					imgfile.name = name;
 					imgfile.type = type;
+					imgfile.exttype = exttype;
 					imgfile.cmppos = 0;
 					imgfile.orgpos = mDirOrgPos;
 					imgfile.cmplen = 0;
@@ -3303,7 +3314,7 @@ public class ImageManager extends InputStream implements Runnable {
 			mFileList[page].o_width = width;
 			mFileList[page].o_height = height;
 		}
-		mFileList[page].scale = DEF.calcScale(mFileList[page].o_width, mFileList[page].o_height, mFileList[page].type, 3200, 3200);
+		mFileList[page].scale = DEF.calcScale(mFileList[page].o_width, mFileList[page].o_height, mFileList[page].exttype, 3200, 3200);
 //		mFileList[page].scale = 1;
 		mFileList[page].width = DEF.divRoundUp(mFileList[page].o_width, mFileList[page].scale);
 		mFileList[page].height = DEF.divRoundUp(mFileList[page].o_height, mFileList[page].scale);
@@ -3325,7 +3336,7 @@ public class ImageManager extends InputStream implements Runnable {
 		}
 
 		if (mFileList[page].o_width == 0) {
-			returnCode = SizeCheckImage(inputStream, page, mFileList[page].type, mFileList[page].orglen, imagesize);
+			returnCode = SizeCheckImage(inputStream, page, mFileList[page].exttype, mFileList[page].orglen, imagesize);
 			if (returnCode < 0) {
 				Log.e("ImageManager", "SizeCheckImage(3): SizeCheckImage(5) の実行に失敗しました.");
 				return -8;
@@ -3400,11 +3411,11 @@ public class ImageManager extends InputStream implements Runnable {
 			return null;
 		}
 		if (mFileList[page].width <= 0 || mFileList[page].height <= 0) {
-			Log.e("ImageManager", "GetBitmapNative: Image size is invalid. width=" + mFileList[page].width + "height=" + mFileList[page].height + ", " + mFileList[page].name);
+			Log.e("ImageManager", "GetBitmapNative: Image size is invalid. width=" + mFileList[page].width + ", height=" + mFileList[page].height + ", " + mFileList[page].name);
 			return null;
 		}
 
-		bm = GetBitmapNativeMain(inputStream, page, mFileList[page].type, scale, mFileList[page].orglen, mFileList[page].width, mFileList[page].height, bm);
+		bm = GetBitmapNativeMain(inputStream, page, mFileList[page].exttype, scale, mFileList[page].orglen, mFileList[page].width, mFileList[page].height, bm);
 		if (bm == null) {
 			Log.e("ImageManager", "GetBitmapNative: GetBitmapNativeMain() failed. " + mFileList[page].name);
 		}
@@ -3412,13 +3423,13 @@ public class ImageManager extends InputStream implements Runnable {
 		return bm;
 	}
 
-	public static Bitmap GetBitmapNativeMain(InputStream inputStream, int page, int type, int scale, long orglen, int width, int height, Bitmap bm) {
+	public static Bitmap GetBitmapNativeMain(InputStream inputStream, int page, int exttype, int scale, long orglen, int width, int height, Bitmap bm) {
 		boolean debug = false;
 
 		int ret = 0;
 		int returnCode = 0;
 
-		if (debug) {Log.d("ImageManager", "GetBitmapNativeMain: Start. page=" + page + ", type=" + type + ", scale=" + scale);}
+		if (debug) {Log.d("ImageManager", "GetBitmapNativeMain: Start. page=" + page + ", exttype=" + exttype + ", scale=" + scale);}
 
 		// 読み込み準備
 		returnCode = CallImgLibrary.ImageSetFileSize(orglen);
@@ -3464,8 +3475,8 @@ public class ImageManager extends InputStream implements Runnable {
 		} else {
 			bm = Bitmap.createBitmap(width, height, Config.RGB_565);
 			try {
-				if (debug) {Log.d("ImageManager", "GetBitmapNativeMain: CallImgLibrary.ImageGetBitmap start. type=" + type + ", scale=" + scale);}
-				ret = CallImgLibrary.ImageGetBitmap(type, scale, bm);
+				if (debug) {Log.d("ImageManager", "GetBitmapNativeMain: CallImgLibrary.ImageGetBitmap start. exttype=" + exttype + ", scale=" + scale);}
+				ret = CallImgLibrary.ImageGetBitmap(exttype, scale, bm);
 			} catch (Exception e) {
 				Log.e("ImageManager", "GetBitmapNativeMain: CallImgLibrary.ImageGetBitmap error.");
 				if (e != null && e.getMessage() != null) {
@@ -3739,7 +3750,13 @@ public class ImageManager extends InputStream implements Runnable {
 			SizeCheckImage(page);
 		}
 
-		int sampleSize = DEF.calcThumbnailScale(mFileList[page].width, mFileList[page].height, width, height);
+		int sampleSize = 1;
+		if (width != 0 && height != 0) {
+			sampleSize = DEF.calcThumbnailScale(mFileList[page].width, mFileList[page].height, width, height);
+		}
+		else {
+			sampleSize = 1;
+		}
 		Bitmap bm = LoadThumbnailMain(page, sampleSize);
 
 		if (debug) {Log.d("ImageManager", "LoadThumbnail: 終了します.");}
@@ -4011,7 +4028,7 @@ public class ImageManager extends InputStream implements Runnable {
 			} else {
 				int returnCode = 0;
 				// 画像を取得してバッファに格納する
-				returnCode = CallImgLibrary.ImageConvert(mFileList[page].type, mFileList[page].scale);
+				returnCode = CallImgLibrary.ImageConvert(mFileList[page].exttype, mFileList[page].scale);
 				if (returnCode >= 0 && mFileList[page].width > 0 && mFileList[page].height > 0) {
 					if (debug) {Log.d("ImageManager", "LoadImageData: CallImgLibrary.ImageConvert succeed. " + mFileList[page].name);}
 					// 読み込み成功

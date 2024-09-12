@@ -52,6 +52,12 @@
         <activity
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
             android:maxAspectRatio="3.0"
+            android:name="src.comitton.activity.EpubActivity"
+            android:theme="@style/MyTheme" >
+        </activity>
+        <activity
+            android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
+            android:maxAspectRatio="3.0"
             android:name="src.comitton.activity.TextActivity"
             android:theme="@style/MyTheme" >
         </activity>
@@ -98,6 +104,14 @@
         <activity
             android:maxAspectRatio="3.0"
             android:name="src.comitton.config.SetTextActivity" >
+        </activity>
+        <activity
+            android:maxAspectRatio="3.0"
+            android:name="src.comitton.config.SetEpubActivity" >
+        </activity>
+        <activity
+            android:maxAspectRatio="3.0"
+            android:name="src.comitton.activity.HelpActivity" >
         </activity>
 <!--
         <activity

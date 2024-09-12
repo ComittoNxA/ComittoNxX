@@ -3,6 +3,7 @@ package src.comitton.stream;
 public class FileListItem {
 	public String name;
 	public short type;
+	public short exttype;
 	public long cmppos;
 	public long orgpos;
 	public int cmplen;

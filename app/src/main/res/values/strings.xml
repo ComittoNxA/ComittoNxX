@@ -81,7 +81,7 @@
     <string name="scrlWayMenuSub1">V->H</string>
     <string name="scrlWayMenuSub2">H->V</string>
     <string name="helpMenu">Operations</string>
-    <string name="onlineMenu">Online Help</string>
+    <string name="onlineMenu">Operation Help</string>
     <string name="sortMenu">Sort</string>
     <string name="setTopMenu">Top Menu Settings</string>
     <string name="setMenu">Settings</string>
@@ -228,6 +228,7 @@
     <string name="ope08">Rename</string>
     <string name="ope09">Delete thumbnail cache</string>
     <string name="ope10">Open first page</string>
+    <string name="ope11">Show Epub viewer</string>
     <string name="lmTitle">List Mode</string>
     <string name="listmode00">List View (Thumbnail ON)</string>
     <string name="listmode01">List View (Thumbnail OFF)</string>
@@ -437,24 +438,26 @@
     <string name="fontdlMincho">Download IPA MINCHO</string>
     <string name="fontdlGothic">Download IPA GOTHIC</string>
 
-    <string name="url_config">https://docs.google.com/document/pub?id=1i-IxSZP6A2iGKeEHzvsVpILxZwDW9ofiMM3tNTfrs58</string>
-    <string name="url_filelist">https://docs.google.com/document/pub?id=1Tr5dflNVclo_ROJWuClo4xVb6QNTVwGQItUzrSNtynk</string>
-    <string name="url_filecolor">https://docs.google.com/document/pub?id=1nSFR3Ogn-wF0m8pAnbYYp4zywxs_xQDZkhr9pn-2x_o</string>
-    <string name="url_image">https://docs.google.com/document/pub?id=1PAvJduSjmk19TvL8uEWwu6x86-IwIhu9JYSzW4sD1IU</string>
-    <string name="url_imagedetail">https://docs.google.com/document/pub?id=1kgYOKSWYEmCuJk5vObBpdzS0hWrQZia6jPUoGVg4MWM</string>
-    <string name="url_text">https://docs.google.com/document/pub?id=1vt0yuI0mEIZkezIKte8ngUaBq257pSfN1RHsHDr0oSY</string>
-    <string name="url_imagetext">https://docs.google.com/document/pub?id=1Rt7t--mVwaM8-lbbGX_rsVjB7mLrRiez4_LGg49ykBA</string>
-    <string name="url_imagetextdetail">https://docs.google.com/document/pub?id=1RWQSQKKqdCRyI1xXC3yQyOBujEX6orbnWRPPXA5g4VY</string>
-    <string name="url_imagetextcolor">https://docs.google.com/document/pub?id=1AdL2YHZIfxhPGxiV3UICvloNrqat8ByPxwOCyu6jKV8</string>
-    <string name="url_common">https://docs.google.com/document/pub?id=1Kq42ECadsJqW-tYxtxteIbdWFldxST9_qsetUtLHqsk</string>
-    <string name="url_noise">https://docs.google.com/document/pub?id=1543E0DjEZQkwBo6A4RIPdHySMWRtMl6si4AS1VlI20I</string>
-    <string name="url_cache">https://docs.google.com/document/pub?id=1XyOwtaQ3W8hyEGh1rZckXH-yLClu3sE_RPyxCgWRHH0</string>
-    <string name="url_operate">https://docs.google.com/document/pub?id=19HMUlAXpZO4mnIgfPVfXbhQQNRBqU_4Q02x215NW4jA</string>
-    <string name="url_operatetext">https://docs.google.com/document/pub?id=11BxqgBTozmm6KFVQC8XZuvb_8_nOq_SJ-xK-GDTdJbQ</string>
-    <string name="url_server">https://docs.google.com/document/pub?id=1Onzky5_PBOuXjAor3J8ZbiUIvoNS6KwA_mEseqYZpiU</string>
-    <string name="url_filer">https://docs.google.com/document/pub?id=1kbbrbbR1MXR6i4F040QIqK6WkFiRF-32KTHPR498JpY</string>
-    <string name="url_complist">https://docs.google.com/document/pub?id=1kWDk7h7DDFSW5FYoJyIis2HDQ-GTe1EBxRCrW7oDjXY</string>
-    <string name="url_recordlist">https://docs.google.com/document/d/1oMSBMSuj2IvBgyro3hDMnnBTiK4qLyw11RQ8wsnZvzM/pub</string>
+    <string name="url_config">config/config.html</string>
+    <string name="url_filelist">config/file_list.html</string>
+    <string name="url_filecolor">config/file_color.html</string>
+    <string name="url_image">config/image.html</string>
+    <string name="url_imagedetail">config/image_detail.html</string>
+    <string name="url_text">config/text.html</string>
+    <string name="url_imagetext">config/image_text.html</string>
+    <string name="url_imagetextdetail">config/image_text_detail.html</string>
+    <string name="url_imagetextcolor">config/image_text_color.html</string>
+    <string name="url_common">config/common.html</string>
+    <string name="url_noise">config/noise.html</string>
+    <string name="url_cache">config/cache.html</string>
+    <string name="url_operate">config/operate.html</string>
+    <string name="url_operatetext">config/operate_text.html</string>
+    <string name="url_server">config/server.html</string>
+    <string name="url_filer">config/filer.html</string>
+    <string name="url_complist">config/comp_list.html</string>
+    <string name="url_recordlist">config/record_list.html</string>
+    <string name="url_epub">config/epub.html</string>
+    <string name="url_operateepub">config/operate_epub.html</string>
 
     <string name="url_fontlicense">http://ipafont.ipa.go.jp/ipa_font_license_v1.html</string>
     <string name="url_fontdownload1">http://drive.google.com/uc?export=view&amp;id=0Bzx6UxEo3Pg0MzdZMkN5ZHU0NU0</string>

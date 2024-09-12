@@ -14,6 +14,7 @@ public class RecordItem {
 	public static final int TYPE_FOLDER		=  3;	// ディレクトリオープン
 	public static final int TYPE_SERVER		=  4;	// サーバ
 	public static final int TYPE_MENU		=  5;	// オプションメニュー
+	public static final int TYPE_EPUB		=  6;	// オプションメニュー
 
 	private int server;
 	private String servername;
@@ -22,6 +23,8 @@ public class RecordItem {
 	private int type;
 	private long date;
 	private String image;
+	private int chapter;
+	private float pagerate;
 	private int page;
 	private String dispname;
 	private String host;
@@ -102,6 +105,22 @@ public class RecordItem {
 	}
 
 	// ページ情報
+	public int getChapter() {
+		return this.chapter;
+	}
+
+	public void setChapter(int chapter) {
+		this.chapter = chapter;
+	}
+
+	public float getPageRate() {
+		return this.pagerate;
+	}
+
+	public void setPageRate(float pagerate) {
+		this.pagerate = pagerate;
+	}
+
 	public int getPage() {
 		return this.page;
 	}

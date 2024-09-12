@@ -1,5 +1,6 @@
 package src.comitton.config;
 
+import src.comitton.activity.HelpActivity;
 import src.comitton.common.DEF;
 import src.comitton.filelist.RecordList;
 import jp.dip.muracoro.comittonx.R;
@@ -41,8 +42,9 @@ public class SetRecorderActivity extends PreferenceActivity implements OnSharedP
 				// Activityの遷移
 				Resources res = getResources();
 				String url = res.getString(R.string.url_recordlist);	// 設定画面
-				Uri uri = Uri.parse(url);
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				Intent intent;
+				intent = new Intent(SetRecorderActivity.this, HelpActivity.class);
+				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;
 			}

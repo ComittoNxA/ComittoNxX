@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import jp.dip.muracoro.comittonx.R;
 
 import src.comitton.common.DEF;
+import src.comitton.config.SetConfigActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
+import src.comitton.data.FileData;
 import src.comitton.data.ServerData;
 import src.comitton.filelist.ServerSelect;
 import src.comitton.view.ListItemView;
@@ -232,7 +234,7 @@ public class ServerActivity extends ListActivity {
 		// メニューをクリア
 		menu.clear();
 
-		// オンラインヘルプ
+		// ヘルプ
 		menu.add(0, DEF.MENU_ONLINE, Menu.NONE, res.getString(R.string.onlineMenu)).setIcon(android.R.drawable.ic_menu_set_as);
 		return ret;
 	}
@@ -242,9 +244,10 @@ public class ServerActivity extends ListActivity {
 		if (id == DEF.MENU_ONLINE) {
 			// 操作方法画面に遷移
 			Resources res = getResources();
-			String url = res.getString(R.string.url_server);	// 操作説明
-			Uri uri = Uri.parse(url);
-			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+			String url = res.getString(R.string.url_server);	// 設定画面
+			Intent intent;
+			intent = new Intent(ServerActivity.this, HelpActivity.class);
+			intent.putExtra("Url", url);
 			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);

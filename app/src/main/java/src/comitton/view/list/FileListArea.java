@@ -32,7 +32,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	};
 	private final int FILEMARK_ID[] =
 	{
-		R.drawable.thumb_dir, R.drawable.thumb_pdf, R.drawable.thumb_zip, R.drawable.thumb_rar
+		R.drawable.thumb_dir, R.drawable.thumb_pdf, R.drawable.thumb_zip, R.drawable.thumb_rar, R.drawable.thumb_epub
 	};
 
 	public static final short LISTMODE_LIST = 0;
@@ -46,6 +46,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	private final int FILEMARK_PDF = 1;
 	private final int FILEMARK_ZIP = 2;
 	private final int FILEMARK_RAR = 3;
+	private final int FILEMARK_EPUB = 4;
 
 	private final int MAXLINE_TITLE = 3;
 	private final int DATETIME_LENGTH = 21;
@@ -256,7 +257,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 				else {
 					switch (fd.getState()) {
 						case -1:
-							if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT) {
+							if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_EPUB) {
 								color = mBefColor;
 							}
 							else {
@@ -276,7 +277,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 				mLinePaint.setStrokeWidth(3);
 
 				if (mThumbFlag) {
-					if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR) {
+					if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR || type == FileData.FILETYPE_EPUB) {
 						// ビットマップ表示
 						canvas.drawRect(x - 1, y - 1, x + mIconWidth, y + mIconHeight, mLinePaint);
 //						canvas.drawRect(x - 1, y - 1, x + mIconWidth, y + mIconHeight, paint);
@@ -294,6 +295,9 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							}
 							else if (exttype == FileData.EXTTYPE_PDF) {
 								bmMark = mMark[FILEMARK_PDF];
+							}
+							else if (exttype == FileData.EXTTYPE_EPUB) {
+								bmMark = mMark[FILEMARK_EPUB];
 							}
 						}
 
@@ -574,7 +578,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			else {
 				switch (fd.getState()) {
 					case -1:
-						if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT) {
+						if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_EPUB) {
 							color = mBefColor;
 						}
 						else {
@@ -602,7 +606,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
                 int iconWidth = mIconWidth * iconHeight / mIconHeight;
 				int retBitmap = CallImgLibrary.ThumbnailCheck(mThumbnailId, index);
 
-				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR) {
+				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_IMG || type == FileData.FILETYPE_DIR || type == FileData.FILETYPE_EPUB) {
 					// ビットマップ表示
                     canvas.drawRect(x - 1, y - 1, x + iconWidth, y + iconHeight, mLinePaint);
 
@@ -616,6 +620,12 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						}
 						else if (exttype == FileData.EXTTYPE_RAR) {
 							bmMark = mMark[FILEMARK_RAR];
+						}
+						else if (exttype == FileData.EXTTYPE_PDF) {
+							bmMark = mMark[FILEMARK_PDF];
+						}
+						else if (exttype == FileData.EXTTYPE_EPUB) {
+							bmMark = mMark[FILEMARK_EPUB];
 						}
 					}
 

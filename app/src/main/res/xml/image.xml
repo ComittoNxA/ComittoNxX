@@ -256,10 +256,10 @@
             android:summary="When checked, Key to cover direction(if left cover then left key) will move to the previous page."
             android:title="Swap the LR key operation(*)" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="ImageHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="Displays the help for these settings."
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

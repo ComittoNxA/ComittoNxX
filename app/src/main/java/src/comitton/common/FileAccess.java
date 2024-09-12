@@ -437,6 +437,10 @@ public class FileAccess {
 					type = FileData.FILETYPE_PDF;
 					exttype = FileData.EXTTYPE_PDF;
 				}
+				else if (FileData.isEpub(ext)) {
+					type = FileData.FILETYPE_EPUB;
+					exttype = FileData.EXTTYPE_EPUB;
+				}
 				else if (FileData.isText(ext)) {
 					type = FileData.FILETYPE_TXT;
 					exttype = FileData.EXTTYPE_TXT;

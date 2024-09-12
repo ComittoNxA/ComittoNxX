@@ -43,6 +43,8 @@ public class RecordList {
 	private static final int INDEX_IMAGE = 5;
 	private static final int INDEX_PAGE = 6;
 	private static final int INDEX_DISPNAME = 7;
+	private static final int INDEX_CHAPTER = 8;
+	private static final int INDEX_PAGERATE = 9;
 
 	private static final int MENU_TITLE_ID[] = {R.string.shortCut, R.string.delMenu, R.string.thumbMenu,
 			R.string.rotateMenu, R.string.onlineMenu, R.string.noticeMenu, R.string.aboutMenu, R.string.setMenu};
@@ -169,12 +171,12 @@ public class RecordList {
 
 			String line;
 			// パス,日付(long値),ページ
-			String[] params = new String[8];
+			String[] params = new String[10];
 			while ((line = br.readLine()) != null) {
 				int pos = 0;
 				int next = 0;
 				int index = 0;
-				for (index = 0 ; index < 7 ; index ++) {
+				for (index = 0 ; index < 9 ; index ++) {
 					next = line.indexOf(SEPARATOR, pos);
 					if (next >= 0) {
 						params[index] = line.substring(pos, next);
@@ -204,6 +206,12 @@ public class RecordList {
 					data.setImage(params[INDEX_IMAGE]);
 					data.setPage(Integer.parseInt(params[INDEX_PAGE]));
 					data.setDispName(params[INDEX_DISPNAME]);
+					if (index >= INDEX_CHAPTER) {
+						data.setChapter(Integer.parseInt(params[INDEX_CHAPTER]));
+					}
+					if (index >= INDEX_PAGERATE) {
+						data.setPageRate(Float.parseFloat(params[INDEX_PAGERATE]));
+					}
 				}
 				catch (Exception ex) {
 					Log.e("Bookmark/load", ex.getMessage());
@@ -242,10 +250,12 @@ public class RecordList {
 		data.setServer(server);
 		data.setPath(path);
 		data.setFile(file);
+		data.setDate(date);
 		data.setImage(image);
 		data.setPage(page);
-		data.setDate(date);
 		data.setDispName(name);
+		data.setChapter(-1);
+		data.setPageRate(-1f);
 		if (listtype == TYPE_HISTORY) {
 			// 履歴の場合、既存は削除する
 			int index = list.indexOf(data);
@@ -283,7 +293,81 @@ public class RecordList {
 //			if (encpass == null) {
 //				encpass = "";
 //			}
-			bw.write(type + SEPARATOR + server + SEPARATOR + data.getPath() + SEPARATOR + data.getFile() + SEPARATOR + date + SEPARATOR + data.getImage() + SEPARATOR + page + SEPARATOR + data.getDispName());
+			bw.write(type + SEPARATOR + server + SEPARATOR + data.getPath() + SEPARATOR + data.getFile() + SEPARATOR + date + SEPARATOR + data.getImage() + SEPARATOR + page + SEPARATOR + data.getDispName() + SEPARATOR + data.getChapter() + SEPARATOR + data.getPageRate());
+			bw.newLine();
+		}
+		catch (Exception e) {
+			// 書き込みエラー
+			Log.e("saveBookmark/Write", e.getMessage());
+		}
+
+		try {
+			bw.flush();
+			bw.close();
+		}
+		catch (Exception e) {
+			// クローズエラー
+			Log.e("saveBookmark/Close", e.getMessage());
+		}
+		return;
+	}
+
+	public static void add(int listtype, int type, int server, String path, String file, long date, String image, int chapter, float pagerate, int page, String name) {
+		ArrayList<RecordItem>list = load(null, listtype);
+
+		if (name == null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+			name = sdf.format(new Date(date));
+		}
+		RecordItem data = new RecordItem();
+		data.setType(type);
+		data.setServer(server);
+		data.setPath(path);
+		data.setFile(file);
+		data.setDate(date);
+		data.setImage(image);
+		data.setPage(page);
+		data.setDispName(name);
+		data.setChapter(chapter);
+		data.setPageRate(pagerate);
+		if (listtype == TYPE_HISTORY) {
+			// 履歴の場合、既存は削除する
+			int index = list.indexOf(data);
+			if (index >= 0) {
+				// 登録済なら既存を削除して追加
+				list.remove(index);
+				list.add(data);
+				update(list, listtype);
+				return;
+			}
+		}
+		String filepath = getFilePath(listtype);
+		FileOutputStream os;
+		OutputStreamWriter sw;
+		BufferedWriter bw;
+
+		try {
+			// ファイルオープン
+			os = new FileOutputStream(filepath, true);
+			sw = new OutputStreamWriter(os, "UTF-8");
+			bw = new BufferedWriter(sw, 8192);
+		}
+		catch (Exception e) {
+			// ファイル作成失敗
+			Log.e("saveBookmark/Open", e.getMessage());
+			return;
+		}
+
+		try {
+//			int size = list.size();
+//			for (int i = 0 ; i < size ; i++) {
+//				bw.newLine();
+//			}
+//			String encpass = Aes.encode(pass);
+//			if (encpass == null) {
+//				encpass = "";
+//			}
+			bw.write(type + SEPARATOR + server + SEPARATOR + data.getPath() + SEPARATOR + data.getFile() + SEPARATOR + date + SEPARATOR + data.getImage() + SEPARATOR + page + SEPARATOR + data.getDispName() + SEPARATOR + chapter + SEPARATOR + pagerate);
 			bw.newLine();
 		}
 		catch (Exception e) {
@@ -341,8 +425,10 @@ public class RecordList {
 			String image = data.getImage();
 			int page = data.getPage();
 			String name = data.getDispName();
+			int chapter = data.getChapter();
+			float pagerate = data.getPageRate();
 			try {
-				bw.write(type + SEPARATOR + server + SEPARATOR + path + SEPARATOR + file + SEPARATOR + date + SEPARATOR + image + SEPARATOR + page + SEPARATOR + name);
+				bw.write(type + SEPARATOR + server + SEPARATOR + path + SEPARATOR + file + SEPARATOR + date + SEPARATOR + image + SEPARATOR + page + SEPARATOR + name + SEPARATOR + chapter + SEPARATOR + pagerate);
 				bw.newLine();
 			}
 			catch (Exception e) {

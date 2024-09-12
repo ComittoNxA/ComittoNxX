@@ -3,6 +3,7 @@ package src.comitton.config;
 import java.io.File;
 
 import src.comitton.activity.FontDownloadActivity;
+import src.comitton.activity.HelpActivity;
 import src.comitton.common.DEF;
 
 import jp.dip.muracoro.comittonx.R;
@@ -186,19 +187,9 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 				// Activityの遷移
 				Resources res = getResources();
 				String url = res.getString(R.string.url_text);	// 設定画面
-				Uri uri = Uri.parse(url);
-				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-				startActivity(intent);
-				return true;
-			}
-		});
-
-		PreferenceScreen fontDL = (PreferenceScreen) findPreference(DEF.KEY_TX_FONTDL);
-		fontDL.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-			@Override
-			public boolean onPreferenceClick(Preference preference) {
-				// Activityの遷移
-				Intent intent = new Intent(SetTextActivity.this, FontDownloadActivity.class);
+				Intent intent;
+				intent = new Intent(SetTextActivity.this, HelpActivity.class);
+				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;
 			}

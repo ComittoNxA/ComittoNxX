@@ -22,5 +22,10 @@
 
 -dontwarn javax.naming.**
 -dontwarn org.slf4j.**
+
+# このへんをkeepnamesに変更したらSMBにアクセスできなくなった
 -keep class org.bouncycastle.jcajce.provider.** { *; }
 -keep class org.bouncycastle.jce.provider.** { *; }
+
+# Epub表示用ライブラリepub4jから参照
+-dontwarn android.content.res.**

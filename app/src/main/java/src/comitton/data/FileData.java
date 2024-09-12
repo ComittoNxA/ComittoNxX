@@ -18,7 +18,8 @@ public class FileData {
 	public static final short FILETYPE_IMG = 3;
 	public static final short FILETYPE_PDF = 4;
 	public static final short FILETYPE_TXT = 5;
-	public static final short FILETYPE_NONE = 6;
+	public static final short FILETYPE_EPUB = 6;
+	public static final short FILETYPE_NONE = 7;
 
 	public static final short EXTTYPE_NONE = 0;
 	public static final short EXTTYPE_ZIP = 1;
@@ -32,6 +33,7 @@ public class FileData {
 	public static final short EXTTYPE_AVIF = 52;
 	public static final short EXTTYPE_HEIF = 53;
 	public static final short EXTTYPE_JXL = 54;
+	public static final short EXTTYPE_EPUB = 55;
 
 	private String name;
 	private short type;
@@ -228,7 +230,7 @@ public class FileData {
 		return false;
 	}
 	public static boolean isArchive(String ext) {
-		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr") || ext.equals(".epub");
+		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr");
 	}
 	public static boolean isZip(String ext) {
 		return ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub");
@@ -238,6 +240,9 @@ public class FileData {
 	}
 	public static boolean isPdf(String ext) {
 		return ext.equals(".pdf");
+	}
+	public static boolean isEpub(String ext) {
+		return ext.equals(".epub");
 	}
 	public static boolean isText(String ext) {
 		return ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html");

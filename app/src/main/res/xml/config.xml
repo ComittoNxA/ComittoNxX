@@ -46,6 +46,13 @@
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
+            android:key="EpubSet"
+            android:title="Settings for Epub Viewer" >
+            <intent
+                android:targetClass="src.comitton.config.SetEpubActivity"
+                android:targetPackage="@string/application_id" />
+        </PreferenceScreen>
+        <PreferenceScreen
             android:key="ImTxDetailSet"
             android:title="Detail Settings for Image &amp; Text" >
             <intent
@@ -100,10 +107,10 @@
             android:summary="Overwrite the current settings with the contents of the select file.\n (reference file : [sdcard]/comittona/conf/*.set)"
             android:title="Load setting from file" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Online Help" >
+    <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="ConfHelp"
-            android:summary="Displays the online help for these settings."
+            android:summary="Displays the help for these settings."
             android:title="Description of the item" >
         </PreferenceScreen>
     </PreferenceCategory>

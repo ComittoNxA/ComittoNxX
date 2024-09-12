@@ -94,10 +94,10 @@
             android:summary="ピンチイン/アウト操作で表示サイズを変更します"
             android:title="ピンチイン/アウト操作" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="オンラインヘルプ" >
+    <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen
             android:key="ImgTxtDtlHelp"
-            android:summary="設定項目についてのオンラインヘルプを表示します。"
+            android:summary="設定項目についてのヘルプを表示します。"
             android:title="設定項目の説明" >
         </PreferenceScreen>
     </PreferenceCategory>

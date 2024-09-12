@@ -9,7 +9,9 @@ import java.util.Comparator;
 import jp.dip.muracoro.comittonx.R;
 
 import src.comitton.common.DEF;
+import src.comitton.common.ImageAccess;
 import src.comitton.config.SetCommonActivity;
+import src.comitton.config.SetConfigActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
@@ -33,6 +35,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
@@ -442,7 +445,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		menu.add(0, DEF.MENU_REFRESH, Menu.NONE, res.getString(R.string.refresh)).setIcon(R.drawable.ic_menu_refresh);
 		// サムネイル切替
 		menu.add(0, DEF.MENU_THUMBSWT, Menu.NONE, res.getString(R.string.thumbSwt)).setIcon(android.R.drawable.ic_menu_gallery);
-		// オンラインヘルプ
+		// ヘルプ
 		menu.add(0, DEF.MENU_ONLINE, Menu.NONE, res.getString(R.string.onlineMenu)).setIcon(android.R.drawable.ic_menu_set_as);
 		return ret;
 	}
@@ -464,9 +467,10 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		else if (id == DEF.MENU_ONLINE) {
 			// 操作方法画面に遷移
 			Resources res = getResources();
-			String url = res.getString(R.string.url_complist); // 操作説明
-			Uri uri = Uri.parse(url);
-			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+			String url = res.getString(R.string.url_complist);	// 設定画面
+			Intent intent;
+			intent = new Intent(ExpandActivity.this, HelpActivity.class);
+			intent.putExtra("Url", url);
 			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
@@ -823,6 +827,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 			data.setName(files[i].name);
 			data.setSize(files[i].orglen);
 			data.setType(files[i].type);
+			data.setExtType(files[i].type);
 			data.setDate(files[i].dtime);
 			data.setState(state);
 			mFileList.add(data);

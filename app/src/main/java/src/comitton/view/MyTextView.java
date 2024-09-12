@@ -13,6 +13,7 @@ import src.comitton.stream.TextInputStream;
 import src.comitton.stream.TextManager;
 import src.comitton.view.GuideView.UpdateListener;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;

@@ -942,6 +942,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 			switch (keycode) {
 				case KeyEvent.KEYCODE_ENTER:
+				case KeyEvent.KEYCODE_DPAD_CENTER:
 					if (mEnterDown == false) {
 						mListScreenView.moveCursor(keycode, true);
 						mEnterDown = true;
@@ -972,6 +973,20 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						switchFileList(); // ファイルリストをアクティブ化
 						return true;
 					}
+
+					// ジェスチャーナビゲーションのBack操作中に長押し判定が発生していた場合にキャンセルする
+					if (mTouchArea == ListScreenView.AREATYPE_FILELIST) {
+						mListScreenView.mFileListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_DIRLIST) {
+						mListScreenView.mDirListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_SERVERLIST) {
+						mListScreenView.mServerListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_FAVOLIST) {
+						mListScreenView.mFavoListArea.cancelOperation();
+					} else if (mTouchArea == ListScreenView.AREATYPE_HISTLIST) {
+						mListScreenView.mHistListArea.cancelOperation();
+					}
+
 					if (mBackMode == BACKMODE_EXIT) {
 						checkExitTimer();
 						return true;
@@ -1058,6 +1073,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					}
 					break;
 				case KeyEvent.KEYCODE_ENTER:
+				case KeyEvent.KEYCODE_DPAD_CENTER:
 					if (mEnterDown == true) {
 						mListScreenView.moveCursor(keycode, false);
 					}

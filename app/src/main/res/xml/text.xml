@@ -185,6 +185,11 @@
             android:key="txPageSelect"
             android:summary="dummy"
             android:title="Page select operation(*)" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPageKey"
+            android:summary="When checked, right key will move to the previous page."
+            android:title="Swap the LR key operation(*)" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Size Settings" >
         <src.comitton.config.TextFontTopSeekbar

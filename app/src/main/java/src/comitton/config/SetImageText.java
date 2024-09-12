@@ -182,4 +182,10 @@ public class SetImageText {
 		int val = getTxPageSelect(sharedPreferences);
 		return res.getString(PageSelectName[val]);
 	}
+
+	public static boolean getChgPageKey(SharedPreferences sharedPreferences){
+		boolean flag;
+		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_CHGPAGEKEY, DEF.DEFAULT_CHGPAGEKEY);
+		return flag;
+	}
 }

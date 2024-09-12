@@ -185,6 +185,11 @@
             android:key="txPageSelect"
             android:summary="dummy"
             android:title="ページ選択方法" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPageKey"
+            android:summary="チェックにより右キーが前ページの移動になります"
+            android:title="左右キー操作の入替え＊" />
     </PreferenceCategory>
     <PreferenceCategory android:title="サイズ設定" >
         <src.comitton.config.TextFontTopSeekbar

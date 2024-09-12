@@ -70,6 +70,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	private boolean mScrlNext  = false;
 	private boolean mScrlNextStop = false;
 	private boolean mViewNext  = false;
+	private boolean mNextFilter = true;
 
 	private int mDispWidth  = 0;
 	private int mDispHeight = 0;
@@ -780,7 +781,8 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 					}
 				}
 				// 「スクロールで前後のページへ移動」の設定が有効かつ、スクロール量超過していないなら前後のページにグラデーションを重ねる
-				else if ((mScrlNext && !mScrlNextStop) && effect == 3 && mOverScrollX == 0 && mViewNext) {
+				// グラデーションOFFの時は表示しない
+				else if ((mScrlNext && !mScrlNextStop) && effect == 3 && mOverScrollX == 0 && mViewNext && mNextFilter) {
 					if (pseLand == false) {
 						// 横持ち
 						dl = (int) drawLeft;
@@ -987,7 +989,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	}
 
 	// 余白色を設定
-	public void setConfig(ImageActivity parent, int mclr, int cclr, int gclr, int vp, int mgn, int cen, int sdw, int zom, int way, int sway, int srngw, int srngh, boolean pr, boolean ne, boolean fit, boolean cmgn, boolean csdw, boolean psel, int effect, boolean scrlNext, boolean viewNext){
+	public void setConfig(ImageActivity parent, int mclr, int cclr, int gclr, int vp, int mgn, int cen, int sdw, int zom, int way, int sway, int srngw, int srngh, boolean pr, boolean ne, boolean fit, boolean cmgn, boolean csdw, boolean psel, int effect, boolean scrlNext, boolean viewNext, boolean nextFilter){
 		mParentAct = parent;
 		mMgnColor  = mclr;
 		mCenColor  = cclr;
@@ -1020,6 +1022,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		mEffect = effect;
 		mScrlNext = scrlNext;
 		mViewNext = viewNext;
+		mNextFilter = nextFilter;
 	}
 
 	public void setLoupeConfig( int size ) {

@@ -237,6 +237,11 @@
             android:key="ViewNextPage"
             android:summary="左右に表示領域が余っているときに次のページを表示する"
             android:title="次のページを表示" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="NextPageFilter"
+            android:summary="次のページを表示する時、グラデーションを表示する"
+            android:title="グラデーションを表示" />
         <ListPreference
             android:defaultValue="2"
             android:dialogTitle="ページ選択方法"
@@ -245,6 +250,11 @@
             android:key="PageSelect"
             android:summary="dummy"
             android:title="ページ選択方法" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="ChgPageKey"
+            android:summary="チェックにより表紙方向キー(右表紙なら右キー)が前ページの移動になります"
+            android:title="左右キー操作の入替え＊" />
     </PreferenceCategory>
     <PreferenceCategory android:title="オンラインヘルプ" >
         <PreferenceScreen

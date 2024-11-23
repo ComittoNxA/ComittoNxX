@@ -71,6 +71,12 @@ int ComprDataIO::UnpRead(byte *Addr,size_t Count)
     if (UnpackFromMemory)
     {
       size_t SizeToRead = ((int64)Count > UnpPackedSize) ? (size_t)UnpPackedSize : Count;
+
+      // SizeToReadが残UnpackFromMemorySizeより大きいとアクセスエラーが発生する？
+      if (SizeToRead > UnpackFromMemorySize) {
+        SizeToRead = (size_t)UnpackFromMemorySize;
+      }
+
       memcpy( Addr, UnpackFromMemoryAddr, SizeToRead );
       ReadSize = (int)SizeToRead;
       UnpackFromMemorySize -= SizeToRead;

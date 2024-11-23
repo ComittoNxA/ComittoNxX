@@ -78,16 +78,14 @@ public class ImageAccess {
 		if (margin != 0) {
 			// 余白を削除する
 
-			//int mask = 0x00808080;  // 上位1ビット
-			//int mask = 0x00C0C0C0;  // 上位2ビット
-			//int mask = 0x00E0E0E0;  // 上位3ビット
-			int mask = 0x00F0F0F0;  // 上位4ビット
-
 			int limit;
 			int space;
 			int range;
+			int start;
+			int bitmask;
 
 			// パラメタ設定 limit=白黒以外の色の許容×0.1％ 、space=余白のカット％ 、range=余白を探す範囲％
+			// start=余白判定を開始するまでの無視区間x0.1%、bitmask=色判定時のビットマスク深度
 			switch (margin) {
 				case 0:		// なし
 					return null;
@@ -95,27 +93,63 @@ public class ImageAccess {
 					limit = 5;
 					space = 60;
 					range = 25;
+					start = 1;
+					bitmask = 4;
 					break;
 				case 2:		// 中
 					limit = 6;
 					space = 80;
 					range = 30;
+					start = 2;
+					bitmask = 4;
 					break;
 				case 3:		// 強
 					limit = 8;
 					space = 90;
 					range = 45;
+					start = 3;
+					bitmask = 3;
 					break;
 				case 4:		// 特上
 					limit = 20;
 					space = 95;
 					range = 50;
+					start = 5;
+					bitmask = 3;
 					break;
 				default:	// 最強
 					limit = 50;
 					space = 100;
 					range = 100;
+					start = 10;
+					bitmask = 2;
 					break;
+			}
+
+
+			int startH = (int)Math.ceil((float)src_cy * start / 1000);
+			int startW = (int)Math.ceil((float)src_cx * start / 1000);
+
+			int mask;
+
+			switch (bitmask) {
+				case 0:
+					mask = 0x00000000;  // 上位0ビット
+					break;
+				case 1:
+					mask = 0x00808080;  // 上位1ビット
+					break;
+				case 2:
+					mask = 0x00C0C0C0;  // 上位2ビット
+					break;
+				case 3:
+					mask = 0x00E0E0E0;  // 上位3ビット
+					break;
+				case 4:
+					mask = 0xF79D;  // 上位4ビット
+					break;
+				default:
+					mask = 0x00F0F0F0;  // 上位4ビット
 			}
 
 			int CutL = 0;
@@ -144,13 +178,13 @@ public class ImageAccess {
 			// 上下左右の端のラインの色の最頻値を調べる
 			// 配列に左右端のラインの色を代入
 			for (yy = 0; yy < src_cy; yy++) {
-				ColorArrayL[yy] = bm.getPixel(0, yy);
-				ColorArrayR[yy] = bm.getPixel(src_cx - 1, yy);
+				ColorArrayL[yy] = bm.getPixel(0 + startW, yy);
+				ColorArrayR[yy] = bm.getPixel(src_cx - startW - 1, yy);
 			}
 			// 配列に上下端のラインの色を代入
 			for (xx = 0; xx < src_cx; xx++) {
-				ColorArrayT[xx] = bm.getPixel(xx, 0);
-				ColorArrayB[xx] = bm.getPixel(xx, src_cy - 1);
+				ColorArrayT[xx] = bm.getPixel(xx, 0 + startH);
+				ColorArrayB[xx] = bm.getPixel(xx, src_cy - startH - 1);
 			}
 			// 昇順ソート
 			Arrays.sort(ColorArrayL);
@@ -275,7 +309,7 @@ public class ImageAccess {
 			ColorB = modeB;
 
 			// 上の余白チェック
-			for (yy = 0; yy < CheckCY; yy++) {
+			for (yy = startH + 0; yy < CheckCY; yy++) {
 				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
 				overcnt = 0;    // 余白でないカウンタ
 				CutT = yy;
@@ -291,7 +325,7 @@ public class ImageAccess {
 				}
 			}
 			// 下の余白チェック
-			for (yy = src_cy - 1; yy >= src_cy - CheckCY; yy--) {
+			for (yy = src_cy - startH - 1; yy >= src_cy - CheckCY; yy--) {
 				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
 				overcnt = 0;    // 余白でないカウンタ
 				CutB = src_cy - 1 - yy;
@@ -307,7 +341,7 @@ public class ImageAccess {
 				}
 			}
 			// 左の余白チェック
-			for (xx = 0; xx < CheckCX; xx++) {
+			for (xx = startW + 0; xx < CheckCX; xx++) {
 				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
 				overcnt = 0;    // 余白でないカウンタ
 				CutL = xx;
@@ -324,7 +358,7 @@ public class ImageAccess {
 				}
 			}
 			// 右の余白チェック
-			for (xx = src_cx - 1; xx >= src_cx - CheckCX; xx--) {
+			for (xx = src_cx - startW - 1; xx >= src_cx - CheckCX; xx--) {
 				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
 				overcnt = 0;    // 余白でないカウンタ
 				CutR = src_cx - 1 - xx;
@@ -339,6 +373,11 @@ public class ImageAccess {
 					break;
 				}
 			}
+
+			if(CutL <= startW){CutL = 0;}
+			if(CutR <= startW){CutR = 0;}
+			if(CutT <= startH){CutT = 0;}
+			if(CutB <= startH){CutB = 0;}
 
 			CutL = CutL * space / 100;
 			CutR = CutR * space / 100;

@@ -14,7 +14,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -78,7 +77,9 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	public ThumbnailView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mRectPaint = new Paint();
-		mRectPaint.setColor(Color.LTGRAY);
+		//mRectPaint.setColor(Color.LTGRAY);
+		mRectPaint.setColor(0x8FCCCCCC);
+
 
 		mDrawPaint = new Paint();
 		mHandler = new Handler(this);
@@ -235,7 +236,8 @@ public class ThumbnailView extends View implements Runnable, Callback {
 			int posx = (int) (dstWidth / 2 * rate);
 			int posy = (int) ((mThumH - dstHeight) / 2);
 			rcSrc = new Rect(0, 0, w, h);
-			rcDst = new Rect(x - posx, MARGIN_HEIGHT + posy, x - posx + dstWidth, MARGIN_HEIGHT + posy + dstHeight);
+			//rcDst = new Rect(x - posx, MARGIN_HEIGHT + posy, x - posx + dstWidth, MARGIN_HEIGHT + posy + dstHeight);
+			rcDst = new Rect(x - posx, MARGIN_HEIGHT, x - posx + dstWidth, MARGIN_HEIGHT + mThumH);
 			if (flag == DRAW_CENTER) {
 				rcDst.offset(dstWidth / 2 * -1, 0);
 			}
@@ -250,6 +252,23 @@ public class ThumbnailView extends View implements Runnable, Callback {
 					rcDst.offset((mPageWidth - dstWidth) / 2 * -1, 0);
 				}
 			}
+
+			if (posy > 0) {
+				// サムネイルの高さが不足している場合に半透明の背景と合成する
+				Bitmap bm2;
+				Rect rcDst2;
+
+				bm2 = Bitmap.createBitmap(dstWidth, mThumH, Config.ARGB_4444);
+				mDrawBitmap = Bitmap.createBitmap(mDrawBitmap, 0, 0, w, h);
+				Canvas offScreen = new Canvas(bm2);
+				offScreen.drawColor(0xBFCCCCCC);
+				rcDst2 = new Rect(0, posy, dstWidth, mThumH - posy);
+				offScreen.drawBitmap(mDrawBitmap, rcSrc, rcDst2, null);
+				mDrawBitmap = bm2;
+				// ソースのサイズを変更する
+				rcSrc = new Rect(0, 0, dstWidth, mThumH);
+			}
+
 			canvas.drawBitmap(mDrawBitmap, rcSrc, rcDst, null);
 
 			if (dstWidth < mPageWidth) {
@@ -517,20 +536,21 @@ public class ThumbnailView extends View implements Runnable, Callback {
 								x = ((thumDataW / 2) - w) / 2;
 								chg = true;
 							}
-							if (thumDataH > h) {
-								y = (thumDataH - h) / 2;
-								chg = true;
-							}
+							// 保存時に画像の高さをサムネイルサイズに合わせずに、表示のときに行う
+							//if (thumDataH > h) {
+							//	y = (thumDataH - h) / 2;
+							//	chg = true;
+							//}
 							if (debug) {Log.d("ThumbnailView", "run: 切り出すサイズを決定します. width=" + w + ", height=" + h);}
 
 							// ビットマップを切り出す
 							if (chg || bm.getConfig() != Config.RGB_565) {
 								Bitmap bm2;
 								if (thumDataW / 2 > w) {
-									bm2 = Bitmap.createBitmap(thumDataW / 2, thumDataH, Config.RGB_565);
+									bm2 = Bitmap.createBitmap(thumDataW / 2, h, Config.RGB_565);
 								}
 								else {
-									bm2 = Bitmap.createBitmap(w, thumDataH, Config.RGB_565);
+									bm2 = Bitmap.createBitmap(w, h, Config.RGB_565);
 								}
 								bm = Bitmap.createBitmap(bm, 0, 0, w, h);
 								Canvas offScreen = new Canvas(bm2);

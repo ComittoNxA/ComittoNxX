@@ -602,6 +602,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					}
 					else {
 						if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");}
+						moveFileSelect(mURI, path, file,true);
 					}
 				}
 			}
@@ -3664,9 +3665,14 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					|| (mListMode == FileListArea.LISTMODE_LIST &&  point != null && point.x < mThumbSizeW * mListThumbSizeH / mThumbSizeH + mItemMargin)) )
 			{
 				mFileData = files.get(listpos);
-				if (mFileData != null && mFileData.getType() != FileData.FILETYPE_PARENT) {
-					// ファイル長押しメニュー
-					showFileLongClickDialog();
+				if (mFileData != null)  {
+					if (mFileData.getType() == FileData.FILETYPE_PARENT) {
+						// 親ディレクトリに移動
+						moveParentDir();
+					} else {
+						// ファイル長押しメニュー
+						showFileLongClickDialog();
+					}
 				}
 			}else {
 				// リストのクリック

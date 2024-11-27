@@ -69,7 +69,7 @@ if(WITH_AVIF)
   target_sources(comitton PRIVATE comitton/ImageAVIF.cpp)
 endif()
 if(WITH_HEIF)
-  # TODO: add HEIF support
+  # 不要
   #add_definitions(-DHAVE_LIBHEIF)
   #add_subdirectory(dav1d)
   #add_subdirectory(libheif)

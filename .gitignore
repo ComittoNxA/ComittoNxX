@@ -24,6 +24,8 @@ output.json
 .idea/workspace.xml
 .idea/usage.statistics.xml
 .idea/assetWizardSettings.xml
+.idea/runConfigurations.xml
+.idea/caches
 
 # Keystore files
 *.jks

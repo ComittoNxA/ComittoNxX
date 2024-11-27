@@ -1,13 +1,8 @@
-diff --git a/rdwrfn.cpp b/rdwrfn.cpp
-index fa71376..ab37731 100644
---- a/rdwrfn.cpp
-+++ b/rdwrfn.cpp
-@@ -68,42 +68,15 @@ int ComprDataIO::UnpRead(byte *Addr,size_t Count)
-   ReadAddr=Addr;
-   while (Count > 0)
-   {
--    Archive *SrcArc=(Archive *)SrcFile;
--
+diff -u before/rdwrfn.cpp after/rdwrfn.cpp
+--- before/rdwrfn.cpp	2024-11-05 21:23:24.000000000 +0900
++++ after/rdwrfn.cpp	2024-11-27 22:20:55.187715800 +0900
+@@ -72,38 +72,19 @@
+
      if (UnpackFromMemory)
      {
 -      memcpy(Addr,UnpackFromMemoryAddr,UnpackFromMemorySize);
@@ -40,8 +35,13 @@ index fa71376..ab37731 100644
 -        FileHeader *hd=SubHead!=NULL ? SubHead:&SrcArc->FileHead;
 -        if (!NoFileHeader && hd->SplitAfter)
 -          PackedDataHash.Update(ReadAddr,ReadSize);
--      }
 +      size_t SizeToRead = ((int64)Count > UnpPackedSize) ? (size_t)UnpPackedSize : Count;
++
++      // SizeToReadが残UnpackFromMemorySizeより大きいとアクセスエラーが発生する？
++      if (SizeToRead > UnpackFromMemorySize) {
++        SizeToRead = (size_t)UnpackFromMemorySize;
+       }
++
 +      memcpy( Addr, UnpackFromMemoryAddr, SizeToRead );
 +      ReadSize = (int)SizeToRead;
 +      UnpackFromMemorySize -= SizeToRead;
@@ -51,7 +51,7 @@ index fa71376..ab37731 100644
      CurUnpRead+=ReadSize;
      TotalRead+=ReadSize;
  #ifndef NOVOLUME
-@@ -113,31 +86,8 @@ int ComprDataIO::UnpRead(byte *Addr,size_t Count)
+@@ -113,31 +94,8 @@
      Count-=ReadSize;
  #endif
      UnpPackedLeft-=ReadSize;
@@ -63,7 +63,7 @@ index fa71376..ab37731 100644
 -    // we ask for next volume also if we have non-aligned encryption block.
 -    // Since we adjust data size for decryption earlier above,
 -    // it does not hurt "Keep broken files" mode efficiency.
--    if (UnpVolume && UnpPackedLeft == 0 && 
+-    if (UnpVolume && UnpPackedLeft == 0 &&
 -        (ReadSize==0 || Decryption && (TotalRead & CRYPT_BLOCK_MASK) != 0) )
 -    {
 -#ifndef NOVOLUME
@@ -84,15 +84,15 @@ index fa71376..ab37731 100644
    if (ReadSize!=-1)
    {
      ReadSize=TotalRead;
-@@ -146,7 +96,6 @@ int ComprDataIO::UnpRead(byte *Addr,size_t Count)
+@@ -146,7 +104,6 @@
        Decrypt->DecryptBlock(Addr,ReadSize);
  #endif
    }
 -  Wait();
    return ReadSize;
  }
- 
-@@ -181,14 +130,11 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
+
+@@ -181,14 +138,11 @@
        UnpackToMemorySize-=Count;
      }
    }
@@ -106,12 +106,12 @@ index fa71376..ab37731 100644
    ShowUnpWrite();
 -  Wait();
  }
- 
- 
-@@ -196,24 +142,6 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
- 
- 
- 
+
+
+@@ -196,26 +150,6 @@
+
+
+
 -void ComprDataIO::ShowUnpRead(int64 ArcPos,int64 ArcSize)
 -{
 -  if (ShowProgress && SrcFile!=NULL)
@@ -130,31 +130,36 @@ index fa71376..ab37731 100644
 -    }
 -  }
 -}
- 
- 
+-
+-
  void ComprDataIO::ShowUnpWrite()
-@@ -287,36 +215,9 @@ void ComprDataIO::SetUnpackToMemory(byte *Addr,uint Size)
+ {
  }
- 
- 
--// Extraction progress is based on the position in archive and we adjust 
+@@ -287,40 +221,9 @@
+ }
+
+
+-// Extraction progress is based on the position in archive and we adjust
 -// the total archives size here, so trailing blocks do not prevent progress
 -// reaching 100% at the end of extraction. Alternatively we could print "100%"
 -// after completing the entire archive extraction, but then we would need
 -// to take into account possible messages like the checksum error after
 -// last file percent progress.
 -void ComprDataIO::AdjustTotalArcSize(Archive *Arc)
-+void ComprDataIO::SetUnpackFromMemory(byte *Addr,uint Size)
- {
+-{
 -  // If we know a position of QO or RR blocks, use them to adjust the total
 -  // packed size to beginning of these blocks. Earlier we already calculated
 -  // the total size based on entire archive sizes. We also set LastArcSize
 -  // to start of first trailing block, to add it later to ProcessedArcSize.
--  int64 ArcLength=Arc->IsSeekable() ? Arc->FileLength() : 0;
--  if (Arc->MainHead.QOpenOffset!=0) // QO is always preceding RR record.
+-  uint64 ArcLength=Arc->IsSeekable() ? Arc->FileLength() : 0;
+-  // QO is always preceding RR record.
+-  // Also we check QO and RR to be less than archive length to prevent
+-  // negative "ArcLength-LastArcSize" and possible signed integer overflow
+-  // when calculating TotalArcSize.
+-  if (Arc->MainHead.QOpenOffset>0 && Arc->MainHead.QOpenOffset<ArcLength)
 -    LastArcSize=Arc->MainHead.QOpenOffset;
 -  else
--    if (Arc->MainHead.RROffset!=0)
+-    if (Arc->MainHead.RROffset>0 && Arc->MainHead.RROffset<ArcLength)
 -      LastArcSize=Arc->MainHead.RROffset;
 -    else
 -    {
@@ -170,36 +175,36 @@ index fa71376..ab37731 100644
 -    }
 -
 -  TotalArcSize-=ArcLength-LastArcSize;
++void ComprDataIO::SetUnpackFromMemory(byte *Addr,uint Size)
++{
 +  UnpackFromMemory=true;
 +  UnpackFromMemoryAddr=Addr;
 +  UnpackFromMemorySize=Size;
  }
-diff --git a/rdwrfn.hpp b/rdwrfn.hpp
-index 3060a0f..aec83cb 100644
---- a/rdwrfn.hpp
-+++ b/rdwrfn.hpp
-@@ -75,6 +75,7 @@ class ComprDataIO
-     void SetAV15Encryption();
+diff -u before/rdwrfn.hpp after/rdwrfn.hpp
+--- before/rdwrfn.hpp	2024-11-05 21:23:24.000000000 +0900
++++ after/rdwrfn.hpp	2024-11-27 22:07:22.439166900 +0900
+@@ -70,6 +70,7 @@
+          const byte *Salt,const byte *InitV,uint Lg2Cnt,byte *HashKey,byte *PswCheck);
      void SetCmt13Encryption();
      void SetUnpackToMemory(byte *Addr,uint Size);
 +    void SetUnpackFromMemory(byte *Addr,uint Size);
      void SetCurrentCommand(wchar Cmd) {CurrentCommand=Cmd;}
      void AdjustTotalArcSize(Archive *Arc);
- 
-diff --git a/timefn.cpp b/timefn.cpp
-index 0abf49d..34e558b 100644
---- a/timefn.cpp
-+++ b/timefn.cpp
-@@ -329,7 +329,11 @@ void RarTime::Adjust(int64 ns)
+
+diff -u before/timefn.cpp after/timefn.cpp
+--- before/timefn.cpp	2024-11-05 21:23:25.000000000 +0900
++++ after/timefn.cpp	2024-11-27 22:06:14.088058300 +0900
+@@ -327,7 +327,11 @@
  #ifndef SFX_MODULE
- const wchar *GetMonthName(int Month)
+ const wchar *GetMonthName(uint Month)
  {
 -  return uiGetMonthName(Month);
 +  static MSGID MonthID[12]={
-+      MMonthJan,MMonthFeb,MMonthMar,MMonthApr,MMonthMay,MMonthJun,
-+      MMonthJul,MMonthAug,MMonthSep,MMonthOct,MMonthNov,MMonthDec
++    MMonthJan,MMonthFeb,MMonthMar,MMonthApr,MMonthMay,MMonthJun,
++    MMonthJul,MMonthAug,MMonthSep,MMonthOct,MMonthNov,MMonthDec
 +  };
 +  return MonthID[Month];
  }
  #endif
- 
+

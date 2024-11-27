@@ -34,6 +34,10 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	private final int DRAW_LEFT = 1;
 	private final int DRAW_RIGHT = 2;
 
+	private final int BACKGROUND_COLOR = 0x40000000;
+	private final int PAGE_COLOR = 0x40FFFFFF;
+	//0x8FCCCCCC
+
 	private int mMaxPage;
 	private int mFirstPage;
 	private int mDispPage;
@@ -77,8 +81,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	public ThumbnailView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mRectPaint = new Paint();
-		//mRectPaint.setColor(Color.LTGRAY);
-		mRectPaint.setColor(0x8FCCCCCC);
+		mRectPaint.setColor(PAGE_COLOR);
 
 
 		mDrawPaint = new Paint();
@@ -140,7 +143,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		}
 		int xpos = mScrollView.getScrollX();
 
-		canvas.drawColor(0x40000000);
+		canvas.drawColor(BACKGROUND_COLOR);
 
 		mPageAreaNum = 0;
 
@@ -267,7 +270,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 				Bitmap bm2 = Bitmap.createBitmap(dstWidth, dstHeight, Config.ARGB_4444);
 				//mDrawBitmap = Bitmap.createBitmap(mDrawBitmap, 0, 0, w, h);
 				Canvas offScreen = new Canvas(bm2);
-				offScreen.drawColor(0xBFCCCCCC);
+				offScreen.drawColor(PAGE_COLOR);
 				offScreen.drawBitmap(mDrawBitmap, rcSrc, rcDst, null);
 				mDrawBitmap = bm2;
 			} else {

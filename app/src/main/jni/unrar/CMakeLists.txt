@@ -1,12 +1,26 @@
+# Windowsのとき
+# BusyBox for Windowsがインストールされているかを確認する.
+if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+  find_program(PATCH patch.exe)
+  find_program(GREP grep.exe)
+  find_program(XARGS xargs.exe)
+  find_program(SED sed.exe)
+  if((NOT PATCH) OR (NOT GREP) OR (NOT XARGS) OR (NOT SED))
+    message(FATAL_ERROR "C:\\Program Files\\Git\\usr\\bin\\にパスを通しててください.")
+  endif()
+endif()
+
+# オプションの値が前回のcmake実行から引き継がれないように削除しておく
+unset(DOWNLOAD_UNRAR_SOURCES CACHE)
 option(
   DOWNLOAD_UNRAR_SOURCES
   "Download UnRAR library, and patch. (Need Linux environment, not Windows)"
-  OFF
+  ON
 )
 
 if(DOWNLOAD_UNRAR_SOURCES)
-  set(UNRAR_VERSION "6.2.1")
-  set(UNRAR_HASH_SHA256 "5cc8f7ded262d27c29d01e7a119d2fd23edda427711820454f2eb667044a8900")
+  set(UNRAR_VERSION "7.1.1")
+  set(UNRAR_HASH_SHA256 "2e9cbc9d1c250b40f4a7a6a363b6ccfa3703e190534979d18c8c4ac5ae35dafc")
 
   set(FILE_NAME "unrarsrc-${UNRAR_VERSION}.tar.gz")
   FetchContent_Declare(
@@ -24,10 +38,28 @@ if(DOWNLOAD_UNRAR_SOURCES)
 
   set(PATCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/unrar.patch")
 
-  execute_process(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch-unrar.sh "${PATCH_PATH}"
-    WORKING_DIRECTORY "${unrar_SOURCE_DIR}/unrar"
-  )
+  if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
+    execute_process(
+      #COMMAND "${BUSYBOX}" bash -c "${CMAKE_CURRENT_SOURCE_DIR}/patch-unrar.sh ${PATCH_PATH}"
+      COMMAND cmd /C "${CMAKE_CURRENT_SOURCE_DIR}/patch-unrar.bat" "${PATCH_PATH}"
+      WORKING_DIRECTORY "${unrar_SOURCE_DIR}/unrar"
+      RESULT_VARIABLE BUILD_COMMAND_RESULT
+      OUTPUT_VARIABLE BUILD_COMMAND_STDOUT
+      ERROR_VARIABLE BUILD_COMMAND_STDERR
+    )
+  else()
+    execute_process(
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch-unrar.sh "${PATCH_PATH}"
+      WORKING_DIRECTORY "${unrar_SOURCE_DIR}/unrar"
+      RESULT_VARIABLE BUILD_COMMAND_RESULT
+      OUTPUT_VARIABLE BUILD_COMMAND_STDOUT
+      ERROR_VARIABLE BUILD_COMMAND_STDERR
+    )
+  endif ()
+  # ビルドの実行結果をログ出力する
+  message(WARNING "Cmake: unrar: BUILD_COMMAND_RESULT = ${BUILD_COMMAND_RESULT}")
+  message(WARNING "Cmake: unrar: BUILD_COMMAND_STDOUT = \n${BUILD_COMMAND_STDOUT}")
+  message(WARNING "Cmake: unrar: BUILD_COMMAND_STDERR = \n${BUILD_COMMAND_STDERR}")
 else()
   # Use local patched unrar sources
   set(unrar_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -59,6 +91,7 @@ set(
   ${unrar_SOURCE_DIR}/unrar/timefn.cpp
   ${unrar_SOURCE_DIR}/unrar/unicode.cpp
   ${unrar_SOURCE_DIR}/unrar/unpack.cpp
+  ${unrar_SOURCE_DIR}/unrar/largepage.cpp
 )
 
 add_library(unrar STATIC ${UNRAR_SOURCES})

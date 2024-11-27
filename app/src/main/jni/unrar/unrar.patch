@@ -192,6 +192,47 @@ diff -u before/rdwrfn.hpp after/rdwrfn.hpp
      void SetCurrentCommand(wchar Cmd) {CurrentCommand=Cmd;}
      void AdjustTotalArcSize(Archive *Arc);
 
+diff -u before/system.cpp after/system.cpp
+--- before/system.cpp	2024-11-05 21:23:25.000000000 +0900
++++ after/system.cpp	2024-11-27 23:10:19.942840200 +0900
+@@ -77,26 +77,6 @@
+
+
+
+-void Wait()
+-{
+-  if (ErrHandler.UserBreak)
+-    ErrHandler.Exit(RARX_USERBREAK);
+-#if defined(_WIN_ALL) && !defined(SFX_MODULE)
+-  if (SleepTime!=0)
+-  {
+-    static clock_t LastTime=MonoClock();
+-    if (MonoClock()-LastTime>10*CLOCKS_PER_SEC/1000)
+-    {
+-      Sleep(SleepTime);
+-      LastTime=MonoClock();
+-    }
+-  }
+-#endif
+-#if defined(_WIN_ALL)
+-  // Reset system sleep timer to prevent system going sleep.
+-  SetThreadExecutionState(ES_SYSTEM_REQUIRED);
+-#endif
+-}
+
+
+
+diff -u before/system.hpp after/system.hpp
+--- before/system.hpp	2024-11-05 21:23:25.000000000 +0900
++++ after/system.hpp	2024-11-27 23:10:17.378911000 +0900
+@@ -20,7 +20,6 @@
+ void InitSystemOptions(int SleepTime);
+ void SetPriority(int Priority);
+ clock_t MonoClock();
+-void Wait();
+ bool EmailFile(const std::wstring &FileName,std::wstring MailToW);
+ #ifdef _WIN_ALL
+ bool SetPrivilege(LPCTSTR PrivName);
 diff -u before/timefn.cpp after/timefn.cpp
 --- before/timefn.cpp	2024-11-05 21:23:25.000000000 +0900
 +++ after/timefn.cpp	2024-11-27 22:06:14.088058300 +0900

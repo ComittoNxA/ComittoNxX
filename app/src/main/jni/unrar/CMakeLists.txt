@@ -81,6 +81,7 @@ set(
   ${unrar_SOURCE_DIR}/unrar/crypt.cpp
   ${unrar_SOURCE_DIR}/unrar/getbits.cpp
   ${unrar_SOURCE_DIR}/unrar/hash.cpp
+  ${unrar_SOURCE_DIR}/unrar/largepage.cpp
   ${unrar_SOURCE_DIR}/unrar/rarvm.cpp
   ${unrar_SOURCE_DIR}/unrar/rdwrfn.cpp
   ${unrar_SOURCE_DIR}/unrar/rijndael.cpp
@@ -88,10 +89,10 @@ set(
   ${unrar_SOURCE_DIR}/unrar/sha1.cpp
   ${unrar_SOURCE_DIR}/unrar/sha256.cpp
   ${unrar_SOURCE_DIR}/unrar/strfn.cpp
+  ${unrar_SOURCE_DIR}/unrar/system.cpp
   ${unrar_SOURCE_DIR}/unrar/timefn.cpp
   ${unrar_SOURCE_DIR}/unrar/unicode.cpp
   ${unrar_SOURCE_DIR}/unrar/unpack.cpp
-  ${unrar_SOURCE_DIR}/unrar/largepage.cpp
 )
 
 add_library(unrar STATIC ${UNRAR_SOURCES})

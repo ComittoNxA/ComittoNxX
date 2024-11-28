@@ -28,7 +28,7 @@ android {
 
     // C言語の書式でビルドエラーが発生する場合はndkバージョンを24まで下げること
     ndkVersion "27.0.12077973"
-    //ndkVersion "24.0.8215888"adb
+    //ndkVersion "24.0.8215888"
 
 
     defaultConfig {

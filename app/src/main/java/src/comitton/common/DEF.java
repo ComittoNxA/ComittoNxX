@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 
 import jp.dip.muracoro.comittonx.BuildConfig;
+import src.comitton.data.FileData;
 
 public class DEF {
 
@@ -1726,7 +1727,7 @@ public class DEF {
 	// 縮小取り込みの倍率計算
 	static public int calcScale(int w, int h, int type, int lw, int lh) {
 		int lw2 = DEF.checkPortrait(w, h) ? lw : lw * 2;
-		if (type == 1) {
+		if (type == FileData.EXTTYPE_JPG) {
 			// JPEGではライブラリで1/2^xに縮小できる
 			if (w >= lw2 * 8 && h >= lh * 8) {
 				return 8;
@@ -1738,7 +1739,7 @@ public class DEF {
 				return 2;
 			}
 		}
-		else if (type != 2 && type != 6 && type != 51 && type != 52 && type != 53 && type != 54) {
+		else if (type != FileData.EXTTYPE_PNG && type != FileData.EXTTYPE_GIF) {
 			// pngとgif他以外
 			if (w >= lw2 * 2 && h >= lh * 2) {
 				int w_scale = w / lw2;

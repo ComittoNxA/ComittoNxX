@@ -4,10 +4,11 @@ plugins {
 }
 
 def packageName = "jp.dip.muracoro.comittonx"
+// 今更だけどComittoNxA-v2って名前にすればよかった
 def applicationName = "ComittoNxX"
 def versionMajor = 2
 def versionMinor = 0
-def versionPatch = 4
+def versionPatch = 5
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -27,14 +28,16 @@ android {
 
     // C言語の書式でビルドエラーが発生する場合はndkバージョンを24まで下げること
     ndkVersion "27.0.12077973"
-    //ndkVersion "24.0.8215888"
+    //ndkVersion "24.0.8215888"adb
+
 
     defaultConfig {
         applicationId packageName
         minSdk 21 // Android 5.0("Lollipop")
         // targetSdk11以降でSMBまわりでNetworkOnMainThreadExceptionエラー発生の可能性
         // targetSdk29はrequestLegacyExternalStorageをセットできる
-        targetSdk 29 // Android 10.0("Q")
+        //targetSdk 29 // Android 10.0("Q")
+        targetSdk 35 // Android 15("Vanilla Ice Cream")
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"

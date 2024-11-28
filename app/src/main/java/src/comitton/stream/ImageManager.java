@@ -3206,7 +3206,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 	@SuppressLint("Range")
     private int SizeCheckImage(int page) {
-		boolean debug = false;
+		boolean debug = true;
 		if (debug) {Log.d("ImageManager", "SizeCheckImage(1): 開始します. page=" + page + ", " + mFileList[page].name);}
 		int returnCode = 0;
 		//Log.e("FromStreamSizeCheck", "page=" + page + ", type=" + type);
@@ -3235,8 +3235,16 @@ public class ImageManager extends InputStream implements Runnable {
 				if (mFileType == FILETYPE_PDF) {
 					//ページ番号を指定してPdfRenderer.Pageインスタンスを取得する。
 					PdfRenderer.Page pdfPage = mPdfRenderer.openPage(page);
-					width = pdfPage.getWidth();
-					height = pdfPage.getHeight();
+					int maxsize = Math.min(3000, Math.max(mScrWidth, mScrHeight));
+					if (pdfPage.getWidth() > pdfPage.getHeight()) {
+						width = maxsize;
+						height = maxsize * pdfPage.getHeight() / pdfPage.getWidth();
+					} else {
+						width = maxsize * pdfPage.getWidth() / pdfPage.getHeight();
+						height = maxsize;
+					}
+					if (debug) {Log.d("ImageManager", "SizeCheckImage(1):  pdfファイルです. pdfPage.getWidth()=" + pdfPage.getWidth() + ", pdfPage.getHeight()=" + pdfPage.getHeight() + ", " + mFileList[page].name);}
+					if (debug) {Log.d("ImageManager", "SizeCheckImage(1):  pdfファイルです. width =" + width + ", height=" + height + ", " + mFileList[page].name);}
 					//PdfRenderer.Pageを閉じる、この処理を忘れると次回読み込む時に例外が発生する。
 					pdfPage.close();
 				}
@@ -3881,12 +3889,15 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	private ImageData LoadPdfImageData(int page, PdfRenderer mPdfRenderer) {
+		boolean debug = true;
 		int ret = 0;
 		ImageData id = null;
 		//ページ番号を指定してPdfRenderer.Pageインスタンスを取得する。
 		PdfRenderer.Page pdfPage = mPdfRenderer.openPage(page);
 		//PdfRenderer.Pageの情報を使って空の描画用Bitmapインスタンスを作成する。
-		Bitmap bm = Bitmap.createBitmap(pdfPage.getWidth() , pdfPage.getHeight() , Bitmap.Config.ARGB_8888);
+		if(debug){Log.d("ImageManager", "LoadPdfImageData: BitmapSize pdfPage.getWidth()=" + pdfPage.getWidth() + ", pdfPage.getHeight()=" + pdfPage.getHeight() + ", " + mFileList[page].name);}
+		if(debug){Log.d("ImageManager", "LoadPdfImageData: BitmapSize  mFileList[page].width=" + mFileList[page].o_width + ", mFileList[page].height =" + mFileList[page].o_height + ", " + mFileList[page].name);}
+		Bitmap bm = Bitmap.createBitmap(mFileList[page].o_width , mFileList[page].o_height , Bitmap.Config.ARGB_8888);
 		// PDFをレンダリングする前にBitmapを白く塗る。
 		Canvas canvas = new Canvas(bm);
 		canvas.drawColor(Color.WHITE);
@@ -3896,7 +3907,7 @@ public class ImageManager extends InputStream implements Runnable {
 		//PdfRenderer.Pageを閉じる、この処理を忘れると次回読み込む時に例外が発生する。
 		pdfPage.close();
 		if (bm != null) {
-			Log.d("ImageManager", "LoadPdfImageData: BitmapFactory decode succeed. " + mFileList[page].name);
+			if(debug){Log.d("ImageManager", "LoadPdfImageData: BitmapFactory decode succeed. " + mFileList[page].name);}
 			ret = CallImgLibrary.ImageSetPage(page, 0);
 			if (ret < 0) {
 				Log.e("ImageManager", "LoadPdfImageData: CallImgLibrary.ImageSetPage failed at BitmapFactory. return=" + ret + ", " + mFileList[page].name);
@@ -3905,7 +3916,7 @@ public class ImageManager extends InputStream implements Runnable {
 			if (mFileList[page].scale != 1) {
 				int Outwidth = mFileList[page].width / mFileList[page].scale;
 				int Outheight = mFileList[page].height / mFileList[page].scale;
-				Log.d("ImageManager", "LoadPdfImageData: Bitmap.createScaledBitmap start. width=" + Outwidth + ", height=" + Outheight);
+				if(debug){Log.d("ImageManager", "LoadPdfImageData: Bitmap.createScaledBitmap start. width=" + Outwidth + ", height=" + Outheight);}
 				bm = Bitmap.createScaledBitmap(bm, Outwidth, Outheight, true);
 				if (bm == null) {
 					Log.e("ImageManager", "LoadPdfImageData: Bitmap.createScaledBitmap failed.");
@@ -3913,13 +3924,13 @@ public class ImageManager extends InputStream implements Runnable {
 				}
 			}
 
-			Log.d("ImageManager", "LoadPdfImageData: CallImgLibrary.ImageSetPage succeed. " + mFileList[page].name);
+			if(debug){Log.d("ImageManager", "LoadPdfImageData: CallImgLibrary.ImageSetPage succeed. " + mFileList[page].name);}
 			ret = CallImgLibrary.ImageSetBitmap(bm);
 			if (ret < 0) {
 				Log.e("ImageManager", "LoadPdfImageData: ImageSetBitmap failed. return=" +ret + ", " + mFileList[page].name);
 				return null;
 			}
-			Log.d("ImageManager", "LoadPdfImageData: CallImgLibrary.ImageSetBitmap succeed. " + mFileList[page].name);
+			if(debug){Log.d("ImageManager", "LoadPdfImageData: CallImgLibrary.ImageSetBitmap succeed. " + mFileList[page].name);}
 			bm.recycle();
 			// 読み込み成功
 			mMemCacheFlag[page].fSource = true;

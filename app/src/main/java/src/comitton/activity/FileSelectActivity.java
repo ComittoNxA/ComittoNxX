@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 
+import jp.dip.muracoro.comittonx.BuildConfig;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 import src.comitton.common.FileAccess;
@@ -74,6 +75,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.os.storage.StorageManager;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -94,6 +96,11 @@ import androidx.core.content.ContextCompat;
 
 @SuppressLint("DefaultLocale")
 public class FileSelectActivity extends Activity implements OnTouchListener, ListNoticeListener, BookmarkListenerInterface, Handler.Callback {
+
+	public static final int READ_REQUEST_CODE = 42;
+	public static final int WRITE_REQUEST_CODE = 43;
+	public static final int OPEN_REQUEST_CODE = 44;
+	public static final int REQUEST_SDCARD_ACCESS = 2;
 
 	private static final int OPERATE_NONREAD = 0;
 	private static final int OPERATE_READ = 1;
@@ -236,8 +243,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		boolean debug = true;
 		super.onCreate(savedInstanceState);
-
 
 		// 設定の読込
 		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -425,24 +432,47 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			// 取得不可エラー
 		}
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if (debug) {Log.d("FileSelectActivity", "onCreate: Android11(R)以降のバージョンです.");}
+			if (!Environment.isExternalStorageManager()){
+				if (debug) {Log.d("FileSelectActivity", "onCreate: 外部ストレージアクセス権限がありません.");}
+				ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE);
+				intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+				startActivity(intent);
+			}else{
+				if (debug) {Log.d("FileSelectActivity", "onCreate: 外部ストレージアクセス権限があります.");}
+			}
+		} else {
+			if (debug) {Log.d("FileSelectActivity", "onCreate: Android10(Q)以前のバージョンです.");}
 
-		//==== パーミッション承認状態判定(読み込み) ====//
-		if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-		{
-			//==== 承認要求を行う ====//
-			ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
-		}
+			//==== パーミッション承認状態判定(読み込み) ====//
+			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+			{
+				if (debug) {Log.d("FileSelectActivity", "onCreate: READ_EXTERNAL_STORAGE 権限がありません.");}
+				//==== 承認要求を行う ====//
+				ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
+			}
+			else {
+				if (debug) {Log.d("FileSelectActivity", "onCreate: READ_EXTERNAL_STORAGE 権限があります.");}
+			}
 
-		//==== パーミッション承認状態判定(書き込み) ====//
-		if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-		{
-			//==== 承認要求を行う ====//
-			ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+			//==== パーミッション承認状態判定(書き込み) ====//
+			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+			{
+				if (debug) {Log.d("FileSelectActivity", "onCreate: WRITE_EXTERNAL_STORAGE 権限がありません.");}
+				//==== 承認要求を行う ====//
+				ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+			}
+			else {
+				if (debug) {Log.d("FileSelectActivity", "onCreate: WRITE_EXTERNAL_STORAGE 権限があります.");}
+			}
+
 		}
 
 		//==== パーミッション承認状態判定(マイク使用) ====//
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
 		{
+			if (debug) {Log.d("FileSelectActivity", "onCreate: RECORD_AUDIO がありません.");}
 			//==== 承認要求を行う ====//
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE);
 		}
@@ -521,11 +551,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		// mListScreenView.notifyUpdate();
 		// }
 	}
-
-	public static final int READ_REQUEST_CODE = 42;
-	public static final int WRITE_REQUEST_CODE = 43;
-	public static final int OPEN_REQUEST_CODE = 44;
-	public static final int REQUEST_SDCARD_ACCESS = 2;
 
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

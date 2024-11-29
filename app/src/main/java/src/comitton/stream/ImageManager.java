@@ -1184,7 +1184,8 @@ public class ImageManager extends InputStream implements Runnable {
 		FileListItem filelist = new FileListItem();
 		mFileList[0] = filelist;
 
-		filelist.type = FileData.getExtType(mFilePath);
+		filelist.type = FileData.FILETYPE_IMG;
+		filelist.exttype = FileData.getExtType(mFilePath);
 		filelist.name = FileData.getName(mFilePath);
 
 		if (mHostType == HOSTTYPE_SAMBA) {
@@ -3206,7 +3207,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 	@SuppressLint("Range")
     private int SizeCheckImage(int page) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("ImageManager", "SizeCheckImage(1): 開始します. page=" + page + ", " + mFileList[page].name);}
 		int returnCode = 0;
 		//Log.e("FromStreamSizeCheck", "page=" + page + ", type=" + type);

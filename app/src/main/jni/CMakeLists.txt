@@ -78,6 +78,7 @@ endif()
 if(WITH_JXL)
 # TODO: add JXL support
   add_definitions(-DHAVE_LIBJXL)
+  add_subdirectory(libjxl)
   target_sources(comitton PRIVATE comitton/ImageJXL.cpp)
 endif()
 

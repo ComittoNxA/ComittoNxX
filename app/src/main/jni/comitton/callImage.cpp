@@ -52,8 +52,10 @@ extern "C" {
 // サムネイルの初期化
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailInitialize (JNIEnv *env, jclass obj, jlong id, jint pagesize, jint pagenum, jint imagenum)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailInitialize : id=%lld, pagesize=%d, pagenum=%d, imagenum=%d", id, pagesize, pagenum, imagenum);
+//#define DEBUG_ThumbnailInitialize
+
+#ifdef DEBUG_ThumbnailInitialize
+	LOGD("callImage: ThumbnailInitialize : id=%lld, pagesize=%d, pagenum=%d, imagenum=%d", id, pagesize, pagenum, imagenum);
 #endif
 
 	int ret = ThumbnailAlloc(id, pagesize, pagenum, imagenum);
@@ -63,8 +65,10 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailInitiali
 // サムネイルのNoImage設定
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSetNone (JNIEnv *env, jclass obj, jlong id, jint index)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailSetNone : id=%lld, index=%d", id, index);
+//#define DEBUG_ThumbnailSetNone
+
+#ifdef DEBUG_ThumbnailSetNone
+	LOGD("callImage: ThumbnailSetNone : id=%lld, index=%d", id, index);
 #endif
 
 	int ret = ThumbnailSetNone(id, index);
@@ -74,8 +78,10 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSetNone 
 // サムネイルの残り領域確認
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailCheck (JNIEnv *env, jclass obj, jlong id, jint index)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailCheck : id=%lld, index=%d", id, index);
+//#define DEBUG_ThumbnailCheck
+
+#ifdef DEBUG_ThumbnailCheck
+	LOGD("callImage: ThumbnailCheck : id=%lld, index=%d", id, index);
 #endif
 
 	int ret = ThumbnailCheck(id, index);
@@ -85,8 +91,10 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailCheck (J
 // サムネイルの残り領域確認
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailMemorySizeCheck (JNIEnv *env, jclass obj, jlong id, jint width, jint height)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailMemorySizeCheck : id=%lld, width=%d, height=%d", id, width, height);
+//#define DEBUG_ThumbnailMemorySizeCheck
+
+#ifdef DEBUG_ThumbnailMemorySizeCheck
+	LOGD("callImage: ThumbnailMemorySizeCheck : id=%lld, width=%d, height=%d", id, width, height);
 #endif
 
 	int ret = ThumbnailMemorySizeCheck(id, width, height);
@@ -96,8 +104,10 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailMemorySi
 // サムネイルを整理して容量確保
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailImageAlloc (JNIEnv *env, jclass obj, jlong id, jint blocks, jint index)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailImageAlloc : id=%lld, blocks=%d, index=%d", id, blocks, index);
+//#define DEBUG_ThumbnailImageAlloc
+
+#ifdef DEBUG_ThumbnailImageAlloc
+	LOGD("callImage: ThumbnailImageAlloc : id=%lld, blocks=%d, index=%d", id, blocks, index);
 #endif
 
 	int ret = ThumbnailImageAlloc(id, blocks, index);
@@ -107,8 +117,10 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailImageAll
 // サムネイルが全て設定されているかをチェック
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailCheckAll (JNIEnv *env, jclass obj, jlong id)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailCheckAll : id=%lld", id);
+//#define DEBUG_ThumbnailCheckAll
+
+#ifdef DEBUG_ThumbnailCheckAll
+	LOGD("callImage: ThumbnailCheckAll : id=%lld", id);
 #endif
 
 	int ret = ThumbnailCheckAll(id);
@@ -118,8 +130,10 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailCheckAll
 // サムネイルが全て設定されているかをチェック
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSave (JNIEnv *env, jclass obj, jlong id, jobject bitmap, jint index)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailSave : id=%lld, index=%d", id, index);
+//#define DEBUG_ThumbnailSave
+
+#ifdef DEBUG_ThumbnailSave
+	LOGD("callImage: ThumbnailSave : id=%lld, index=%d", id, index);
 #endif
 	if (bitmap == NULL) {
 		return 0;
@@ -131,17 +145,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSave (JN
 	void				*canvas;
 
 	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-		LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+		LOGE("callImage: ThumbnailSave : AndroidBitmap_getInfo() failed ! error=%d", ret);
 		return -2;
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("ThumbnailSave: Bitmap format is not RGB_565 !");
+		LOGE("callImage: ThumbnailSave: Bitmap format is not RGB_565 !");
 		return -3;
 	}
 
 	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
-		LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		LOGE("callImage: ThumbnailSave : AndroidBitmap_lockPixels() failed ! error=%d", ret);
 		return -4;
 	}
 
@@ -154,15 +168,21 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailSave (JN
 // サムネイル描画
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailImageSize(JNIEnv *env, jclass obj, jlong id, jint index)
 {
+//#define DEBUG_ThumbnailImageSize
+
+#ifdef DEBUG_ThumbnailImageSize
     LOGD("callImage: ThumbnailImageSize: 開始します. id=%ld, index=%d", id, index);
+#endif
     return ThumbnailImageSize(id, index);
 }
 
 // サムネイル描画
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailDraw(JNIEnv *env, jclass obj, jlong id, jobject bitmap, jint index)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailDraw : id=%lld, index=%d", id, index);
+//#define DEBUG_ThumbnailDraw
+
+#ifdef DEBUG_ThumbnailDraw
+	LOGD("callImage: ThumbnailDraw : id=%lld, index=%d", id, index);
 #endif
 
 	if (bitmap == NULL) {
@@ -175,17 +195,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailDraw(JNI
 	void				*canvas;
 
 	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-		LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+		LOGE("callImage: ThumbnailDraw : AndroidBitmap_getInfo() failed ! error=%d", ret);
 		return -2;
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("ThumbnailDraw: Bitmap format is not RGB_565 !");
+		LOGE("callImage: ThumbnailDraw : Bitmap format is not RGB_565 !");
 		return -3;
 	}
 
 	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
-		LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		LOGE("callImage: ThumbnailDraw : AndroidBitmap_lockPixels() failed ! error=%d", ret);
 		return -4;
 	}
 
@@ -198,8 +218,11 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailDraw(JNI
 // サムネイル解放
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailFree(JNIEnv *env, jclass obj, jlong id)
 {
-#ifdef DEBUG
-	LOGD("ThumbnailFree : id=%lld", id);
+//#define DEBUG_ThumbnailFree
+
+
+#ifdef DEBUG_ThumbnailFree
+	LOGD("callImage: ThumbnailFree : id=%lld", id);
 #endif
 //	if (gThumbnailId != id) {
 //		// 初期化したIDと異なる
@@ -217,7 +240,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ThumbnailFree(JNI
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageInitialize (JNIEnv *env, jclass obj, jlong loadsize, jint buffsize, jint totalpage, jint threadnum)
 {
 #ifdef DEBUG
-	LOGD("Initialize : buffsize=%d * 4, page=%d", buffsize, totalpage);
+	LOGD("callImage: ImageInitialize : buffsize=%d * 4, page=%d", buffsize, totalpage);
 #endif
 
     // 読み込み用領域確保
@@ -236,7 +259,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageInitialize (
 		gMaxThreadNum = threadnum;
 	}
 	else {
-		LOGE("SetParameter : Illegal Param.(%d)", threadnum);
+		LOGE("callImage: ImageInitialize : Illegal Param.(%d)", threadnum);
 	}
 	return ret;
 }
@@ -248,7 +271,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageInitialize (
  */
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetPage (JNIEnv *env, jclass obj, jint page, jlong size) {
 #ifdef DEBUG
-    LOGD("ImageSetSize : page=%d, size=%d", page, size);
+    LOGD("callImage: ImageSetSize : page=%d, size=%d", page, size);
 #endif
 
     if (gLoadBuffSize < size) {
@@ -299,7 +322,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetData (JNI
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetFileSize (JNIEnv *env, jclass obj, jlong size)
 {
 #ifdef DEBUG
-    LOGD("ImageSetSize : page=%d, size=%d", page, size);
+    LOGD("callImage: ImageSetSize : page=%d, size=%d", size);
 #endif
 
     if (gLoadBuffSize < size) {
@@ -322,6 +345,9 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetSize (JNI
 {
     int ret = 0;
 
+#ifdef DEBUG
+    LOGD("callImage: ImageGetSize : page=%d, filesize=%d, type=%d", (int)gLoadPage, (int)gLoadFilePos, type);
+#endif
     jint *iSize = NULL;
     if (imagesize != NULL) {
         iSize = (jint*)env->GetIntArrayElements(imagesize, NULL);
@@ -363,6 +389,9 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetSize (JNI
             }
         }
         else if (type == IMAGETYPE_AVIF){
+#ifdef DEBUG
+            LOGD("callImage: ImageGetSize : Call ImageGetSizeAvif.");
+#endif
 #ifdef HAVE_LIBAVIF
             ret = ImageGetSizeAvif(type, &iSize[0], &iSize[1]);
 #endif
@@ -371,15 +400,18 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetSize (JNI
             }
         }
         else if (type == IMAGETYPE_HEIF){
-#ifdef HAVE_HEIF
-            ret = ImageGetSizeHeif(type, &iSize[0], &iSize[1]);
+#ifdef HAVE_LIBHEIF
+            // なにもしない
 #endif
             if (ret == 0 && gLoadError) {
                 ret = -4;
             }
         }
         else if (type == IMAGETYPE_JXL){
-#ifdef HAVE_JXL
+#ifdef DEBUG
+            LOGD("callImage: ImageGetSize : Call ImageGetSizeJxl.");
+#endif
+#ifdef HAVE_LIBJXL
             ret = ImageGetSizeJxl(type, &iSize[0], &iSize[1]);
 #endif
             if (ret == 0 && gLoadError) {
@@ -397,7 +429,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetSize (JNI
 
     gLoadPage = -1;
 #ifdef DEBUG
-    LOGD("ImageGetSize: end - result=%d", ret);
+    LOGD("callImage: ImageGetSize: end - result=%d, width=%d, height=%d", ret, iSize[0], iSize[1]);
 #endif
     return ret;
 }
@@ -414,18 +446,18 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetBitmap (J
     colorFormat colorFormat;
 
     if (gLoadPage < 0 || gTotalPages <= gLoadPage) {
-        LOGE("ImageSetBitmap: Illegal Page.(%d)", (int)gLoadPage);
+        LOGE("callImage: ImageSetBitmap: Illegal Page.(%d)", (int)gLoadPage);
         return - 3;
     }
 #ifdef DEBUG
-    LOGD("ImageConvert : page=%d, filesize=%d, type=%d, scale=%d", (int)gLoadPage, (int)gLoadFilePos, type, scale);
+    LOGD("callImage: ImageSetBitmap : page=%d, filesize=%d", (int)gLoadPage, (int)gLoadFilePos);
 #endif
 
     int ret = 0;
     gLoadError = 0;
 
     if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-        LOGE("ImageSetBitmap: AndroidBitmap_getInfo() failed ! error=%d", ret);
+        LOGE("callImage: ImageSetBitmap: AndroidBitmap_getInfo() failed ! error=%d", ret);
         return -4;
     }
 
@@ -436,17 +468,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetBitmap (J
         colorFormat = COLOR_FORMAT_RGBA;
     }
     else {
-        LOGE("ImageSetBitmap: Bitmap format is not RGBA_8888 or RGB_565 !");
+        LOGE("callImage: ImageSetBitmap: Bitmap format is not RGBA_8888 or RGB_565 !");
         return -5;
     }
 
     if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
-        LOGE("ImageSetBitmap: AndroidBitmap_lockPixels() failed ! error=%d", ret);
+        LOGE("callImage: ImageSetBitmap: AndroidBitmap_lockPixels() failed ! error=%d", ret);
         return -4;
     }
 
     if ((ret = SetBuff(gLoadPage, info.width, info.height, (uint8_t *)canvas, colorFormat)) < 0) {
-        LOGE("ImageSetBitmap: SetBuff() failed ! error=%d", ret);
+        LOGE("callImage: ImageSetBitmap: SetBuff() failed ! error=%d", ret);
         return -5;
     }
 
@@ -458,7 +490,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetBitmap (J
 
     gLoadPage = -1;
 #ifdef DEBUG
-    LOGD("ImageConvert : end - result=%d", ret);
+    LOGD("callImage: ImageConvert : end - result=%d", ret);
 #endif
     return ret;
 }
@@ -471,11 +503,11 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageSetBitmap (J
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageConvert (JNIEnv *env, jclass obj, jint type, jint scale)
 {
 	if (gLoadPage < 0 || gTotalPages <= gLoadPage) {
-		LOGE("ImageConvert: Illegal Page.(%d)", (int)gLoadPage);
+		LOGE("callImage: ImageConvert: Illegal Page.(%d)", (int)gLoadPage);
 		return - 2;
 	}
 #ifdef DEBUG
-	LOGD("ImageConvert: page=%d, filesize=%d, type=%d, scale=%d", (int)gLoadPage, (int)gLoadFilePos, type, scale);
+	LOGD("callImage: ImageConvert: page=%d, filesize=%d, type=%d, scale=%d", (int)gLoadPage, (int)gLoadFilePos, type, scale);
 #endif
 
 	int ret = 0;
@@ -485,9 +517,6 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageConvert (JNI
         CheckImageType(&type);
 
         if (type == IMAGETYPE_JPEG) {
-#ifdef DEBUG
-            LOGD("ImageConvert : JPEG - quality=%d", pArray[0]);
-#endif
 #ifdef HAVE_LIBJPEG
             //ret = LoadImageJpeg(SET_BUFFER, &gImageData[gLoadPage], gLoadPage, scale, NULL);
 #endif
@@ -515,7 +544,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageConvert (JNI
 #ifdef HAVE_LIBAVIF
             ret = LoadImageAvif(SET_BUFFER, &gImageData[gLoadPage], gLoadPage, scale, NULL);
             if (ret < 0) {
-                LOGE("ImageConvert: LoadImageAvif() failed. return=%d", ret);
+                LOGE("callImage: ImageConvert: LoadImageAvif() failed. return=%d", ret);
             }
 #endif
             if (ret == 0 && gLoadError) {
@@ -523,14 +552,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageConvert (JNI
             }
         }
         else if (type == IMAGETYPE_HEIF){
-#ifdef HAVE_HEIF
+#ifdef HAVE_LIBHEIF
             //ret = LoadImageHeif(SET_BUFFER, &gImageData[gLoadPage], gLoadPage, scale, NULL);
 #endif
             ret = -200 - IMAGETYPE_HEIF;
         }
         else if (type == IMAGETYPE_JXL){
-#ifdef HAVE_JXL
+#ifdef HAVE_LIBJXL
             ret = LoadImageJxl(SET_BUFFER, &gImageData[gLoadPage], gLoadPage, scale, NULL);
+            if (ret < 0) {
+                LOGE("ImageConvert: LoadImageJxl() failed. return=%d", ret);
+            }
 #endif
             if (ret == 0 && gLoadError) {
                 ret = -200 - IMAGETYPE_JXL;
@@ -543,7 +575,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageConvert (JNI
 
 	gLoadPage = -1;
 #ifdef DEBUG
-	LOGD("ImageConvert: end - result=%d", ret);
+	LOGD("callImage: ImageConvert: end - result=%d", ret);
 #endif
 	return ret;
 }
@@ -556,11 +588,11 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageConvert (JNI
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetBitmap (JNIEnv *env, jclass obj, jint type, jint scale, jobject bitmap)
 {
 	if (gLoadPage != -1) {
-		LOGE("ImageGetBitmap: Illegal Page.(%d)", (int)gLoadPage);
+		LOGE("callImage: ImageGetBitmap: Illegal Page.(%d)", (int)gLoadPage);
 		return - 2;
 	}
 #ifdef DEBUG
-	LOGD("ImageGetBitmap : page=%d, filesize=%d, type=%d, scale=%d", (int)gLoadPage, (int)gLoadFilePos, type, scale);
+	LOGD("callImage: ImageGetBitmap : page=%d, filesize=%d, type=%d, scale=%d", (int)gLoadPage, (int)gLoadFilePos, type, scale);
 #endif
     int ret = 0;
     gLoadError = 0;
@@ -568,17 +600,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetBitmap (J
     void				*canvas;
 
     if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-        LOGE("ImageGetBitmap: AndroidBitmap_getInfo() failed ! error=%d", ret);
+        LOGE("callImage: ImageGetBitmap: AndroidBitmap_getInfo() failed ! error=%d", ret);
         return -3;
     }
 
     if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-        LOGE("ImageGetBitmap: Bitmap format is not RGB_565 !");
+        LOGE("callImage: ImageGetBitmap: Bitmap format is not RGB_565 !");
         return -4;
     }
 
     if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
-        LOGE("ImageGetBitmap: AndroidBitmap_lockPixels() failed ! error=%d", ret);
+        LOGE("callImage: ImageGetBitmap: AndroidBitmap_lockPixels() failed ! error=%d", ret);
         return -5;
     }
 
@@ -586,9 +618,6 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetBitmap (J
         CheckImageType(&type);
 
         if (type == IMAGETYPE_JPEG) {
-#ifdef DEBUG
-            LOGD("ImageGetBitmap : JPEG - quality=%d", pArray[0]);
-#endif
 #ifdef HAVE_LIBJPEG
             //ret = LoadImageJpeg(SET_BITMAP, &gImageData[gLoadPage], gLoadPage, scale, (WORD *)canvas);
 #endif
@@ -616,7 +645,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetBitmap (J
 #ifdef HAVE_LIBAVIF
             ret = LoadImageAvif(SET_BITMAP, &gImageData[gLoadPage], gLoadPage, scale, (WORD *)canvas);
             if (ret < 0) {
-                LOGE("ImageGetBitmap: [error] LoadImageAvif() failed. return=%d", ret);
+                LOGE("callImage: ImageGetBitmap: [error] LoadImageAvif() failed. return=%d", ret);
             }
 #endif
             if (ret == 0 && gLoadError) {
@@ -624,14 +653,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetBitmap (J
             }
         }
         else if (type == IMAGETYPE_HEIF){
-#ifdef HAVE_HEIF
+#ifdef HAVE_LIBHEIF
             //ret = LoadImageHeif(SET_BITMAP, &gImageData[gLoadPage], gLoadPage, scale, (WORD *)canvas);
 #endif
             ret = -200 - IMAGETYPE_HEIF;
         }
         else if (type == IMAGETYPE_JXL){
-#ifdef HAVE_JXL
+#ifdef HAVE_LIBJXL
             ret = LoadImageJxl(SET_BITMAP, &gImageData[gLoadPage], gLoadPage, scale, (WORD *)canvas);
+            if (ret < 0) {
+                LOGE("ImageGetBitmap: [error] LoadImageJxl() failed. return=%d", ret);
+            }
 #endif
             if (ret == 0 && gLoadError) {
                 ret = -200 - IMAGETYPE_JXL;
@@ -646,7 +678,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetBitmap (J
 
     gLoadPage = -1;
 #ifdef DEBUG
-    LOGD("ImageGetBitmap: end - result=%d", ret);
+    LOGD("callImage: ImageGetBitmap: end - result=%d", ret);
 #endif
     return ret;
 }
@@ -677,7 +709,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetFreeSize 
 		}
 	}
 #ifdef DEBUG
-	LOGD("ImageGetFreeSize : %d / %d", count, (int)gBuffNum);
+	LOGD("callImage: ImageGetFreeSize : %d / %d", count, (int)gBuffNum);
 #endif
 	return (count);
 }
@@ -689,12 +721,13 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageGetFreeSize 
  */
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_GetMarginSize (JNIEnv *env, jclass obj, jint page, jint half, jint index, jint width, jint height, jint margin, jint margincolor, jintArray size)
 {
+//#define DEBUG_GetMarginSize
 	if (page < 0 || gTotalPages <= page) {
-		LOGE("ImageMeasureMarginCut : Illegal Page.(%d)", page);
+		LOGE("callImage: GetMarginSize : Illegal Page.(%d)", page);
 		return -1;
 	}
-#ifdef DEBUG
-	LOGD("ImageMeasureMarginCut : page=%d, half=%d, width=%d, height=%d", page, half, width, height);
+#ifdef DEBUG_GetMarginSize
+	LOGD("callImage: GetMarginSize : page=%d, half=%d, width=%d, height=%d", page, half, width, height);
 #endif
 
 	jint *retsize = env->GetIntArrayElements(size, NULL);
@@ -712,11 +745,11 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_GetMarginSize (JN
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScale (JNIEnv *env, jclass obj, jint page, jint half, jint width, jint height, jint left, jint right, jint top, jint bottom, jint algorithm, jint rotate, jint margin, jint margincolor, jint sharpen, jint bright, jint gamma, jint param, jintArray size)
 {
 	if (page < 0 || gTotalPages <= page) {
-		LOGE("ImageScale : Illegal Page.(%d)", page);
+		LOGE("callImage: ImageScale : Illegal Page.(%d)", page);
 		return -1;
 	}
 #ifdef DEBUG
-	LOGD("ImageScale : page=%d, half=%d, width=%d, height=%d", page, half, width, height);
+	LOGD("callImage: ImageScale : page=%d, half=%d, width=%d, height=%d", page, half, width, height);
 #endif
 
     jint *retsize = env->GetIntArrayElements(size, NULL);
@@ -734,11 +767,11 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScale (JNIEn
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageFree (JNIEnv *env, jclass obj, jint page)
 {
 	if (page < 0 || gTotalPages <= page) {
-		LOGE("ImnageFree : Illegal Page.(%d)", page);
+		LOGE("callImage: ImnageFree : Illegal Page.(%d)", page);
 		return -1;
 	}
 #ifdef DEBUG
-	LOGD("ImageFree : page=%d", page);
+	LOGD("callImage: ImageFree : page=%d", page);
 #endif
 	gImageData[page].UseFlag = 0;
     // 画像の領域全部を解放
@@ -756,11 +789,11 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageFree (JNIEnv
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScaleFree (JNIEnv *env, jclass obj, jint page, jint half)
 {
 	if (page != -1 && (page < 0 || gTotalPages <= page)) {
-		LOGE("ImageScaleFree : Illegal Page.(%d)", page);
+		LOGE("callImage: ImageScaleFree : Illegal Page.(%d)", page);
 		return -1;
 	}
 #ifdef DEBUG
-	LOGD("ImageScaleFree : page=%d, half=%d", page, half);
+	LOGD("callImage: ImageScaleFree : page=%d, half=%d", page, half);
 #endif
 
     // 画像の縮尺を解放
@@ -775,8 +808,9 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScaleFree (J
  */
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageDraw (JNIEnv *env, jclass obj, jint page, jint half, jint x, jint y, jobject bitmap)
 {
+//#define DEBUG_ImageDraw
 	if (page < 0 || gTotalPages <= page) {
-		LOGE("ImageDraw : Illegal Page.(%d)", page);
+		LOGE("callImage: ImageDraw : Illegal Page.(%d)", page);
 		return -1;
 	}
 //	if (gImageData[page].SclFlag != 1) {
@@ -784,8 +818,8 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageDraw (JNIEnv
 //		return -2;
 //	}
 
-#ifdef DEBUG
-	LOGD("DrawBitmap : page=%d, half=%d, x=%d, y=%d / sflg=%d, ow=%d, oh=%d, sw=%d, sh=%d"
+#ifdef DEBUG_ImageDraw
+	LOGD("callImage: ImageDraw : page=%d, half=%d, x=%d, y=%d / sflg=%d, ow=%d, oh=%d, sw=%d, sh=%d"
 			, page, half, x, y
 			, (int)gImageData[page].SclFlag[half]
 			, (int)gImageData[page].OrgWidth, (int)gImageData[page].OrgHeight
@@ -797,17 +831,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageDraw (JNIEnv
 	void				*canvas;
 
 	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-		LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+		LOGE("callImage: ImageDraw : AndroidBitmap_getInfo() failed ! error=%d", ret);
 		return -2;
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("ImageDraw: Bitmap format is not RGB_565 !");
+		LOGE("callImage: ImageDraw : Bitmap format is not RGB_565 !");
 		return -3;
 	}
 
 	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
-		LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		LOGE("callImage: ImageDraw : AndroidBitmap_lockPixels() failed ! error=%d", ret);
 		return -4;
 	}
 
@@ -815,8 +849,8 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageDraw (JNIEnv
 	ret = DrawBitmap(page, half, x, y, canvas, info.width, info.height, info.stride, &gImageData[page]);
 
 	AndroidBitmap_unlockPixels(env, bitmap);
-#ifdef DEBUG
-	LOGD("DrawBitmap : end");
+#ifdef DEBUG_ImageDraw
+	LOGD("callImage: ImageDraw : end");
 #endif
 	return ret;
 }
@@ -829,15 +863,15 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageDraw (JNIEnv
 JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScaleDraw (JNIEnv *env, jclass obj, jint page, jint rotate, jint s_x, jint s_y, jint s_cx, jint s_cy, jint d_x, jint d_y, jint d_cx, jint d_cy, jint psel, jobject bitmap, jint cut_left, jint cut_right, jint cut_top, jint cut_bottom)
 {
 	if (page < 0 || gTotalPages <= page) {
-		LOGE("ImageDraw : Illegal Page.(%d)", page);
+		LOGE("callImage: ImageScaleDraw : Illegal Page.(%d)", page);
 		return -1;
 	}
 	if (gImageData[page].UseFlag != 1) {
-		LOGE("ImageDraw : no Scale Image.(%d)", page);
+		LOGE("callImage: ImageScaleDraw : no Scale Image.(%d)", page);
 		return -2;
 	}
 
-//	LOGD("ImageScaleDraw : page=%d, x=%d, y=%d / sflg=%d, ow=%d, oh=%d, sw=%d, sh=%d"
+//	LOGD("callImage: ImageScaleDraw : page=%d, x=%d, y=%d / sflg=%d, ow=%d, oh=%d, sw=%d, sh=%d"
 //			, page, x, y
 //			, gImageData[page].SclFlag
 //			, gImageData[page].OrgWidth, gImageData[page].OrgHeight
@@ -848,17 +882,17 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_ImageScaleDraw (J
 	void				*canvas;
 
 	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-		LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+		LOGE("callImage: ImageScaleDraw : AndroidBitmap_getInfo() failed ! error=%d", ret);
 		return -3;
 	}
 
 	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("ImageScaleDraw: Bitmap format is not RGB_565 !");
+		LOGE("callImage: ImageScaleDraw : Bitmap format is not RGB_565 !");
 		return -4;
 	}
 
 	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
-		LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		LOGE("callImage: ImageScaleDraw : AndroidBitmap_lockPixels() failed ! error=%d", ret);
 		return -5;
 	}
 
@@ -896,7 +930,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallImgLibrary_SetParameter (JNI
         gMaxThreadNum = threadnum;
     }
     else {
-        LOGE("SetParameter : Illegal Param.(%d)", threadnum);
+        LOGE("callImage: SetParameter : Illegal Param.(%d)", threadnum);
         ret = -1;
     }
     return ret;

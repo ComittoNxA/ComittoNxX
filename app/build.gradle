@@ -7,8 +7,8 @@ def packageName = "jp.dip.muracoro.comittonx"
 // 今更だけどComittoNxA-v2って名前にすればよかった
 def applicationName = "ComittoNxX"
 def versionMajor = 2
-def versionMinor = 0
-def versionPatch = 5
+def versionMinor = 1
+def versionPatch = 0
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -17,7 +17,7 @@ def WITH_GIF = "ON"
 def WITH_WEBP = "ON"
 def WITH_AVIF = "ON"
 def WITH_HEIF = "ON"
-def WITH_JXL = "OFF"
+def WITH_JXL = "ON"
 
 // アプリに署名するため以下のファイルを作成して signingConfig の設定を記述してください
 apply from:'../signingConfigs/release.gradle', to: android
@@ -36,7 +36,7 @@ android {
         minSdk 21 // Android 5.0("Lollipop")
         // targetSdk11以降でSMBまわりでNetworkOnMainThreadExceptionエラー発生の可能性
         // targetSdk29はrequestLegacyExternalStorageをセットできる
-        //targetSdk 29 // Android 10.0("Q")
+        // targetSdk29から35に上げるとNetworkOnMainThreadExceptionエラーが発生しなくなったけど対処しなくていいんだっけ？
         targetSdk 35 // Android 15("Vanilla Ice Cream")
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
@@ -134,7 +134,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
 
     // SMB接続用ライブラリjcifs(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
-    implementation 'org.codelibs:jcifs:2.1.38'
+    implementation 'org.codelibs:jcifs:2.1.39'
 
     // Epub表示用ライブラリepub4j
     implementation('io.documentnode:epub4j-core:4.2.1') {

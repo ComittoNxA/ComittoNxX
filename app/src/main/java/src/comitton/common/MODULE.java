@@ -15,7 +15,7 @@ public class MODULE {
 			+ "		Version :				" + BuildConfig.VERSION_NAME + "<br>"
 			+ "		License :				<a href=\"https://raw.githubusercontent.com/ComittoNxA/ComittoNxX/master/LICENSE\">Unlicense license</a><br><br>"
 			+ "Using Library<br><br>"
-			+ "		jcifs (codelibs) 2.1.38 :<br>"
+			+ "		jcifs (codelibs) 2.1.39 :<br>"
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/codelibs/jcifs/master/LICENSE\">LGPL v2.1</a><br><br>"
 			+ "		unrar 7.1.1 :<br>"
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/pmachapman/unrar/master/license.txt\">unRAR restriction</a><br><br>"
@@ -23,6 +23,8 @@ public class MODULE {
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/videolan/dav1d/master/COPYING\">BSD-2-Clause</a><br><br>"
 			+ "		libavif 1.1.1 :<br>"
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/AOMediaCodec/libavif/main/LICENSE\">BSD License</a><br><br>"
+ 		    + "		libjxl v0.11.1 :<br>"
+		    + "				License :		<a href=\"https://raw.githubusercontent.com/libjxl/libjxl/refs/heads/main/LICENSE\">BSD-3-Clause</a><br><br>"
 			+ "		epub4j 4.2.0 :<br>"
 			+ "				License :		<a href=\"https://raw.githubusercontent.com/documentnode/epub4j/main/LICENSE\">ASL v2.0</a><br><br>"
 			// 以下利用を終了したライブラリ

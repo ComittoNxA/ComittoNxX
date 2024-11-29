@@ -120,6 +120,7 @@ int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *
         returnCode = SetBuff(page, width, height, rgb.pixels, COLOR_FORMAT_RGB);
         if (returnCode < 0) {
             LOGE("LoadImageAvif: SetBuff() failed. return=%d", returnCode);
+            returnCode = -9;
             goto cleanup;
         }
         pData->UseFlag = 1;
@@ -133,6 +134,7 @@ int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *
         returnCode = SetBitmap(page, width, height, rgb.pixels, COLOR_FORMAT_RGB, canvas);
         if (returnCode < 0) {
             LOGE("LoadImageAvif: SetBitmap() failed. return=%d", returnCode);
+            returnCode = -10;
             goto cleanup;
         }
     }
@@ -206,7 +208,7 @@ int ImageGetSizeAvif(int type, jint *width, jint *height)
 cleanup:
     avifDecoderDestroy(decoder);
 #ifdef DEBUG
-    LOGD("LoadImageAvif: End. return=%d, width=%d, height=%d", returnCode, *width, *height);
+    LOGD("ImageGetSizeAvif: End. return=%d, width=%d, height=%d", returnCode, *width, *height);
 #endif
     return returnCode;
 }

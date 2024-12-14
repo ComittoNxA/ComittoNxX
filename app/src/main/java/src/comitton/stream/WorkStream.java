@@ -1,8 +1,17 @@
 package src.comitton.stream;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import jcifs.smb.SmbException;
 
 import src.comitton.common.DEF;
 import src.comitton.common.FileAccess;
@@ -114,7 +123,27 @@ public class WorkStream extends InputStream {
 		try {
 			if (mURI != null && mURI.length() > 0) {
 				if (FileAccess.getSmbMode() == FileAccess.SMBLIB_JCIFS) {
-					ret = mJcifsFile.read(buf, off, size);
+
+					if (!DEF.isUiThread()) {
+						// UIスレッドではない時はそのまま実行
+						ret = mJcifsFile.read(buf, off, size);
+					} else {
+						// UIスレッドの時は新しいスレッド内で実行
+						ExecutorService executor = Executors.newSingleThreadExecutor();
+						Future<Integer> future = executor.submit(new Callable<Integer>() {
+
+							@Override
+							public Integer call() throws SmbException {
+								return mJcifsFile.read(buf, off, size);
+							}
+						});
+
+						try {
+							ret = future.get();
+						} catch (Exception e) {
+							Log.e("FileAccess", "jcifsAccessFile: File not found.");
+						}
+					}
 				}
 			} else {
 				ret = mLocalFile.read(buf, off, size);
@@ -135,10 +164,11 @@ public class WorkStream extends InputStream {
 			}
 		}
 		catch (Exception e) {
-				Open(mURI, mPath, mUser, mPass, mZipFlag);
-				seek(mPos);
-				return read(buf, off, size);
-			}
+			Log.e("WorkStream", "read: Exception: " + e.getMessage());
+			Open(mURI, mPath, mUser, mPass, mZipFlag);
+			seek(mPos);
+			return read(buf, off, size);
+		}
 		return ret;
 	}
 

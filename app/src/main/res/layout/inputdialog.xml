@@ -4,7 +4,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:orientation="vertical"
-	android:background="@drawable/dialogframe" >
+	android:background="@drawable/dialogframe_transparent" >
 
 	<TextView
 		android:id="@+id/text_title"

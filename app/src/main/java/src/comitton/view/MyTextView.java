@@ -71,6 +71,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	private boolean mIsShadow = false;
 	private boolean mPseLand = false;
 	private boolean mAscRotate;
+	private int mPicScale;
 
 	private int mDispWidth = 0;
 	private int mDispHeight = 0;
@@ -176,10 +177,12 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	// 挿絵の保持
 	private String mUser;
 	private String mPass;
+	private String mFilePath;
+	//private String mPicturePath = "";
 	private TextInputStream mTextStream;
 	private SparseArray<BitmapDrawable> mPicMap1;
 	private SparseArray<BitmapDrawable> mPicMap2;
-	private int mPicMapPage;
+	private int mPicMapPage = -1;
 	private ImageManager mImageMgr;
 	private GuideView mGuideView;
 
@@ -191,6 +194,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 
 	public MyTextView(Context context) {
 		super(context);
+
 		getHolder().addCallback(this);
 		// SurfaceHolder.Callbackを継承したSurfaceCallback()です。
 
@@ -300,6 +304,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	public void unlockDraw() { mDrawLock = false; }
 
 	public boolean update(boolean unlock) {
+		boolean debug = false;
+		if (debug) {Log.d("MyTextView", "update: mDrawLock=" + mDrawLock + ", unlock=" + unlock);}
 		if (mDrawLock == true && unlock == false) {
 			return false;
 		}
@@ -312,9 +318,10 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		SurfaceHolder surfaceHolder = getHolder();
 		try {
 			canvas = surfaceHolder.lockCanvas(); // ロックして、書き込み用のcanvasを受け取る
-			if (canvas == null)
+			if (canvas == null) {
+				if (debug) {Log.d("MyTextView", "update: canvasが受け取れません.");}
 				return false; // canvasが受け取れてなかったら抜ける
-
+			}
 //			synchronized (surfaceHolder) {
 				drawScreen(canvas);
 //			}
@@ -331,6 +338,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	}
 
 	public void drawScreen(Canvas canvas) {
+		boolean debug = false;
+		if (debug) {Log.d("MyTextView", "drawScreen: 開始します.");}
 		// 背景色設定
 		canvas.drawColor(mMgnColor);
 		if (mTextData == null) {
@@ -398,7 +407,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		synchronized (mLock) {
 			mDrawBreak = false;
 			for (int p = st; p <= ed; p++) {
-				if (p < 0 || p >= mTextData.length || mTextData[p] == null) {
+				if (p < 0 || mTextData == null || p >= mTextData.length || mTextData[p] == null) {
 					continue;
 				}
 
@@ -539,6 +548,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	}
 
 	private void setDrawBitmap(int page) {
+		boolean debug = false;
+		if (debug) {Log.d("MyTextView", "setDrawBitmap: 開始します.");}
 		if (mDrawBitmap == null) {
 			return;
 		}
@@ -612,7 +623,10 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		return rc;
 	}
 
+	// 1ページ分の画像を作成する
 	private void TextDraw(Canvas canvas, int index, float x, float y) {
+		boolean debug = false;
+		if(debug) {Log.d("MyTextView", "TextDraw: 開始します. index=" + index + ", x=" + x + ", y=" + y);}
 		if (mTextData == null) {
 			return;
 		}
@@ -660,30 +674,61 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 
 		for (int i = 0 ; i < tdds.length && mDrawBreak == false ; i++) {
 			TextDrawData tdd = tdds[i]; 
-			// ビットマップ描画
-			if (tdd.mTextPos == -1) {
+			// mTextPos==TB_PICTUREなら画像表示
+			if (tdd.mTextPos == TextManager.TB_PICTURE) {
+				if(debug) {Log.d("MyTextView", "TextDraw: index=" + index +", 画像を表示します.");}
 				int picIndex = tdd.mTextLen;
+				if(debug) {Log.d("MyTextView", "TextDraw: picIndex=" + picIndex +", mPictures.length=" + mPictures.length);}
 				if (picIndex >= 0 && picIndex < mPictures.length) {
 					PictureData picdata = mPictures[picIndex];
 					if (picdata != null && picdata.mIsError == false) {
-						BitmapDrawable bm = loadPicture(picIndex, picdata.mFileName);
-						if (bm != null) {
+						BitmapDrawable bmdraw = loadPicture(picIndex, picdata.mFileName);
+						if (bmdraw != null) {
+							if(debug) {Log.d("MyTextView", "TextDraw: tdd.mTextX=" + tdd.mTextX +", tdd.mTextY=" + tdd.mTextY);}
+							if(debug) {Log.d("MyTextView", "TextDraw: picdata.mWidth=" + picdata.mWidth +", picdata.mHeight=" + picdata.mHeight);}
+							if(debug) {Log.d("MyTextView", "TextDraw: mDrawWidth=" + mDrawWidth +", mDrawHeight=" + mDrawHeight);}
+							if(debug) {Log.d("MyTextView", "TextDraw: mTextWidth=" + mTextWidth +", mTextHeight=" + mTextHeight);}
 							// bitmapを拡大縮小描画
-						    Matrix matrix = new Matrix();
+							Matrix matrix = new Matrix();
 							int drawX = (int)(x + mDrawWidth - ((float) tdd.mTextX + picdata.mWidth) * mDrawScale);
 							int drawY = (int)(y + (float)tdd.mTextY * mDrawScale);
-							float srcWidth = bm.getBitmap().getWidth();
-							float srcHeight = bm.getBitmap().getHeight();
+							float srcWidth = bmdraw.getBitmap().getWidth();
+							float srcHeight = bmdraw.getBitmap().getHeight();
 							float dstWidth = (float)picdata.mWidth * mDrawScale;
 							float dstHeight = (float)picdata.mHeight * mDrawScale;
 
+							// 見開き対応モードで、画像が横長のとき
+							// 1ページに画像の半分だけ表示する
+							// 表示座標がマイナスのときは2画面目の画像を表示する
+							switch (mPicScale) {
+								case TextManager.BMPSCALE_DUAL_SCREEN:
+								case TextManager.BMPSCALE_DUAL_SCREEN_NO_MARGIN:
+									if (picdata.mWidth > picdata.mHeight) {
+										Bitmap bm;
+										if (tdd.mTextX >= 0) {
+											drawX = (int)(x + mDrawWidth - ((float) tdd.mTextX + picdata.mWidth / 2) * mDrawScale);
+											bm = Bitmap.createBitmap(bmdraw.getBitmap(), bmdraw.getBitmap().getWidth() / 2, 0, bmdraw.getBitmap().getWidth() / 2, bmdraw.getBitmap().getHeight(), null, true);
+											bmdraw = new BitmapDrawable(bm);
+											bmdraw.setBounds(0, 0, bm.getWidth(), bm.getHeight());
+										} else {
+											bm = Bitmap.createBitmap(bmdraw.getBitmap(), 0, 0, bmdraw.getBitmap().getWidth() / 2, bmdraw.getBitmap().getHeight(), null, true);
+											bmdraw = new BitmapDrawable(bm);
+											bmdraw.setBounds(0, 0, bm.getWidth(), bm.getHeight());
+										}
+									}
+									break;
+							}
+
+							if(debug) {Log.d("MyTextView", "TextDraw: drawX=" + drawX +", drawY=" + drawY);}
+							if(debug) {Log.d("MyTextView", "TextDraw: srcWidth=" + srcWidth +", srcHeight=" + srcHeight);}
+							if(debug) {Log.d("MyTextView", "TextDraw: dstWidth=" + dstWidth +", dstHeight=" + dstHeight);}
 						    matrix.postScale(dstWidth / srcWidth, dstHeight / srcHeight);
 
 						    canvas.save();
-						    canvas.translate(drawX, drawY);
+							canvas.translate(drawX, drawY);
 							canvas.concat(matrix);
 						    //canvasに描画
-						    bm.draw(canvas);
+							bmdraw.draw(canvas);
 						    canvas.restore();
 						}
 						else {
@@ -695,6 +740,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				continue;
 			}
 			else if ((tdd.mTextPos & TextManager.STYLE_LINE_BASE) != 0) {
+				if(debug) {Log.d("MyTextView", "TextDraw: index=" + index +" STEP 2");}
 				// 傍線
 				float ty1 = tdd.mTextY * mDrawScale;
 				float ty2 = (tdd.mTextY + tdd.mGap) * mDrawScale;
@@ -957,6 +1003,11 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 
 	// 挿絵管理
 	private BitmapDrawable loadPicture(int picindex, String filename) {
+		boolean debug = false;
+		if(debug) {Log.d("MyTextView", "loadPicture: 開始します. picindex=" + picindex + ", filename=" + filename);}
+		if(debug) {Log.d("MyTextView", "loadPicture: mPicMapPage=" + mPicMapPage + ", mCurrentPage=" + mCurrentPage);}
+		if (debug) {DEF.StackTrace("MyTextView", "loadPicture: ");}
+
 		if (filename == null) {
 			return null;
 		}
@@ -1020,7 +1071,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				if (e != null && e.getMessage() != null) {
 					s = e.getMessage();
 				}
-				Log.e("Text/BitmapLoad", s);
+				Log.e("MyTextView", "loadPicture: " + s);
 			}
 			// ハッシュに登録
 			if (bm != null) {
@@ -1029,6 +1080,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				mPicMap1.put(picindex, bmdraw);
 			}
 		}
+		if(debug) {Log.d("MyTextView", "loadPicture: 終了します.");}
 		return bmdraw;
 	}
 
@@ -1240,7 +1292,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	}
 
 	// 余白色を設定
-	public boolean setConfig(int mclr, int cclr, int gclr, int vp, int mgn, int cen, int sdw, int srngw, int srngh, int svol, boolean pr, boolean cmgn, boolean csdw, boolean psel, boolean effect, int effecttime, String fontfile, boolean ascrt) {
+	public boolean setConfig(int mclr, int cclr, int gclr, int vp, int mgn, int cen, int sdw, int srngw, int srngh, int svol, boolean pr, boolean cmgn, boolean csdw, boolean psel, boolean effect, int effecttime, String fontfile, boolean ascrt, int pic_scale) {
 		boolean result = true;
 
 		mMgnColor = mclr;
@@ -1281,6 +1333,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 			}
 		}
 		mAscRotate = ascrt;
+		mPicScale = pic_scale;
 
 		mBackPaint.setColor(mMgnColor);
 		mCenterPaint.setColor(mCenColor);
@@ -1350,9 +1403,11 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		return result;
 	}
 
-	public void setPicturePath(String path, ImageManager imagemgr, String user, String pass) {
+	public void setPath(String path, ImageManager imagemgr, String user, String pass) {
+		boolean debug = false;
+		if(debug) {Log.d("MyTextView", "setPicturePath: 開始します. path=" + path);}
 		// 挿絵のパス
-		// mPicturePath = path;
+		mFilePath = path;
 		mImageMgr = imagemgr;
 		mUser = user;
 		mPass = pass;
@@ -2380,16 +2435,23 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	}
 
 	public boolean prevPage() {
-		int page = getCurrentPage(PAGEBASE_LEFT);
+		boolean debug = false;
+		if (debug) {Log.d("MyTextView", "prevPage: 開始します.");}
+		int page = getCurrentPage(PAGEBASE_RIGHT);
+		if (debug) {Log.d("MyTextView", "prevPage: page=" + page);}
 
 		// 前ページへ
 		if (page <= 0) {
+			if (debug) {Log.d("MyTextView", "prevPage: 先頭ページです.");}
 			// 先頭ページかつ分割表示中かつ2ページ目でないなら前ページはない
 			// 先頭ページかつ分割表示でないなら前ページはない
 			if (mDispMode == DEF.DISPMODE_TX_SERIAL) {
+				if (debug) {Log.d("MyTextView", "prevPage: 表示モードがスクロールです.");}
 				// 端までスクロール開始
 				mMoveToLeft = mDrawWidthSum * -1 - mMgnRight + mDispWidth;
 				if (mMoveToLeft < mDrawLeft) {
+					if (debug) {Log.d("MyTextView", "prevPage: まだスクロールできます.");}
+					if (debug) {Log.d("MyTextView", "prevPage: mMoveToLeft=" + mMoveToLeft + ", mDrawLeft=" + mDrawLeft);}
 					// まだ端ではないとき
 					startPageMove();
 					return true;
@@ -2757,7 +2819,6 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 					update(false);
 				}
 			}
-			;
 		}
 	}
 

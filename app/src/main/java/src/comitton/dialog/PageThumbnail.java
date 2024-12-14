@@ -50,8 +50,9 @@ public class PageThumbnail extends Dialog implements OnTouchListener,
 		dlgWindow.setFlags(0, WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(0x00000000);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(0x00000000);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(android.R.color.transparent);
 
 		// 画面下に表示
 		WindowManager.LayoutParams wmlp = dlgWindow.getAttributes();

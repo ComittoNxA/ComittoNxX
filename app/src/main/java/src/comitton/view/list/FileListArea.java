@@ -256,7 +256,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 				}
 				else {
 					switch (fd.getState()) {
-						case -1:
+						case DEF.PAGENUMBER_UNREAD:
 							if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_EPUB) {
 								color = mBefColor;
 							}
@@ -264,7 +264,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 								color = mDirColor;
 							}
 							break;
-						case -2:
+						case DEF.PAGENUMBER_READ:
 							color = mAftColor;
 							break;
 						default:
@@ -577,7 +577,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			}
 			else {
 				switch (fd.getState()) {
-					case -1:
+					case DEF.PAGENUMBER_UNREAD:
 						if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_EPUB) {
 							color = mBefColor;
 						}
@@ -585,7 +585,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							color = mDirColor;
 						}
 						break;
-					case -2:
+					case DEF.PAGENUMBER_READ:
 						color = mAftColor;
 						break;
 					default:

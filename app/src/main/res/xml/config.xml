@@ -46,13 +46,6 @@
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
-            android:key="EpubSet"
-            android:title="Settings for Epub Viewer" >
-            <intent
-                android:targetClass="src.comitton.config.SetEpubActivity"
-                android:targetPackage="@string/application_id" />
-        </PreferenceScreen>
-        <PreferenceScreen
             android:key="ImTxDetailSet"
             android:title="Detail Settings for Image &amp; Text" >
             <intent

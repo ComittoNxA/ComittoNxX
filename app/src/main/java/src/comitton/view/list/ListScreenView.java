@@ -109,11 +109,11 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 		mTitleArea = new TitleArea(context, this);
 		mToolbarArea = new ToolbarArea(context, this);
 		mFileListArea = new FileListArea(context, this);
-		mDirListArea = new RecordListArea(context, AREATYPE_DIRLIST, RecordList.TYPE_DIRECTORY, res.getString(R.string.drTitle), this);
-		mServerListArea = new RecordListArea(context, AREATYPE_SERVERLIST, RecordList.TYPE_SERVER, res.getString(R.string.saTitle1), this);
-		mFavoListArea = new RecordListArea(context, AREATYPE_FAVOLIST, RecordList.TYPE_BOOKMARK, res.getString(R.string.bmTitle), this);
-		mHistListArea = new RecordListArea(context, AREATYPE_HISTLIST, RecordList.TYPE_HISTORY, res.getString(R.string.hsTitle), this);
-		mMenuListArea = new RecordListArea(context, AREATYPE_MENULIST, RecordList.TYPE_MENU, res.getString(R.string.listname05), this);
+		mDirListArea = new RecordListArea(context, RecordList.TYPE_DIRECTORY, res.getString(R.string.drTitle), this);
+		mServerListArea = new RecordListArea(context, RecordList.TYPE_SERVER, res.getString(R.string.saTitle1), this);
+		mFavoListArea = new RecordListArea(context, RecordList.TYPE_BOOKMARK, res.getString(R.string.bmTitle), this);
+		mHistListArea = new RecordListArea(context, RecordList.TYPE_HISTORY, res.getString(R.string.hsTitle), this);
+		mMenuListArea = new RecordListArea(context, RecordList.TYPE_MENU, res.getString(R.string.listname05), this);
 		mSelectorArea = new SelectorArea(context, this);
 		// mScrollerArea = new ScrollerArea(context, this);
 
@@ -404,7 +404,7 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			}
 
 			synchronized (surfaceHolder) {
-				draw(canvas, areatype, lockRect);
+				draw(canvas, lockRect);
 			}
 		} finally {
 			if (canvas != null)
@@ -413,7 +413,7 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 		return true;
 	}
 
-	public void draw(Canvas canvas, short areatype, Rect rc) {
+	public void draw(Canvas canvas, Rect rc) {
 		long listPosition = mListPosition;
 		int stListIndex = getIntHigh(listPosition);
 		int stListOffsetX = getIntLow(listPosition);

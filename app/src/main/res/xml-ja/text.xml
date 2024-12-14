@@ -26,7 +26,7 @@
             android:summary="dummy"
             android:title="用紙選択" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="表示関連の設定(＊はイメージ/Epubと共通)" >
+    <PreferenceCategory android:title="表示関連の設定(＊はイメージと共通)" >
         <ListPreference
             android:defaultValue="0"
             android:dialogTitle="挿絵のサイズ"
@@ -102,7 +102,7 @@
             android:summary="dummy"
             android:title="時刻と充電表示＊" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="操作関連の設定(＊はイメージ/Epubと共通)" >
+    <PreferenceCategory android:title="操作関連の設定(＊はイメージと共通)" >
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="ConfirmBack"
@@ -180,7 +180,7 @@
             android:summary="チェックにより右キーが前ページの移動になります"
             android:title="左右キー操作の入替え＊" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="フォント設定(＊はEpubと共通)" >
+    <PreferenceCategory android:title="フォント設定" >
         <ListPreference
             android:defaultValue=""
             android:dialogTitle="フォント選択 ([sdcard]/comittona/font/から選択)"
@@ -200,7 +200,7 @@
             android:key="txFontBodySp"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="本文のフォントサイズ＊" />
+            android:title="本文のフォントサイズ" />
         <src.comitton.config.TextFontRubiSeekbar
             android:dialogMessage="ルビのフォントサイズを選択"
             android:dialogTitle="ルビのフォントサイズ"
@@ -214,7 +214,7 @@
             android:key="txFontInfoSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="ヘッダ/フッタのフォントサイズ＊" />
+            android:title="ヘッダ/フッタのフォントサイズ" />
         <src.comitton.config.TextSpaceWSeekbar
             android:dialogMessage="行間のサイズを選択"
             android:dialogTitle="行間のサイズ"
@@ -235,14 +235,14 @@
             android:key="txMarginW"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="左右の余白サイズ＊" />
+            android:title="左右の余白サイズ" />
         <src.comitton.config.TextMarginHSeekbar
             android:dialogMessage="上下の余白サイズを選択"
             android:dialogTitle="上下の余白サイズ"
             android:key="txMarginH"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="上下の余白サイズ＊" />
+            android:title="上下の余白サイズ" />
     </PreferenceCategory>
     <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen

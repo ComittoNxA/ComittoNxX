@@ -6,8 +6,11 @@ plugins {
 def packageName = "jp.dip.muracoro.comittonx"
 // 今更だけどComittoNxA-v2って名前にすればよかった
 def applicationName = "ComittoNxX"
+def abiAppName = applicationName
+def abiName = ""
+
 def versionMajor = 2
-def versionMinor = 1
+def versionMinor = 2
 def versionPatch = 0
 
 // 画像フォーマットサポート設定
@@ -26,22 +29,20 @@ android {
     namespace packageName
     compileSdk 35 // Android 15("Vanilla Ice Cream")
 
+    // 28にすると -lpthread が勝手に追加されてビルドできない時がある
     // C言語の書式でビルドエラーが発生する場合はndkバージョンを24まで下げること
+    //ndkVersion "28.0.12674087"
     ndkVersion "27.0.12077973"
     //ndkVersion "24.0.8215888"
 
 
     defaultConfig {
         applicationId packageName
-        minSdk 21 // Android 5.0("Lollipop")
-        // targetSdk11以降でSMBまわりでNetworkOnMainThreadExceptionエラー発生の可能性
-        // targetSdk29はrequestLegacyExternalStorageをセットできる
-        // targetSdk29から35に上げるとNetworkOnMainThreadExceptionエラーが発生しなくなったけど対処しなくていいんだっけ？
         targetSdk 35 // Android 15("Vanilla Ice Cream")
+        minSdk 21 // Android 5.0("Lollipop")
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-
 
         ndk {
             externalNativeBuild {
@@ -50,6 +51,31 @@ android {
                 }
             }
         }
+
+        splits {
+            // ABI 毎の複数の APK の設定.
+            abi {
+                // Releaseビルドの時だけ ABI 毎の複数の APK をビルドする.
+                //enable gradle.startParameter.taskNames.any { it.contains("Release") }
+                // 無効にする
+                enable false
+
+                // デフォルトではすべての ABI が含まれているため、
+                // reset() と include を使用して、armeabi-v7a、x86、arm64-v8a、x86_64 の APK のみが必要であることを指定する.
+
+                // Gradle が APK を作成する必要がある ABI のリストを none にリセットする.
+                reset()
+
+                // Gradle が APK を作成する ABI のリストを指定します。
+                include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+
+                // すべての ABI を含むユニバーサル APK を生成する.
+                universalApk true
+            }
+        }
+
+        // map for the version code
+        project.ext.versionCodes = ['armeabi': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'mips': 5, 'mips64': 6, 'x86': 8, 'x86_64': 9].withDefault { 0 }
 
         // BuildConfig.java に値を定義する
         buildConfigField("String", "WITH_JPEG", "\"" + WITH_JPEG + "\"")
@@ -80,8 +106,35 @@ android {
     }
     applicationVariants.all { variant ->
         variant.resValue 'string', 'application_id', variant.applicationId
-        variant.outputs.all {
-            outputFileName = "${applicationName}_${versionName}.apk"
+        if (variant.buildType.name == "release") {
+            variant.outputs.all {
+                outputFileName = "${applicationName}_${versionName}.apk"
+            }
+            variant.outputs.each { output ->
+                // enable false なので実行されない
+
+                // ABI 毎にバージョンコードを変更するとABIのAPKにユニバーサルAPKが上書きできなくなるからコメントアウト
+                //def abiVersionCode = project.ext.versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI))
+                //output.versionCodeOverride = abiVersionCode * 1000000 + variant.versionCode
+                //print "ABI " + output.getFilter(com.android.build.OutputFile.ABI) + " \t-> VersionCode = " + output.versionCode + "\n"
+
+                // ABI 毎に APK のファイル名を変える
+                if (output.getFilter(com.android.build.OutputFile.ABI) == null) {
+                    output.outputFileName = applicationName + "-" + versionName + ".apk"
+                } else {
+                    abiName = output.getFilter(com.android.build.OutputFile.ABI)
+                    abiAppName = "${applicationName}[${abiName}]"
+                    output.outputFileName = "${abiAppName}-${versionName}.apk"
+                }
+            }
+        } else if (variant.buildType.name == "debug"){
+            variant.outputs.all {
+                outputFileName = "${applicationName}[debug]-${versionName}.apk"
+            }
+        } else {
+            variant.outputs.all {
+                outputFileName = "${applicationName}[${variant.buildType.name}]-${versionName}.apk"
+            }
         }
     }
     buildTypes {
@@ -89,6 +142,10 @@ android {
             ndk {
                 abiFilters "arm64-v8a", "armeabi-v7a", "x86_64", "x86"
             }
+            resValue("string", "app_name", applicationName)
+            resValue("string", "app_launch_name", applicationName)
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx")
+            manifestPlaceholders = [icon: "@drawable/comittonxx"];
             debuggable false
             minifyEnabled true
             shrinkResources true
@@ -99,16 +156,94 @@ android {
             ndk {
                 abiFilters "arm64-v8a"
             }
+            //versionNameSuffix "-debug"
             applicationIdSuffix ".debug"
-            versionNameSuffix "debug"
+            resValue("string", "app_name", "${applicationName}[debug]")
+            resValue("string", "app_launch_name", "${applicationName}[debug]")
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_debug")
+            manifestPlaceholders = [icon: "@drawable/comittonxx_debug"];
             debuggable true
             minifyEnabled false
+        }
+        debug32 {
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+            //versionNameSuffix "-debug"
+            applicationIdSuffix ".debug"
+            resValue("string", "app_name", "${applicationName}[debug]")
+            resValue("string", "app_launch_name", "${applicationName}[debug]")
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_debug")
+            manifestPlaceholders = [icon: "@drawable/comittonxx_debug"];
+            debuggable true
+            minifyEnabled false
+        }
+        arm64 {
+            ndk {
+                abiFilters "arm64-v8a"
+            }
+            applicationIdSuffix ".arm64"
+            resValue("string", "app_name", "${applicationName}[arm64]")
+            resValue("string", "app_launch_name", "${applicationName}[arm64]")
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_arm64")
+            manifestPlaceholders = [icon: "@drawable/comittonxx_arm64"];
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        arm32 {
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+            applicationIdSuffix "arm32"
+            resValue("string", "app_name", "${applicationName}[arm32]")
+            resValue("string", "app_launch_name", "${applicationName}[arm32]")
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_arm32")
+            manifestPlaceholders = [icon: "@drawable/comittonxx_arm32"];
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        x64 {
+            ndk {
+                abiFilters "x86_64"
+            }
+            applicationIdSuffix ".x64"
+            resValue("string", "app_name", "${applicationName}[x64]")
+            resValue("string", "app_launch_name", "${applicationName}[x64]")
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_x64")
+            manifestPlaceholders = [icon: "@drawable/comittonxx_x64"];
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        x86 {
+            ndk {
+                abiFilters "x86"
+            }
+            applicationIdSuffix ".x86"
+            resValue("string", "app_name", "${applicationName}[x86]")
+            resValue("string", "app_launch_name", "${applicationName}[x86]")
+            buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_x86")
+            manifestPlaceholders = [icon: "@drawable/comittonxx_x86"];
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     externalNativeBuild {
         cmake {
             path file('src/main/jni/CMakeLists.txt')
-            version '3.22.1'
+            version '3.31.0'
+            //version '3.22.1'
         }
     }
     productFlavors {
@@ -136,8 +271,7 @@ dependencies {
     // SMB接続用ライブラリjcifs(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
     implementation 'org.codelibs:jcifs:2.1.39'
 
-    // Epub表示用ライブラリepub4j
-    implementation('io.documentnode:epub4j-core:4.2.1') {
-        exclude group: 'xmlpull'
-    }
+    // 文字コード判定用ライブラリ
+    // 2.5.0と2.0.4は同時リリースのため、Andriod5でも使用できる2.0.4を選択する
+    implementation 'com.github.albfernandez:juniversalchardet:2.0.4'
 }

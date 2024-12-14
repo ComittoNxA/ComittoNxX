@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 
 import jp.dip.muracoro.comittonx.R;
 
+import src.comitton.common.DEF;
 import src.comitton.data.ServerData;
 import src.comitton.data.RecordItem;
 
@@ -13,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Environment;
+import android.util.Log;
 
 public class ServerSelect {
 	public static final int MAX_SERVER = 10;
@@ -213,6 +215,9 @@ public class ServerSelect {
 
 	// サーバパスの設定
 	public void setPath(String path) {
+		boolean debug = false;
+		if (debug) {Log.d("ServerSelect", "setPath: 開始します. path=" + path);}
+		if (debug) {DEF.StackTrace("ServerSelect", "setPath:");}
 		if (mSelect == INDEX_LOCAL) {
 			// ローカル名
 			mLocalPath = path;
@@ -241,7 +246,6 @@ public class ServerSelect {
 			return "";
 		}
 		else{
-			// TODO テストサーバ名
 			return "smb://" + mServer[index].getHost();
 //			return "http://" + mServer[index].getHost();
 		}

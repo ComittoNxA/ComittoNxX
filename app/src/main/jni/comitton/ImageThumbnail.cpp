@@ -79,7 +79,9 @@ int ThumbnailAlloc(long long id, int pagesize, int pagenum, int imagenum)
 	gThumbnailId = id;			// 新しいIDを保持
 
 	if (gThPageNum != pagenum || gThPageSize != pagesize) {
+#ifdef DEBUG
 		LOGD("ThumbnailInitialize : Alloc pagenum=%d, pagesize=%d", pagenum, pagesize);
+#endif
 		// メモリサイズの設定が変わった場合は再確保
 		ThumbnailFree(id);
 
@@ -118,7 +120,9 @@ int ThumbnailAlloc(long long id, int pagesize, int pagenum, int imagenum)
 
 	// ポインタ配列初期化
 	memset(gThBlockMng, 0xFF, sizeof(THUMBBLOCK) * gThBlockNum);
+#ifdef DEBUG
 	LOGD("ThumbnailInitialize : pagenum=%d, pagesize=%d, blocknum=%d", pagenum, pagesize, gThBlockNum);
+#endif
 	gThUseBlockNum = 0;	// 使用ブロック数
 
 	// イメージ管理領域
@@ -139,8 +143,9 @@ int ThumbnailAlloc(long long id, int pagesize, int pagenum, int imagenum)
 	}
 
 	memset(gThImageMng, 0xFF, sizeof(THUMBINFO) * gThImageNum);
+#ifdef DEBUG
 	LOGD("ThumbnailInitialize : imagenum=%d", imagenum);
-
+#endif
 ERROREND:
 	// 処理途中でエラー発生の場合は解放する
 	if (ret != 0){
@@ -570,23 +575,31 @@ void ThumbnailFree(long long id)
 
 	// ページバッファの解放
 	if (gThPageBuff != NULL) {
+#ifdef DEBUG
 		LOGD("ThumbnailFree : gThPageNum=%d", gThPageNum);
+#endif
 		for (int i = 0 ; i < gThPageNum ; i ++) {
 			if (gThPageBuff[i] != NULL ) {
+#ifdef DEBUG
 				LOGD("ThumbnailFree : gThPageBuff[%d] free", i);
+#endif
 				free (gThPageBuff[i]);
 			}
 		}	
 
 		// アドレス保存配列解放
+#ifdef DEBUG
 		LOGD("ThumbnailFree : gThumbnailPages free");
+#endif
 		free (gThPageBuff);
 		gThPageBuff = NULL;
 	}
 
 	// ブロック管理の解放
 	if (gThBlockMng != NULL) {
-		LOGD("ThumbnailFree : gThBlockMng free");
+#ifdef DEBUG
+        LOGD("ThumbnailFree : gThBlockMng free");
+#endif
 		free (gThBlockMng);
 		gThBlockMng = NULL;
 	}
@@ -599,7 +612,9 @@ void ThumbnailFree(long long id)
 
 	// サムネイル解放
 	if (gThImageMng != NULL) {
+#ifdef DEBUG
 		LOGD("ThumbnailFree : gThumbnailMng != NULL");
+#endif
 		// 解放
 		free (gThImageMng);
 		gThImageMng = NULL;

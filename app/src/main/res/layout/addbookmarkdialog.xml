@@ -44,7 +44,7 @@
 			android:layout_marginRight="10sp"
 			android:gravity="fill_horizontal"
 			android:hint=""
-			android:maxLength="20"
+			android:maxLength="40"
 			android:scrollHorizontally="true"
 			android:singleLine="true" />
 

@@ -2,7 +2,19 @@ package src.comitton.common;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.net.Uri;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
+import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import jp.dip.muracoro.comittonx.R;
 import jp.dip.muracoro.comittonx.BuildConfig;
 
@@ -10,33 +22,30 @@ public class MODULE {
 	public static String aboutTitle(Context context) {
 		return context.getString(R.string.app_name);
 	}
-	public static final String ABOUT_INFO =
-			  "		Build date :		" + DEF.BUILD_DATE + "<br>"
-			+ "		Version :				" + BuildConfig.VERSION_NAME + "<br>"
-			+ "		License :				<a href=\"https://raw.githubusercontent.com/ComittoNxA/ComittoNxX/master/LICENSE\">Unlicense license</a><br><br>"
-			+ "Using Library<br><br>"
-			+ "		jcifs (codelibs) 2.1.39 :<br>"
-			+ "				License :		<a href=\"https://raw.githubusercontent.com/codelibs/jcifs/master/LICENSE\">LGPL v2.1</a><br><br>"
-			+ "		unrar 7.1.1 :<br>"
-			+ "				License :		<a href=\"https://raw.githubusercontent.com/pmachapman/unrar/master/license.txt\">unRAR restriction</a><br><br>"
-			+ "		dav1d 1.5.0 :<br>"
-			+ "				License :		<a href=\"https://raw.githubusercontent.com/videolan/dav1d/master/COPYING\">BSD-2-Clause</a><br><br>"
-			+ "		libavif 1.1.1 :<br>"
-			+ "				License :		<a href=\"https://raw.githubusercontent.com/AOMediaCodec/libavif/main/LICENSE\">BSD License</a><br><br>"
- 		    + "		libjxl v0.11.1 :<br>"
-		    + "				License :		<a href=\"https://raw.githubusercontent.com/libjxl/libjxl/refs/heads/main/LICENSE\">BSD-3-Clause</a><br><br>"
-			+ "		epub4j 4.2.0 :<br>"
-			+ "				License :		<a href=\"https://raw.githubusercontent.com/documentnode/epub4j/main/LICENSE\">ASL v2.0</a><br><br>"
-			// 以下利用を終了したライブラリ
-			//+ " 		libjpg-turbo 2.1.91 :<br>"
-			//+ "				BSD-3-Clause, IJG<br>"
-			//+ "		libpng 1.6.43 :<br>"
-			//+ "				libpng License<br><br>"
-			//+ "		libwebp 1.4.0 :<br>"
-			//+ "				BSD-3-Clause<br><br>"
-			//+ "		AndroidSVG 1.4 :<br>"
-			//+ "				ASL v2.0<br><br>"
-			;
+
+	public static String aboutText(Context context) {
+		Resources res = context.getResources();
+		String filename = res.getString(R.string.aboutText);
+		String text = loadHtml(context, filename);
+		text = text.replace("DEF.BUILD_DATE", DEF.BUILD_DATE).replace("BuildConfig.VERSION_NAME", BuildConfig.VERSION_NAME);
+		return text;
+	}
+
+	private static String loadHtml(Context context, String filename) {
+		AssetManager am = context.getAssets();
+		StringBuilder stringBuilder = new StringBuilder();
+		try {
+			InputStream inputStream = am.open(filename);
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				stringBuilder.append(line + "\n");
+			}
+		} catch (IOException e) {
+			Log.e("MODULE", "loadHtml: ファイルが読み込めませんでした. filename=" + filename);
+		}
+		return stringBuilder.toString();
+	}
 
 	public static boolean isFree() {
 		// false:有料版、true:無料版

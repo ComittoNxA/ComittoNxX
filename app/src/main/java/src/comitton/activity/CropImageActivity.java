@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +31,7 @@ import src.comitton.view.image.CropImageView;
 import src.comitton.data.FileData;
 
 
-public class CropImageActivity extends Activity implements Runnable, TextWatcher, CropImageView.CropCallback{
+public class CropImageActivity extends AppCompatActivity implements Runnable, TextWatcher, CropImageView.CropCallback{
     private String mFile;
     private String mPath;
     private String mUser;
@@ -49,23 +51,25 @@ public class CropImageActivity extends Activity implements Runnable, TextWatcher
      */
     @Override
     public void run() {
+        boolean debug = false;
         Message message = new Message();
         message.what = DEF.HMSG_ERROR;
         ImageManager imageMgr = null;
         if(mCropPath == null) {
             imageMgr = new ImageManager(this, mPath, mFile, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, mCharset, true, ImageManager.OPENMODE_THUMBSORT, 1);
             imageMgr.LoadImageList(0, 0, 0);
-            mCropPath = imageMgr.decompFile(0, "croptmp");
+            mCropPath = imageMgr.decompFile(0, null);
         }
         if(mCropPath != null) {
             try {
-                Log.d("CropImageActivity", "run: イメージファイルを開きます. mUri=" + mPath + ", mFile=" + mFile);
+                if(debug) {Log.d("CropImageActivity", "run: イメージファイルを開きます. mUri=" + mPath + ", mFile=" + mFile);}
+                if(debug) {Log.d("CropImageActivity", "run: mCropPath=" + mCropPath);}
                 mBitmap = ImageManager.GetBitmapFromPath(mCropPath);
                 if (mBitmap == null) {
                     Log.e("CropImageActivity", "run: ビットマップ取得に失敗しました.");
                 }
                 else {
-                    Log.e("CropImageActivity", "run: ビットマップ取得に成功しました.");
+                    if(debug) {Log.d("CropImageActivity", "run: ビットマップ取得に成功しました.");}
                     message.what = DEF.HMSG_LOAD_END;
                 }
                 if (mBitmap.getHeight() > 1000) {
@@ -138,7 +142,7 @@ public class CropImageActivity extends Activity implements Runnable, TextWatcher
         mCropImageView.setAspectRatio(mAspectRatio);
         mCropImageView.setCallback(this);
 
-        mProgress = new ProgressDialog(this);
+        mProgress = new ProgressDialog(this, R.style.MyDialog);
         mProgress.setIndeterminate(true);
         mProgress.setMessage("Loading...");
         mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);

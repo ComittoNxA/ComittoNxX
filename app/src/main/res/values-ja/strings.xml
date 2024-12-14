@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- build.gradle から上書きするためにコメントアウト
     <string name="app_name">ComittoNxX</string>
     <string name="app_launch_name">ComittoNxX</string>
+    -->
     <string name="noticeText">history-ja.html</string>
+    <string name="aboutText">about.html</string>
     <string name="topMenu">カスタマイズメニュー</string>
     <string name="tguide00">画面方向切替</string>
     <string name="tguide01">余白削除</string>
@@ -42,6 +45,9 @@
     <string name="picsize02">元画像サイズの3倍</string>
     <string name="picsize03">元画像サイズの4倍</string>
     <string name="picsize04">画面サイズに拡大</string>
+    <string name="picsize05">画面サイズに拡大(余白無視)</string>
+    <string name="picsize06">画面サイズに拡大(見開き対応)</string>
+    <string name="picsize07">画面サイズに拡大(見開き対応:余白無視)</string>
     <string name="ascmode00">縦表示</string>
     <string name="ascmode01">横表示(回転)</string>
     <string name="ascmode02">縦/横併用</string>
@@ -166,6 +172,7 @@
     <string name="svUserHist">domain;user</string>
     <string name="svPassHist"></string>
     <string name="svNotFound">指定されたサーバは登録されていません。</string>
+    <string name="resetLocal">保存済みのフォルダの場所をリセットします。</string>
     <string name="psAdd100">+100</string>
     <string name="psAdd10">+10</string>
     <string name="psAdd1">+1</string>
@@ -177,7 +184,7 @@
     <string name="btnSearch">検索</string>
     <string name="btnApply">適用</string>
     <string name="btnRevert">戻す</string>
-    <string name="btnCancel">Cancel</string>
+    <string name="btnCancel">キャンセル</string>
     <string name="opLabel">タップのパターンを選択してください。\nメニューの「操作確認」で確認できます。</string>
     <string name="opReverse">反転する</string>
     <string name="opCheck">確認</string>
@@ -209,6 +216,7 @@
     <string name="noticeTitle">ComittoNxXについて</string>
     <string name="aboutDonate">寄付Ver.</string>
     <string name="aboutOK">OK</string>
+    <string name="aboutSource">ソースダウンロードページ</string>
     <string name="addBmTitle">ブックマーク追加</string>
     <string name="addBmName">ブックマーク名</string>
     <string name="addBmOK">OK</string>
@@ -249,9 +257,11 @@
     <string name="bm01">名前の変更</string>
     <string name="bm02">ブックマークを削除</string>
     <string name="bmTitle">ブックマーク一覧</string>
+    <string name="bmNotFound">ブックマークはありません。</string>
     <string name="bmSort0">Path</string>
     <string name="bmSort1">Name</string>
     <string name="bmSort2">Date</string>
+    <string name="ChapterNotFound">見出しはありません。</string>
     <string name="drTitle">ディレクトリ一覧</string>
     <string name="hsTitle">履歴一覧</string>
     <string name="flSort1">Name(D)</string>
@@ -471,6 +481,7 @@
     <string name="cShadow">中央に影を表示</string>
     <string name="setThumb">サムネイルに設定</string>
     <string name="setThumbCropped">範囲選択してサムネイルに設定</string>
+    <string name="ThumbConfigured">サムネイルに設定しました。</string>
 
     <string name="loupesize00">通常</string>
     <string name="loupesize01">大</string>

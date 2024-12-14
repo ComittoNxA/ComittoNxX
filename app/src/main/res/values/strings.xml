@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- build.gradle から上書きするためにコメントアウト
     <string name="app_name">ComittoNxX</string>
     <string name="app_launch_name">ComittoNxX</string>
+    -->
     <string name="noticeText">history.html</string>
+    <string name="aboutText">about.html</string>
     <string name="topMenu">Customized Menu</string>
     <string name="tguide00">Screen direction</string>
     <string name="tguide01">Cut Margin</string>
@@ -42,6 +45,9 @@
     <string name="picsize02">Original x2</string>
     <string name="picsize03">Original x3</string>
     <string name="picsize04">Fit Screen</string>
+    <string name="picsize05">Fit Screen(Ignore margins)</string>
+    <string name="picsize06">Fit Screen(for Spread)</string>
+    <string name="picsize07">Fit Screen(for Spread, Ignore margins)</string>
     <string name="ascmode00">Vertical</string>
     <string name="ascmode01">Horizontal</string>
     <string name="ascmode02">Blend</string>
@@ -166,6 +172,7 @@
     <string name="svUserHist">domain;user</string>
     <string name="svPassHist"></string>
     <string name="svNotFound">The specified server is not registered.</string>
+    <string name="resetLocal">Resets the saved folder location.</string>
     <string name="psAdd100">+100</string>
     <string name="psAdd10">+10</string>
     <string name="psAdd1">+1</string>
@@ -209,6 +216,7 @@
     <string name="noticeTitle">Notes of ComittoNxX</string>
     <string name="aboutDonate">Donate</string>
     <string name="aboutOK">OK</string>
+    <string name="aboutSource">Source Download Page</string>
     <string name="addBmTitle">Add Favorite</string>
     <string name="addBmName">Favorite Name</string>
     <string name="addBmOK">OK</string>
@@ -249,9 +257,11 @@
     <string name="bm01">Edit Name</string>
     <string name="bm02">Delete Favorite</string>
     <string name="bmTitle">Favorite List</string>
+    <string name="bmNotFound">There are no bookmarks.</string>
     <string name="bmSort0">Path</string>
     <string name="bmSort1">Name</string>
     <string name="bmSort2">Date</string>
+    <string name="ChapterNotFound">There are no chapters.</string>
     <string name="drTitle">Directory List</string>
     <string name="hsTitle">History List</string>
     <string name="flSort1">Name(D)</string>
@@ -471,6 +481,7 @@
     <string name="cShadow">Center Shadow</string>
     <string name="setThumb">Set as thumbnail</string>
     <string name="setThumbCropped">Crop and set as thumbnail</string>
+    <string name="ThumbConfigured">Set as thumbnail.</string>
 
     <string name="loupesize00">0</string>
     <string name="loupesize01">+1</string>

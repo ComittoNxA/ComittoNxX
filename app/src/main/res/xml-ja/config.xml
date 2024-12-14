@@ -52,14 +52,6 @@
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
-            android:key="EpubSet"
-            android:title="Epub表示画面の設定"
-            android:summary="Epub表示画面の起動時の表示や操作を設定する">
-            <intent
-                android:targetClass="src.comitton.config.SetEpubActivity"
-                android:targetPackage="@string/application_id" />
-        </PreferenceScreen>
-        <PreferenceScreen
             android:key="ImageTextDetailSet"
             android:title="共通の表示詳細設定"
             android:summary="イメージ／テキスト表示画面で共通なパラメータを設定する">

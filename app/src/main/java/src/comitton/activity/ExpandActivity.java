@@ -9,9 +9,7 @@ import java.util.Comparator;
 import jp.dip.muracoro.comittonx.R;
 
 import src.comitton.common.DEF;
-import src.comitton.common.ImageAccess;
 import src.comitton.config.SetCommonActivity;
-import src.comitton.config.SetConfigActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
@@ -24,10 +22,12 @@ import src.comitton.view.ListItemView;
 import src.comitton.view.TitleView;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,9 +35,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
+import android.database.Cursor;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -60,7 +59,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class ExpandActivity extends ListActivity implements Handler.Callback, OnScrollListener {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ExpandActivity extends AppCompatActivity implements Handler.Callback, OnScrollListener {
 	private static final int OPERATE_NONREAD = 0;
 	private static final int OPERATE_READ = 1;
 	private static final int OPERATE_READHERE = 2;
@@ -136,6 +137,8 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 	private String mOpenLastFile;
 
 	private ExpandActivity mActivity = null;
+
+	protected ListView getListView() { return findViewById( android.R.id.list ); }
 
 	/** Called when the activity is first created. */
 	@Override
@@ -222,6 +225,35 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		mOpenLastFile = null;
 
 		loadListView();
+
+		mListView.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick( AdapterView<?> parent, View view, int position, long id ) {
+				ArrayList<FileData> files = mFileList;
+
+				if (position < files.size()) {
+					FileData file = (FileData) files.get(position);
+					String name = file.getName();
+					int type = file.getType();
+
+					freeListView();
+
+					// 現在のパスを設定
+					mSelectIndex = position;
+					mSelectPos = 0;
+
+					if (type == FileData.FILETYPE_TXT) {
+						// TXTファイル表示
+						openTextFile(name);
+					}
+					else {
+						// イメージファイル表示
+						openImageFile(name);
+					}
+				}
+			}
+		} );
+		//mListView.setAdapter( adapter );
 	}
 
 	public class ZipLoad implements Runnable {
@@ -371,6 +403,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		}
 	}
 
+	/*
 	@Override
 	// 選択イベント
 	protected void onListItemClick(ListView listView, View v, int position, long id) {
@@ -393,18 +426,20 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 //			if (lvi != null) {
 //				mSelectPos = v.getTop();
 //			}
-			if (type != FileData.FILETYPE_TXT) {
-				// イメージファイル表示
-				openImageFile(name);
-			}
-			else {
+			if (type == FileData.FILETYPE_EPUB || type == FileData.FILETYPE_TXT) {
 				// TXTファイル表示
 				openTextFile(name);
 			}
+			else {
+				// イメージファイル表示
+				openImageFile(name);
+			}
 		}
 	}
+	*/
 
 	private void openImageFile(String image) {
+		Toast.makeText(this, image, Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(ExpandActivity.this, ImageActivity.class);
 		intent.putExtra("Server", mServer);
 		intent.putExtra("Uri", mUri);
@@ -421,6 +456,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 	}
 
 	private void openTextFile(String text, int page) {
+		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 		Intent intent;
 		intent = new Intent(ExpandActivity.this, TextActivity.class);
 		intent.putExtra("Server", mServer);
@@ -486,7 +522,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 			final FileData filedata = files.get(position);
 			final int datapos = position;
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ExpandActivity.this, R.style.MyDialog);
 
 			if (filedata == null) {
 				// データがない
@@ -495,7 +531,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 
 			CharSequence[] items;
 
-			builder.setTitle(res.getString(R.string.opeTitle));
+			dialogBuilder.setTitle(res.getString(R.string.opeTitle));
 			String ope0 = res.getString(R.string.ope00);	// 未読設定
 			String ope1 = res.getString(R.string.ope01);	// 既読設定
 			String ope6 = res.getString(R.string.ope06);	// ここまで読んだ
@@ -547,7 +583,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 				i++;
 			}
 
-			builder.setItems(items, new DialogInterface.OnClickListener() {
+			dialogBuilder.setItems(items, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int item) {
 					if (item < 0 && 2 < item) {
 						// 選択インデックスが範囲外
@@ -595,7 +631,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 					}
 				}
 			});
-			AlertDialog alert = builder.create();
+			AlertDialog alert = dialogBuilder.create();
 			alert.show();
 			return true;
 		}
@@ -657,6 +693,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 
 	// Bitmap読込のスレッドからの通知取得
 	public boolean handleMessage(Message msg) {
+		boolean debug = false;
 		switch (msg.what) {
 			case DEF.HMSG_PROGRESS: {
 				// 読込中の表示
@@ -684,7 +721,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 				return true;
 			}
 			case DEF.HMSG_READ_END: {
-				Log.d("ExpandActivity", "handleMessage: DEF.HMSG_READ_END. ImageManager の読み込みが終了しました.");
+				if(debug) {Log.d("ExpandActivity", "handleMessage: DEF.HMSG_READ_END. ImageManager の読み込みが終了しました.");}
 				// 読込中の表示
 				if (mReadDialog != null) {
 					mReadDialog.dismiss();
@@ -705,7 +742,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 					mText = null;
 				}
 				else if (mOpenOperation != CloseDialog.CLICK_CLOSE) {
-					Log.d("ExpandActivity", "handleMessage: mOpenOperation != CloseDialog.CLICK_CLOSE");
+					if(debug) {Log.d("ExpandActivity", "handleMessage: mOpenOperation != CloseDialog.CLICK_CLOSE");}
 					// 次のファイル検索
 					FileData nextfile = searchNextFile(mFileList, mOpenLastFile, mOpenOperation);
 					if (nextfile != null && nextfile.getName().length() > 0) {
@@ -728,16 +765,18 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 						}
 						if (nextfile != null) {
 							// 次のファイルがあれば開く
-							Toast.makeText(this, nextfile.getName(), Toast.LENGTH_SHORT).show();
 							openTextFile(nextfile.getName());
 						}
 					}
 				}
 				else {
-					Log.d("ExpandActivity", "handleMessage: mOpenOperation == CloseDialog.CLICK_CLOSE");
-					// サムネイル読み込み
-					loadThumbnail();
-					mThumbnailLoader.setDispRange(mFirstIndex, mLastIndex);
+					if(debug) {Log.d("ExpandActivity", "handleMessage: mOpenOperation == CloseDialog.CLICK_CLOSE");}
+					// 初回表示またはビュワー終了
+					if (mThumbnail == true) {
+						// 表示モードがサムネイルありならサムネイル読み込み
+						loadThumbnail();
+						mThumbnailLoader.setDispRange(mFirstIndex, mLastIndex);
+					}
 				}
 				break;
 			}
@@ -763,7 +802,8 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 	}
 
 	private void loadListView() {
-		Log.d("ExpandActivity", "loadListView 開始します.");
+		boolean debug = false;
+		if(debug) {Log.d("ExpandActivity", "loadListView 開始します.");}
 		Resources res = getResources();
 		mReadingMsg = new String[4];
 		mReadingMsg[0] = res.getString(R.string.reading);
@@ -772,7 +812,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		mReadingMsg[3] = res.getString(R.string.download);
 
 		// プログレスダイアログ準備
-		mReadDialog = new ProgressDialog(this);
+		mReadDialog = new ProgressDialog(this, R.style.MyDialog);
 		mReadDialog.setMessage(mReadingMsg[0] + " (0)");
 		mReadDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		mReadDialog.setCancelable(true);
@@ -791,7 +831,7 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		mZipLoad = new ZipLoad(mHandler, this);
 		mZipThread = new Thread(mZipLoad);
 		mZipThread.start();
-		Log.d("ExpandActivity", "loadListView 終了します.");
+		if(debug) {Log.d("ExpandActivity", "loadListView: 終了します.");}
 	}
 
 	private void loadListViewAfter() {
@@ -809,17 +849,20 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		int imageCnt = 0;
 		for (int i = 0; i < filenum; i++) {
 			FileData data = new FileData();
-			int state = -1;
+			int state = DEF.PAGENUMBER_UNREAD;
 			if (files[i].type == FileData.FILETYPE_TXT) {
-				state = mSharedPreferences.getInt(DEF.createUrl(mUri + mPath + mFileName + files[i].name, mUser, mPass), -1);
+				state = (int)mSharedPreferences.getFloat(DEF.createUrl(mUri + mPath + mFileName + files[i].name, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+				if (state == DEF.PAGENUMBER_UNREAD) {
+					state = mSharedPreferences.getInt(DEF.createUrl(mUri + mPath + mFileName + files[i].name, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+				}
 			}
 			else {
-				if (mCurrentPage == -2) {
-					state = -2;
+				if (mCurrentPage == DEF.PAGENUMBER_READ) {
+					state = DEF.PAGENUMBER_READ;
 				}
 				else if (mCurrentPage >= 0) {
 					if (imageCnt < mCurrentPage) {
-						state = -2;
+						state = DEF.PAGENUMBER_READ;
 					}
 				}
 			}
@@ -837,7 +880,8 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 			}
 		}
 		mFileListAdapter = new FileListAdapter(this, R.layout.listitem, mFileList);
-		setListAdapter(mFileListAdapter);
+		//setListAdapter(mFileListAdapter);
+		mListView.setAdapter(mFileListAdapter);
 		if (mSelectIndex >= mFileList.size()) {
 			mSelectIndex = mFileList.size() - 1;
 			mSelectPos = 0;
@@ -864,17 +908,20 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 		for (int i = 0; i < files.size() ; i++) {
 			FileData data = files.get(i);
 
-			int state = -1;
+			int state = DEF.PAGENUMBER_UNREAD;
 			if (data.getType() == FileData.FILETYPE_TXT) {
-				state = mSharedPreferences.getInt(DEF.createUrl(mUri + mPath + mFileName + data.getName(), mUser, mPass), -1);
+				state = (int)mSharedPreferences.getFloat(DEF.createUrl(mUri + mPath + mFileName + data.getName(), mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+				if (state == DEF.PAGENUMBER_UNREAD) {
+					state = mSharedPreferences.getInt(DEF.createUrl(mUri + mPath + mFileName + data.getName(), mUser, mPass), DEF.PAGENUMBER_UNREAD);
+				}
 			}
 			else {
-				if (mCurrentPage == -2) {
-					state = -2;
+				if (mCurrentPage == DEF.PAGENUMBER_READ) {
+					state = DEF.PAGENUMBER_READ;
 				}
 				else if (mCurrentPage >= 0) {
 					if (imageCnt < mCurrentPage) {
-						state = -2;
+						state = DEF.PAGENUMBER_READ;
 					}
 				}
 			}
@@ -898,7 +945,8 @@ public class ExpandActivity extends ListActivity implements Handler.Callback, On
 
 	// サムネイル読み込み
 	private void loadThumbnail() {
-		Log.d("ExpandActivity", "loadThumbnail: 開始します.");
+		boolean debug = false;
+		if(debug) {Log.d("ExpandActivity", "loadThumbnail: 開始します.");}
 		if (mThumbnail == false) {
 			return;
 		}

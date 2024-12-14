@@ -1,28 +1,27 @@
 package src.comitton.dialog;
 
+import jp.dip.muracoro.comittonx.BuildConfig;
 import src.comitton.common.DEF;
 import src.comitton.common.MODULE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.Uri;
-import android.os.Bundle;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
-import android.view.Gravity;
-import android.view.View;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
-import android.widget.Button;
+import android.webkit.WebViewClient;
+
 import jp.dip.muracoro.comittonx.R;
-import android.view.View.OnClickListener;
-import android.widget.TextView;
+
 
 @SuppressLint("NewApi")
 public class Information implements DialogInterface.OnDismissListener {
@@ -37,7 +36,7 @@ public class Information implements DialogInterface.OnDismissListener {
 
 	public void showNotice() {
 		if (mIsOpened == false) {
-			mDialog = (Dialog)new NoticeDialog(mContext);
+			mDialog = (Dialog)new NoticeDialog(mContext, R.style.MyDialog);
 
 			// ダイアログ終了通知を受け取る
 			mDialog.setOnDismissListener(this);
@@ -47,7 +46,7 @@ public class Information implements DialogInterface.OnDismissListener {
 
 	public void showAbout() {
 		if (mIsOpened == false) {
-			mDialog = (Dialog)new AboutDialog(mContext);
+			mDialog = (Dialog)new AboutDialog(mContext, R.style.MyDialog);
 			// ダイアログ終了通知を受け取る
 			mDialog.setOnDismissListener(this);
 			mDialog.show();
@@ -72,124 +71,81 @@ public class Information implements DialogInterface.OnDismissListener {
 		mIsOpened = false;
 	}
 
-	public class NoticeDialog extends Dialog implements OnClickListener {
-		private Button mBtnDonate;
-		private Button mBtnOk;
-		private WebView mWebView;
+	public class NoticeDialog extends AlertDialog {
 
-		public NoticeDialog(Context context) {
-			super(context);
+		public NoticeDialog(Context context, int themeResId) {
+			super(context, themeResId);
+			boolean debug = false;
+			if (debug) {Log.d("Information", "NoticeDialog: NoticeDialog: 開始します.");}
+
 			Window dlgWindow = getWindow();
-
 			// タイトルなし
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			//requestWindowFeature(Window.FEATURE_NO_TITLE);
+			// Activityを暗くしない
+			dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+			// 背景を透明に
+			dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
-			// 画面中央に表示
-			WindowManager.LayoutParams wmlp = dlgWindow.getAttributes();
-			wmlp.gravity = Gravity.CENTER;
-			dlgWindow.setAttributes(wmlp);
-			setCanceledOnTouchOutside(true);
+			String text = "";
+			setIcon(BuildConfig.icon);
+			setTitle(R.string.noticeTitle);
 
+			WebView webView = new WebView(mContext);
+			Resources res = mContext.getResources();
+			String filename = res.getString(R.string.noticeText);
+			webView.loadUrl("file:///android_asset/" + filename);
+			webView.setBackgroundColor(Color.TRANSPARENT);
+			setView(webView);
+			setButton(DialogInterface.BUTTON_POSITIVE, res.getString(R.string.btnOK),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							dismiss();
+						}
+					});
 			mIsOpened = true;
 		}
 
-		protected void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-
-			int layout;
-			if (MODULE.isFree()) {
-				layout = R.layout.notice_donate;
-			} else {
-				layout = R.layout.notice;
-			}
-			setContentView(layout);
-
-			Window win = getWindow();
-			WindowManager.LayoutParams lpCur = win.getAttributes();
-			WindowManager.LayoutParams lpNew = new WindowManager.LayoutParams();
-			lpNew.copyFrom(lpCur);
-			lpNew.width = WindowManager.LayoutParams.FILL_PARENT;
-			lpNew.height = WindowManager.LayoutParams.WRAP_CONTENT;
-			win.setAttributes(lpNew);
-
-			mWebView = (WebView) this.findViewById(R.id.web_text);
-			mBtnDonate = (Button) this.findViewById(R.id.btn_donate);
-			mBtnOk = (Button) this.findViewById(R.id.btn_ok);
-			mBtnOk.setOnClickListener(this);
-			if (mBtnDonate != null) {
-				mBtnDonate.setOnClickListener(this);
-			}
-
-			Resources res = mContext.getResources();
-			String localurl = res.getString(R.string.noticeText);
-			mWebView.loadUrl("file:///android_asset/" + localurl);
-		}
-
-		// ダイアログを表示してもIMMERSIVEが解除されない方法
-		// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
-		/**
-		 * An hack used to show the dialogs in Immersive Mode (that is with the NavBar hidden). To
-		 * obtain this, the method makes the dialog not focusable before showing it, change the UI
-		 * visibility of the window like the owner activity of the dialog and then (after showing it)
-		 * makes the dialog focusable again.
-		 */
-		@Override
-		public void show() {
-			// Set the dialog to not focusable.
-			getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-			// 設定をコピー
-			copySystemUiVisibility();
-
-			// Show the dialog with NavBar hidden.
-			super.show();
-
-			// Set the dialog to focusable again.
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-		}
-
-		/**
-		 * Copy the visibility of the Activity that has started the dialog {@link mActivity}. If the
-		 * activity is in Immersive mode the dialog will be in Immersive mode too and vice versa.
-		 */
-		@SuppressLint("NewApi")
-		private void copySystemUiVisibility() {
-		    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-		        getWindow().getDecorView().setSystemUiVisibility(
-		                mContext.getWindow().getDecorView().getSystemUiVisibility());
-		    }
-		}
-
-		@Override
-		public void onClick(View v) {
-			// クリックイベント
-			if (v == mBtnDonate) {
-				// 寄付版
-				MODULE.donate(mContext);
-			}
-			dismiss();
-		}
 	}
 
 	public class AboutDialog extends AlertDialog {
-		private WebView mWebView;
 
 		@SuppressWarnings("deprecation")
-		public AboutDialog(Context context) {
-			super(context);
-			setIcon(R.drawable.icon);
+		public AboutDialog(Context context, int themeResId) {
+			super(context, themeResId);
+			boolean debug = false;
+
+			Window dlgWindow = getWindow();
+			// タイトルなし
+			//requestWindowFeature(Window.FEATURE_NO_TITLE);
+			// Activityを暗くしない
+			dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+			// 背景を透明に
+			dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
+
+			setIcon(BuildConfig.icon);
 			setTitle(MODULE.aboutTitle(mContext));
-			TextView tv = new TextView(mContext);
-			tv.setText(Html.fromHtml(MODULE.ABOUT_INFO));
-			tv.setMovementMethod(LinkMovementMethod.getInstance());
-			setView(tv);
-			setButton(context.getResources().getString(MODULE.getAboutOk()),
+			WebView webView = new WebView(mContext);
+			Resources res = mContext.getResources();
+			webView.loadDataWithBaseURL(null,MODULE.aboutText(context),"text/html", "utf-8", null);
+			webView.setBackgroundColor(Color.TRANSPARENT);
+			webView.setWebViewClient(new WebViewClient() {
+				@Override
+				public boolean shouldOverrideUrlLoading(WebView view, String url) {
+					if(debug) {Log.d("Information", "AboutDialog: AboutDialog: url=" + url);}
+					// ブラウザ起動
+					view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+					return true;
+				}
+			});
+			setView(webView);
+			setButton(DialogInterface.BUTTON_POSITIVE, res.getString(MODULE.getAboutOk()),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
 							// 寄付
 							MODULE.donate(mContext);
 						}
 					});
-			setButton2("Source Download Page",
+			setButton(DialogInterface.BUTTON_NEUTRAL, res.getString(R.string.aboutSource),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
 							// ソースダウンロード

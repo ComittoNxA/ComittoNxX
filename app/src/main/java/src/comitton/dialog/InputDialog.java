@@ -47,8 +47,9 @@ public class InputDialog extends Dialog implements OnClickListener, OnDismissLis
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(0xC0000000);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(0xC0000000);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);

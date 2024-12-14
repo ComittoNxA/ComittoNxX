@@ -1,16 +1,14 @@
 package src.comitton.activity;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebView;
 
-import io.documentnode.epub4j.domain.Resource;
+import androidx.appcompat.app.AppCompatActivity;
+
 import jp.dip.muracoro.comittonx.R;
 
-public class HelpActivity extends Activity {
+public class HelpActivity extends AppCompatActivity {
 
     private WebView mWebView;
 

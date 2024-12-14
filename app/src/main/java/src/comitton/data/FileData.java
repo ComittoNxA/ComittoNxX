@@ -19,7 +19,8 @@ public class FileData {
 	public static final short FILETYPE_PDF = 4;
 	public static final short FILETYPE_TXT = 5;
 	public static final short FILETYPE_EPUB = 6;
-	public static final short FILETYPE_NONE = 7;
+	public static final short FILETYPE_EPUB_SUB = 7;
+	public static final short FILETYPE_NONE = 8;
 
 	public static final short EXTTYPE_NONE = 0;
 	public static final short EXTTYPE_ZIP = 1;
@@ -243,6 +244,9 @@ public class FileData {
 	}
 	public static boolean isEpub(String ext) {
 		return ext.equals(".epub");
+	}
+	public static boolean isEpubSub(String ext) {
+		return  ext.equals(".css") || ext.equals(".xml") || ext.equals(".opf") || ext.equals(".ncx");
 	}
 	public static boolean isText(String ext) {
 		return ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html");

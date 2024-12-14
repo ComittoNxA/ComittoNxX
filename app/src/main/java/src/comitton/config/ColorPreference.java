@@ -101,7 +101,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 		}
 
 //        Button buttonOK = new Button(mContext);
-//        buttonOK.setText("OK");
+//        buttonOK.setText(res.getString(R.string.btnOK));
 //        buttonOK.setOnClickListener(new OnClickListener() {
 //            public void onClick(View v) {
 //                setValue();
@@ -110,7 +110,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 //        layout.addView(buttonOK, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 //
 //        Button buttonCancel = new Button(mContext);
-//        buttonCancel.setText("Cancel");
+//        buttonCancel.setText(res.getString(R.string.btnCancel));
 //        layout.addView(buttonCancel, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
 		int progress = getValue();

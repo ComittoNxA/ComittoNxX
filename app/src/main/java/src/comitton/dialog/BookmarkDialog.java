@@ -42,8 +42,9 @@ public class BookmarkDialog extends Dialog implements OnClickListener {
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 		mContext = context;
 	}

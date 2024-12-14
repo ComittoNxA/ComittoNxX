@@ -16,6 +16,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import jcifs.CIFSContext;
 import jcifs.CIFSException;
@@ -75,6 +79,8 @@ public class FileAccess {
 
 	// jcifs認証
 	public static SmbFile jcifsFile(String url, String user, String pass) throws MalformedURLException {
+		boolean debug = false;
+
 		SmbFile sfile = null;
 		NtlmPasswordAuthenticator smbAuth;
 		CIFSContext context = null;
@@ -108,7 +114,7 @@ public class FileAccess {
 //			context = new BaseContext(config);
 			SingletonContext.init(prop);
 		} catch (CIFSException e) {
-			Log.d("FileAccess", "jcifsFile " + e.getMessage());
+			if(debug) {Log.d("FileAccess", "jcifsFile: " + e.getMessage());}
 		}
 
 
@@ -132,7 +138,7 @@ public class FileAccess {
 			}
 		}
 
-		Log.d("FileAccess", "jcifsFile domain=" + domain + ", user=" + user + ", pass=" + pass + ", host=" + host + ", share=" + share + ", path=" + path);
+		if(debug) {Log.d("FileAccess", "jcifsFile: domain=" + domain + ", user=" + user + ", pass=" + pass + ", host=" + host + ", share=" + share + ", path=" + path);}
 
 		if (domain != null && domain.length() != 0) {
 			smbAuth = new NtlmPasswordAuthenticator(domain, user, pass);
@@ -156,23 +162,49 @@ public class FileAccess {
 
 	// ユーザ認証付きSambaストリーム
 	public static SmbRandomAccessFile jcifsAccessFile(String url, String user, String pass) throws IOException {
-		Log.d("FileAccess", "smbRandomAccessFile url=" + url + ", user=" + user + ", pass=" + pass);
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "jcifsAccessFile: url=" + url + ", user=" + user + ", pass=" + pass);}
+		if (debug) {DEF.StackTrace("FileAccess", "jcifsAccessFile:");}
 		SmbRandomAccessFile stream;
 		try {
 			if (!exists(url, user, pass)) {
-				throw new IOException("File not found.");
+				throw new IOException("FileAccess: jcifsAccessFile: File not found.");
 			}
 		} catch (FileAccessException | IOException e) {
-			throw new IOException("File not found.");
+			throw new IOException("FileAccess: jcifsAccessFile: File not found.");
 		}
-		SmbFile sfile = jcifsFile(url, user, pass);
-		stream = new SmbRandomAccessFile(sfile, "r");
+
+		if (!DEF.isUiThread()) {
+			// UIスレッドではない時はそのまま実行
+			SmbFile sfile = jcifsFile(url, user, pass);
+			stream = new SmbRandomAccessFile(sfile, "r");
+		} else {
+			// UIスレッドの時は新しいスレッド内で実行
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			Future<SmbRandomAccessFile> future = executor.submit(new Callable<SmbRandomAccessFile>() {
+
+				@Override
+				public SmbRandomAccessFile call() throws SmbException, MalformedURLException {
+					SmbFile sfile = jcifsFile(url, user, pass);
+					return new SmbRandomAccessFile(sfile, "r");
+				}
+			});
+
+			try {
+				stream = future.get();
+			} catch (Exception e) {
+				Log.e("FileAccess", "jcifsAccessFile: File not found.");
+				throw new IOException("FileAccess: jcifsAccessFile: File not found.");
+			}
+		}
+
 		return stream;
 	}
 
 	// ローカルファイルのOutputStream
 	public static OutputStream localOutputStream(String url) throws FileAccessException {
-		Log.d("FileAccess", "localOutputStream url=" + url);
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "localOutputStream: url=" + url);}
 		boolean result;
 		if (url.startsWith("/")) {
 			// ローカルの場合
@@ -184,7 +216,7 @@ public class FileAccess {
 				}
 				return new FileOutputStream(orgfile);
 			} catch (IOException e) {
-				e.printStackTrace();
+				if(debug) {Log.d("FileAccess", "localOutputStream: " + e.getMessage());}
 			}
 		}
 		return null;
@@ -221,7 +253,8 @@ public class FileAccess {
 
 	// ファイル存在チェック
 	public static boolean exists(String url, String user, String pass) throws FileAccessException {
-		Log.d("FileAccess", "exists url=" + url + ", user=" + user + ", pass=" + pass);
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "exists: url=" + url + ", user=" + user + ", pass=" + pass);}
 		boolean result = false;
 		if (url.startsWith("/")) {
 			// ローカルの場合/
@@ -230,23 +263,58 @@ public class FileAccess {
 		}
 		else if (SMBLIB == SMBLIB_JCIFS) {
 			// jcifsの場合
-			SmbFile orgfile;
-			try {
-				orgfile = FileAccess.jcifsFile(url, user, pass);
-			} catch (MalformedURLException e) {
-				throw new FileAccessException(e);
-			}
-			try {
-				result = orgfile.exists();
-			} catch (SmbException e) {
-				throw new FileAccessException(e);
+
+			if (!DEF.isUiThread()) {
+				// UIスレッドではない時はそのまま実行
+				SmbFile orgfile;
+				try {
+					orgfile = FileAccess.jcifsFile(url, user, pass);
+				} catch (MalformedURLException e) {
+					throw new FileAccessException("FileAccess: exists: " + e.getMessage());
+				}
+				try {
+					result = orgfile.exists();
+				} catch (SmbException e) {
+					throw new FileAccessException("FileAccess: exists: " + e.getMessage());
+				}
+				return result;
+			} else {
+				// UIスレッドの時は新しいスレッド内で実行
+				ExecutorService executor = Executors.newSingleThreadExecutor();
+				Future<Boolean> future = executor.submit(new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws FileAccessException {
+						SmbFile orgfile;
+						boolean result = false;
+						try {
+							orgfile = FileAccess.jcifsFile(url, user, pass);
+						} catch (MalformedURLException e) {
+							throw new FileAccessException("FileAccess: exists: " + e.getMessage());
+						}
+						try {
+							result = orgfile.exists();
+						} catch (SmbException e) {
+							throw new FileAccessException("FileAccess: exists: " + e.getMessage());
+						}
+						return result;
+					}
+				});
+
+				try {
+					result = future.get();
+				} catch (Exception e) {
+					Log.e("FileAccess", "exists: " + e.getMessage());
+					throw new FileAccessException("FileAccess: exists: " + e.getMessage());
+				}
 			}
 		}
 		return result;
 	}
 
-	public static boolean isDirectory(String url, String user, String pass) throws MalformedURLException, SmbException {
-		Log.d("FileAccess", "isDirectory url=" + url + ", user=" + user + ", pass=" + pass);
+	public static boolean isDirectory(String url, String user, String pass) throws IOException {
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "isDirectory: url=" + url + ", user=" + user + ", pass=" + pass);}
 		boolean result = false;
 		if (url.startsWith("/")) {
 			// ローカルの場合/
@@ -255,19 +323,47 @@ public class FileAccess {
 		}
 		else if (SMBLIB == SMBLIB_JCIFS) {
 			// jcifsの場合
-			SmbFile orgfile;
-			orgfile = FileAccess.jcifsFile(url, user, pass);
-			try {
-				result = orgfile.isDirectory();
-			} catch (SmbException e) {
-				result = false;
+			if (!DEF.isUiThread()) {
+				// UIスレッドではない時はそのまま実行
+				SmbFile orgfile;
+				orgfile = FileAccess.jcifsFile(url, user, pass);
+				try {
+					result = orgfile.isDirectory();
+				} catch (SmbException e) {
+					result = false;
+				}
+			} else {
+				// UIスレッドの時は新しいスレッド内で実行
+				ExecutorService executor = Executors.newSingleThreadExecutor();
+				Future<Boolean> future = executor.submit(new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws MalformedURLException {
+						SmbFile orgfile;
+						boolean result = false;
+						orgfile = FileAccess.jcifsFile(url, user, pass);
+						try {
+							result = orgfile.isDirectory();
+						} catch (SmbException e) {
+							result = false;
+						}
+						return result;
+					}
+				});
+
+				try {
+					result = future.get();
+				} catch (Exception e) {
+					throw new IOException("FileAccess: isDirectory: File not found.");
+				}
 			}
 		}
 		return result;
 	}
 
 	public static ArrayList<FileData> listFiles(String url, String user, String pass) throws SmbException {
-		Log.d("FileAccess", "listFiles url=" + url + ", user=" + user + ", pass=" + pass);
+		boolean debug = false;
+		if(debug) {Log.d("FileAccess", "listFiles: url=" + url + ", user=" + user + ", pass=" + pass);}
 		boolean isLocal;
 
 		String host = "";
@@ -295,7 +391,7 @@ public class FileAccess {
 			}
 		}
 
-		Log.d("FileAccess", "listFiles isLocal=" + isLocal);
+		if(debug) {Log.d("FileAccess", "listFiles: isLocal=" + isLocal);}
 
 		// ファイルリストを取得
 		File lfiles[] = null;
@@ -342,8 +438,8 @@ public class FileAccess {
 				return fileList;
 			}
 		}
-		
-		Log.d("FileAccess", "listFiles length=" + length);
+
+		if(debug) {Log.d("FileAccess", "listFiles: length=" + length);}
 
 		// FileData型のリストを作成
 		boolean flag = false;
@@ -381,7 +477,7 @@ public class FileAccess {
 					date = jcifsFiles[i].lastModified();
 				}
 			}
-			
+
 			if (flag) {
 				// ディレクトリの場合
 				int len = name.length();
@@ -482,11 +578,12 @@ public class FileAccess {
 			}
 		}
 	}
-	
+
 	public static boolean renameTo(String uri, String path, String fromfile, String tofile, String user, String pass) throws FileAccessException {
-		Log.d("FileAccess", "renameTo url=" + uri + ", path=" + path + ", fromfile=" + fromfile + ", tofile=" + tofile + ", user=" + user + ", pass=" + pass);
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "renameTo: url=" + uri + ", path=" + path + ", fromfile=" + fromfile + ", tofile=" + tofile + ", user=" + user + ", pass=" + pass);}
 		if (tofile.indexOf('/') > 0) {
-			throw new FileAccessException("Invalid file name.");
+			throw new FileAccessException("FileAccess: renameTo: Invalid file name.");
 		}
 
 		if (uri == null || uri.length() == 0) {
@@ -494,12 +591,12 @@ public class FileAccess {
 			File orgfile = new File(path + fromfile);
 			if (orgfile.exists() == false) {
 				// 変更前ファイルが存在しなければエラー
-				throw new FileAccessException("File not found.");
+				throw new FileAccessException("FileAccess: renameTo: File not found.");
 			}
 			File dstfile = new File(path + tofile);
 			if (dstfile.exists() == true) {
 				// 変更後ファイルが存在すればエラー
-				throw new FileAccessException("File access error.");
+				throw new FileAccessException("FileAccess: renameTo: File access error.");
 			}
 			orgfile.renameTo(dstfile);
 			return dstfile.exists();
@@ -511,12 +608,12 @@ public class FileAccess {
 				orgfile = FileAccess.jcifsFile(uri + path + fromfile, user, pass);
 				if (orgfile.exists() == false) {
 					// 変更前ファイルが存在しなければエラー
-					throw new FileAccessException("File not found.");
+					throw new FileAccessException("FileAccess: renameTo: File not found.");
 				}
 			} catch (MalformedURLException e) {
-				throw new FileAccessException(e);
+				throw new FileAccessException("FileAccess: renameTo: " + e.getMessage());
 			} catch (SmbException e) {
-				throw new FileAccessException(e);
+				throw new FileAccessException("FileAccess: renameTo: " + e.getMessage());
 			}
 
 			SmbFile dstfile;
@@ -524,12 +621,12 @@ public class FileAccess {
 				dstfile = FileAccess.jcifsFile(uri + path + tofile, user, pass);
 				if (dstfile.exists() == true) {
 					// 変更後ファイルが存在すればエラー
-					throw new FileAccessException("File access error.");
+					throw new FileAccessException("FileAccess: renameTo: File access error.");
 				}
 			} catch (MalformedURLException e) {
-				throw new FileAccessException(e);
+				throw new FileAccessException("FileAccess: renameTo: " + e.getMessage());
 			} catch (SmbException e) {
-				throw new FileAccessException(e);
+				throw new FileAccessException("FileAccess: renameTo: " + e.getMessage());
 			}
 
 			// ファイル名変更
@@ -537,7 +634,7 @@ public class FileAccess {
 				orgfile.renameTo(dstfile);
 				return dstfile.exists();
 			} catch (SmbException e) {
-				throw new FileAccessException(e);
+				throw new FileAccessException("FileAccess: renameTo: " + e.getMessage());
 			}
 		}
 		return false;
@@ -545,7 +642,8 @@ public class FileAccess {
 
 	// ファイル削除
 	public static boolean delete(String url, String user, String pass) throws FileAccessException {
-		Log.d("FileAccess", "delete url=" + url + ", user=" + user + ", pass=" + pass );
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "delete: url=" + url + ", user=" + user + ", pass=" + pass );}
 		boolean result;
 		if (url.startsWith("/")) {
 			// ローカルの場合
@@ -555,17 +653,47 @@ public class FileAccess {
 		}
 		else if (SMBLIB == SMBLIB_JCIFS) {
 			// jcifsの場合
-			SmbFile orgfile;
-			try {
-				orgfile = FileAccess.jcifsFile(url, user, pass);
-			} catch (MalformedURLException e) {
-				throw new FileAccessException(e);
-			}
-			try {
-				orgfile.delete();
-				return orgfile.exists();
-			} catch (SmbException e) {
-				throw new FileAccessException(e);
+
+			if (!DEF.isUiThread()) {
+				// UIスレッドではない時はそのまま実行
+				SmbFile orgfile;
+				try {
+					orgfile = FileAccess.jcifsFile(url, user, pass);
+				} catch (MalformedURLException e) {
+					throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+				}
+				try {
+					orgfile.delete();
+					return orgfile.exists();
+				} catch (SmbException e) {
+					throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+				}
+			} else {
+				// UIスレッドの時は新しいスレッド内で実行
+				ExecutorService executor = Executors.newSingleThreadExecutor();
+				Future<Boolean> future = executor.submit(new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws FileAccessException {
+						SmbFile orgfile;
+						try {
+							orgfile = FileAccess.jcifsFile(url, user, pass);
+						} catch (MalformedURLException e) {
+							throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+						}
+						try {
+							orgfile.delete();
+							return orgfile.exists();
+						} catch (SmbException e) {
+							throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+						}
+					}
+				});
+				try {
+					return future.get();
+				} catch (Exception e) {
+					throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+				}
 			}
 		}
 		return false;
@@ -573,7 +701,8 @@ public class FileAccess {
 
 	// ディレクトリ作成
 	public static boolean mkdir(String url, String item, String user, String pass) throws FileAccessException {
-		Log.d("FileAccess", "mkdir url=" + url + ", item=" + item + ", user=" + user + ", pass=" + pass );
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "mkdir: url=" + url + ", item=" + item + ", user=" + user + ", pass=" + pass );}
 		boolean result;
 		if (url.startsWith("/")) {
 			// ローカルの場合
@@ -611,7 +740,7 @@ public class FileAccess {
 			if (file != null) {
 				int index = file.getAbsolutePath().lastIndexOf("/Android/data");
 				if (index < 0) {
-					Log.w("FileAccess", "Unexpected external file dir: " + file.getAbsolutePath());
+					Log.w("FileAccess", "getExtSdCardPaths: Unexpected external file dir: " + file.getAbsolutePath());
 				}
 				else {
 					String path = file.getAbsolutePath().substring(0, index);

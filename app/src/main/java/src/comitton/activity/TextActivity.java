@@ -41,6 +41,7 @@ import src.comitton.view.GuideView;
 import src.comitton.view.MyTextView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -59,6 +60,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -69,11 +71,14 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 /**
  * 画像のスクロールを試すための画面を表します。
  */
 @SuppressLint("NewApi")
-public class TextActivity extends Activity implements OnTouchListener, Handler.Callback, MenuSelectListener, PageSelectListener,  BookmarkListenerInterface {
+public class TextActivity extends AppCompatActivity implements OnTouchListener, Handler.Callback, MenuSelectListener, PageSelectListener,  BookmarkListenerInterface {
 	private final int mSdkVersion = android.os.Build.VERSION.SDK_INT;
 	//
 	private static final int TIME_VIB_TERM = 20;
@@ -221,6 +226,10 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 	private String mTextName;
 	private String mFilePath;
 	private int mPage;
+	private float mPageRate;
+	private int mChapter;
+	private int mFileType;
+
 
 	private ImageManager mImageMgr;
 	private TextManager mTextMgr;
@@ -228,6 +237,8 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 	// ページ表示のステータス情報
 	private int mRestorePage;
 	private int mCurrentPage;
+	private float mRestorePageRate;
+	private float mCurrentPageRate;
 	private int mSelectPage = 0;
 //	private boolean mPageBack = false;
 	private int mInitFlg = 0; // 初期表示の制御用フラグ
@@ -321,6 +332,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		boolean debug = false;
 
 		// 回転
 		mInitFlg = 0;
@@ -416,6 +428,14 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		Intent intent = getIntent();
 		mServer = -1;	// デフォルトはローカル
 		try {
+			String type = intent.getType();
+			if ("text/plain".equals(type) || "text/html".equals(type) || "text/xml".equals(type)) {
+				mFileType = FileData.FILETYPE_TXT;
+			} else if ("application/epub+zip".equals(type)) {
+				mFileType = FileData.FILETYPE_EPUB;
+				mTextName = "META-INF/container.xml";
+			}
+
 			String path = null;
 			if (Intent.ACTION_SEND.equals(getIntent().getAction())) {
 				Uri uri = (Uri) intent.getExtras().get(Intent.EXTRA_STREAM);
@@ -447,13 +467,17 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 				// パスの構成チェック
 				if (path.length() > prev + 1) {
 					mPath = path.substring(0, prev + 1);
-					String ext = path.substring(path.length() - 4).toLowerCase();
-					if (FileData.isText(ext)) {
-						// 圧縮ファイル
+					if (mFileType == FileData.FILETYPE_TXT) {
+						// テキストファイル
 						mFileName = "";
 						mTextName = path.substring(prev + 1);
-					}
-					else {
+					} else if (mFileType == FileData.FILETYPE_EPUB) {
+						// EPUBファイル
+						mFileName = path.substring(prev + 1);
+						mTextName = "META-INF/container.xml";
+
+					} else {
+						// 圧縮ファイル
 						mPath = null;
 					}
 				}
@@ -476,7 +500,15 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			mPass = intent.getStringExtra("Pass");
 			mFileName = intent.getStringExtra("File");
 			mTextName = intent.getStringExtra("Text");
-			mPage = intent.getIntExtra("Page", -1);
+			mPage = intent.getIntExtra("Page", DEF.PAGENUMBER_UNREAD);
+			mPageRate = intent.getFloatExtra("PageRate", (float)DEF.PAGENUMBER_UNREAD);
+			if (debug) {Log.d("TextActivity", "onCreate: mServer=" + mServer + ", uri=" + uri + ", mPath=" + mPath + ", mUser=" + mUser + ", mPass=" + mPass
+					+ ", mFileName=" + mFileName + ", mTextName=" + mTextName + ", mPage=" + mPage + ", mPageRate=" + mPageRate);}
+			if (mTextName.equals("META-INF/container.xml")) {
+				mFileType = FileData.FILETYPE_EPUB;
+			} else {
+				mFileType = FileData.FILETYPE_TXT;
+			}
 		}
 		else {
 			mPage = -1;
@@ -497,13 +529,18 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		// 続きから開く設定を記録
 		saveLastFile();
 
-		mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mFilePath + mTextName, mUser, mPass), -1);
-		mCurrentPage = (mPage != -1) ? mPage : (mRestorePage != -1 ? mRestorePage : 0);
+		Log.d("TextActivity", "onCreate: mRestorePageRate を取得します.");
+		mRestorePageRate = mSharedPreferences.getFloat(DEF.createUrl(mFilePath + mTextName, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+		Log.d("TextActivity", "onCreate: pageRate を設定します.");
+		mCurrentPageRate = (mPageRate != (float)DEF.PAGENUMBER_UNREAD) ? mPageRate : (mRestorePageRate != (float)DEF.PAGENUMBER_UNREAD ? mRestorePageRate : 0f);
+		Log.d("TextActivity", "onCreate: mCurrentPageRate=" + mCurrentPageRate);
+		mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mFilePath + mTextName, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+		mCurrentPage = (mPage != DEF.PAGENUMBER_UNREAD) ? mPage : (mRestorePage != DEF.PAGENUMBER_UNREAD ? mRestorePage : 0);
 		mTextView.setOnTouchListener(this);
 
 		// プログレスダイアログ準備
 		mReadBreak = false;
-		mReadDialog = new ProgressDialog(this);
+		mReadDialog = new ProgressDialog(this, R.style.MyDialog);
 		mReadDialog.setMessage(mParsingMsg + " (0)");
 		mReadDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		mReadDialog.setCancelable(true);
@@ -592,22 +629,29 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 
 	public class TextLoad implements Runnable {
 		private Handler handler;
-		private Activity mActivity;
+		private TextActivity mActivity;
 
 		public TextLoad(Handler handler, TextActivity activity) {
 			super();
+			boolean debug = false;
+			if (debug) {Log.d("TextActivity", "new TextLoad: 開始します.");}
+			//if (debug) {DEF.StackTrace("TextActivity", "TextLoad: ");}
+
 			this.handler = handler;
 			this.mActivity = activity;
 
 		}
 
 		public void run() {
+			boolean debug = false;
+			if (debug) {Log.d("TextActivity", "TextLoad: run: 開始します.");}
 			// ファイルリストの読み込み
+			if (debug) {Log.d("TextActivity", "TextLoad: run: mPath=" + mPath + ", mFileName=" + mFileName + ", mTextName=" + mTextName);}
 			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, mCharset, true, ImageManager.OPENMODE_TEXTVIEW, 1);
 			mImageMgr.LoadImageList(0, 0, 0);
-			mTextMgr = new TextManager(mImageMgr, mTextName, mUser, mPass, handler, mActivity);
-			mTextMgr.LoadTextFile();
-			mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
+			mTextMgr = new TextManager(mImageMgr, mTextName, mUser, mPass, handler, mActivity, mFileType);
+			//mTextMgr.LoadTextFile();
+			mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode,mCharset);
 
 			String imagePath;
 			if (mImageMgr == null) {
@@ -618,7 +662,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 				// 圧縮ファイルから読み込み
 				imagePath = DEF.getDir(mTextName);
 			}
-			mTextView.setPicturePath(imagePath, mImageMgr, mUser, mPass);
+			mTextView.setPath(mFilePath + mTextName, mImageMgr, mUser, mPass);
 
 			// 終了通知
 			Message message = new Message();
@@ -789,7 +833,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 					}
 					if (mViewRota == DEF.ROTATE_PORTRAIT || mViewRota == DEF.ROTATE_LANDSCAPE) {
 						int rotate;
-						if (getRequestedOrientation() == DEF.ROTATE_PORTRAIT) {
+						if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 							// 横にする
 							rotate = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 						}
@@ -989,11 +1033,14 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 				if (mTextMgr.length() == 0) {
 					mCurrentPage = 0;
 				}
-				else if (mCurrentPage < 0) {
+				else if (mCurrentPageRate < 0f) {
 					mCurrentPage = mTextMgr.length() - 1;
 				}
-				else if (mCurrentPage >= mTextMgr.length()) {
+				else if (mCurrentPageRate >= 1f) {
 					mCurrentPage = mTextMgr.length() - 1;
+				}
+				else {
+					mCurrentPage = (int)(mCurrentPageRate * mTextMgr.length());
 				}
 
 				// テキストの設定
@@ -1443,25 +1490,63 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 						openMenu();
 					}
 					else if (result == 0x4002 || result == 0x4003) {
-						// 末尾ボタン
-						if (result == 0x4003) {
-							if (mSelectPage != mTextMgr.length() - 1) {
-								mSelectPage = mTextMgr.length() - 1;
-							}
+						int mPageWay = DEF. PAGEWAY_RIGHT;
+						AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.MyDialog);
+						if ((result == 0x4002 && mPageWay == DEF.PAGEWAY_RIGHT) || (result == 0x4003 && mPageWay != DEF.PAGEWAY_RIGHT)) {
+							dialogBuilder.setTitle(R.string.pageTop);
 						}
 						else {
-							// 右側ボタン
-							if (mSelectPage != 0) {
-								mSelectPage = 0;
+							dialogBuilder.setTitle(R.string.pageLast);
+						}
+						dialogBuilder.setMessage(null);
+						dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int whichButton) {
+								if (result == 0x4003) {
+									// 左側ボタン
+									int leftpage = mPageWay == DEF.PAGEWAY_RIGHT ? mTextMgr.length() - 1 : 0;
+									if (mSelectPage != leftpage) {
+										mSelectPage = leftpage;
+									}
+								}
+								else {
+									// 右側ボタン
+									int rightpage = mPageWay == DEF.PAGEWAY_RIGHT ? 0 : mTextMgr.length() - 1;
+									if (mSelectPage != rightpage) {
+										mSelectPage = rightpage;
+									}
+								}
+								// ページ選択確定
+								if (mSelectPage != mCurrentPage) {
+									// ページ変更時に振動
+									startVibrate();
+									mCurrentPage = mSelectPage;
+									setPage(false);
+								}
+
+								dialog.dismiss();
 							}
+						});
+						dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// dialog.cancel();
+							}
+						});
+						Dialog dialog = dialogBuilder.create();
+						if (mImmEnable) {
+							//dialog.getWindow().
+							//		setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+							//				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+							dialog.getWindow().getDecorView().setSystemUiVisibility(
+									View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+											| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+											| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+											//| View.SYSTEM_UI_FLAG_FULLSCREEN
+											//| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+											//| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+							);
 						}
-						// ページ選択確定
-						if (mSelectPage != mCurrentPage) {
-							// ページ変更時に振動
-							startVibrate();
-							mCurrentPage = mSelectPage;
-							setPage(false);
-						}
+						dialog.show();
 					}
 					else {
 						switch (index) {
@@ -1931,6 +2016,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			mMenuDialog.show();
 		}
 		else {
+			Toast.makeText(this, R.string.bmNotFound, Toast.LENGTH_SHORT).show();
 			mMenuDialog = null;
 		}
 	}
@@ -1941,24 +2027,42 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			return;
 		}
 
-		mMenuDialog = new MenuDialog(this, mTextView.getWidth(), mTextView.getHeight(), false, this);
+		mMenuDialog = new MenuDialog(this, mTextView.getWidth(), mTextView.getHeight(), false, false, false, true, this);
 
 		int size = mTextMgr.getMidashiSize();
+		int count = 0;
 
 		for (int i = 0 ; i < size; i ++) {
 			// ブックマーク追加
 			MidashiData md = mTextMgr.getMidashi(i);
 			if (md != null) {
 				int page = md.getPage();
-				if (page >= 0) {
+				int type = md.getType();
+				if ((type == MidashiData.HEADING_LARGE || type == MidashiData.HEADING_MIDDLE || type == MidashiData.HEADING_SMALL) && page >= 0) {
 					mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
+					++count;
 				}
 			}
 		}
-		if (size > 0) {
+		if (count == 0) {
+			for (int i = 0; i < size; i++) {
+				// ブックマーク追加
+				MidashiData md = mTextMgr.getMidashi(i);
+				if (md != null) {
+					int page = md.getPage();
+					int type = md.getType();
+					if (type == MidashiData.CAPTION && page >= 0) {
+						mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
+						++count;
+					}
+				}
+			}
+		}
+		if (count > 0) {
 			mMenuDialog.show();
 		}
 		else {
+			Toast.makeText(this, R.string.ChapterNotFound, Toast.LENGTH_SHORT).show();
 			mMenuDialog = null;
 		}
 	}
@@ -2022,6 +2126,8 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 				break;
 			}
 			case DEF.MENU_HELP: {
+				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
+
 				// 操作方法画面に遷移
 				// Intent intent = new Intent(TextActivity.this, HelpActivity.class);
 				// startActivityForResult(intent, DEF.REQUEST_HELP);
@@ -2042,7 +2148,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			case DEF.MENU_ROTATE: {
 				// 画面の縦横切替
 				int rotate;
-				if (getRequestedOrientation() == DEF.ROTATE_PORTRAIT) {
+				if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 					// 横にする
 					rotate = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 				}
@@ -2055,6 +2161,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			}
 			case DEF.MENU_SETTING: {
 				// 設定画面に遷移
+				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
 				Intent intent = new Intent(TextActivity.this, SetConfigActivity.class);
 				startActivityForResult(intent, DEF.REQUEST_SETTING);
 				break;
@@ -2087,10 +2194,11 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 			case DEF.MENU_ADDBOOKMARK: {
 				// ブックマーク追加ダイアログ表示
 				mCurrentPage = mTextView.getPage(); // 現在ページ取得
+				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
 
 				BookmarkDialog bookmarkDlg = new BookmarkDialog(this);
 				bookmarkDlg.setBookmarkListear(this);
-				bookmarkDlg.setName((mCurrentPage + 1) + " / " + mTextMgr.length());
+				bookmarkDlg.setName(String.format("Page : %d / %d (%.2f%%)", mCurrentPage + 1 , mTextMgr.length(), (mCurrentPageRate * 100)));
 				bookmarkDlg.show();
 				break;
 			}
@@ -2174,6 +2282,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 
 	// テキスト設定用ダイアログ表示
 	private void showTextConfigDialog() {
+		mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
 		if (mTextConfigDialog != null) {
 			return;
 		}
@@ -2297,7 +2406,8 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		}
 
 		// 現在ページ
-		mCurrentPage = mTextView.getPage();
+		//mCurrentPage = mTextView.getPage();
+		mCurrentPage = (int)(mCurrentPageRate * mTextMgr.length());
 
 		mTextView.setTextBuffer(null, null, null);
 		mTextView.setDispMode(mDispMode);
@@ -2312,7 +2422,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		mGuideView.setGuideSize(mClickArea, mTapPattern, mTapRate, mChgPage, mOldMenu);
 
 		// プログレスダイアログ準備
-		mReadDialog = new ProgressDialog(this);
+		mReadDialog = new ProgressDialog(this, R.style.MyDialog);
 		mReadDialog.setMessage(mParsingMsg + " (0)");
 		mReadDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		mReadDialog.setCancelable(true);
@@ -2531,7 +2641,7 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 	private void setConfig() {
 		if (mTextView != null) {
 			boolean result;
-			result = mTextView.setConfig(mMgnColor, mCenColor, mTopColor1, mViewPoint, mMargin, mCenter, mShadow, mScrlRngW, mScrlRngH, mVolScrl, mPrevRev, mCMargin, mCShadow, mPseLand, mEffect, mEffectTime, mFontFile, mAscMode != TextManager.ASC_NORMAL);
+			result = mTextView.setConfig(mMgnColor, mCenColor, mTopColor1, mViewPoint, mMargin, mCenter, mShadow, mScrlRngW, mScrlRngH, mVolScrl, mPrevRev, mCMargin, mCShadow, mPseLand, mEffect, mEffectTime, mFontFile, mAscMode != TextManager.ASC_NORMAL, mPicSize);
 			if (result == false) {
 				Toast.makeText(this, "open font error:\"" + mFontFile + "\"", Toast.LENGTH_LONG).show();
 
@@ -2586,11 +2696,15 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 	}
 
 	private void prevPage() {
+		boolean debug = false;
+		if (debug) {Log.d("TextActivity", "prevPage: 開始します.");}
 		// 前ページへ
 		if (mTextView.prevPage()) {
+			if (debug) {Log.d("TextActivity", "prevPage: 前ページへ移動できました.");}
 			startVibrate();
 		}
 		else {
+			if (debug) {Log.d("TextActivity", "prevPage: 前ページへ移動できませんでした.");}
 			// 先頭ページ
 			if (mLastMsg == DEF.LASTMSG_DIALOG) {
 				showCloseDialog(CloseDialog.LAYOUT_TOP);
@@ -2641,10 +2755,16 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		mImageMgr.closeFiles();
 
 		// 解放
+		mTextView.close();
 		mTextMgr.release();
 		Intent intent = new Intent();
 		intent.putExtra("nextopen", select);
-		intent.putExtra("lastfile", mTextName);
+		if (mFileType == FileData.FILETYPE_EPUB) {
+			intent.putExtra("lastfile", mFileName);
+		}
+		else {
+			intent.putExtra("lastfile", mTextName);
+		}
 		intent.putExtra("lastpath", mLocalPath);
 		setResult(RESULT_OK, intent);
 		finish();
@@ -2658,19 +2778,24 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		Editor ed = sp.edit();
 		int savePage = mCurrentPage;
+		float savePageRate = (float)mCurrentPage / mTextMgr.length();
 		if (mTextMgr.length() <= mCurrentPage + 1) {
 			// 既読
-			savePage = -2;
+			savePage = DEF.PAGENUMBER_READ;
+			savePageRate = (float)DEF.PAGENUMBER_READ;
 		}
 		else if (mDispMode == DEF.DISPMODE_TX_DUAL && mTextMgr.length() <= mCurrentPage + 2) {
 			// 見開きの場合は1ページ前でも既読
-			savePage = -2;
+			savePage = DEF.PAGENUMBER_READ;
+			savePageRate = (float)DEF.PAGENUMBER_READ;
 		}
 		else if (savePage < 0) {
 			// 範囲外は読み込みしない
 			savePage = 0;
+			savePageRate = 0f;
 		}
 		ed.putInt(DEF.createUrl(mFilePath + mTextName, mUser, mPass), savePage);
+		ed.putFloat(DEF.createUrl(mFilePath + mTextName, mUser, mPass) + "#pageRate", savePageRate);
 		ed.commit();
 	}
 
@@ -2679,7 +2804,13 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		if (mImageMgr != null) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
-			if (mRestorePage == -1) {
+			if (mRestorePageRate == DEF.PAGENUMBER_UNREAD) {
+				ed.remove(DEF.createUrl(mFilePath + mTextName, mUser, mPass) + "#pageRate");
+			}
+			else {
+				ed.putFloat(DEF.createUrl(mFilePath + mTextName, mUser, mPass) + "#pageRate", mRestorePageRate);
+			}
+			if (mRestorePage == DEF.PAGENUMBER_UNREAD) {
 				ed.remove(DEF.createUrl(mFilePath + mTextName, mUser, mPass));
 			}
 			else {
@@ -2694,8 +2825,9 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 		if (mReadBreak == false && mTextMgr != null && mTextView != null) {
 			int type = (mFileName == null || mFileName.length() == 0) ? RecordItem.TYPE_TEXT : RecordItem.TYPE_COMPTEXT;
 			mCurrentPage = mTextView.getPage();
+			mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
 			RecordList.add(RecordList.TYPE_HISTORY, type, mServer, mLocalPath + mFileName
-						, mTextName, new Date().getTime(), null, mCurrentPage, null);
+					, mTextName, new Date().getTime(), null, 0, mCurrentPageRate, mCurrentPage, null);
 
 			// タスク切り替え時しおりを保存
 			if (isSavePage) {
@@ -2726,8 +2858,9 @@ public class TextActivity extends Activity implements OnTouchListener, Handler.C
 	public void onAddBookmark(String name) {
 		// ブックマーク追加
 		int type = (mFileName == null || mFileName.length() == 0) ? RecordItem.TYPE_TEXT : RecordItem.TYPE_COMPTEXT;
+		mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
 		RecordList.add(RecordList.TYPE_BOOKMARK, type, mServer, mLocalPath + mFileName
-				, mTextName, new Date().getTime(), null, mCurrentPage, name);
+				, mTextName, new Date().getTime(), null, 0, mCurrentPageRate, mCurrentPage, name);
 	}
 
 	private void showCloseDialog(int layout) {

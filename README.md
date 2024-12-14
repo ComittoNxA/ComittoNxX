@@ -1,6 +1,6 @@
 # ComittoNxX
 
-<img src="app/src/main/res/drawable-hdpi/icon.png" width="100" align="right" alt="logo">
+<img src="app/src/main/res/drawable-hdpi/comittonxx.png" width="100" align="right" alt="logo">
 
 ComittoNxXはオープンソースの画像ビュアーです.  
 対応バージョンはAndroid5.0以上15までです.
@@ -16,18 +16,18 @@ ComittoNxXはオープンソースの画像ビュアーです.
 
 - Windowsファイル共有(SMB)に対応
 
- 
+<!-- 
 > [!IMPORTANT]
 > 更新を再開しました.
+-->
 
-
+<!--
 > [!NOTE]
 > 掲示板への投稿が規制されたためバージョン更新の告知を停止しています.
+-->
 
 ## 既知の不具合
 
-- EPUBビュアーで横書きになったり画像が表示されなかったりフォント変更が反映されなくなっています.  
-  - EpubファイルをEpubビュアーで開くかイメージビュアーで開くかは選択可能です.  
 - アプリ内ヘルプの内容が古いです.  
 
 ## ダウンロード

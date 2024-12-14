@@ -43,6 +43,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	private boolean mFilter;
 	private boolean mApplyDir;
 	private String mMarker;
+	private boolean mEpubViewer;
 
 	public LoadingDialog mDialog;
 	private Handler mHandler;
@@ -86,12 +87,13 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	}
 
 	// リストモード
-	public void setParams(boolean hidden, String marker, boolean filter, boolean applydir, boolean parentmove) {
+	public void setParams(boolean hidden, String marker, boolean filter, boolean applydir, boolean parentmove, boolean epubViewer) {
 		mHidden = hidden;
 		mMarker = marker;
 		mFilter = filter;
 		mApplyDir = applydir;
 		mParentMove = parentmove;
+		mEpubViewer = epubViewer;
 	}
 
 	public ArrayList<FileData> getFileList() {
@@ -214,12 +216,26 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 				name = fileList.get(i).getName();
 
-				if (fileList.get(i).getType() == FileData.FILETYPE_DIR
-						|| fileList.get(i).getType() == FileData.FILETYPE_ARC
+				if (fileList.get(i).getType() == FileData.FILETYPE_ARC
 						|| fileList.get(i).getType() == FileData.FILETYPE_PDF
-						|| fileList.get(i).getType() == FileData.FILETYPE_EPUB
-						|| fileList.get(i).getType() == FileData.FILETYPE_TXT) {
-					state = mSp.getInt(DEF.createUrl(mUri + mPath + name, mUser, mPass), -1);
+						|| fileList.get(i).getType() == FileData.FILETYPE_TXT
+						|| fileList.get(i).getType() == FileData.FILETYPE_DIR) {
+					state = (int)mSp.getFloat(DEF.createUrl(mUri + mPath + name, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+					if (state == DEF.PAGENUMBER_UNREAD) {
+						state = mSp.getInt(DEF.createUrl(mUri + mPath + name, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+					}
+					fileList.get(i).setState(state);
+				}
+				if (fileList.get(i).getType() == FileData.FILETYPE_EPUB) {
+					if (DEF.EPUB_VIEWER == mEpubViewer) {
+                        state = (int)mSp.getFloat(DEF.createUrl(mUri + mPath + name + "META-INF/container.xml", mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+                        if (state == DEF.PAGENUMBER_UNREAD) {
+                            state = mSp.getInt(DEF.createUrl(mUri + mPath + name + "META-INF/container.xml", mUser, mPass), DEF.PAGENUMBER_UNREAD);
+                        }
+					}
+					else {
+                        state = mSp.getInt(DEF.createUrl(mUri + mPath + name, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+					}
 					fileList.get(i).setState(state);
 				}
 				if (fileList.get(i).getType() == FileData.FILETYPE_IMG){

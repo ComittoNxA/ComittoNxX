@@ -1,13 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="NoAnime" parent="@android:style/Theme.NoTitleBar">
+    <style name="MyTheme" parent="@android:style/Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
+
+        <item name="android:textColor">@color/white1</item>
+        <item name="android:textColorPrimary">@color/white1</item>
+        <item name="colorControlNormal">@color/white1</item>
         <!--item name="android:windowAnimationStyle">@android:style/Animation</item-->
     </style>
 
-    <style name="MyTheme" parent="@android:style/Theme.NoTitleBar">
+    <style name="AppCompat.MyTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
+
+        <!-- 参考： https://qiita.com/ryo_mm2d/items/3c0e3850a6c87824776c -->
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:textColor">@color/white1</item>
+        <item name="android:textColorPrimary">@color/white1</item>
+        <item name="android:textColorSecondary">@color/lightgrey1</item>
+        <item name="android:textColorTertiary">@color/lightgrey1</item>
+        <!-- CheckBoxやSwitchのテキスト -->
+        <item name="android:textColorPrimaryDisableOnly">@color/white1</item>
+
+        <item name="colorPrimary">@color/white1</item>
+        <item name="colorPrimaryDark">@color/white1</item>
+        <item name="colorAccent">@color/white1</item>
+
+        <item name="colorError">@color/red1</item>
+        <item name="colorButtonNormal">@color/lightgrey1</item>
+        <item name="colorSwitchThumbNormal">@color/green2</item>
+        <item name="android:colorForeground">@color/lightgrey1</item>
+        <item name="android:colorBackground">@color/black2</item>
+        <!-- 未選択のCheckBox（枠線のみ） -->
+        <item name="colorControlNormal">@color/grey1</item>
+        <!-- 選択済みのCheckBox -->
+        <item name="colorControlActivated">@color/green2</item>
+
+        <!-- Buttonのスタイル -->
+        <item name="buttonStyle">@style/MyButton</item>
+        <!-- EditTextのスタイル -->
+        <item name="editTextStyle">@style/MyEditText</item>
+    </style>
+
+    <!-- AlertDialogのスタイル -->
+    <style name="MyDialog" parent="@style/ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="buttonBarPositiveButtonStyle">@style/MyPositiveButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/MyNeutralButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MyNegativeButton</item>
+        <item name="android:backgroundDimAmount">0.0</item>
+        <item name="android:windowBackground">@drawable/dialogframe</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">@color/white1</item>
+        <item name="android:textColorPrimary">@color/white1</item>
+        <item name="android:textColorAlertDialogListItem">@color/blue1</item>
+    </style>
+
+    <!-- AlertDialogのボタンのスタイル -->
+    <style name="MyPositiveButton" parent="@style/Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/blue1</item>
+        <item name="android:layout_marginStart">20dp</item>
+    </style>
+
+    <!-- AlertDialogのボタンのスタイル -->
+    <style name="MyNeutralButton" parent="@style/Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/blue1</item>
+    </style>
+
+    <!-- AlertDialogのボタンのスタイル -->
+    <style name="MyNegativeButton" parent="@style/Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/blue1</item>
+    </style>
+
+    <!-- Buttonのスタイル -->
+    <style name="MyButton" parent="@style/Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">@color/black1</item>
+    </style>
+
+    <!-- EditTextのスタイル -->
+    <style name="MyEditText" parent="@style/Widget.AppCompat.EditText">
+        <item name="android:textColorHint">@color/darkgrey1</item>
     </style>
 
     <style name="PageSeekBar">

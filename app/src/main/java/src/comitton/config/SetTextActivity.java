@@ -2,7 +2,6 @@ package src.comitton.config;
 
 import java.io.File;
 
-import src.comitton.activity.FontDownloadActivity;
 import src.comitton.activity.HelpActivity;
 import src.comitton.common.DEF;
 
@@ -11,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -72,7 +70,10 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 		, R.string.picsize01	// 2倍
 		, R.string.picsize02	// 3倍
 		, R.string.picsize03	// 4倍
-		, R.string.picsize04 };	// 画面サイズに拡大
+		, R.string.picsize04	// 画面サイズに拡大
+		, R.string.picsize05	// 画面サイズに拡大(余白無視)
+		, R.string.picsize06	// 画面サイズに拡大(見開き対応)
+		, R.string.picsize07 };	// 画面サイズに拡大(見開き対応:余白無視)
 	public static final int AscModeName[] =
 		{ R.string.ascmode00	// 縦表示
 		, R.string.ascmode01	// 横表示

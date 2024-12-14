@@ -455,10 +455,10 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: LoadThumbnail を実行します. page=0, , width=" + mThumbSizeW + ", height=" + mThumbSizeH);}
 					bm = mImageMgr.LoadThumbnail(0, mThumbSizeW, mThumbSizeH);
 					if (bm != null) {
-						Log.e("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail の実行に失敗しました.");
+						if (debug) {Log.d("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail() の実行に成功しました.");}
 					}
 					else {
-						if (debug) {Log.d("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail() の実行に成功しました.");}
+						Log.e("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail の実行に失敗しました.");
 					}
 				} catch (Exception e) {
 					Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得でエラーになりました.");

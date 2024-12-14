@@ -1,3 +1,4 @@
+#cmake_minimum_required(VERSION 3.31.0)
 cmake_minimum_required(VERSION 3.22.1)
 project(comitton C CXX ASM)
 include(FetchContent)

@@ -1,5 +1,6 @@
 package src.comitton.activity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -40,7 +41,10 @@ import src.comitton.view.image.MyImageView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -77,6 +81,7 @@ import src.comitton.data.FileData;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import src.comitton.stream.ThumbnailLoader;
@@ -86,7 +91,7 @@ import java.net.URLDecoder;
  * 画像のスクロールを試すための画面を表します。
  */
 @SuppressLint("NewApi")
-public class ImageActivity extends Activity implements OnTouchListener, Handler.Callback, MenuSelectListener, PageSelectListener, BookmarkListenerInterface {
+public class ImageActivity extends AppCompatActivity implements OnTouchListener, Handler.Callback, MenuSelectListener, PageSelectListener, BookmarkListenerInterface {
 	//
 	private static final int DISPMODE_NORMAL = 0;
 	private static final int DISPMODE_DUAL = 1;
@@ -695,7 +700,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		// プログレスダイアログ準備
 		mReadBreak = false;
 
-		mReadDialog = new ProgressDialog(this);
+		mReadDialog = new ProgressDialog(this, R.style.MyDialog);
 		mReadDialog.setMessage(mReadingMsg[0] + " (0)");
 		mReadDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		mReadDialog.setCancelable(true);
@@ -806,11 +811,12 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		}
 
 		public void run() {
+			boolean debug = false;
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, mFileSort, handler, mCharset, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
-			Log.d("ImageActivity", "run メモリ利用状況.\n" + getMemoryString());
+			if(debug) {Log.d("ImageActivity", "run メモリ利用状況.\n" + getMemoryString());}
 			mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
-			Log.d("ImageActivity", "run メモリ利用状況.(2回目)\n" + getMemoryString());
+			if(debug) {Log.d("ImageActivity", "run メモリ利用状況.(2回目)\n" + getMemoryString());}
 			setMgrConfig(true);
 			// mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode,
 			// mNoExpand, mAlgoMode, mRotate, mWAdjust, mImgScale, mPageWay,
@@ -998,7 +1004,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 					}
 					if (mViewRota == DEF.ROTATE_PORTRAIT || mViewRota == DEF.ROTATE_LANDSCAPE) {
 						int rotate;
-						if (getRequestedOrientation() == DEF.ROTATE_PORTRAIT) {
+						if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 							// 横にする
 							rotate = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 						}
@@ -1703,7 +1709,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	//指定したページをクロップして書庫／フォルダのサムネイルに設定
 	public void setThumbCropped(int page) {
-		String path = mImageMgr.decompFile(page, "croptmp");
+		String path = mImageMgr.decompFile(page, null);
 		if (path != null && path.length() >= 5) {
 			int thumbH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
 			int thumbW = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeW(mSharedPreferences));
@@ -1753,7 +1759,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 			loader.deleteThumbnailCache(mFilePath, thumW, thumH);
 			loader.setThumbnailCache(mFilePath, bm);
-			Toast.makeText(this, "サムネイルに設定しました", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.ThumbConfigured, Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -1780,7 +1786,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 			loader.deleteThumbnailCache(mFilePath, thumW, thumH);
 			loader.setThumbnailCache(mFilePath,bm);
-			Toast.makeText(this, "サムネイルに設定しました", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.ThumbConfigured, Toast.LENGTH_SHORT).show();
 		}
 	}
 	public void toggleCenterMargin() {
@@ -2352,7 +2358,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 						else {
 							// ページ選択方法がスライダー表示かサムネイルのとき
 
-							AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+							AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.MyDialog);
 							if ((mResult == 0x4002 && mPageWay == DEF.PAGEWAY_RIGHT) || (mResult == 0x4003 && mPageWay != DEF.PAGEWAY_RIGHT)) {
 								dialogBuilder.setTitle(R.string.pageTop);
 							}
@@ -2360,7 +2366,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 								dialogBuilder.setTitle(R.string.pageLast);
 							}
 							dialogBuilder.setMessage(null);
-							dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int whichButton) {
 
@@ -2392,12 +2398,25 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 									dialog.dismiss();
 								}
 							});
-							dialogBuilder.setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
+							dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int whichButton) {
 									// dialog.cancel();
 								}
 							});
 							Dialog dialog = dialogBuilder.create();
+							if (mImmEnable) {
+								//dialog.getWindow().
+								//	setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+								//			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+								dialog.getWindow().getDecorView().setSystemUiVisibility(
+										View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+												| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+												| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+												//| View.SYSTEM_UI_FLAG_FULLSCREEN
+												//| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+												//| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+								);
+							}
 							dialog.show();
 						}
 
@@ -2449,6 +2468,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 								break;
 							case 8:
 								if (mPageSelect == PAGE_INPUT) {
+
 									// ページ番号入力
 									if (PageSelectDialog.mIsOpened == false) {
 										PageSelectDialog pageDlg = new PageSelectDialog(this, mImmEnable);
@@ -2458,6 +2478,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 									}
 								}
 								else if (mPageSelect == PAGE_THUMB) {
+
 									// サムネイルページ選択
 									if (PageThumbnail.mIsOpened == false) {
 										PageThumbnail thumbDlg = new PageThumbnail(this);
@@ -2955,7 +2976,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	// 上部メニューの設定を読み込み
 	private boolean[] loadTopMenuState() {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("ImageActivity", "loadTopMenuState: 開始します.");}
 
 		boolean states[] = null;
@@ -3021,7 +3042,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 	// 上部メニューの設定を保存
 	private void saveTopMenuState(boolean states[]) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("ImageActivity", "saveTopMenuState: 開始します. states.length=" + states.length);}
 
 		Editor ed = mSharedPreferences.edit();
@@ -3195,7 +3216,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 
 		// 操作カテゴリ
 		mMenuDialog.addSection(res.getString(R.string.operateSec));
-		// ブックマーク追加
+		// ブックマーク選択
 		mMenuDialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
 		// ブックマーク追加
 		mMenuDialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
@@ -3331,6 +3352,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			mMenuDialog.show();
 		}
 		else {
+			Toast.makeText(this, R.string.bmNotFound, Toast.LENGTH_SHORT).show();
 			mMenuDialog = null;
 		}
 	}
@@ -3547,7 +3569,9 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 						Intent intent = new Intent(Intent.ACTION_SEND);
 						intent.setType(mime);
 						// 保存した画像のURIを第二引数に。
-						intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + path));
+						//intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + path));
+						Uri uri = FileProvider.getUriForFile(this,getApplicationContext().getPackageName() + ".provider", new File(path));
+						intent.putExtra(Intent.EXTRA_STREAM, uri);
 						startActivity(intent);
 					}
 				}
@@ -3977,7 +4001,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 				showCloseDialog(CloseDialog.LAYOUT_LAST);
 			}
 			else if (mLastMsg == DEF.LASTMSG_NEXT) {
-				// 前のファイルを開き、続きから記録せず、現在頁保存
+				// 次のファイルを開き、続きから記録せず、現在頁保存
 				finishImageActivity(CloseDialog.CLICK_NEXTTOP, false, true);
 			}
 			else {
@@ -4016,6 +4040,8 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		if (mCurrentPage <= 0 && (!mCurrentPageHalf || (mCurrentPageHalf && mHalfPos != HALFPOS_2ND))) {
 			// 先頭ページかつ分割表示中かつ2ページ目でないなら前ページはない
 			// 先頭ページかつ分割表示でないなら前ページはない
+
+			// 先頭ページ
 			if (mLastMsg == DEF.LASTMSG_DIALOG) {
 				showCloseDialog(CloseDialog.LAYOUT_TOP);
 			}
@@ -4083,7 +4109,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 			}
 			else {
 				if (DEF.checkPortrait(mViewWidth, mViewHeight) == false) {
-					// /* getRequestedOrientation() != DEF.ROTATE_PORTRAIT */
+					// /* getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT */
 					return true;
 				}
 			}
@@ -4099,7 +4125,7 @@ public class ImageActivity extends Activity implements OnTouchListener, Handler.
 		else if (mDispMode == DISPMODE_EXCHANGE) {
 			if (mViewRota != DEF.ROTATE_PSELAND) {
 				if (DEF.checkPortrait(mViewWidth, mViewHeight) == true) {
-					/* getRequestedOrientation() == DEF.ROTATE_PORTRAIT */
+					/* getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT */
 					return true;
 				}
 			}

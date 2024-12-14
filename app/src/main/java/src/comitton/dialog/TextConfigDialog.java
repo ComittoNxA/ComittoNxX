@@ -19,6 +19,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
@@ -123,8 +125,9 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 		// 外をタッチすると閉じる
 		setCanceledOnTouchOutside(true);
@@ -170,6 +173,17 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.textconfigdialog);
+
+		TextView textView = (TextView)this.findViewById(R.id.text_message);
+		ScrollView scrollView = (ScrollView)this.findViewById(R.id.ScrollView);
+
+		int width = (int)(mContext.getResources().getDisplayMetrics().widthPixels * 0.80);
+		int scale = (int)(mContext.getResources().getDisplayMetrics().scaledDensity * 320);
+		width = Math.max(width, scale);
+
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, LinearLayout.LayoutParams.WRAP_CONTENT);
+		textView.setLayoutParams(lp);
+		scrollView.setLayoutParams(lp);
 
 		mChkIsSave = (CheckBox) this.findViewById(R.id.chk_save);
 

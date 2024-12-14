@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
+import src.comitton.activity.TextActivity;
 import src.comitton.common.DEF;
+import src.comitton.data.FileData;
 import src.comitton.data.MarkerDrawData;
 import src.comitton.data.TextDrawData;
 import src.comitton.data.PictureData;
@@ -30,44 +31,47 @@ public class TextManager {
 	public static final int SIZE_BITFLAG = 12;
 	public static final int MSG_ERROR = 4;
 
-	private final int COMMENT_NONE = 0;
-	private final int COMMENT_JISAGE = 1;
-	private final int COMMENT_JISAGE_RANGE = 2;
-	private final int COMMENT_PAGECONTROL = 3;
-	private final int COMMENT_STRCODE = 4;
-	private final int COMMENT_STRCODE_EXT = 5;
-	private final int COMMENT_PICTURE = 6;
-	private final int COMMENT_PICTURE_CHAR = 7;
-	private final int COMMENT_MIDASHI = 8;
-	private final int COMMENT_MIDASHI_ST = 9;
-	private final int COMMENT_MIDASHI_ED = 10;
-	private final int COMMENT_TEXTSTYLE = 11;
-	private final int COMMENT_TEXTSTYLE_ST = 12;
-	private final int COMMENT_TEXTSTYLE_ED = 13;
-	private final int COMMENT_JITUKI = 14;
+	private static final int COMMENT_NONE = 0;
+	private static final int COMMENT_JISAGE = 1;
+	private static final int COMMENT_JISAGE_RANGE = 2;
+	private static final int COMMENT_PAGECONTROL = 3;
+	private static final int COMMENT_STRCODE = 4;
+	private static final int COMMENT_STRCODE_EXT = 5;
+	private static final int COMMENT_PICTURE = 6;
+	private static final int COMMENT_PICTURE_CHAR = 7;
+	private static final int COMMENT_MIDASHI = 8;
+	private static final int COMMENT_MIDASHI_ST = 9;
+	private static final int COMMENT_MIDASHI_ED = 10;
+	private static final int COMMENT_TEXTSTYLE = 11;
+	private static final int COMMENT_TEXTSTYLE_ST = 12;
+	private static final int COMMENT_TEXTSTYLE_ED = 13;
+	private static final int COMMENT_JITUKI = 14;
 
 	private final int PARAM_PAGEBREAK = 0;
 	private final int PARAM_PAGECENTER = 1;
 
-	private final int TB_PICTURE = -1;
-	private final int TB_PAGECONTROL = -2;
+	public static final int TB_PICTURE = -1;
+	public static final int TB_PAGECONTROL = -2;
 
-	private final int CHARTYPE_INIT = -1;
-	private final int CHARTYPE_KANJI = 0;
-	private final int CHARTYPE_ASCII = 1;
-	private final int CHARTYPE_KANA = 2;
-	private final int CHARTYPE_CTRL = 3;
-	private final int CHARTYPE_SYMBOL = 4;
-	private final int CHARTYPE_MARK = 5;
-	private final int CHARTYPE_PCHAR = 6;
-	private final int CHARTYPE_ASCII_NUM = 7;
-	private final int CHARTYPE_ASCII_MARK = 8;
+	private static final int CHARTYPE_INIT = -1;
+	private static final int CHARTYPE_KANJI = 0;
+	private static final int CHARTYPE_ASCII = 1;
+	private static final int CHARTYPE_KANA = 2;
+	private static final int CHARTYPE_CTRL = 3;
+	private static final int CHARTYPE_SYMBOL = 4;
+	private static final int CHARTYPE_MARK = 5;
+	private static final int CHARTYPE_PCHAR = 6;
+	private static final int CHARTYPE_ASCII_NUM = 7;
+	private static final int CHARTYPE_ASCII_MARK = 8;
 
-	private final int BMPSCALE_ORIGINAL = 0;
-	private final int BMPSCALE_ZOOM2X = 1;
-	private final int BMPSCALE_ZOOM3X = 2;
-	private final int BMPSCALE_ZOOM4X = 3;
-	private final int BMPSCALE_SCREEN = 4;
+	public static final int BMPSCALE_ORIGINAL = 0;
+	public static final int BMPSCALE_ZOOM2X = 1;
+	public static final int BMPSCALE_ZOOM3X = 2;
+	public static final int BMPSCALE_ZOOM4X = 3;
+	public static final int BMPSCALE_SCREEN = 4;
+	public static final int BMPSCALE_SCREEN_NO_MARGIN = 5;
+	public static final int BMPSCALE_DUAL_SCREEN = 6;
+	public static final int BMPSCALE_DUAL_SCREEN_NO_MARGIN = 7;
 
 	public static final char CHARDRAW_YOKO = 0x2a00;
 	public static final char CHARDRAW_DAKUTEN = 0x2a01;
@@ -86,6 +90,8 @@ public class TextManager {
 
 	private Handler mHandler;
 
+	private TextActivity mTextActivity;
+	private Context mContext;
 	private TextDrawData mTextPages[][] = null;
 	private byte mInputBuff[];
 	private char mTextBuff[];
@@ -101,7 +107,12 @@ public class TextManager {
 	private static final int CODETBL_BLOCK = 4;
 	private byte mCodeTbl[];
 
-	private String mTitle;
+	private String mTitle = "";
+	private String mCreator = "";
+	private String mPublisher = "";
+	private String mPrimaryWritingMode = "";
+	private String mToc = "";
+	private String mPageProgressionDirection = "";
 
 	// private int mPosX; // 次の文字X座標(文字の右上基準)
 	// private int mTxPosY; // 次の文字Y座標(文字の右上基準)
@@ -117,7 +128,8 @@ public class TextManager {
 	private int mTextWidth; // テキストエリア幅
 	private int mTextHeight; // テキストエリア高さ
 
-	public int mAscMode;	// 半角の表示方法
+	public int mAscMode;
+	private String mCharset;// 半角の表示方法
 
 	private int mPicScale;
 
@@ -133,6 +145,7 @@ public class TextManager {
 	private String mTextPath;
 	private String mUser;
 	private String mPass;
+	private int mFileType;
 
 	private Paint mTextPaint;
 	
@@ -479,11 +492,42 @@ public class TextManager {
 			return;
 		}
 	}
-	
+
+	public class EpubFile {
+		public String id;
+		public String href;
+		public String type;
+
+		public EpubFile(String id, String href, String type) {
+			this.id = id;
+			this.href = href;
+			this.type = type;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getHref() {
+			return href;
+		}
+
+		public String getType() {	return type; }
+	}
+
 	public class MidashiData {
 		public String text; // 見出しテキスト
 		public int line; // 行位置
 		public int page; // ページ位置
+		public int type; // 種別
+
+		public static final int EPUB_TITLE = 1;
+		public static final int EPUB_TOC = 2;
+		public static final int FILE_TITLE = 3;
+		public static final int HEADING_LARGE = 4;
+		public static final int HEADING_MIDDLE = 5;
+		public static final int HEADING_SMALL = 6;
+		public static final int CAPTION = 7;
 
 		public void setText(String t) {
 			if (text == null) {
@@ -500,6 +544,10 @@ public class TextManager {
 
 		public int getPage() {
 			return page;
+		}
+
+		public int getType() {
+			return type;
 		}
 
 		public boolean equals(Object obj) {
@@ -521,11 +569,12 @@ public class TextManager {
 			current = 0;
 		}
 
-		public MidashiData addMidashiData(String t, int l) {
+		public MidashiData addMidashiData(String text, int line, int type) {
 			MidashiData md = new MidashiData();
-			md.text = t;
-			md.line = l;
+			md.text = text;
+			md.line = line;
 			md.page = -1;
+			md.type = type;
 			if (midashilist.indexOf(md) < 0) {
 				// 同じものがない場合のみ登録
 				midashilist.add(md);
@@ -1104,7 +1153,9 @@ public class TextManager {
 		}
 	}
 
-	public TextManager(ImageManager imagemgr, String textfile, String user, String pass, Handler handler, Context context) {
+	public TextManager(ImageManager imagemgr, String textfile, String user, String pass, Handler handler, TextActivity activity, int fileType) {
+		mTextActivity = activity;
+		mContext = activity;
 		mTextPages = null;
 		mHandler = handler;
 		mRunningFlag = true;
@@ -1113,6 +1164,7 @@ public class TextManager {
 		mTextPath = DEF.getDir(textfile);
 		mUser = user;
 		mPass = pass;
+		mFileType = fileType;
 
 		mImageMgr = imagemgr;
 
@@ -1120,39 +1172,78 @@ public class TextManager {
 		mFontWidth[0] = new float[0x80];
 		mFontWidth[1] = new float[0x80];
 
-		AssetManager am = context.getResources().getAssets();
+		AssetManager am = activity.getResources().getAssets();
 		InputStream is;
 		try {
 			is = am.open("codetbl.bin", AssetManager.ACCESS_STREAMING);
 			is.read(mCodeTbl);
 		} catch (IOException e) {
 			// 文字テーブル読み込み失敗
-			Log.e("TextManager", e.getMessage());
+			Log.e("TextManager", "TextManager: " + e.getMessage());
 		}
 	}
 
 	public void LoadTextFile() {
-		// try {
-		mInputBuff = mImageMgr.loadExpandData(mTextFile);
-		if (mInputBuff == null) {
-			// }
-			// catch (IOException ex) {
-			Log.d("TextManager", "Text file load error");
+		LoadTextFile(mTextFile, true);
+	}
+
+	public void LoadTextFile(String filename) {
+		LoadTextFile(filename, true);
+	}
+
+	public void LoadTextFile(String filename, boolean errlog) {
+		mInputBuff = mImageMgr.loadExpandData(filename);
+		if (mInputBuff == null && errlog) {
+			Log.e("TextManager", "LoadTextFile: Text file load error. file=" + filename);
 			Message message = new Message();
 			message.what = MSG_ERROR;
-			message.obj = "Text file load error";
+			message.obj = "Text file load error. file=" + filename;
 			mHandler.sendMessage(message);
 		}
 	}
 
-	public void formatTextFile(int width, int height, float headfont, float textfont, float rubifont, float space_w, float space_h, int margin_w, int margin_h, int pic_scale, String fontfile, int ascmode) {
+	private String getPath(String srcFile, String dstFile) {
+		boolean debug = false;
+		if (debug) {Log.d("TextManager", "getPath: 開始します. srcFile=" + srcFile + ", dstFile=" + dstFile);}
+		String filePath = srcFile.substring(0, srcFile.lastIndexOf('/') + 1);
+		String filePath2 = dstFile;
+		if (dstFile.startsWith("/")) {
+			if (debug) {Log.d("TextManager", "getPath: 終了します. return=" + filePath2.substring(1));}
+			return filePath2.substring(1);
+		} else {
+			while (true) {
+				if (filePath2.startsWith("../")) {
+					// 親ディレクトリ指定
+					filePath2 = dstFile.substring(3);
+					if (filePath.length() > 2) {
+						int pridx = filePath.lastIndexOf('/', filePath.length() - 2);
+						if (pridx >= 0) {
+							filePath = filePath.substring(0, pridx + 1);
+						} else {
+							filePath = "";
+						}
+					}
+				} else {
+					break;
+				}
+			}
+			if (debug) {Log.d("TextManager", "getPath: 終了します. return=" + (filePath + filePath2));}
+			return filePath + filePath2;
+		}
+	}
+
+	// xmlを解析して青空文庫に変換する
+	public void formatTextFile(int width, int height, float headfont, float textfont, float rubifont, float space_w, float space_h, int margin_w, int margin_h, int pic_scale, String fontfile, int ascmode, String charset) {
+		boolean debug = true;
+		if (debug) {Log.d("TextManager", "formatTextFile: 開始します. width=" + width + ",  height=" + height + ", headfont=" + headfont + ", textfont=" + textfont + ", rubifont=" + rubifont);}
+
 		// リスト確保
 		StringBuffer textbuff = new StringBuffer();
 		mPicArray = new ArrayList<PictureData>();
 
-		if (mInputBuff == null) {
-			return;
-		}
+		//if (mInputBuff == null) {
+		//	return;
+		//}
 
 		// 基準値保持
 		mWidth = width;
@@ -1191,196 +1282,276 @@ public class TextManager {
 		}
 
 		mAscMode = ascmode;
+		mCharset = charset;
 
-		String inputStr;
+		ArrayList<EpubFile> manifest = new ArrayList<EpubFile>();
+		ArrayList<EpubFile> spine = new ArrayList<EpubFile>();
+		ArrayList<EpubFile> toc = new ArrayList<EpubFile>();
+
+		String filename = mTextFile;
+		String inputStr = "";
+		String outputStr = "";
 		StringBuffer inputSB = null;
 		String title = "";
-		String strCharSet = checkShiftJIS(mInputBuff);
-		try {
-			inputStr = new String(mInputBuff, strCharSet);
+
+		if (debug) {Log.d("TextManager", "formatTextFile: filename=" + filename);}
+		// EPUBコンテナファイルの解析
+		if (filename.equals("META-INF/container.xml")) {
+			if (debug) {Log.d("TextManager", "formatTextFile: EPUBコンテナファイルを解析します.");}
+
+			LoadTextFile(filename);
+			inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
 			inputStr = inputStr.replaceAll("\r\n", "\n");
-		} catch (UnsupportedEncodingException e) {
-			// 自動判定による変換失敗
-			return;
-		}
 
-		// XML読み込み
-		if (inputStr.startsWith("<?xml")) {
+			// XML読み込み
 			XmlPullParser xmlPullParser = Xml.newPullParser();
-
 			try {
-				xmlPullParser.setInput(new StringReader(inputStr));
-			} catch (XmlPullParserException e) {
+				xmlPullParser.setInput(new StringReader(DEF.removeUTF8BOM(inputStr)));
+			} catch (Exception e) {
 				xmlPullParser = null;
-				Log.e("formatText", "XMLの読み込みに失敗");
+				Log.e("TextManager", "formatTextFile: XMLの読み込みに失敗");
+				if (e != null && e.getMessage() != null) {
+					Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+				}
 			}
-
 			if (xmlPullParser != null) {
 				inputSB = new StringBuffer(inputStr.length());
 				int eventType = 0;
-				int tag_level = 0;
-				int tag_level_p = 0;
-				int tag_level_title = 0;
-				int tag_level_body = 0;
-				int tag_level_ruby = 0;
-				int tag_level_rp = 0;
-				int tag_level_rt = 0;
-				int tag_level_h = 0;
-				int text_cnt = 0;
-				boolean isDiv = false;
-				String line_text = null;
-
 				try {
 					eventType = xmlPullParser.getEventType();
+				} catch (Exception e) {
 				}
-                catch (Exception e) {
-                	inputSB = null;
-                }
 				String tag_name;
 				while (eventType != XmlPullParser.END_DOCUMENT) {
 					try {
 						tag_name = xmlPullParser.getName();
-						if (eventType == XmlPullParser.START_DOCUMENT) {
-							// Log.d("XmlPullParserSample", "Start document");
-						} else if (eventType == XmlPullParser.END_DOCUMENT) {
-							// Log.d("XmlPullParserSample", "End document");
-						} else if (eventType == XmlPullParser.START_TAG) {
-							// Log.d("XmlPullParserSample", "Start tag " + tag_name);
+						if (eventType == XmlPullParser.START_TAG) {
+							if (debug) {Log.d("TextManager", "formatTextFile: START_TAG: " + tag_name);}
 							int atr_count = xmlPullParser.getAttributeCount();
-
-							// タグの階層
-							tag_level++;
-							if (tag_name.equals("br")) {
-								// brタグであれば改行追加
-								inputSB.append("\n");
-								text_cnt = 0;
-							}
-							else if (tag_name.equals("ruby")) {
-								tag_level_ruby++;
-								if (tag_level_ruby == 1) {
-									inputSB.append("｜");
-								}
-							}
-							else if (tag_name.equals("rt")) {
-								tag_level_rt++;
-								if (tag_level_rt == 1) {
-									inputSB.append("《");
-								}
-							}
-							else if (tag_name.equals("rp")) {
-								tag_level_rp++;
-							}
-							else if (tag_name.equals("p")) {
-								tag_level_p++;
-								text_cnt = 0;
-								isDiv = false;
-							}
-							else if (tag_name.equals("img")) {
+							if (tag_name.equals("rootfile")) {
+								// EPUB書誌情報ファイルを取得
 								for (int i = 0; i < atr_count; i++) {
 									String atr_name = xmlPullParser.getAttributeName(i);
-									if (atr_name.equals("src")) {
-										String atr_value = xmlPullParser.getAttributeValue(i);
-										inputSB.append("［＃挿絵（");
-										inputSB.append(atr_value);
-										inputSB.append("）入る］\n");
+									if (debug) {Log.d("TextManager", "formatTextFile: atr_name=" + atr_name);}
+									if (atr_name.equals("full-path")) {
+										filename = xmlPullParser.getAttributeValue(i);
+										if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル=" + filename);}
 									}
 								}
 							}
-							else if (tag_name.equals("title")) {
+						}
+						eventType = xmlPullParser.next();
+					} catch (Exception e) {
+						Log.e("TextManager", "formatTextFile: EPUBコンテナファイルの解析失敗");
+						if (e != null && e.getMessage() != null) {
+							Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+						}
+						break;
+					}
+				}
+			}
+			if (inputSB != null) {
+				outputStr += inputSB.toString();
+				inputSB = null;
+			} else {
+				outputStr += inputStr;
+			}
+		}
+
+		// EPUB書誌情報ファイルの解析
+		if (filename.toLowerCase().endsWith(".opf")) {
+			if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイルを解析します. filename=" + filename);}
+			if (filename != mTextFile) {
+				LoadTextFile(filename);
+				inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+				inputStr = inputStr.replaceAll("\r\n", "\n");
+			}
+			// XML読み込み
+			XmlPullParser xmlPullParser = Xml.newPullParser();
+			try {
+				xmlPullParser.setInput(new StringReader(DEF.removeUTF8BOM(inputStr)));
+			} catch (Exception e) {
+				xmlPullParser = null;
+				Log.e("TextManager", "formatTextFile: XMLの読み込みに失敗");
+				if (e != null && e.getMessage() != null) {
+					Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+				}
+			}
+			if (xmlPullParser != null) {
+				inputSB = new StringBuffer(inputStr.length());
+				int tag_level_title = 0;
+				int tag_level_creator = 0;
+				int tag_level_publisher = 0;
+				int tag_level_manifest = 0;
+				int tag_level_spine = 0;
+				int tag_level_guide = 0;
+
+				int eventType = 0;
+				try {
+					eventType = xmlPullParser.getEventType();
+				} catch (Exception e) {
+				}
+				String tag_name;
+				while (eventType != XmlPullParser.END_DOCUMENT) {
+					try {
+						tag_name = xmlPullParser.getName();
+						if (eventType == XmlPullParser.START_TAG) {
+							if (debug) {Log.d("TextManager", "formatTextFile: START_TAG: " + tag_name);}
+							int atr_count = xmlPullParser.getAttributeCount();
+							if (tag_name.equals("title")) {
 								tag_level_title++;
 							}
-							else if (tag_name.equals("body")) {
-								tag_level_body++;
+							else if (tag_name.equals("creator")) {
+								tag_level_creator++;
 							}
-							else if (tag_name.equals("div")) {
-								if (isDiv == false && inputSB.length() > 0) {
-									inputSB.append("［＃改ページ］\n");
-									isDiv = true;
+							else if (tag_name.equals("publisher")) {
+								tag_level_publisher++;
+							}
+							else if (tag_name.equals("meta")) {
+								String name = "";
+								String content = "";
+								for (int i = 0; i < atr_count; i++) {
+									String atr_name = xmlPullParser.getAttributeName(i);
+									if (atr_name.equals("name")) {
+										name = xmlPullParser.getAttributeValue(i);
+									}
+									if (atr_name.equals("content")) {
+										content = xmlPullParser.getAttributeValue(i);
+									}
+								}
+								if (name == "primary-writing-mode") {
+									// テキストの行の方向（縦書き、横書き）
+									mPrimaryWritingMode = content;
 								}
 							}
-							else if (tag_name.equals("h1") || tag_name.equals("h2") || tag_name.equals("h3")) {
-								// 見出しとする
-								tag_level_h++;
-								line_text = "";
-								text_cnt = 0;
+							else if (tag_name.equals("manifest")) {
+								tag_level_manifest++;
 							}
-							else if (tag_name.equals("ol")) {
-								inputSB.append("\n");
-							}
-						} else if (eventType == XmlPullParser.END_TAG) {
-							//Log.d("XmlPullParserSample", "End tag " + tag_name);
-							if (tag_level > 0) {
-								tag_level--;
-							}
-							if (tag_name.equals("ruby")) {
-								if (tag_level_ruby > 0) {
-									tag_level_ruby--;
-								}
-							}
-							else if (tag_name.equals("rt")) {
-								if (tag_level_rt == 1) {
-									inputSB.append("》");
-								}
-								if (tag_level_rt > 0) {
-									tag_level_rt--;
-								}
-							}
-							else if (tag_name.equals("rp")) {
-								if (tag_level_rp > 0) {
-									tag_level_rp--;
-								}
-							}
-							else if (tag_name.equals("p")) {
-								if (tag_level_p > 0) {
-									tag_level_p--;
-
-									if (tag_level_p == 0 && text_cnt > 0) {
-										inputSB.append("\n");
+							else if (tag_name.equals("item")) {
+								if (tag_level_manifest > 0) {
+									String id = "";
+									String href = "";
+									String type = "";
+									for (int i = 0; i < atr_count; i++) {
+										String atr_name = xmlPullParser.getAttributeName(i);
+										if (atr_name.equals("id")) {
+											id = xmlPullParser.getAttributeValue(i);
+										}
+										if (atr_name.equals("href")) {
+											href = getPath(filename, xmlPullParser.getAttributeValue(i));
+										}
+										if (atr_name.equals("media-type")) {
+											type = xmlPullParser.getAttributeValue(i);
+										}
+									}
+									if (id.length() > 0) {
+										manifest.add(new EpubFile(id, href, type));
+										if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: manifest[" + (manifest.size()-1) + "]: id=" + manifest.get(manifest.size()-1).getId() + ", href=" + manifest.get(manifest.size()-1).getHref() + ", mediaType=" + manifest.get(manifest.size()-1).getType());}
 									}
 								}
 							}
-							else if (tag_name.equals("title")) {
-								if (tag_level_title > 0) {
-									tag_level_title--;
+							else if (tag_name.equals("spine")) {
+								tag_level_spine++;
+								String id = "";
+								for (int i = 0; i < atr_count; i++) {
+									String atr_name = xmlPullParser.getAttributeName(i);
+									if (atr_name.equals("toc")) {
+										id = xmlPullParser.getAttributeValue(i);
+										if (id.length() > 0) {
+											for(int j = 0; j < manifest.size(); ++j){
+												if (id.equals(manifest.get(i).getId())) {
+													mToc = manifest.get(i).getHref();
+													if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: mToc=" + mToc);}
+													break;
+												}
+											}
+										}
+									}
+									if (atr_name.equals("page-progression-direction")) {
+										mPageProgressionDirection = xmlPullParser.getAttributeValue(i);
+										if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: mPageProgressionDirection=" + mPageProgressionDirection);}
+									}
 								}
 							}
-							else if (tag_name.equals("body")) {
-								if (tag_level_body > 0) {
-									tag_level_body--;
+							else if (tag_name.equals("itemref")) {
+								if (tag_level_spine > 0) {
+									String id = "";
+									String href = "";
+									String mediaType = "";
+									for (int i = 0; i < atr_count; i++) {
+										String atr_name = xmlPullParser.getAttributeName(i);
+										if (atr_name.equals("idref")) {
+											id = xmlPullParser.getAttributeValue(i);
+										}
+									}
+									if (id.length() > 0) {
+										for(int i = 0; i < manifest.size(); ++i){
+											if (id.equals(manifest.get(i).getId())) {
+												spine.add(new EpubFile(id, manifest.get(i).getHref(), manifest.get(i).getType()));
+												if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: spine[" + (spine.size()-1) + "]: id=" + spine.get(spine.size()-1).getId() + ", href=" + spine.get(spine.size()-1).getHref() + ", mediaType=" + spine.get(spine.size()-1).getType());}
+												break;
+											}
+										}
+									}
 								}
 							}
-							else if (tag_name.equals("div")) {
-								if (isDiv == false && inputSB.length() > 0) {
-									inputSB.append("［＃改ページ］\n");
-									isDiv = true;
+							else if (tag_name.equals("guide")) {
+								tag_level_guide++;
+							}
+							else if (tag_name.equals("reference")) {
+								if (tag_level_guide > 0) {
+									String id = "";
+									String href = "";
+									String type = "";
+									for (int i = 0; i < atr_count; i++) {
+										String atr_name = xmlPullParser.getAttributeName(i);
+										if (atr_name.equals("title")) {
+											id = xmlPullParser.getAttributeValue(i);
+										}
+										if (atr_name.equals("href")) {
+											href = getPath(filename, xmlPullParser.getAttributeValue(i));
+										}
+										if (atr_name.equals("type")) {
+											type = xmlPullParser.getAttributeValue(i);
+										}
+									}
+									if (href.length() > 0) {
+										toc.add(new EpubFile(id, href, type));
+										if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: toc[" + (toc.size()-1) + "]: id=" + toc.get(toc.size()-1).getId() + ", href=" + toc.get(toc.size()-1).getHref() + ", mediaType=" + toc.get(toc.size()-1).getType());}
+									}
 								}
 							}
-							else if (tag_name.equals("h1") || tag_name.equals("h2") || tag_name.equals("h3")) {
-								if (line_text.length() > 0) {
-    								inputSB.append(line_text);
-    								inputSB.append("［＃「" + line_text + "」は大見出し］\n");
-    							}
-   								text_cnt = 0;
-								if (tag_level_h > 0) {
-									tag_level_h--;
-								}
+						} else if (eventType == XmlPullParser.END_TAG) {
+							if (debug) {Log.d("TextManager", "formatTextFile: END_TAG: " + tag_name);}
+							//if(debug) {Log.d("TextManager", "formatTextFile: End tag '" + tag_name + "'");}
+							if (tag_name.equals("title")) {
+								tag_level_title--;
 							}
-							else if (tag_name.equals("li") || tag_name.equals("dt") || tag_name.equals("dd")) {
-								inputSB.append("\n");
+							else if (tag_name.equals("creator")) {
+								tag_level_creator--;
+							}
+							else if (tag_name.equals("publisher")) {
+								tag_level_publisher--;
+							}
+							else if (tag_name.equals("manifest")) {
+								tag_level_manifest--;
+							}
+							else if (tag_name.equals("spine")) {
+								tag_level_spine--;
+							}
+							else if (tag_name.equals("guide")) {
+								tag_level_guide--;
 							}
 						} else if (eventType == XmlPullParser.TEXT) {
-							//Log.d("XmlPullParserSample", "Text " + xmlPullParser.getText());
+							//if(debug) {Log.d("TextManager", "formatTextFile: Text '" + xmlPullParser.getText() + "'");}
 							String text = xmlPullParser.getText().replaceAll("[\n\t]", "");
 							if (text.equals("!!")) {
 								text = "‼";
-							}
-							else if (text.equals("!?")) {
+							} else if (text.equals("!?")) {
 								text = "⁉";
-							}
-							else if (text.equals("?!")) {
+							} else if (text.equals("?!")) {
 								text = "⁈";
-							}
-							else if (text.equals("??")) {
+							} else if (text.equals("??")) {
 								text = "⁇";
 							}
 							text = text.replaceAll(" ", "");
@@ -1388,36 +1559,472 @@ public class TextManager {
 							if (tag_level_title > 0) {
 								if (text.length() > 0) {
 									// タイトル文字列設定
-									title = title + text;
+									mTitle = title + text;
 								}
 							}
-							else if (tag_level_h > 0) {
+							else if (tag_level_creator > 0) {
 								if (text.length() > 0) {
-									line_text = line_text + text;
-									text_cnt++;
+									// 作者設定
+									mCreator = mCreator + text;
 								}
 							}
-							else if (tag_level_body > 0 && tag_level_rp == 0) {
+							else if (tag_level_publisher > 0) {
 								if (text.length() > 0) {
-									inputSB.append(text);
-									text_cnt++;
+									// 出版社
+									mPublisher = mPublisher + text;
 								}
 							}
 						}
 						eventType = xmlPullParser.next();
 					} catch (Exception e) {
-						Log.e("formatText", "xml解析失敗");
-//						inputSB = null;
+						Log.e("TextManager", "formatTextFile: EPUB書誌情報ファイルの解析失敗");
+						if (e != null && e.getMessage() != null) {
+							Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+						}
 						break;
 					}
 				}
 			}
+			if (mTitle.length() > 0) {
+				if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: mTitle=" + mTitle);}
+				inputSB.append("［＃「" + mTitle + "」はEPUBタイトル］");
+			}
+			if (mCreator.length() > 0) {
+				if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: mCreator=" + mCreator);}
+				inputSB.append("［＃「" + mCreator + "」は作者］");
+			}
+			if (mPublisher.length() > 0) {
+				if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: mPublisher=" + mPublisher);}
+				inputSB.append("［＃「" + mPublisher + "」は出版社］");
+			}
+			if (inputSB != null) {
+				outputStr += inputSB.toString();
+				inputSB = null;
+			} else {
+				outputStr += inputStr;
+			}
+		}
+
+		// 目次情報ファイルの解析
+		if (mFileType == FileData.FILETYPE_EPUB) {
+			mInputBuff = null;
+			if (mToc.length() > 0) {
+				LoadTextFile(mToc);
+			} else {
+				// 目次ファイル名が無かったら決めうちで探す
+				mToc = getPath(filename, "toc.ncx");
+				LoadTextFile(mToc, false);
+			}
+			if (mInputBuff != null) {
+				if (debug) {
+					Log.d("TextManager", "formatTextFile: 目次情報ファイルを解析します. filename=" + filename);
+				}
+				if (mInputBuff != null) {
+					inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+					inputStr = inputStr.replaceAll("\r\n", "\n");
+				}
+				// XML読み込み
+				XmlPullParser xmlPullParser = Xml.newPullParser();
+				try {
+					xmlPullParser.setInput(new StringReader(DEF.removeUTF8BOM(inputStr)));
+				} catch (Exception e) {
+					xmlPullParser = null;
+					Log.e("TextManager", "formatTextFile: XMLの読み込みに失敗");
+					if (e != null && e.getMessage() != null) {
+						Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+					}
+				}
+				if (xmlPullParser != null) {
+					inputSB = new StringBuffer(inputStr.length());
+					int tag_level_navpoint = 0;
+					int tag_level_navlabel = 0;
+					int tag_level_text = 0;
+					String id = "";
+					String href = "";
+					String type = "";
+
+					int eventType = 0;
+					try {
+						eventType = xmlPullParser.getEventType();
+					} catch (Exception e) {
+					}
+					String tag_name;
+					while (eventType != XmlPullParser.END_DOCUMENT) {
+						try {
+							tag_name = xmlPullParser.getName();
+							if (eventType == XmlPullParser.START_TAG) {
+								if (debug) {
+									Log.d("TextManager", "formatTextFile: START_TAG: " + tag_name);
+								}
+								int atr_count = xmlPullParser.getAttributeCount();
+								if (tag_name.equals("navPoint")) {
+									id = "";
+									href = "";
+									type = "";
+									tag_level_navpoint++;
+								} else if (tag_name.equals("navLabel")) {
+									tag_level_navlabel++;
+								} else if (tag_name.equals("text")) {
+									tag_level_text++;
+								} else if (tag_name.equals("content")) {
+									for (int i = 0; i < atr_count; i++) {
+										String atr_name = xmlPullParser.getAttributeName(i);
+										if (atr_name.equals("src")) {
+											href = getPath(mToc, xmlPullParser.getAttributeValue(i));
+										}
+									}
+								}
+							} else if (eventType == XmlPullParser.END_TAG) {
+								if (debug) {
+									Log.d("TextManager", "formatTextFile: END_TAG: " + tag_name);
+								}
+								if (tag_name.equals("navPoint")) {
+									if (href.length() != 0) {
+										toc.add(new EpubFile(id, href, type));
+										if (debug) {
+											Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: toc[" + (toc.size() - 1) + "]: id=" + toc.get(toc.size() - 1).getId() + ", href=" + toc.get(toc.size() - 1).getHref() + ", mediaType=" + toc.get(toc.size() - 1).getType());
+										}
+									}
+									tag_level_navpoint--;
+								} else if (tag_name.equals("navLabel")) {
+									tag_level_navlabel--;
+								} else if (tag_name.equals("text")) {
+									tag_level_text--;
+								}
+							} else if (eventType == XmlPullParser.TEXT) {
+								//if(debug) {Log.d("TextManager", "formatTextFile: Text '" + xmlPullParser.getText() + "'");}
+								String text = xmlPullParser.getText().replaceAll("[\n\t]", "");
+								if (text.equals("!!")) {
+									text = "‼";
+								} else if (text.equals("!?")) {
+									text = "⁉";
+								} else if (text.equals("?!")) {
+									text = "⁈";
+								} else if (text.equals("??")) {
+									text = "⁇";
+								}
+								text = text.replaceAll(" ", "");
+
+								if (tag_level_navpoint > 0 && tag_level_navlabel > 0 && tag_level_text > 0) {
+									if (text.length() > 0) {
+										id = id + text;
+									}
+								}
+							}
+							eventType = xmlPullParser.next();
+						} catch (Exception e) {
+							Log.e("TextManager", "formatTextFile: 目次情報ファイルの解析失敗");
+							if (e != null && e.getMessage() != null) {
+								Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+							}
+							break;
+						}
+					}
+				}
+				if (inputSB != null) {
+					outputStr += inputSB.toString();
+					inputSB = null;
+				} else {
+					outputStr += inputStr;
+				}
+			}
+		}
+
+		if (spine.size() == 0) {
+			spine.add(new EpubFile("id1", filename, ""));
+		}
+
+		for (int epubFileIndex = 0; epubFileIndex < spine.size(); epubFileIndex++) {
+			filename = spine.get(epubFileIndex).getHref();
+			if (filename.length() != 0) {
+				LoadTextFile(filename);
+				inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+				inputStr = inputStr.replaceAll("\r\n", "\n");
+				// 本文の解析
+				if (debug) {Log.d("TextManager", "formatTextFile: 本文を解析します. filename=" + filename);}
+				XmlPullParser xmlPullParser = Xml.newPullParser();
+				try {
+					xmlPullParser.setInput(new StringReader(DEF.removeUTF8BOM(inputStr)));
+				} catch (Exception e) {
+					xmlPullParser = null;
+					Log.e("TextManager", "formatTextFile: XMLの読み込みに失敗");
+					if (e != null && e.getMessage() != null) {
+						Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+					}
+				}
+
+				if (xmlPullParser != null) {
+					inputSB = new StringBuffer(inputStr.length());
+					int eventType = 0;
+					int tag_level = 0;
+					int tag_level_p = 0;
+					int tag_level_title = 0;
+					int tag_level_body = 0;
+					int tag_level_ruby = 0;
+					int tag_level_rp = 0;
+					int tag_level_rt = 0;
+					int tag_level_h = 0;
+					int text_cnt = 0;
+					boolean isDiv = false;
+					String line_text = null;
+
+					try {
+						eventType = xmlPullParser.getEventType();
+					}
+					catch (Exception e) {
+						inputSB = null;
+					}
+					String tag_name;
+					while (eventType != XmlPullParser.END_DOCUMENT) {
+						try {
+							tag_name = xmlPullParser.getName();
+							if (eventType == XmlPullParser.START_DOCUMENT) {
+								//if(debug) {Log.d("TextManager", "formatTextFile: Start document");}
+								for(int i = 0; i < toc.size(); ++i) {
+									if (filename.equals(toc.get(i).getHref())) {
+										inputSB.append("［＃「" + toc.get(i).getId() + "」はEPUB目次］");
+									}
+								}
+							} else if (eventType == XmlPullParser.END_DOCUMENT) {
+								//if(debug) {Log.d("TextManager", "formatTextFile: End document");}
+							} else if (eventType == XmlPullParser.START_TAG) {
+								//if(debug) {Log.d("TextManager", "formatTextFile: Start tag '" + tag_name + "'");}
+								int atr_count = xmlPullParser.getAttributeCount();
+
+								// タグの階層
+								tag_level++;
+
+								for (int i = 0; i < atr_count; i++) {
+									String atr_name = xmlPullParser.getAttributeName(i);
+									if (atr_name.equals("id")) {
+										if (debug) {Log.d("TextManager", "formatTextFile: 本文: id=" + xmlPullParser.getAttributeValue(i));}
+										if (debug) {Log.d("TextManager", "formatTextFile: 本文: href=" + filename + "#" + xmlPullParser.getAttributeValue(i));}
+										for(int j = 0; j < toc.size(); ++j) {
+											if (toc.get(j).getHref().equals(filename + "#" + xmlPullParser.getAttributeValue(i))) {
+												if (debug) {Log.d("TextManager", "formatTextFile: 本文: 目次を挿入しました. id=" + toc.get(j).getId());}
+												inputSB.append("［＃「" + toc.get(j).getId() + "」はEPUB目次］");
+											}
+										}
+										break;
+									}
+								}
+
+								if (tag_name.equals("br")) {
+									// brタグであれば改行追加
+									inputSB.append("\n");
+									text_cnt = 0;
+								}
+								else if (tag_name.equals("ruby")) {
+									tag_level_ruby++;
+									if (tag_level_ruby == 1) {
+										inputSB.append("｜");
+									}
+								}
+								else if (tag_name.equals("rt")) {
+									tag_level_rt++;
+									if (tag_level_rt == 1) {
+										inputSB.append("《");
+									}
+								}
+								else if (tag_name.equals("rp")) {
+									tag_level_rp++;
+								}
+								else if (tag_name.equals("p")) {
+									tag_level_p++;
+									text_cnt = 0;
+									isDiv = false;
+								}
+								else if (tag_name.equals("img") || tag_name.equals("image")) {
+									// SVGタグの中に<image href="">があるので暫定対処
+									String class_value = "";
+									String src_value = "";
+									String alt_value = "";
+									for (int i = 0; i < atr_count; i++) {
+										String atr_name = xmlPullParser.getAttributeName(i);
+										if (atr_name.equals("class")) {
+											class_value = xmlPullParser.getAttributeValue(i);
+										}
+										if (atr_name.equals("src") || atr_name.equals("href")) {
+											if (mFileType == FileData.FILETYPE_EPUB) {
+												src_value = getPath(filename, xmlPullParser.getAttributeValue(i));
+											}
+											else {
+												src_value = xmlPullParser.getAttributeValue(i);
+											}
+										}
+										if (atr_name.equals("alt")) {
+											alt_value = xmlPullParser.getAttributeValue(i);
+										}
+									}
+									if (!src_value.equals("")) {
+										if (class_value.equals("gaiji") || class_value.equals("gaiji-line") || class_value.equals("gaiji-wide")) {
+											if (alt_value.equals("")) {
+												inputSB.append("［＃外字（");
+											} else {
+												inputSB.append("［＃外字「]" + alt_value + "」（");
+											}
+										} else {
+											inputSB.append("\n［＃挿絵（");
+										}
+										inputSB.append(src_value);
+										inputSB.append("）入る］");
+									}
+								}
+								else if (tag_name.equals("title")) {
+									tag_level_title++;
+								}
+								else if (tag_name.equals("body")) {
+									tag_level_body++;
+								}
+								else if (tag_name.equals("div")) {
+									if (isDiv == false && inputSB.length() > 0) {
+										inputSB.append("\n");
+										isDiv = true;
+									}
+								}
+								else if (tag_name.equals("h1") || tag_name.equals("h2") || tag_name.equals("h3")) {
+									// 見出しとする
+									tag_level_h++;
+									line_text = "";
+									text_cnt = 0;
+								}
+								else if (tag_name.equals("ol")) {
+									inputSB.append("\n");
+								}
+							} else if (eventType == XmlPullParser.END_TAG) {
+								//if(debug) {Log.d("TextManager", "formatTextFile: End tag '" + tag_name + "'");}
+								if (tag_level > 0) {
+									tag_level--;
+								}
+								if (tag_name.equals("ruby")) {
+									if (tag_level_ruby > 0) {
+										tag_level_ruby--;
+									}
+								}
+								else if (tag_name.equals("rt")) {
+									if (tag_level_rt == 1) {
+										inputSB.append("》");
+									}
+									if (tag_level_rt > 0) {
+										tag_level_rt--;
+									}
+								}
+								else if (tag_name.equals("rp")) {
+									if (tag_level_rp > 0) {
+										tag_level_rp--;
+									}
+								}
+								else if (tag_name.equals("p")) {
+									if (tag_level_p > 0) {
+										tag_level_p--;
+
+										if (tag_level_p == 0 && text_cnt > 0) {
+											inputSB.append("\n");
+										}
+									}
+								}
+								else if (tag_name.equals("title")) {
+									if (tag_level_title > 0) {
+										tag_level_title--;
+									}
+								}
+								else if (tag_name.equals("body")) {
+									if (tag_level_body > 0) {
+										tag_level_body--;
+									}
+								}
+								else if (tag_name.equals("div")) {
+									if (isDiv == false && inputSB.length() > 0) {
+										inputSB.append("\n");
+										isDiv = true;
+									}
+								}
+								else if (tag_name.equals("h1") || tag_name.equals("h2") || tag_name.equals("h3")) {
+									if (line_text.length() > 0) {
+										inputSB.append(line_text);
+										inputSB.append("［＃「" + line_text + "」は");
+										if (tag_name.equals("h1")){
+											inputSB.append("大見出し］\n");
+										}
+										if (tag_name.equals("h2")){
+											inputSB.append("中見出し］\n");
+										}
+										if (tag_name.equals("h3")){
+											inputSB.append("小見出し］\n");
+										}
+									}
+									text_cnt = 0;
+									if (tag_level_h > 0) {
+										tag_level_h--;
+									}
+								}
+								else if (tag_name.equals("li") || tag_name.equals("dt") || tag_name.equals("dd")) {
+									inputSB.append("\n");
+								}
+							} else if (eventType == XmlPullParser.TEXT) {
+								//if(debug) {Log.d("TextManager", "formatTextFile: Text '" + xmlPullParser.getText() + "'");}
+								String text = xmlPullParser.getText().replaceAll("[\n\t]", "");
+								if (text.equals("!!")) {
+									text = "‼";
+								}
+								else if (text.equals("!?")) {
+									text = "⁉";
+								}
+								else if (text.equals("?!")) {
+									text = "⁈";
+								}
+								else if (text.equals("??")) {
+									text = "⁇";
+								}
+								text = text.replaceAll(" ", "");
+
+								if (tag_level_title > 0) {
+									if (text.length() > 0) {
+										// タイトル文字列設定
+										if (mTitle.length() == 0) {
+											title = title + text;
+										}
+										inputSB.append("［＃「" + text + "」はファイルタイトル］");
+									}
+								}
+								else if (tag_level_h > 0) {
+									if (text.length() > 0) {
+										line_text = line_text + text;
+										text_cnt++;
+									}
+								}
+								else if (tag_level_body > 0 && tag_level_rp == 0) {
+									if (text.length() > 0) {
+										inputSB.append(text);
+										text_cnt++;
+									}
+								}
+							}
+							eventType = xmlPullParser.next();
+						} catch (Exception e) {
+							Log.e("TextManager", "formatTextFile: xml解析失敗");
+							if (e != null && e.getMessage() != null) {
+								Log.e("TextManager", "formatTextFile: エラーメッセージ. " + e.getMessage());
+							}
+	//						inputSB = null;
+							break;
+						}
+					}
+				}
+			}
+			if (inputSB != null) {
+				outputStr += inputSB.toString();
+				inputSB = null;
+			} else {
+				outputStr += inputStr;
+			}
 		}
 
 		char[] intext;
-		if (inputSB != null) {
-			intext = inputSB.toString().toCharArray();
-			inputSB = null;
+		if (outputStr.length() > 0) {
+			if(debug) {Log.d("TextManager", "formatTextFile: intext=\n" + outputStr.substring(0, Math.min(500, outputStr.length())));}
+			intext = outputStr.toCharArray();
+			outputStr = null;
 		}
 		else {
 			intext = inputStr.toCharArray();
@@ -1449,20 +2056,24 @@ public class TextManager {
 		}
 
 		// タイトルの設定
-		LineData ld = linedata.get(0);
-		StringBuffer linestr = new StringBuffer();
-		for (TextBlock tb : ld.textblock) {
-			// TextBlockを文字列化
-			linestr.append(getTextString(mTextBuff, tb.tx_index, tb.tx_length, ld.extdata));
-		}
-		// 1行目の本文をタイトルとして設定
-		mTitle = linestr.toString();
-		if (mTitle == null || mTitle.length() == 0) {
-			mTitle = title;
+		if (mTitle.length() == 0) {
+			LineData ld = linedata.get(0);
+			StringBuffer linestr = new StringBuffer();
+			for (TextBlock tb : ld.textblock) {
+				// TextBlockを文字列化
+				linestr.append(getTextString(mTextBuff, tb.tx_index, tb.tx_length, ld.extdata));
+			}
+			// 1行目の本文をタイトルとして設定
+			mTitle = linestr.toString();
+			if (mTitle == null || mTitle.length() == 0) {
+				mTitle = title;
+			}
 		}
 
 		LineManager dm = layoutLines(linedata);
 		mTextPages = layoutPages(dm);
+
+		if (debug) {Log.d("TextManager", "formatTextFile: 終了します.");}
 		return;
 	}
 
@@ -1486,11 +2097,13 @@ public class TextManager {
 				// 40桁以上のときだけ
 				boolean isAllMinus = true;
 				for (int i = 0; i < ld.textblock[0].tx_length; i++) {
-					// コメント行チェック
-					if (mTextBuff[ld.textblock[0].tx_index + i] != '-') {
-						// マイナスだけかのチェック
-						isAllMinus = false;
-						break;
+					if (ld.textblock[0].tx_index + i >= 0 && ld.textblock[0].tx_index + i < mTextBuff.length) {
+						// コメント行チェック
+						if (mTextBuff[ld.textblock[0].tx_index + i] != '-') {
+							// マイナスだけかのチェック
+							isAllMinus = false;
+							break;
+						}
 					}
 				}
 				if (isAllMinus == true) {
@@ -1974,7 +2587,12 @@ public class TextManager {
 		return dm;
 	}
 
+	// ページ情報を作成
+	// 改ページとページ内の表示座標を決定？
 	private TextDrawData[][] layoutPages(LineManager dm) {
+		boolean debug = false;
+		if (debug) {Log.d("TextManager", "layoutPages: 開始します.");}
+
 		ArrayList<TextDrawData[]> pagelist = new ArrayList<TextDrawData[]>();
 		ArrayList<TextDrawData> pagedata;
 		ArrayList<TextDrawData> textlist;
@@ -2009,59 +2627,148 @@ public class TextManager {
 			LineManager.TextState ts = dm.getLineState(linecnt);
 
 			if (textlist != null && textlist.size() == 1 && textlist.get(0).mTextPos == TB_PICTURE) {
-				// mTextPos==-1なら画像表示
+				// mTextPos==TB_PICTUREなら画像表示
 				TextDrawData td = textlist.get(0);
 				PictureData pd = mPicArray.get(td.mTextLen); // mTextLenに画像番号を設定
 				boolean prenewpage = false;
 				if (pd != null) {
+
+					if (debug) {Log.d("TextManager", "layoutPages: 画像表示: mWidth=" + mWidth + ", mHeight=" + mHeight + ", mTextWidth=" + mTextWidth + ", mTextHeight=" + mTextHeight + ", mTextRight=" + mTextRight);}
+					if (debug) {Log.d("TextManager", "layoutPages: 画像表示: pd.mWidth=" + pd.mWidth + ", pd.mHeight=" + pd.mHeight);}
+
 					// TODO 画像
-					if (mPicScale == BMPSCALE_SCREEN) {
-						// まず改ページ
-						prenewpage = true;
-					}
-					else if (pos_x + pd.mWidth > mTextWidth + mTextRight) {
-						// 画像がページの残りの幅に入りきらない
-						prenewpage = true;
+					switch (mPicScale) {
+						case BMPSCALE_SCREEN:
+						case BMPSCALE_SCREEN_NO_MARGIN:
+						case BMPSCALE_DUAL_SCREEN:
+						case BMPSCALE_DUAL_SCREEN_NO_MARGIN:
+							// まず改ページ
+							if (debug) {Log.d("TextManager", "layoutPages: 画像表示: まず改ページフラグを立てます.");}
+							prenewpage = true;
+							break;
+						case BMPSCALE_ORIGINAL:
+						case BMPSCALE_ZOOM2X:
+						case BMPSCALE_ZOOM3X:
+						case BMPSCALE_ZOOM4X:
+						default:
+							if (pos_x + pd.mWidth > mTextWidth + mTextRight) {
+								// 画像がページの残りの幅に入りきらない
+								if (debug) {Log.d("TextManager", "layoutPages: 画像表示: 画像がページの残りの幅に入りません.");}
+								prenewpage = true;
+							}
+							break;
 					}
 
 					if (prenewpage == true && pagedata.size() > 0) {
 						// これまでのデータは改ページでページ登録
 						pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
+						if (debug) {Log.d("TextManager", "layoutPages: 画像表示: 前のページにデータがあります. ページを登録します. pagedata.size=" + pagedata.size());}
 
 						// x座標初期化
 						pos_x = mTextRight;
 						pagedata = new ArrayList<TextDrawData>();
 					}
-
-					if (mPicScale == BMPSCALE_SCREEN) {
-						// ページに全体表示
-						pagedata = new ArrayList<TextDrawData>();
-						td.mTextX = (mWidth - pd.mWidth) / 2;
-						td.mTextY = (mHeight - pd.mHeight) / 2;
-					}
 					else {
-						td.mTextX = pos_x;
-						td.mTextY = (mHeight - pd.mHeight) / 2; // 高さは画面中央へ
+						if (debug) {Log.d("TextManager", "layoutPages: 画像表示: 前のページにデータがないのでページを登録しません. pagedata.size=" + pagedata.size());}
 					}
+					td.mTextY = (mHeight - pd.mHeight) / 2; // 高さは画面中央へ
+
+					switch (mPicScale) {
+						case BMPSCALE_SCREEN:
+						case BMPSCALE_SCREEN_NO_MARGIN:
+							// ページに全体表示
+							pagedata = new ArrayList<TextDrawData>();
+							td.mTextX = (mWidth - pd.mWidth) / 2;
+							break;
+						case BMPSCALE_DUAL_SCREEN:
+							pagedata = new ArrayList<TextDrawData>();
+							if (pd.mWidth < pd.mHeight) {
+								// ページに全体表示
+								td.mTextX = (mWidth - pd.mWidth) / 2;
+							} else {
+								// 2画面表示
+								td.mTextX = mTextRight + mTextWidth - (pd.mWidth / 2);
+
+								// 次ページに残りを表示
+								// 画像情報登録
+								pagedata.add(td);
+								pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
+								if (debug) {Log.d("TextManager", "layoutPages: 画像表示: 2ページ表示の1ページ目を描画して改ページします. pagedata.size=" + pagedata.size());}
+
+								pagedata = new ArrayList<TextDrawData>();
+								td = new TextDrawData(td.mIsText, td.mIsAscii, td.mTextSize, td.mTextX, td.mTextY, td.mTextPos, td.mTextLen, td.mGap, td.mHeight, td.mExData);
+								td.mTextX = mTextRight - (pd.mWidth / 2);
+								td.mTextY = (mHeight - pd.mHeight) / 2; // 高さは画面中央へ
+							}
+							break;
+						case BMPSCALE_DUAL_SCREEN_NO_MARGIN:
+							// ページに全体表示
+							pagedata = new ArrayList<TextDrawData>();
+							if (pd.mWidth < pd.mHeight) {
+								// ページに全体表示
+								td.mTextX = (mWidth - pd.mWidth) / 2;
+							} else {
+								// 2画面表示
+								td.mTextX = mWidth - (pd.mWidth / 2);
+
+								// 次ページに残りを表示
+								// 画像情報登録
+								pagedata.add(td);
+								pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
+								if (debug) {Log.d("TextManager", "layoutPages: 画像表示: 2ページ表示の1ページ目を描画して改ページします. pagedata.size=" + pagedata.size());}
+
+								pagedata = new ArrayList<TextDrawData>();
+								td = new TextDrawData(td.mIsText, td.mIsAscii, td.mTextSize, td.mTextX, td.mTextY, td.mTextPos, td.mTextLen, td.mGap, td.mHeight, td.mExData);
+								td.mTextX = - (pd.mWidth / 2);
+								td.mTextY = (mHeight - pd.mHeight) / 2; // 高さは画面中央へ
+							}
+							break;
+						case BMPSCALE_ORIGINAL:
+						case BMPSCALE_ZOOM2X:
+						case BMPSCALE_ZOOM3X:
+						case BMPSCALE_ZOOM4X:
+						default:
+							if(pd.mWidth >= mTextWidth) {
+								// ページに全体表示
+								pagedata = new ArrayList<TextDrawData>();
+								td.mTextX = (mWidth - pd.mWidth) / 2;
+							} else {
+								td.mTextX = pos_x;
+							}
+							break;
+					}
+
+					if (debug) {Log.d("TextManager", "layoutPages: 表示位置 td.mTextX=" + td.mTextX + ", td.mTextY=" + td.mTextY);}
 
 					// 画像情報登録
 					pagedata.add(td);
 
-					if (mPicScale == BMPSCALE_SCREEN) {
-						// 次ページの先頭へ
-						pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
+					switch (mPicScale) {
+						case BMPSCALE_SCREEN:
+						case BMPSCALE_SCREEN_NO_MARGIN:
+						case BMPSCALE_DUAL_SCREEN:
+						case BMPSCALE_DUAL_SCREEN_NO_MARGIN:
+							// 次ページの先頭へ
+							pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
+							if (debug) {Log.d("TextManager", "layoutPages: 画像表示: 描画を完了して改ページします. pagedata.size=" + pagedata.size());}
 
-						pos_x = mTextRight;
-						pagedata = new ArrayList<TextDrawData>();
-					}
-					else {
-						// 次の位置へ
-						pos_x += pd.mWidth + mSpaceW;
+							pos_x = mTextRight;
+							pagedata = new ArrayList<TextDrawData>();
+							break;
+						case BMPSCALE_ORIGINAL:
+						case BMPSCALE_ZOOM2X:
+						case BMPSCALE_ZOOM3X:
+						case BMPSCALE_ZOOM4X:
+						default:
+							// 次の位置へ
+							pos_x += pd.mWidth + mSpaceW;
+							if (debug) {Log.d("TextManager", "layoutPages: 次の行の表示位置を設定します. pox_x=" + pos_x);}
+							break;
 					}
 				}
 			}
 			else if (textlist != null && textlist.size() == 1 && textlist.get(0).mTextPos == TB_PAGECONTROL) {
-				// mTextPos==-2なら制御情報
+				// mTextPos==TB_PAGECONTROLなら制御情報
 				TextDrawData td = textlist.get(0);
 				if (td.mTextLen == PARAM_PAGECENTER) {
 					// 左右中央
@@ -2069,6 +2776,7 @@ public class TextManager {
     					// これまでのデータがページ中央を越えている場合は改ページでページ登録
     					pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
     					pagedata = new ArrayList<TextDrawData>();
+						if (debug) {Log.d("TextManager", "layoutPages: 中央表示: 中央表示できないので改ページします. pagedata.size=" + pagedata.size());}
 					}
 					// ページ中央
 				    pos_x = (mWidth - mFontSize) / 2 - mRubiSize;
@@ -2077,6 +2785,7 @@ public class TextManager {
 					// これまでのデータは改ページでページ登録
 					pagelist.add((TextDrawData[]) pagedata.toArray(new TextDrawData[0]));
 					pagedata = new ArrayList<TextDrawData>();
+					if (debug) {Log.d("TextManager", "layoutPages: 改ページ: 改ページします. pagedata.size=" + pagedata.size());}
 					// ページ先頭
 				    pos_x = mTextRight;
 				}
@@ -2320,8 +3029,13 @@ public class TextManager {
 			extdata = null;
 		}
 	}
-	
+
+	// 青空文庫を中間コードに変換する
 	private CommentResult analyzeComment(String comment) {
+		boolean debug = false;
+		if (debug) {Log.d("TextManager", "analyzeComment: 開始します. comment=" + comment);}
+		//if (debug) {DEF.StackTrace("TextManager", "analyzeComment: ");}
+
 		CommentResult result = new CommentResult();
 		int size = comment.length();
 		if (size <= 3 || !comment.substring(0, 2).equals("［＃")) {
@@ -2419,12 +3133,23 @@ public class TextManager {
 					if (filename.startsWith("./")) {
 						filename = filename.substring(2);
 					}
-					int fileindex = loadBitmap(filename, false);
-					if (fileindex >= 0) {
-						// ファイル名あり
-						result.code = COMMENT_PICTURE;
-						result.param1 = fileindex;
-						return result;
+					if (comment.startsWith("［＃挿絵（")) {
+						int fileindex = loadBitmap(filename, false);
+						if (fileindex >= 0) {
+							// ファイル名あり
+							result.code = COMMENT_PICTURE;
+							result.param1 = fileindex;
+							return result;
+						}
+					} else {
+						int fileindex = loadBitmap(filename, true);
+						if (fileindex >= 0 && fileindex < 768) {
+							// ファイル名あり
+							result.code = COMMENT_PICTURE_CHAR;
+							result.param1 = 0x1a00 + fileindex;
+							result.param2 = 1;
+							return result;
+						}
 					}
 				}
 			}
@@ -2469,13 +3194,13 @@ public class TextManager {
 				char code = comment.charAt(pos);
 				//
 				if (code == '小') {
-					type = 1;
+					type = MidashiData.HEADING_SMALL;
 				}
 				else if (code == '中') {
-					type = 2;
+					type = MidashiData.HEADING_MIDDLE;
 				}
 				else if (code == '大') {
-					type = 3;
+					type = MidashiData.HEADING_LARGE;
 				}
 
 				if (type != 0) {
@@ -2486,22 +3211,37 @@ public class TextManager {
 			}
 		}
 		if (comment.startsWith("［＃「")) {
-			int cmd = -1;
-			int type = 0;
-			int len = 0;
-			if (comment.endsWith("」は小見出し］")) {
+			int cmd = -1; // 注記の種類
+			int type = 0; // 注記のサブタイプ
+			int len = 0; //
+			if (comment.endsWith("」はEPUBタイトル］")) {
 				cmd = COMMENT_MIDASHI;
-				type = 1;
+				type = MidashiData.EPUB_TITLE;
+				len = size - 14;
+			}
+			if (comment.endsWith("」はEPUB目次］")) {
+				cmd = COMMENT_MIDASHI;
+				type = MidashiData.EPUB_TOC;
+				len = size - 12;
+			}
+			if (comment.endsWith("」はファイルタイトル］")) {
+				cmd = COMMENT_MIDASHI;
+				type = MidashiData.FILE_TITLE;
+				len = size - 14;
+			}
+			else if (comment.endsWith("」は大見出し］")) {
+				cmd = COMMENT_MIDASHI;
+				type = MidashiData.HEADING_LARGE;
 				len = size - 10;
 			}
 			else if (comment.endsWith("」は中見出し］")) {
 				cmd = COMMENT_MIDASHI;
-				type = 2;
+				type = MidashiData.HEADING_MIDDLE;
 				len = size - 10;
 			}
-			else if (comment.endsWith("」は大見出し］")) {
+			else if (comment.endsWith("」は小見出し］")) {
 				cmd = COMMENT_MIDASHI;
-				type = 3;
+				type = MidashiData.HEADING_SMALL;
 				len = size - 10;
 			}
 			else if (comment.endsWith("」に傍点］")) {
@@ -4583,6 +5323,7 @@ public class TextManager {
 	}
 
 	/**
+	 * 中間コードからページ内の配置を計算する
 	 * コメント以降の本文全体を解析する
 	 * @param inbuff	テキストファイルの内容(in)
 	 * @param inoff		テキスト解析開始位置(in)
@@ -4590,11 +5331,14 @@ public class TextManager {
 	 * @param linedata	行ごとの表示情報(out)
 	 */ 
 	private void parseTextData(char inbuff[], int inoff, StringBuffer textbuff, ArrayList<LineData> linedata) {
+		boolean debug = false;
+		if (debug) {Log.d("TextManager", "parseTextData: 開始します.");}
+		if (debug) {DEF.StackTrace("TextManager", "parseTextData: ");}
+
 		int inpos = inoff;
 		int size = inbuff.length;
 
-		MidashiManager midashi1 = new MidashiManager(); // 見出しタグ用
-		MidashiManager midashi2 = new MidashiManager(); // 1行単独用
+		mMidashi = new MidashiManager();
 		StringBuffer midashiLabel = new StringBuffer();
 		int midashiMode = 0;
 		int midashiLine = 0; 
@@ -4635,6 +5379,7 @@ public class TextManager {
 						}
 						case COMMENT_PICTURE_CHAR: {
 							// 文字画像を追加
+							//tb.addPicture(cr.param1);
 							tb.checkRubiTarget(CHARTYPE_PCHAR);
 							tb.appendText((char)cr.param1);
 							break;
@@ -4663,6 +5408,7 @@ public class TextManager {
 							}
 							else {
 								// 文字画像を追加
+								tb.addPicture(cr.param1);
 								tb.checkRubiTarget(CHARTYPE_PCHAR);
 								tb.appendText((char)(cr.param1 + 0x1a00));
 							}
@@ -4670,8 +5416,8 @@ public class TextManager {
 						}
 						case COMMENT_MIDASHI: {
 							int linecnt = linedata.size();
-							String label = comment.substring(3, comment.length() - 7);
-							midashi1.addMidashiData(label.replaceAll("[　 \t]+", "　"), linecnt);
+							String label = comment.substring(3, cr.param2 + 3);
+							mMidashi.addMidashiData(label.replaceAll("[　 \t]+", "　"), linecnt, cr.param1);
 							break;
 						}
 						case COMMENT_MIDASHI_ST:{
@@ -4684,8 +5430,8 @@ public class TextManager {
 						}
 						case COMMENT_MIDASHI_ED:
 							if (midashiMode == 1 && midashiLabel.length() > 0) {
-    							String label = midashiLabel.toString().replaceAll("[　 \t]+", "　"); 
-    							midashi1.addMidashiData(label, midashiLine);
+    							String label = midashiLabel.toString().replaceAll("[　 \t]+", "　");
+								mMidashi.addMidashiData(label, midashiLine, cr.param1);
     							midashiLabel.setLength(0);
 							}
 							// 見出し終了
@@ -4910,7 +5656,7 @@ public class TextManager {
 										sb.append(textbuff.subSequence(tbwk.tx_index, tbwk.tx_index + tbwk.tx_length));
 									}
 								}
-								midashi2.addMidashiData(sb.toString().replaceAll("^[　 \t]+", "").replaceAll("[　 \t]+", "　"), linecnt - 1);
+								mMidashi.addMidashiData(sb.toString().replaceAll("^[　 \t]+", "").replaceAll("[　 \t]+", "　"), linecnt - 1, MidashiData.CAPTION);
 							}
 						}
 						textcolumn3 = textcolumn2;
@@ -4938,14 +5684,6 @@ public class TextManager {
 					break;
 				}
 			}
-		}
-		if (midashi1.midashilist.size() > 0) {
-			// 見出しタグがあればそちらを採用
-			mMidashi = midashi1;
-		}
-		else {
-			// 見出しタグがなければ単独行を見出しにする
-			mMidashi = midashi2;
 		}
 		return;
 	}
@@ -5056,6 +5794,8 @@ public class TextManager {
 			case '\"':
 			case '/':
 			case '｣':
+			case '-':
+			case '|':
 				return true;
 		}
 		return false;
@@ -5210,8 +5950,17 @@ public class TextManager {
 		mTextPages = null;
 	}
 
-	// ビットマップの情報読み込み
+	/**
+	 * 画像の拡大縮小後の幅と高さをmPicArray配列へ挿入する
+	 * @param filename 画像ファイル名
+	 * @param isCharacter 挿絵なら0、外字なら1
+	 * @return mPicArray配列への挿入位置
+	 */
 	private int loadBitmap(String filename, boolean isCharacter) {
+		boolean debug = false;
+		if (debug) {Log.d("TextManager", "loadBitmap: 開始します. filename=" + filename + ",  isCharacter=" + isCharacter + ", mFileType=" + (mFileType == 6 ? "FILETYPE_EPUB" : "FILETYPE_TXT"));}
+		//if (debug) {DEF.StackTrace("TextManager", "loadBitmap: ");}
+
 		if (filename == null || filename.length() <= 0) {
 			return -1;
 		}
@@ -5220,44 +5969,75 @@ public class TextManager {
 		// option.inJustDecodeBounds = true;
 
 		Point pt = new Point(0, 0);
-		String textpath;
+		String textpath = "";
 		try {
-			textpath = mImageMgr.getFilePath() + mTextPath;
+			if (debug) {Log.d("TextManager", "loadBitmap: mImageMgr.getFilePath()=" + mImageMgr.getFilePath() + ", mTextPath=" + mTextPath + ",  filename=" + filename);}
 			// ビットマップの読み込み
 			if (mImageMgr.getFileType() == ImageManager.FILETYPE_DIR) {
+				if (debug) {Log.d("TextManager", "loadBitmap: mImageMgr.getFileType()=FILETYPE_DIR");}
+				textpath = mImageMgr.getFilePath() + mTextPath;
 				BitmapFactory.Options option = new BitmapFactory.Options();
 				option.inJustDecodeBounds = true;
 				TextInputStream tis = new TextInputStream();
-				tis.fileAccessInit(textpath + filename, mUser, mPass);
+				if (mFileType == FileData.FILETYPE_EPUB) {
+					if (debug) {Log.d("TextManager", "loadBitmap: mFileType=FILETYPE_EPUB, mTextPath=" + mTextPath + ",  filename=" + filename);}
+					tis.fileAccessInit(filename, mUser, mPass);
+				}
+				else {
+					if (debug) {Log.d("TextManager", "loadBitmap: mFileType=FILETYPE_TXT, mTextPath=" + mTextPath + ",  filename=" + (textpath + filename));}
+					tis.fileAccessInit(textpath + filename, mUser, mPass);
+				}
 				BitmapFactory.decodeStream(tis, null, option);
 				tis.fileClose();
 				pt.x = option.outWidth;
 				pt.y = option.outHeight;
 			}
 			else {
+				if (debug) {Log.d("TextManager", "loadBitmap: mImageMgr.getFileType()=FILETYPE_ARC");}
+				if (mFileType == FileData.FILETYPE_EPUB) {
+					if (debug) {Log.d("TextManager", "loadBitmap: mFileType=FILETYPE_EPUB, mTextPath=" + mTextPath + ",  filename=" + filename);}
+					mImageMgr.getImageSize(filename, pt);
+				}
+				else {
+					if (debug) {Log.d("TextManager", "loadBitmap: mFileType=FILETYPE_EPUB, mTextPath=" + mTextPath + ",  filename=" + getPath(mTextFile, filename));}
+					mImageMgr.getImageSize(getPath(mTextFile, filename), pt);
+				}
+				/*
 				textpath = mTextPath;
-				while (true) {
-					if (filename.startsWith("../")) {
-						// 親ディレクトリ指定
-						filename = filename.substring(3);
-						if (textpath.length() > 2) {
-							int pridx = textpath.lastIndexOf('/', textpath.length() - 2);
-							if (pridx >= 0) {
-								textpath = textpath.substring(0, pridx + 1);
+				if (filename.startsWith("/")) {
+					textpath = "";
+				} else {
+					while (true) {
+						if (filename.startsWith("../")) {
+							// 親ディレクトリ指定
+							filename = filename.substring(3);
+							if (debug) {Log.d("TextManager", "loadBitmap: textpath.length()=" + textpath.length());}
+							if (textpath.length() > 2) {
+								int pridx = textpath.lastIndexOf('/', textpath.length() - 2);
+								if (debug) {Log.d("TextManager", "loadBitmap: pridx=" + pridx);}
+								if (pridx >= 0) {
+									textpath = textpath.substring(0, pridx + 1);
+									if (debug) {Log.d("TextManager", "loadBitmap: textpath=" + textpath);}
+								} else {
+									textpath = "";
+								}
 							}
+						} else {
+							break;
 						}
-					}
-					else {
-						break;
 					}
 				}
 				mImageMgr.getImageSize(textpath + filename, pt);
+				}
+				 */
 			}
 		} catch (IOException e) {
 			// 読み込みエラー
-			Log.e("Text/BitmapLoad", e.getMessage());
+			Log.e("TextManager", "loadBitmap : filename=" + filename + ", " + e.getMessage());
 			return -1;
 		}
+
+		if (debug) {Log.d("TextManager", "loadBitmap: textpath=" + textpath + ",  filename=" + filename);}
 
 		PictureData picdata = new PictureData();
 		picdata.mFileName = textpath + filename;
@@ -5267,16 +6047,55 @@ public class TextManager {
 		int dst_cx;
 		int dst_cy;
 
+		float scale_x;
+		float scale_y;
+		float scale;
 		if (isCharacter) {
 			// 文字の置き換え
-			picdata.mWidth = 0;
-			picdata.mHeight = 0;
+			//picdata.mWidth = src_cx;
+			//picdata.mHeight = src_cy;
+			dst_cx = src_cx;
+			dst_cy = src_cy;
+			if (dst_cx > mTextSize || dst_cy > mTextSize) {
+				scale_x = (float) mTextSize / (float) src_cx;
+				scale_y = (float) mTextSize / (float) src_cy;
+			}
+			else {
+				scale_x = (float) dst_cx / (float) src_cx;
+				scale_y = (float) dst_cy / (float) src_cy;
+			}
 		}
 		else {
 			switch (mPicScale) {
 				case BMPSCALE_SCREEN:
+					dst_cx = mTextWidth;
+					dst_cy = mHeight;
+					break;
+				case BMPSCALE_SCREEN_NO_MARGIN:
 					dst_cx = mWidth;
 					dst_cy = mTextHeight;
+					break;
+				case BMPSCALE_DUAL_SCREEN:
+					if (src_cx < src_cy) {
+						dst_cx = mTextWidth;
+						dst_cy = mTextHeight;
+					} else {
+						dst_cx = mTextWidth * 2;
+						dst_cy = mTextHeight;
+					}
+					scale_x = (float) mTextWidth * 2 / (float) src_cx;
+					scale_y = (float) mTextHeight / (float) src_cy;
+					break;
+				case BMPSCALE_DUAL_SCREEN_NO_MARGIN:
+					if (src_cx < src_cy) {
+						dst_cx = mWidth;
+						dst_cy = mTextHeight;
+					} else {
+						dst_cx = mWidth * 2;
+						dst_cy = mTextHeight;
+					}
+					scale_x = (float) mWidth * 2 / (float) src_cx;
+					scale_y = (float) mHeight / (float) src_cy;
 					break;
 				case BMPSCALE_ZOOM2X:
 					dst_cx = src_cx * 2;
@@ -5297,139 +6116,47 @@ public class TextManager {
 					break;
 			}
 
-			float scale_x;
-			float scale_y;
-			float scale;
-			if (dst_cx > mTextWidth || dst_cy > mTextHeight) {
-				scale_x = (float) mTextWidth / (float) src_cx;
-				scale_y = (float) mTextHeight / (float) src_cy;
+			switch (mPicScale) {
+				case BMPSCALE_SCREEN:
+				case BMPSCALE_SCREEN_NO_MARGIN:
+				case BMPSCALE_DUAL_SCREEN:
+				case BMPSCALE_DUAL_SCREEN_NO_MARGIN:
+					scale_x = (float) dst_cx / (float) src_cx;
+					scale_y = (float) dst_cy / (float) src_cy;
+					break;
+				case BMPSCALE_ORIGINAL:
+				case BMPSCALE_ZOOM2X:
+				case BMPSCALE_ZOOM3X:
+				case BMPSCALE_ZOOM4X:
+				default:
+					if (dst_cx > mTextWidth || dst_cy > mTextHeight) {
+						scale_x = (float) mTextWidth / (float) src_cx;
+						scale_y = (float) mTextHeight / (float) src_cy;
+					} else {
+						scale_x = (float) dst_cx / (float) src_cx;
+						scale_y = (float) dst_cy / (float) src_cy;
+					}
+					break;
 			}
-			else {
-				scale_x = (float) dst_cx / (float) src_cx;
-				scale_y = (float) dst_cy / (float) src_cy;
-			}
-
-			if (scale_x < scale_y) {
-				scale = scale_x;
-			}
-			else {
-				scale = scale_y;
-			}
-			picdata.mWidth = (int) (src_cx * scale);
-			picdata.mHeight = (int) (src_cy * scale);
 		}
+
+		if (scale_x < scale_y) {
+			scale = scale_x;
+		}
+		else {
+			scale = scale_y;
+		}
+		picdata.mWidth = (int) (src_cx * scale);
+		picdata.mHeight = (int) (src_cy * scale);
+
+		if (debug) {Log.d("TextManager", "loadBitmap: 画面情報 mWidth=" + mWidth + ", mHeight=" + mHeight + ", mTextWidth=" + mTextWidth + ", mTextHeight=" + mTextHeight);}
+		if (debug) {Log.d("TextManager", "loadBitmap: 元画像サイズ src_cx=" + src_cx + ", src_cy=" + src_cy + ", dst_cx=" + dst_cx + ", dst_cy=" + dst_cy);}
+		if (debug) {Log.d("TextManager", "loadBitmap: 拡大率 scale_x=" + scale_x + ", scale_y=" + scale_y + ", scale=" + scale);}
 
 		mPicArray.add(picdata);
+
+		if (debug) {Log.d("TextManager", "loadBitmap: 終了します. filename=" + filename + ", picid=" + (mPicArray.size() - 1) + ", 出力サイズ width=" + picdata.mWidth + ", height=" + picdata.mHeight);}
 		return mPicArray.size() - 1;
-	}
-
-	private String checkShiftJIS(byte[] buff) {
-		if (buff == null || buff.length < 3) {
-			return "MS932";
-		}
-
-		int size = 2048;
-		if (buff.length < 2048) {
-			size = buff.length;
-		}
-		String strSJIS = null;
-		String strUTF8 = null;
-		String strEUCKR = null;
-		try {
-			strSJIS = new String(buff, 0, size, "MS932");
-		} catch (UnsupportedEncodingException e) {
-			// UTF-8
-		}
-		try {
-			strUTF8 = new String(buff, 0, size, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// Shift-JIS
-		}
-		try {
-			strEUCKR = new String(buff, 0, size, "EUC-KR");
-		} catch (UnsupportedEncodingException e) {
-			// EUC-KR
-		}
-		if (strSJIS != null && strUTF8 == null && strEUCKR == null) {
-			return "MS932";
-		}
-		else if (strSJIS == null && strUTF8 != null && strEUCKR == null) {
-			return "UTF-8";
-		}
-		else if (strSJIS == null && strUTF8 == null && strEUCKR != null) {
-			return "EUC-KR";
-		}
-
-		byte[] buffSJIS = null;
-		byte[] buffUTF8 = null;
-		byte[] buffEUCKR = null;
-		try {
-			buffSJIS = strSJIS.getBytes("MS932");
-		} catch (UnsupportedEncodingException e) {
-			// Shift-JIS
-		}
-		try {
-			buffUTF8 = strUTF8.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// UTF-8
-		}
-		try {
-			buffEUCKR = strEUCKR.getBytes("EUC-KR");
-		} catch (UnsupportedEncodingException e) {
-			// EUCKR
-		}
-		if (buffSJIS != null && buffUTF8 == null && buffEUCKR == null) {
-			return "MS932";
-		}
-		else if (buffSJIS == null && buffUTF8 != null && buffEUCKR == null) {
-			return "UTF-8";
-		}
-		else if (buffSJIS == null && buffUTF8 == null && buffEUCKR != null) {
-			return "EUC-KR";
-		}
-
-		int cntSJIS = 0;
-		if (buffSJIS != null) {
-			for (int i = 0; i < buffSJIS.length && i < size; i++) {
-				if (buffSJIS[i] != buff[i]) {
-					cntSJIS++;
-				}
-			}
-		}
-		else {
-			cntSJIS = 99999;
-		}
-		int cntUTF8 = 0;
-		if (buffUTF8 != null) {
-			for (int i = 0; i < buffUTF8.length && i < size; i++) {
-				if (buffUTF8[i] != buff[i]) {
-					cntUTF8++;
-				}
-			}
-		}
-		else {
-			cntUTF8 = 99999;
-		}
-
-		int cntEUCKR = 0;
-		if (buffEUCKR != null) { 
-			for (int i = 0; i < buffEUCKR.length && i < size; i++) {
-				if (buffEUCKR[i] != buff[i]) {
-					cntEUCKR++;
-				}
-			}
-		}
-		else {
-			cntEUCKR = 99999;
-		}
-
-		if (cntEUCKR < cntSJIS && cntEUCKR < cntUTF8) {
-			return "EUC-KR";
-		}
-		else if (cntUTF8 < cntSJIS) {
-			return "UTF-8";
-		}
-		return "MS932";
 	}
 
 	public void searchClear() {

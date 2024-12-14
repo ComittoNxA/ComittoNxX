@@ -1,22 +1,30 @@
 package src.comitton.common;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.SortedMap;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Environment;
+import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 
 import jp.dip.muracoro.comittonx.BuildConfig;
 import src.comitton.data.FileData;
+
+import org.mozilla.universalchardet.UniversalDetector;
 
 public class DEF {
 
@@ -50,6 +58,7 @@ public class DEF {
 	public static final int MESSAGE_RECORD_LONGCLICK = 1014;
 	public static final int MESSAGE_FILE_RENAME = 1015;
 	public static final int MESSAGE_MOVE_PATH_EROOR = 1016;
+	public static final int MESSAGE_RESETLOCAL = 1017;
 
 	public static final int HMSG_LOAD_END = 1;
 	public static final int HMSG_READ_END = 2;
@@ -594,7 +603,7 @@ public class DEF {
 	public static final long MILLIS_DELETECHE = (10 * 60 * 1000); // 10分
 
 	public static final int PAPERSEL_SCREEN = 0;
-	public static final int PAPERSIZE[][] = { { 0, 0 }, { 800, 1280 }, { 720, 1280 }, { 540, 960 }, { 480, 800 } };
+	public static final int PAPERSIZE[][] = {{0, 0}, {800, 1280}, {720, 1280}, {540, 960}, {480, 800}};
 
 	public static final String URL_IMAGEDETIAL = "";
 	public static final String URL_FILESELECT = "https://docs.google.com/document/d/197jmNnXY3BP4F9HHmJCuroWslbTFH8nWTBVWbn8T4dE/edit";
@@ -616,7 +625,7 @@ public class DEF {
 	public static final int SHOWMENU_LOCAL = 2;
 	public static final int SHOWMENU_SERVER = 3;
 
-	public static final int ColorList[] = { Color.rgb(0, 0, 0) // 0
+	public static final int ColorList[] = {Color.rgb(0, 0, 0) // 0
 			, Color.rgb(255, 255, 255) // 1
 			, Color.rgb(0, 0, 255) // 2
 			, Color.rgb(255, 0, 0) // 3
@@ -638,22 +647,23 @@ public class DEF {
 			, Color.rgb(0, 97, 0) // 19
 			, Color.rgb(97, 97, 0) // 20
 			, Color.rgb(0, 97, 97) // 21
-			, Color.rgb(97, 97, 97) }; // 22
-	public static final int GuideList[] = { 0x80000000 // 0 : 黒
+			, Color.rgb(97, 97, 97)}; // 22
+	public static final int GuideList[] = {0x80000000 // 0 : 黒
 			, 0x80000070 // 1 : 青
 			, 0x80700000 // 2 : 赤
 			, 0x80700070 // 3 : マゼンタ
 			, 0x80007000 // 4 : 緑
 			, 0x80707000 // 5 : 黄
-			, 0x80007070 }; // 6 : シアン
+			, 0x80007070}; // 6 : シアン
 
-	public static final int RotateBtnList[] = { 0, KeyEvent.KEYCODE_FOCUS // フォーカスキー
+	public static final int RotateBtnList[] = {0, KeyEvent.KEYCODE_FOCUS // フォーカスキー
 			, KeyEvent.KEYCODE_CAMERA // シャッターキー
 	};
-	public static final String CharsetList[] = {"UTF-8", "Shift_JIS", "EUC-JP", "EUC-KR", "Big5", "CB2312"};
+	public static final String CharsetList[] = {"UTF-8", "Shift_JIS", "EUC-JP", "EUC-KR", "Big5", "CB2312", "GB18030", "Big5-HKSCS"};
 
 	public static final int ROTATE_AUTO = 0;
-	public static final int ROTATE_PORTRAIT = 1;
+	public static final int ROTATE_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+
 	public static final int ROTATE_LANDSCAPE = 2;
 	public static final int ROTATE_PSELAND = 3;
 
@@ -661,12 +671,15 @@ public class DEF {
 	public static final int TEXTSIZE_SUMMARY = 14;
 	public static final int TEXTSIZE_EDIT = 20;
 
-	public static final int THUMBNAIL_PAGESIZE = 2 * 1024 * 1024;	// サムネイルバッファサイズ(4MB)
-	public static final int THUMBNAIL_BLOCK = 8 * 1024;				// サムネイルブロックサイズ(8KB)
-	public static final int THUMBNAIL_MAXPAGE = 4;					// サムネイルバッファ数
+	public static final int THUMBNAIL_PAGESIZE = 2 * 1024 * 1024;    // サムネイルバッファサイズ(4MB)
+	public static final int THUMBNAIL_BLOCK = 8 * 1024;                // サムネイルブロックサイズ(8KB)
+	public static final int THUMBNAIL_MAXPAGE = 4;                    // サムネイルバッファ数
 
 	public static final boolean EPUB_VIEWER = false;
 	public static final boolean IMAGE_VIEWER = true;
+
+	public static final int PAGENUMBER_UNREAD = -1; 	// 未読
+	public static final int PAGENUMBER_READ = -2;	    // 既読
 
 	// 縦長チェック
 	static public boolean checkPortrait(int cx, int cy) {
@@ -676,8 +689,7 @@ public class DEF {
 	static public boolean checkPortrait(int cx, int cy, int rotate) {
 		if (rotate == 0 || rotate == 2) {
 			return cx <= cy ? true : false;
-		}
-		else {
+		} else {
 			return cy <= cx ? true : false;
 		}
 	}
@@ -711,8 +723,7 @@ public class DEF {
 		if (0 <= index && index < DEF.ColorList.length) {
 			// 旧設定がある場合は色情報を取得
 			val = DEF.ColorList[index];
-		}
-		else {
+		} else {
 			// 色情報
 			val = sp.getInt(keyRGB, DEF.ColorList[defColor]);
 		}
@@ -735,8 +746,7 @@ public class DEF {
 		if (0 <= index && index < DEF.GuideList.length) {
 			// 旧設定がある場合は色情報を取得
 			val = DEF.GuideList[index];
-		}
-		else {
+		} else {
 			// 色情報
 			val = sp.getInt(keyRGB, DEF.GuideList[defColor]);
 		}
@@ -815,15 +825,13 @@ public class DEF {
 			if (way == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
 				return true;
 			}
-		}
-		else if (rotate == DEF.ROTATE_LANDSCAPE) {
+		} else if (rotate == DEF.ROTATE_LANDSCAPE) {
 			// 横固定
 			act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			if (way == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 				return true;
 			}
-		}
-		else {
+		} else {
 			// 回転あり
 			act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 		}
@@ -833,8 +841,7 @@ public class DEF {
 	static public int calcThumbnailScale(int width, int height, int tcx, int tcy) {
 		if (height >= tcy) {
 			return height / tcy;
-		}
-		else {
+		} else {
 			return 1;
 		}
 	}
@@ -844,8 +851,7 @@ public class DEF {
 
 		if (val == 0) {
 			str = summ1;
-		}
-		else {
+		} else {
 			str = val * 100 + " " + summ2;
 		}
 		return str;
@@ -1078,11 +1084,9 @@ public class DEF {
 
 		if (val == 0) {
 			str = summ1;
-		}
-		else if (val == MAX_MOMENTMODE) {
+		} else if (val == MAX_MOMENTMODE) {
 			str = summ2;
-		}
-		else {
+		} else {
 			str = "" + val;
 		}
 		return str;
@@ -1111,11 +1115,9 @@ public class DEF {
 
 		if (percent < 0) {
 			str = percent + " " + summ1;
-		}
-		else if (percent > 0) {
+		} else if (percent > 0) {
 			str = "+" + percent + " " + summ1;
-		}
-		else {
+		} else {
 			str = summ2;
 		}
 		return str;
@@ -1128,8 +1130,7 @@ public class DEF {
 
 		if (percent == 100) {
 			str = summ2;
-		}
-		else {
+		} else {
 			str = percent + " " + summ1;
 		}
 		return str;
@@ -1302,8 +1303,7 @@ public class DEF {
 				if (ch1 != ch2) {
 					return ch1 - ch2;
 				}
-			}
-			else if (ct1 == CHTYPE_NUM) {
+			} else if (ct1 == CHTYPE_NUM) {
 //				Log.d("DEF","compareFileName 文字1=" + ch1 + ", 文字2=" + ch2);
 				String num1 = getNumbers(name1, i1);
 				String num2 = getNumbers(name2, i2);
@@ -1317,15 +1317,13 @@ public class DEF {
 				boolean minus1 = num1.startsWith("-");
 				boolean minus2 = num2.startsWith("-");
 
-				if ( minus1 && !minus2 ){
+				if (minus1 && !minus2) {
 					// num2が大きい
 					return -1;
-				}
-				else if ( !minus1 && minus2 ){
+				} else if (!minus1 && minus2) {
 					// num1が大きい
 					return 1;
-				}
-				else {
+				} else {
 //					Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2);
 					//小数点の位置
 					int index_dot1 = num1.indexOf(".");
@@ -1396,12 +1394,10 @@ public class DEF {
 									return diff;
 								}
 							}
-						}
-						else {
+						} else {
 							Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
 						}
-					}
-					else {
+					} else {
 						// どちらも負の数
 
 						// マイナスを取り除く
@@ -1440,23 +1436,21 @@ public class DEF {
 									return -diff;
 								}
 							}
-						}
-						else {
+						} else {
 							Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
 						}
 					}
 					i1 += nlen1 - 1;
 					i2 += nlen2 - 1;
 				}
-			}
-			else if (ct1 == CHTYPE_JNUM) {
+			} else if (ct1 == CHTYPE_JNUM) {
 				String num1 = getJnums(name1, i1);
 				String num2 = getJnums(name2, i2);
 				int nlen1 = num1.length();
 				int nlen2 = num2.length();
 				if (nlen1 < nlen2) {
 					int difflen = nlen2 - nlen1;
-					for (int i = 0 ; i < difflen ; i ++) {
+					for (int i = 0; i < difflen; i++) {
 						if (getJnum(num2.charAt(i)) != 0) {
 							// num2の方が大きい
 							return -1;
@@ -1464,10 +1458,9 @@ public class DEF {
 					}
 					// 残り部分で比較
 					num2 = num2.substring(difflen);
-				}
-				else if (nlen1 > nlen2) {
+				} else if (nlen1 > nlen2) {
 					int difflen = nlen1 - nlen2;
-					for (int i = 0 ; i < difflen ; i ++) {
+					for (int i = 0; i < difflen; i++) {
 						if (getJnum(num1.charAt(i)) > 0) {
 							// num1の方が大きい
 							return 1;
@@ -1477,7 +1470,7 @@ public class DEF {
 					num1 = num1.substring(difflen);
 				}
 				// 数字が異なる場合は比較
-				for (int i = 0 ; i < num1.length() ; i ++) {
+				for (int i = 0; i < num1.length(); i++) {
 					int diff = getJnum(num1.charAt(i)) - getJnum(num2.charAt(i));
 					if (diff != 0) {
 						// num1の方が大きい
@@ -1486,13 +1479,11 @@ public class DEF {
 				}
 				i1 += nlen1 - 1;
 				i2 += nlen2 - 1;
-			}
-			else if (ct1 == CHTYPE_CHAR) {
+			} else if (ct1 == CHTYPE_CHAR) {
 				if (ch1 != ch2) {
 					return ch1 - ch2;
 				}
-			}
-			else {
+			} else {
 				int s1 = getSerial(ch1);
 				int s2 = getSerial(ch2);
 				if (s1 != s2) {
@@ -1731,15 +1722,12 @@ public class DEF {
 			// JPEGではライブラリで1/2^xに縮小できる
 			if (w >= lw2 * 8 && h >= lh * 8) {
 				return 8;
-			}
-			else if (w >= lw2 * 4 && h >= lh * 4) {
+			} else if (w >= lw2 * 4 && h >= lh * 4) {
 				return 4;
-			}
-			else if (w >= lw2 * 2 && h >= lh * 2) {
+			} else if (w >= lw2 * 2 && h >= lh * 2) {
 				return 2;
 			}
-		}
-		else if (type != FileData.EXTTYPE_PNG && type != FileData.EXTTYPE_GIF) {
+		} else if (type != FileData.EXTTYPE_PNG && type != FileData.EXTTYPE_GIF) {
 			// pngとgif他以外
 			if (w >= lw2 * 2 && h >= lh * 2) {
 				int w_scale = w / lw2;
@@ -1782,18 +1770,14 @@ public class DEF {
 		if (key.indexOf('/') >= 0) {
 			// 安全のため、しおり削除の条件に一致しないKeyは対象外としておく
 			int len = key.length();
-			if( len >= 1 && key.substring( 0, 1 ).equals( "/" ) ){
-			}
-			else if( len >= 6 && key.substring( 0, 6 ).equals( "smb://" ) ){
-			}
-			else {
+			if (len >= 1 && key.substring(0, 1).equals("/")) {
+			} else if (len >= 6 && key.substring(0, 6).equals("smb://")) {
+			} else {
 				return false;
 			}
-		}
-		else if (key.equals("path")) {
+		} else if (key.equals("path")) {
 			return false;
-		}
-		else if (key.equals("ImportSetting")) {
+		} else if (key.equals("ImportSetting")) {
 			return false;
 		}
 		return true;
@@ -1804,14 +1788,12 @@ public class DEF {
 		if (key.indexOf('/') >= 0) {
 			// 安全のため、しおり削除の条件に一致しないKeyは対象外としておく
 			int len = key.length();
-			if( len >= 1 && key.substring( 0, 1 ).equals( "/" ) ){
+			if (len >= 1 && key.substring(0, 1).equals("/")) {
+				return true;
+			} else if (len >= 6 && key.substring(0, 6).equals("smb://")) {
 				return true;
 			}
-			else if( len >= 6 && key.substring( 0, 6 ).equals( "smb://" ) ){
-				return true;
-			}
-		}
-		else if (key.startsWith("smb-")) {
+		} else if (key.startsWith("smb-")) {
 			return true;
 		}
 		return false;
@@ -1823,8 +1805,7 @@ public class DEF {
 		try {
 			// 読み込み
 			intval = sp.getBoolean(key, defval);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.e("DEF.getBoolean", "error(key=" + key + ")");
 		}
 		return intval;
@@ -1836,8 +1817,7 @@ public class DEF {
 		try {
 			// 読み込み
 			intval = sp.getInt(key, defval);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.e("DEF.getInt", "error(key=" + key + ")");
 		}
 		return intval;
@@ -1849,16 +1829,14 @@ public class DEF {
 		int intval = 0;
 		try {
 			strval = sp.getString(key, defval);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.e("DEF.getInt", "getInt error(key=" + key + ")");
 		}
 
 		try {
 			// 読み込み
 			intval = Integer.parseInt(strval);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.e("DEF.getInt", "parseInt error(key=" + key + ", str=" + strval + ")");
 		}
 		return intval;
@@ -1866,9 +1844,13 @@ public class DEF {
 
 	public static void StackTrace(String tag, String msg) {
 		StackTraceElement[] ste = new Throwable().getStackTrace();
-		for (int i = 0; i < ste.length; i++) {
-			Log.d("", "" + ste[i]);
+		for (int i = 1; i < ste.length; i++) {
+			Log.d(tag, msg + ste[i]);
 		}
+	}
+
+	public static boolean isUiThread() {
+		return Thread.currentThread().equals(Looper.getMainLooper().getThread());
 	}
 
 	// Url文字列作成
@@ -1890,4 +1872,110 @@ public class DEF {
 		ret += "@" + url.substring(6);
 		return ret;
 	}
+
+	/**
+	 * ファイルにBOMが含まれていた場合、
+	 * BOMなしに変換する。
+	 *
+	 * @param s ファイル文字列
+	 * @return BOMなしのファイル文字列
+	 *
+	 */
+	public static String removeUTF8BOM(String s) {
+		// BOMをUnicodeコード表示したもの
+		final String BOM = "\uFEFF";
+		if (s.startsWith(BOM)) {
+			// ファイルの先頭より後ろの文字列を読み込む
+			s = s.substring(1);
+		}
+		return s;
+	}
+
+	public static String toUTF8(byte[] bytes, int offset, int length, String defaultCharset) {
+		boolean debug = false;
+		String encoding = "UTF-8";
+		String dst;
+
+		int tmp_offset = offset;
+		int tmp_length = length;
+
+		// UTF-8のBOMがあったら削除する
+		if( bytes[offset] == 0xFE && bytes[offset+1] == 0xFF ){
+			tmp_offset = offset + 1;
+			tmp_length = length - 1;
+		}
+
+		if(debug) {Log.d("DEF", "toUTF8: 文字コードを自動判定します.");}
+		encoding = CharDetecter(bytes, tmp_offset, tmp_length, defaultCharset);
+
+		dst = new String(bytes, tmp_offset, tmp_length, Charset.forName(encoding));
+		if(debug) {Log.d("DEF", "toUTF8: Stringを出力します. dst=" + dst);}
+		return dst;
+	}
+
+	public static String CharDetecter(byte[] bytes, int offset, int length, String defaultCharset) {
+		boolean debug = false;
+		if (debug) {
+			Log.d("DEF", "CharDetecter: 文字コードを判定します.");
+		}
+
+		int tmp_offset = offset;
+		int tmp_length = length;
+
+		// UTF-8のBOMがあったら削除する
+		if( bytes[offset] == 0xFE && bytes[offset+1] == 0xFF ){
+			tmp_offset = offset + 1;
+			tmp_length = length - 1;
+		}
+
+		// 文字コード判定ライブラリの実装
+		UniversalDetector detector = new UniversalDetector(null);
+		// 判定開始
+		detector.handleData(bytes, tmp_offset, tmp_length);
+		// 判定終了
+		detector.dataEnd();
+		// 文字コード判定
+		String encoding = detector.getDetectedCharset();
+		// 判定の初期化
+		detector.reset();
+
+		if (encoding != null) {
+			if (debug) {
+				Log.d("DEF", "CharDetecter: 文字コードを判定しました. encoding=" + encoding);
+			}
+		} else {
+			if (debug) {
+				Log.d("DEF", "CharDetecter: 文字コードを判定できませんでした.");
+			}
+			byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
+
+			if (debug) {
+				Log.d("DEF", "CharDetecter: 文字コードを自動判定できませんでした.");
+			}
+			// 文字コード判定に失敗したので中国国家標準規格かどうか再度確認する
+			if (debug) {
+				Log.d("DEF", "CharDetecter: 文字コードが GB18030 かどうか判定します.");
+			}
+			if (Arrays.equals(src, new String(src, Charset.forName("GB18030")).getBytes(Charset.forName("GB18030")))) {
+				if (debug) {
+					Log.d("DEF", "CharDetecter: 文字コードは GB18030 です.");
+				}
+				encoding = "GB18030";
+			} else {
+				if (debug) {
+					Log.d("DEF", "CharDetecter: 文字コードは GB18030 ではありません.");
+				}
+			}
+		}
+
+		if (encoding == null) {
+			// 判定できなかったら共通の操作設定設定で設定した文字コードに設定する
+			if (debug) {
+				Log.d("DEF", "CharDetecter: 文字コードを設定画面で設定した " + defaultCharset + " に設定します.");
+			}
+			encoding = defaultCharset;
+		}
+		return encoding;
+	}
+
 }

@@ -5,7 +5,14 @@ FetchContent_Declare(libjxl
         SUBBUILD_DIR subbuild
 )
 
+#option(JPEGXL_STATIC "" ON)
+option(JPEGXL_FORCE_SYSTEM_BROTLI "" OFF)
+option(JPEGXL_FORCE_SYSTEM_HWY "" OFF)
 option(BUILD_TESTING "" OFF)
+option(JPEGXL_BUNDLE_LIBPNG "" OFF)
+option(JPEGXL_ENABLE_VIEWERS "" OFF)
+option(JPEGXL_ENABLE_COVERAGE "" OFF)
+option(JPEGXL_ENABLE_FUZZERS "" OFF)
 option(JPEGXL_ENABLE_DOXYGEN "" OFF)
 option(JPEGXL_ENABLE_MANPAGES "" OFF)
 option(JPEGXL_ENABLE_EXAMPLES "" OFF)
@@ -22,8 +29,7 @@ option(JPEGXL_ENABLE_BENCHMARK "" OFF)
 FetchContent_GetProperties(libjxl)
 
 if(NOT libjxl_POPULATED)
-    FetchContent_Populate(libjxl)
-    add_subdirectory(${libjxl_SOURCE_DIR} ${libjxl_BINARY_DIR} EXCLUDE_FROM_ALL)
+    FetchContent_MakeAvailable(libjxl)
 endif()
 
 target_include_directories(comitton PRIVATE

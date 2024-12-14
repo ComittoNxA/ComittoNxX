@@ -12,6 +12,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.graphics.Color;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,6 +27,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
+
+import androidx.appcompat.app.AlertDialog;
 
 @SuppressLint("NewApi")
 public class ListDialog extends Dialog implements OnClickListener, OnItemClickListener, OnDismissListener {
@@ -45,6 +48,9 @@ public class ListDialog extends Dialog implements OnClickListener, OnItemClickLi
 
 	public ListDialog(Activity context, String title, String[] items, int select, boolean backcolor, ListSelectListener listener) {
 		super(context);
+		boolean debug = false;
+		if (debug) {Log.d("ListDialog", "ListDialog: 開始します.");}
+
 		Window dlgWindow = getWindow();
 
 		// タイトルなし
@@ -54,8 +60,9 @@ public class ListDialog extends Dialog implements OnClickListener, OnItemClickLi
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(backcolor ? 0xC0000000 : 0xFF000000);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(backcolor ? 0xC0000000 : 0xFF000000);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
@@ -66,10 +73,14 @@ public class ListDialog extends Dialog implements OnClickListener, OnItemClickLi
 		mSelect = select;
 		mListener = listener;
 		mDensity = context.getResources().getDisplayMetrics().scaledDensity;
+
+		if (debug) {Log.d("ListDialog", "ListDialog: 終了します.");}
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		boolean debug = false;
+		if (debug) {Log.d("ListDialog", "onCreate: 開始します.");}
 
 		setContentView(R.layout.listdialog);
 
@@ -86,6 +97,8 @@ public class ListDialog extends Dialog implements OnClickListener, OnItemClickLi
 
 		// デフォルトはしおりを記録する
 		mBtnCancel.setOnClickListener(this);
+		if (debug) {Log.d("ListDialog", "onCreate: 終了します.");}
+
 	}
 
 	// ダイアログを表示してもIMMERSIVEが解除されない方法
@@ -98,6 +111,8 @@ public class ListDialog extends Dialog implements OnClickListener, OnItemClickLi
 	 */
 	@Override
 	public void show() {
+		boolean debug = false;
+		if (debug) {Log.d("ListDialog", "show: 開始します.");}
 		// Set the dialog to not focusable.
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 		// 設定をコピー
@@ -108,6 +123,7 @@ public class ListDialog extends Dialog implements OnClickListener, OnItemClickLi
 
 		// Set the dialog to focusable again.
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+		if (debug) {Log.d("ListDialog", "show: 終了します.");}
 	}
 
 	/**

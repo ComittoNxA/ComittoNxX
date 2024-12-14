@@ -154,7 +154,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 
 	//	@Override
 	public void onClick(View v) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("ImportSettingPreference", "onClick: 開始します.");}
 
 		if (v == mButtonOk) {

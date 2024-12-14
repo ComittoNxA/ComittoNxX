@@ -60,10 +60,9 @@ public class RecordListArea extends ListArea {
 	private boolean mChangeLayout = false;
 
 	// コンストラクタ
-	public RecordListArea(Context context, short areatype, int listtype, String title, DrawNoticeListener listener) {
+	public RecordListArea(Context context, int listtype, String title, DrawNoticeListener listener) {
 		super(context, listtype);
 		mContext = context;
-//		mAreaType = areatype;
 		mTitleName = title;
 		// リストファイルの更新日時
 		mLastModified = 0;
@@ -350,11 +349,8 @@ public class RecordListArea extends ListArea {
 					if (rd.getType() == RecordItem.TYPE_IMAGE) {
 						work = rd.getImage();
 					}
-					else if (rd.getType() == RecordItem.TYPE_EPUB) {
-						work = String.format("Chapter : %d, Page : %d, PageRate : %.2f%%", (rd.getChapter() + 1), (rd.getPage() + 1), (rd.getPageRate() * 100));
-					}
 					else {
-						work = "Page : " + (rd.getPage() + 1);
+						work = String.format("Page : %d (%.2f%%)", (rd.getPage() + 1), (rd.getPageRate() * 100));
 					}
 					mTitleSep[index][1] = TextFormatter.getMultiLine(work, tcx, mTitlePaint, 99);
 				}
@@ -398,8 +394,8 @@ public class RecordListArea extends ListArea {
 				else {
 					mInfoSep[index] = new String[3][];
 					mInfoSep[index][0] = TextFormatter.getMultiLine("[" + rd.getServerName() + "]", tcx, mInfoPaint, 1);
-					mInfoSep[index][1] = TextFormatter.getShortening(rd.getPath(), tcx, mInfoPaint);
-					if (rd.getFile().length() > 0) {
+					mInfoSep[index][1] = TextFormatter.getMultiLine(rd.getPath(), tcx, mInfoPaint, 99);
+					if (rd.getFile().length() > 0  && !rd.getFile().equals("META-INF/container.xml")) {
 						mInfoSep[index][2] = TextFormatter.getMultiLine(rd.getFile(), tcx, mInfoPaint, 99);
 					}
 				}

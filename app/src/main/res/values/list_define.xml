@@ -267,6 +267,8 @@
         <item>EUC-KR</item>
         <item>Big5</item>
         <item>GB2312</item>
+        <item>GB18030</item>
+        <item>Big5-HKSCS</item>
     </string-array>
     <string-array name="charset_value_list">
         <item>0</item>
@@ -275,6 +277,8 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
+        <item>6</item>
+        <item>7</item>
     </string-array>
     <string-array name="scroll_name_list">
         <item>Horizontal -> Direction</item>
@@ -374,6 +378,9 @@
         <item>Original x2</item>
         <item>Original x3</item>
         <item>Fit Screen</item>
+        <item>Fit Screen(Ignore margins)</item>
+        <item>Fit Screen(for Spread)</item>
+        <item>Fit Screen(for Spread, Ignore margins)</item>
     </string-array>
     <string-array name="txpic_value_list">
         <item>0</item>
@@ -381,6 +388,9 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
     </string-array>
     <string-array name="effect_name_list">
         <item>None</item>

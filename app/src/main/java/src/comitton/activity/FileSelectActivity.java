@@ -8,14 +8,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 
-import jp.dip.muracoro.comittonx.BuildConfig;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 import src.comitton.common.FileAccess;
 import src.comitton.common.ImageAccess;
 import src.comitton.config.SetCommonActivity;
 import src.comitton.config.SetConfigActivity;
-import src.comitton.config.SetEpubActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
@@ -46,8 +44,7 @@ import src.comitton.view.list.TitleArea;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
@@ -91,11 +88,12 @@ import android.widget.Toast;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 @SuppressLint("DefaultLocale")
-public class FileSelectActivity extends Activity implements OnTouchListener, ListNoticeListener, BookmarkListenerInterface, Handler.Callback {
+public class FileSelectActivity extends AppCompatActivity implements OnTouchListener, ListNoticeListener, BookmarkListenerInterface, Handler.Callback {
 
 	public static final int READ_REQUEST_CODE = 42;
 	public static final int WRITE_REQUEST_CODE = 43;
@@ -132,7 +130,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private String mLoadListNextPath;
 	private String mLoadListNextFile;
 	private String mLoadListNextInFile;
-	private int mLoadListNextChapter;
 	private float mLoadListNextPageRate;
 	private int mLoadListNextPage;
 
@@ -243,7 +240,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		boolean debug = true;
+		boolean debug = false;
 		super.onCreate(savedInstanceState);
 
 		// 設定の読込
@@ -252,16 +249,17 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		try {
 			mInitialize = mSharedPreferences.getInt("Initialize", 0);
 			if (mInitialize >= 3) {
-				//起動処理中が最後まで実行されなかった
+				// 3回連続で起動処理中が最後まで実行されなかった
 				// ローカルはストレージルートにリセット
 				String path = Environment.getExternalStorageDirectory().getAbsolutePath() + '/';
 				ed.putString("path", path);
-
+				// 表示モードはリスト表示(サムネイルOFF)にセット
 				ed.putInt("ListMode", FileListArea.LISTMODE_LIST);
 				ed.putBoolean("Thumbnail", false);
 				ed.putInt("Initialize", 1);
 			} else {
-				// 起動処理開始を保存
+				// 起動処理の実行回数を保存
+				// あとで起動処理が正常に終了したら回数をリセットする
 				ed.putInt("Initialize", mInitialize + 1);
 			}
 			ed.commit();
@@ -554,7 +552,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("FileSelectActivity", "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);}
 
 		if (requestCode == WRITE_REQUEST_CODE || requestCode == REQUEST_SDCARD_ACCESS) {
@@ -589,6 +587,10 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					int nextopen = data.getExtras().getInt("nextopen", -1);
 					String file = data.getExtras().getString("lastfile");
 					String path = data.getExtras().getString("lastpath");
+					if (file.endsWith("/")) {
+						path = path + file;
+						file = "";
+					}
 					if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen=" + nextopen + ", file=" + file + ", path=" + path);}
 					if (nextopen != CloseDialog.CLICK_CLOSE) {
 						if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");}
@@ -599,9 +601,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 							mLoadListNextFile = file;
 							mLoadListNextPath = path;
 							mLoadListNextInFile = "";
-							mLoadListNextChapter = -2;
-							mLoadListNextPageRate = -2f;
-							mLoadListNextPage = -2;
+							mLoadListNextPageRate = (float)DEF.PAGENUMBER_READ;
+							mLoadListNextPage = DEF.PAGENUMBER_READ;
 							return;
 						}
 						else if (path != null && path.equals(mPath) == false) {
@@ -612,14 +613,13 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 							mLoadListNextFile = file;
 							mLoadListNextPath = path;
 							mLoadListNextInFile = "";
-							mLoadListNextChapter = -2;
-							mLoadListNextPageRate = -2f;
-							mLoadListNextPage = -2;
+							mLoadListNextPageRate = (float)DEF.PAGENUMBER_READ;
+							mLoadListNextPage = DEF.PAGENUMBER_READ;
 							return;
 						}
 						else {
 							if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextFileOpen");}
-							if (nextFileOpen(nextopen, path, file, "", -1, -1f, -1) == true) {
+							if (nextFileOpen(nextopen, path, file, "", (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD) == true) {
 								// オープンできた
 								return;
 							}
@@ -657,7 +657,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				}
 			}
 		}
-		Log.d("FileSelectActivity", "onActivityResult: 終了します");
+		if(debug) {Log.d("FileSelectActivity", "onActivityResult: 終了します");}
 	}
 
 	public void setThumb(Uri uri) {
@@ -694,17 +694,18 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			ThumbnailLoader loader = new ThumbnailLoader("", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, mThumbCrop, mThumbMargin);
 			loader.deleteThumbnailCache(mURI + mPath + mFileData.getName(), thumW, thumH);
 			loader.setThumbnailCache(mURI + mPath + mFileData.getName(), bm);
-			Toast.makeText(this, "サムネイルに設定しました", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.ThumbConfigured, Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	// 次のファイルを開く
-	private boolean nextFileOpen(int nextopen, String path, String file, String image, int chapter, float pagerate, int page) {
-		Log.d("FileSelectActivity", "nextFileOpen: 開始します. nextopen=" + nextopen + ", path=" + path + ", image=" + image + ", page=" + page);
+	private boolean nextFileOpen(int nextopen, String path, String file, String image, float pagerate, int page) {
+		boolean debug = false;
+		if(debug) {Log.d("FileSelectActivity", "nextFileOpen: 開始します. nextopen=" + nextopen + ", path=" + path + ", file=" + file + ", image=" + image + ", pagerate=" + pagerate + ", page=" + page);}
 		// 次のファイル検索
 		FileData nextfile = searchNextFile(mFileList.getFileList(), file, nextopen);
 		if (nextfile != null && nextfile.getName().length() > 0) {
-			Log.d("FileSelectActivity", "nextFileOpen: nextfile != null");
+			if(debug) {Log.d("FileSelectActivity", "nextFileOpen: nextfile != null");}
 
 			switch (nextopen) {
 				case CloseDialog.CLICK_PREVTOP:
@@ -712,7 +713,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					Editor ed = mSharedPreferences.edit();
 					String user = mServer.getUser();
 					String pass = mServer.getPass();
-					ed.remove(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#chapter");
 					ed.remove(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#pageRate");
 					ed.remove(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass));
 					ed.commit();
@@ -723,9 +723,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					Editor ed = mSharedPreferences.edit();
 					String user = mServer.getUser();
 					String pass = mServer.getPass();
-					ed.putInt(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#chapter", -2);
-					ed.putFloat(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#pageRate", -2f);
-					ed.putInt(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass), -2);
+					ed.putFloat(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+					ed.putInt(DEF.createUrl(mURI + mPath + nextfile.getName(), user, pass), DEF.PAGENUMBER_READ);
 					ed.commit();
 					updateListView();
 					break;
@@ -734,9 +733,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		}
 
 		if (nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE) {
-			Log.d("FileSelectActivity", "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");
+			if(debug) {Log.d("FileSelectActivity", "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");}
 
-			if (openFile(nextfile, image, chapter, pagerate, page, mEpubViewer) == true) {
+			if (openFile(nextfile, image, pagerate, page, mEpubViewer) == true) {
 				// サムネイル解放
 				releaseThumbnail();
 				return true;
@@ -747,6 +746,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 	// 設定の読み込み
 	private boolean readConfig() {
+		boolean debug = false;
 		// 色の設定
 		mDirColor = SetFileColorActivity.getDirColor(mSharedPreferences);
 		mBefColor = SetFileColorActivity.getBefColor(mSharedPreferences);
@@ -806,7 +806,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		// mSelectorShow =
 		// SetRecorderActivity.getShowSelector(mSharedPreferences); // セレクタ表示
 		mListType = SetRecorderActivity.getListTypes(mSharedPreferences);
-		Log.d("FileSelectActivity", "mListType.length=" + mListType.length);
+		if(debug) {Log.d("FileSelectActivity", "mListType.length=" + mListType.length);}
 
 		mHistCount = DEF.calcSaveNum(SetRecorderActivity.getHistNum(mSharedPreferences));
 		mLocalSave = SetRecorderActivity.getRecLocal(mSharedPreferences);
@@ -1091,7 +1091,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					}
 					if (mListRota == DEF.ROTATE_PORTRAIT || mListRota == DEF.ROTATE_LANDSCAPE) {
 						int rotate;
-						if (getRequestedOrientation() == DEF.ROTATE_PORTRAIT) {
+						if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 							// 横にする
 							rotate = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 						}
@@ -1171,8 +1171,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	// ActivityクラスのonCreateDialogをオーバーライド
 	@Override
 	protected Dialog onCreateDialog(int id) {
+		boolean debug = false;
 		Dialog dialog = null;
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.MyDialog);
 		boolean isDirectory;
 		File file;
 		switch (id) {
@@ -1186,7 +1187,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 				dialogBuilder.setTitle("ファイル削除");
 				dialogBuilder.setMessage(R.string.delMsg);
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 					// ファイル削除
 					if (mFileData != null) {
@@ -1234,7 +1235,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					loadThumbnail();
 					}
 				});
-				dialogBuilder.setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						mFileData = null;
 					}
@@ -1244,7 +1245,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			case DEF.MESSAGE_RECORD_DELETE:
 				dialogBuilder.setTitle("dummy");
 				dialogBuilder.setMessage(R.string.delBmMsg);
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// ブックマーク削除
@@ -1258,7 +1259,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						dialog.dismiss();
 					}
 				});
-				dialogBuilder.setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// dialog.cancel();
 					}
@@ -1274,7 +1275,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 				dialogBuilder.setTitle("Download");
 				dialogBuilder.setMessage("");
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						if (mFileData != null) {
 							// ダウンロード開始
@@ -1287,7 +1288,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						dialog.dismiss();
 					}
 				});
-				dialogBuilder.setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						mFileData = null;
 						dialog.dismiss();
@@ -1303,7 +1304,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				// ダイアログの作成(AlertDialog.Builder)
 				dialogBuilder.setTitle(R.string.scTitle);
 				dialogBuilder.setView(inputView);
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
 						String title = edit.getText().toString();
@@ -1346,7 +1347,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						}
 					}
 				});
-				dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						/* キャンセル処理 */
 					}
@@ -1373,7 +1374,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				// ダイアログの作成(AlertDialog.Builder)
 				dialogBuilder.setTitle(R.string.mkTitle);
 				dialogBuilder.setView(inputView);
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
 						CheckBox chkFilter = (CheckBox) inputView.findViewById(R.id.chk1);
@@ -1383,7 +1384,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						loadListView();
 					}
 				});
-				dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						/* キャンセル処理 */
 					}
@@ -1430,7 +1431,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				// ダイアログの作成(AlertDialog.Builder)
 				dialogBuilder.setTitle(R.string.renTitle);
 				dialogBuilder.setView(inputView);
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
 						String filename = edit.getText().toString().trim();
@@ -1469,7 +1470,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						updateListView();
 					}
 				});
-				dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						/* キャンセル処理 */
 						mFileData = null;
@@ -1489,7 +1490,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				String path = mSharedPreferences.getString("LastPath", "");
 				String lastFile = mSharedPreferences.getString("LastFile", "");
 				String lastText = mSharedPreferences.getString("LastText", "");
-				String lastEpub = mSharedPreferences.getString("LastEpub", "");
 				String uri = "";
 				if (svrindex != ServerSelect.INDEX_LOCAL) {
 					ServerSelect server = new ServerSelect(mSharedPreferences, this);
@@ -1500,10 +1500,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				Resources res = getResources();
 				String msg = res.getString(R.string.rsMsg) + "\n\n" + uri + path + lastFile;
 				if (lastView == DEF.LASTOPEN_TEXT && lastText != null && lastText.length() > 0) {
-					msg += "\n" + lastText;
-				}
-				else if (lastView == DEF.LASTOPEN_EPUB && lastEpub != null && lastEpub.length() > 0) {
-					msg += "\n" + lastEpub;
+					if (!lastText.equals("META-INF/container.xml")) {
+						msg += "\n" + lastText;
+					}
 				}
 				dialogBuilder.setTitle(R.string.rsTitle);
 				dialogBuilder.setMessage(msg);
@@ -1515,7 +1514,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						String path = mSharedPreferences.getString("LastPath", "");
 						String lastFile = mSharedPreferences.getString("LastFile", "");
 						String lastText = mSharedPreferences.getString("LastText", "");
-						String lastEpub = mSharedPreferences.getString("LastEpub", "");
 
 						// 起動処理終了を保存
 						if (mInitialize != 0) {
@@ -1541,22 +1539,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 								mLoadListNextFile = lastText;
 								mLoadListNextPath = path;
 							}
-							mLoadListNextPage = -1;
-						} else if (lastView == DEF.LASTOPEN_EPUB) {
-							if (lastFile != null && lastFile.length() != 0) {
-								// 最後に開いていた圧縮ファイル展開
-								// 圧縮ファイルを設定
-								mLoadListNextFile = lastFile;
-								mLoadListNextPath = path;
-								mLoadListNextInFile = lastEpub;
-							} else {
-								// 最後に開いたテキストオープン
-								mLoadListNextFile = lastEpub;
-								mLoadListNextPath = path;
-							}
-							mLoadListNextChapter = -1;
-							mLoadListNextPageRate = -1f;
-							mLoadListNextPage = -1;
+							mLoadListNextPage = DEF.PAGENUMBER_UNREAD;
 						} else if (lastView == DEF.LASTOPEN_IMAGE) {
 							// 最後に開いたイメージオープン
 							// if (lastFile.length() == 0) {
@@ -1590,7 +1573,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 //			case DEF.MESSAGE_MOVE_PATH_EROOR:{
 //				//dialogBuilder.setTitle("dummy");
 //				dialogBuilder.setMessage(R.string.movePathErr);
-//				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 //					public void onClick(DialogInterface dialog, int whichButton) {
 //						dialog.dismiss();
 //					}
@@ -1598,14 +1581,46 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 //				dialog = dialogBuilder.create();
 //				break;
 //			}
+			case DEF.MESSAGE_RESETLOCAL:{
+				if(debug) {Log.d("FileSelectActivity", "onCreateDialog: ローカルのパスリセットのダイアログを表示します.");}
+				int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
+				ServerSelect server = new ServerSelect(mSharedPreferences, this);
+
+				dialogBuilder.setMessage(R.string.resetLocal);
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// ローカルの場合はストレージルートにリセット
+						String path = Environment.getExternalStorageDirectory().getAbsolutePath() + '/';
+						//path = DEF.getBaseDirectory();
+						server.select(serverindex);
+						server.setPath(path);
+						mSelectRecord.setPath(path);
+						mListScreenView.notifyUpdate(RecordList.TYPE_SERVER);
+
+						ArrayList<RecordItem> recordList = mListScreenView.getList(RecordList.TYPE_SERVER);
+						RecordList.update(recordList, RecordList.TYPE_SERVER);
+					}
+				});
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						/* キャンセル処理 */
+					}
+				});
+				dialog = dialogBuilder.create();
+				break;
+			}
 			case DEF.MESSAGE_EDITSERVER:{
+				if(debug) {Log.d("FileSelectActivity", "onCreateDialog: サーバ情報の編集ダイアログを表示します.");}
+				int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
+				ServerSelect server = new ServerSelect(mSharedPreferences, this);
+
 				// レイアウトの呼び出し
 				LayoutInflater factory = LayoutInflater.from(this);
 				mEditDlg = factory.inflate(R.layout.editsvr, null);
 				// ダイアログの作成(AlertDialog.Builder)
 				dialogBuilder.setTitle(R.string.svTitle);
 				dialogBuilder.setView(mEditDlg);
-				dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// 入力値を保存
 						EditText name = (EditText) mEditDlg.findViewById(R.id.edit_name);
@@ -1626,7 +1641,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						mListScreenView.notifyUpdate(listtype);
 					}
 				});
-				dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						/* キャンセル処理 */
 					}
@@ -1644,7 +1659,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	// ActivityクラスのonCreateDialogをオーバーライド
 	@Override
 	protected void onPrepareDialog(final int id, final Dialog dialog) {
-		// 一度ダイアログを表示すると画面回転時に呼び出される
+		// 一度ダイアログを表示すると二回目に表示するときは中身だけ書き換える
 		switch (id) {
 			case DEF.MESSAGE_FILE_DELETE: // ファイル削除
 			case DEF.MESSAGE_DOWNLOAD: // ファイルダウンロード
@@ -1668,11 +1683,14 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					dialog.setTitle(title);
 				}
 				break;
+			case DEF.MESSAGE_RESETLOCAL: {
+				break;
+			}
 			case DEF.MESSAGE_EDITSERVER:
 				if (mEditDlg == null) {
 					break;
 				}
-				// 一度ダイアログを表示すると画面回転時に呼び出される
+				// 一度ダイアログを表示すると二回目に表示するときは中身だけ書き換える
 				EditText name = (EditText) mEditDlg.findViewById(R.id.edit_name);
 				EditText host = (EditText) mEditDlg.findViewById(R.id.edit_host);
 				EditText user = (EditText) mEditDlg.findViewById(R.id.edit_user);
@@ -1779,12 +1797,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			showDialog(DEF.MESSAGE_SHORTCUT);
 			switchFileList();
 		}
-		else if (id == DEF.MENU_SERVER) {
-			// サーバ選択画面に遷移
-			// Intentをつかって画面遷移する
-			Intent intent = new Intent(FileSelectActivity.this, ServerActivity.class);
-			startActivityForResult(intent, DEF.REQUEST_SERVER);
-		}
 		else if (id == DEF.MENU_REFRESH) {
 			// リストを更新
 			loadListView();
@@ -1795,7 +1807,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		}
 		else if (id == DEF.MENU_ROTATE) {
 			int rotate;
-			if (getRequestedOrientation() == DEF.ROTATE_PORTRAIT) {
+			if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 				// 横にする
 				rotate = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 			}
@@ -1897,7 +1909,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 		// ファイルリスト取得条件セット
 		mFileList.setPath(mURI, mPath, user, pass);
-		mFileList.setParams(mHidden, mMarker, mFilter, mApplyDir, mParentMove);
+		mFileList.setParams(mHidden, mMarker, mFilter, mApplyDir, mParentMove, mEpubViewer);
 
 		mListScreenView.mFileListArea.setThumbnailId(0);
 
@@ -1953,7 +1965,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 		boolean thumbload = true;
 		if (mLoadListNextOpen != -1) {
-			if (nextFileOpen(mLoadListNextOpen, mLoadListNextPath, mLoadListNextFile, mLoadListNextInFile, mLoadListNextChapter, mLoadListNextPageRate, mLoadListNextPage) == true) {
+			if (nextFileOpen(mLoadListNextOpen, mLoadListNextPath, mLoadListNextFile, mLoadListNextInFile, mLoadListNextPageRate, mLoadListNextPage) == true) {
 				// オープンできた
 				thumbload = false;
 			}
@@ -1983,9 +1995,28 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			for (int i = 0; i < files.size(); i++) {
 				FileData data = files.get(i);
 				String name = data.getName();
+				int state = DEF.PAGENUMBER_UNREAD;
 				int type = data.getType();
-				if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF || type == FileData.FILETYPE_EPUB || type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_DIR) {
-					int state = sharedPreferences.getInt(DEF.createUrl(path + name, user, pass), -1);
+				if (type == FileData.FILETYPE_ARC
+						|| type == FileData.FILETYPE_PDF
+						|| type == FileData.FILETYPE_TXT
+						|| type == FileData.FILETYPE_DIR) {
+					state = (int)mSharedPreferences.getFloat(DEF.createUrl(path + name, user, pass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+					if (state == DEF.PAGENUMBER_UNREAD) {
+						state = sharedPreferences.getInt(DEF.createUrl(path + name, user, pass), DEF.PAGENUMBER_UNREAD);
+					}
+					data.setState(state);
+				}
+				if (type == FileData.FILETYPE_EPUB) {
+					if (DEF.EPUB_VIEWER == mEpubViewer) {
+						state = (int) mSharedPreferences.getFloat(DEF.createUrl(path + name + "META-INF/container.xml", user, pass) + "#pageRate", (float) DEF.PAGENUMBER_UNREAD);
+						if (state == DEF.PAGENUMBER_UNREAD) {
+							state = sharedPreferences.getInt(DEF.createUrl(path + name + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_UNREAD);
+						}
+					}
+					else {
+						state = sharedPreferences.getInt(DEF.createUrl(path + name, user, pass), DEF.PAGENUMBER_UNREAD);
+					}
 					data.setState(state);
 				}
 				boolean hit = false;
@@ -2105,6 +2136,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			}
 		}
 		else if (mTouchArea == ListScreenView.AREATYPE_SELECTOR) {
+			// 下部の表示セレクタボタン
 			if (mSelectorShow) {
 				// ボタン押下
 				int listindex = mListScreenView.mSelectorArea.sendTouchEvent(action, (int) x, (int) y);
@@ -2266,6 +2298,9 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	 * ファイルリストの長押し選択表示
 	 */
 	private void showFileLongClickDialog() {
+		boolean debug = false;
+		if (debug) {Log.d("FileSelectActivity", "showFileLongClickDialog: 開始します.");}
+
 		if (mListDialog != null) {
 			return;
 		}
@@ -2529,7 +2564,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 							openCompFile(mFileData.getName(), "");
 						} else {
 							// Epubビュアーで開く
-							openEpubFile(mFileData.getName(), -1, -1f, -1);
+							openEpubFile(mFileData.getName(), (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
 						}
 						break;
 					case OPERATE_NONREAD: // 未読にする
@@ -2537,9 +2572,12 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						ed = mSharedPreferences.edit();
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
-						ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass));
-						if (mFileData.getType() == FileData.FILETYPE_EPUB) {
-							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#chapter");
+						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.EPUB_VIEWER == mEpubViewer) {
+							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass));
+							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass) + "#pageRate");
+						}
+						else {
+							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass));
 							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#pageRate");
 						}
 						ed.commit();
@@ -2552,7 +2590,10 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 							releaseThumbnail();
 
 							if (type == FileData.FILETYPE_TXT) {
-								openTextFile(name, -1);
+								openTextFile(name, (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
+							}
+							else if (type == FileData.FILETYPE_EPUB) {
+								openEpubFile(name, (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
 							}
 							else if (type == FileData.FILETYPE_ARC || type == FileData.FILETYPE_PDF) {
 								// zip/rar/pdfファイルを開く
@@ -2570,10 +2611,13 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						ed = mSharedPreferences.edit();
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
-						ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass), -2);
-						if (mFileData.getType() == FileData.FILETYPE_EPUB) {
-							ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#chapter", -2);
-							ed.putFloat(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#pageRate", -2f);
+						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.EPUB_VIEWER == mEpubViewer) {
+							ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_READ);
+							ed.putFloat(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+						}
+						else {
+							ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass), DEF.PAGENUMBER_READ);
+							ed.putFloat(DEF.createUrl(mURI + mPath + mFileData.getName(), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
 						}
 						ed.commit();
 						updateListView();
@@ -2627,12 +2671,15 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			}
 		});
 		mListDialog.show();
+
+		if (debug) {Log.d("FileSelectActivity", "showFileLongClickDialog: 終了します.");}
 	}
 
 	/**
 	 * 履歴系リストの長押し選択表示
 	 */
 	private void showRecordLongClickDialog() {
+		boolean debug = false;
 		if (mListDialog != null) {
 			return;
 		}
@@ -2667,23 +2714,15 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			mListDialog.show();
 		}
 		else if (listtype == RecordList.TYPE_SERVER) {
+			if(debug) {Log.d("FileSelectActivity", "showRecordLongClickDialog: サーバリストのアイテムが長押しされました.");}
 			// サーバリストのアイテムが長押しされた
 			int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
-			ServerSelect server = new ServerSelect(mSharedPreferences, this);
-
 			if (serverindex == ServerSelect.INDEX_LOCAL) {
-				// ローカルの場合はストレージルートにリセット
-				String path = Environment.getExternalStorageDirectory().getAbsolutePath() + '/';
-				//path = DEF.getBaseDirectory();
-				server.select(serverindex);
-				server.setPath(path);
-				mSelectRecord.setPath(path);
-				mListScreenView.notifyUpdate(listtype);
-
-				ArrayList<RecordItem> recordList = mListScreenView.getList(listtype);
-				RecordList.update(recordList, listtype);
+				if(debug) {Log.d("FileSelectActivity", "showRecordLongClickDialog: ローカルを選択しました.");}
+				showDialog(DEF.MESSAGE_RESETLOCAL);
 			}
 			else {
+				if(debug) {Log.d("FileSelectActivity", "showRecordLongClickDialog: ローカル以外のサーバを選択しました.");}
 				showDialog(DEF.MESSAGE_EDITSERVER);
 			}
 		}
@@ -3160,7 +3199,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	/**
 	 * ファイルオープン
 	 */
-	private boolean openFile(FileData fd, String infile, int chapter, float pagerate, int page, boolean epubviewer) {
+	private boolean openFile(FileData fd, String infile, float pagerate, int page, boolean epubviewer) {
 		// ファイルを表示
 		if (fd == null) {
 			if (page != -2) {
@@ -3170,7 +3209,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 			openImageDir("");
 		}
 		else {
-			Toast.makeText(this, fd.getName(), Toast.LENGTH_SHORT).show();
 			switch (fd.getType()) {
 				case FileData.FILETYPE_DIR:
 					openImageDir(fd.getName());
@@ -3190,7 +3228,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					}
 					break;
 				case FileData.FILETYPE_TXT:
-					openTextFile(fd.getName(), page);
+					openTextFile(fd.getName(), pagerate, page);
 					break;
 				case FileData.FILETYPE_PDF:
 					openCompFile(fd.getName(), infile);
@@ -3199,7 +3237,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					if (DEF.EPUB_VIEWER == epubviewer) {
 						Log.d("FileSelectActivity", "openFile: DEF.EPUB_VIEWER");
 						// Epubビューワーで開く
-						openEpubFile(fd.getName(), chapter, pagerate, page);
+						openEpubFile(fd.getName(), pagerate, page);
 					}
 					else {
 						Log.d("FileSelectActivity", "openFile: DEF.IMAGE_VIEWER");
@@ -3215,23 +3253,26 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	/**
 	 * Epubファイルオープン
 	 */
-	private void openEpubFile(String name, int chapter, float pageRate, int page) {
+	private void openEpubFile(String name, float pageRate, int page) {
 		// saveLastOpenComp(mServer.getCode(), mPath, null, name,
 		// DEF.LASTOPEN_TEXT);
+		Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+
 		// 描画停止
 
 		setDrawEnable();
 
 		Intent intent;
-		intent = new Intent(FileSelectActivity.this, EpubActivity.class);
+		intent = new Intent(FileSelectActivity.this, TextActivity.class);
 		intent.putExtra("Server", mServer.getSelect());
 		intent.putExtra("Uri", mURI);
 		intent.putExtra("Path", mPath);
 		intent.putExtra("User", mServer.getUser());
 		intent.putExtra("Pass", mServer.getPass());
-		intent.putExtra("File", "");
-		intent.putExtra("Epub", name);
-		intent.putExtra("Chapter", chapter);
+		intent.putExtra("File", name);
+		intent.putExtra("Text", "META-INF/container.xml");
+		//intent.putExtra("Epub", name);
+		//intent.putExtra("Chapter", chapter);
 		intent.putExtra("PageRate", pageRate);
 		intent.putExtra("Page", page);
 		startActivityForResult(intent, DEF.REQUEST_EPUB);
@@ -3242,9 +3283,15 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	/**
 	 * テキストファイルオープン
 	 */
-	private void openTextFile(String name, int page) {
+	private void openTextFile(String name, float pageRate, int page) {
+		boolean debug = false;
+		if (debug) {Log.d("FileSelectActivity", "openTextFile: 開始します. name=" + name);}
+		if (debug) {DEF.StackTrace("FileSelectActivity", "openTextFile:");}
+
 		// saveLastOpenComp(mServer.getCode(), mPath, null, name,
 		// DEF.LASTOPEN_TEXT);
+		Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+
 		// 描画停止
 		setDrawEnable();
 
@@ -3257,6 +3304,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 		intent.putExtra("Pass", mServer.getPass());
 		intent.putExtra("File", "");
 		intent.putExtra("Text", name);
+		intent.putExtra("PageRate", pageRate);
 		intent.putExtra("Page", page);
 		startActivityForResult(intent, DEF.REQUEST_TEXT);
 		return;
@@ -3284,6 +3332,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private void openImageFile(String name) {
 		// saveLastOpenComp(mServer.getCode(), mPath, null, name,
 		// DEF.LASTOPEN_IMAGE);
+		Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+
 		// 描画停止
 		setDrawEnable();
 
@@ -3305,6 +3355,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private void openImageDir(String name) {
 		// saveLastOpenComp(mServer.getCode(), mPath + name, null, null,
 		// DEF.LASTOPEN_IMAGE);
+		Toast.makeText(this, mPath, Toast.LENGTH_SHORT).show();
 
 		// Intentをつかって画面遷移する
 		Intent intent = new Intent(FileSelectActivity.this, ImageActivity.class);
@@ -3325,6 +3376,8 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 	private void openCompFile(String name, String page) {
 		// saveLastOpenComp(mServer.getCode(), mPath, name, null,
 		// DEF.LASTOPEN_IMAGE);
+		Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+
 		// 描画停止
 		setDrawEnable();
 
@@ -3680,6 +3733,10 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 
 	@Override
 	public void onItemClick(int listtype, int listpos, Point point) {
+		boolean debug = false;
+		if (debug) {Log.d("FileSelectActivity", "onItemClick: 開始します.");}
+		if (debug) {DEF.StackTrace("FileSelectActivity", "onItemClick: ");}
+
 		if (listtype == RecordList.TYPE_FILELIST) {
 			ArrayList<FileData> files = mFileList.getFileList();
 			// サムネイル有りでタイル表示の時はファイル情報部分
@@ -3719,7 +3776,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					} else if (type == FileData.FILETYPE_TXT) {
 						// サムネイル解放
 						releaseThumbnail();
-						openTextFile(name, -1);
+						openTextFile(name, (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
 					} else if (type == FileData.FILETYPE_PDF) {
 						// サムネイル解放
 						releaseThumbnail();
@@ -3731,7 +3788,7 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 						if (DEF.EPUB_VIEWER == mEpubViewer) {
 							Log.d("FileSelectActivity", "onItemClick: DEF.EPUB_VIEWER");
 							// EpubViewerで開く
-							openEpubFile(name, -1, -1f, -1);
+							openEpubFile(name, (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
 						}
 						else {
 							Log.d("FileSelectActivity", "onItemClick: DEF.IMAGE_VIEWER");
@@ -3766,7 +3823,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 				String file = rd.getFile();
 				String path = rd.getPath();
 				String image = rd.getImage();
-				int chapter = rd.getChapter();
 				float pagerate = rd.getPageRate();
 				int page = rd.getPage();
 				int type = rd.getType();
@@ -3801,7 +3857,6 @@ public class FileSelectActivity extends Activity implements OnTouchListener, Lis
 					moveFileSelectFromServer(server, mLoadListNextPath);
 					if (type != RecordItem.TYPE_NONE) {
 						mLoadListNextOpen = CloseDialog.CLICK_THIS;
-						mLoadListNextChapter = chapter;
 						mLoadListNextPageRate = pagerate;
 						mLoadListNextPage = page;
 					}

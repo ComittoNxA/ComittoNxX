@@ -252,7 +252,8 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public void LoadImageList(int memsize, int memnext, int memprev) {
-		Log.d("ImageManager", "LoadImageList: 開始します. memsize=" + memsize + ", memnext=" + memnext + ", memprev=" + memprev);
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "LoadImageList: 開始します. memsize=" + memsize + ", memnext=" + memnext + ", memprev=" + memprev);}
 		try {
 			if (mFilePath.length() >= 1 && mFilePath.substring(0, 1).equals("/")) {
 				// ローカルパス
@@ -282,7 +283,7 @@ public class ImageManager extends InputStream implements Runnable {
 			else if (FileData.isPdf(ext)) {
 				mFileType = FILETYPE_PDF;
 			}
-			else if (FileData.isZip(ext)) {
+			else if (FileData.isZip(ext) || FileData.isEpub(ext)) {
 				mFileType = FILETYPE_ZIP;
 			}
 			else if (FileData.isRar(ext)) {
@@ -338,11 +339,12 @@ public class ImageManager extends InputStream implements Runnable {
 			message.obj = ex.getMessage();
 			mHandler.sendMessage(message);
 		}
-		Log.d("ImageManager", "LoadImageList: 終了します. ");
+		if(debug) {Log.d("ImageManager", "LoadImageList: 終了します. ");}
 	}
 
 	private void cmpFileList() throws IOException {
-		Log.d("ImageManager", "cmpFileList: 開始します.");
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "cmpFileList: 開始します.");}
 		// ZIPファイル読み込み
 		byte[] buf = new byte[SIZE_BUFFER];
 		int readSize=0;
@@ -490,6 +492,10 @@ public class ImageManager extends InputStream implements Runnable {
 						fl.type = FileData.FILETYPE_TXT;
 						fl.exttype = FileData.EXTTYPE_TXT;
 					}
+					else if (FileData.isEpubSub(ext) && (mOpenMode == OPENMODE_TEXTVIEW)) {
+						fl.type = FileData.FILETYPE_EPUB_SUB;
+						fl.exttype = FileData.FILETYPE_EPUB_SUB;
+					}
 
 					if (fl.type != 0) {
 						// リストへ登録
@@ -542,7 +548,7 @@ public class ImageManager extends InputStream implements Runnable {
 		}
 		mMaxCmpLength = maxcmplen;
 		mMaxOrgLength = maxorglen;
-		Log.d("ImageManager", "cmpFileList: 終了します.");
+		if(debug) {Log.d("ImageManager", "cmpFileList: 終了します.");}
 	}
 
 	public boolean sendProgress(int type, int count) {
@@ -644,6 +650,9 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public FileListItem zipFileListItem(byte buf[], long cmppos, long orgpos, int readsize, boolean isCmpSum) {
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "zipFileListItem: 開始します.");}
+
 		int sig = getInt(buf, OFFSET_LCL_SIGNA_LEN);
 		int bflag = getShort(buf, OFFSET_LCL_BFLAG_LEN);
 		int ftime = getShort(buf, OFFSET_LCL_FTIME_LEN);
@@ -667,16 +676,7 @@ public class ImageManager extends InputStream implements Runnable {
 		if (readsize >= lenFName + SIZE_LOCALHEADER) {
 			// ファイル名までのデータがあり
 			try {
-//				name = new String(buf, SIZE_LOCALHEADER, lenFName, mCharset);
-				// 日本語環境に限った話でShift-JISではなくUTF-8だった場合に変換しておく
-				if( checkUFT8( buf, SIZE_LOCALHEADER, lenFName ) ){
-					// RAR5がUTF-8なので定義を流用
-					name = new String(buf, SIZE_LOCALHEADER, lenFName, mRarCharset);
-//					Log.d("comittonx/UTF-8",name);
-				}else {
-					name = new String(buf, SIZE_LOCALHEADER, lenFName, mCharset);
-//					Log.d("comittonx/Shift-JIS",name);
-				}
+				name = DEF.toUTF8(buf, SIZE_LOCALHEADER, lenFName, mCharset);
 			}
 			catch (Exception e) {
 				name = "Unknown";
@@ -736,6 +736,9 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public FileListItem zipFileListOldItemLite(byte buf[], long orgpos, int readsize) throws IOException {
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "zipFileListOldItemLite: 開始します.");}
+
 		int sig = getInt(buf, OFFSET_CTL_SIGNA_LEN);
 		if (readsize < SIZE_CENTHEADER) {
 			// データ不正
@@ -775,16 +778,7 @@ public class ImageManager extends InputStream implements Runnable {
 		imgfile.dtime = d.getTime();
 		// ファイル名までのデータがあり
 		try {
-//			imgfile.name = new String(buf, OFFSET_CTL_FNAME, lenFName, mCharset);
-			// 日本語環境に限った話でShift-JISではなくUTF-8だった場合に変換しておく
-			if( checkUFT8( buf, OFFSET_CTL_FNAME, lenFName ) ){
-				// RAR5がUTF-8なので定義を流用
-				imgfile.name = new String(buf, OFFSET_CTL_FNAME, lenFName, mRarCharset);
-//				Log.d("comittonx/UTF-8",imgfile.name);
-			}else {
-				imgfile.name = new String(buf, OFFSET_CTL_FNAME, lenFName, mCharset);
-//				Log.d("comittonx/Shift-JIS",imgfile.name);
-			}
+			imgfile.name = DEF.toUTF8(buf, OFFSET_CTL_FNAME, lenFName, mCharset);
 		}
 		catch (Exception e) {
 			imgfile.name = "Unknown";
@@ -793,6 +787,9 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public FileListItem rar5FileListItem(byte buf[], long cmppos, long orgpos, int readsize) throws IOException {
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "rar5FileListItem: 開始します.");}
+
 		// ヘッダを読み込み、ファイルヘッダだけをFileListItemとして返す
 		// シグネチャ(マーカーブロック)やアーカイブヘッダーなどは読み飛ばす
 		// VINTは2byteまでと決め打ちして簡略化 > vint取得関数を実装
@@ -928,6 +925,7 @@ public class ImageManager extends InputStream implements Runnable {
 					}
 				}
 				name = new String( buf, pos, fnlen, mRarCharset );
+				//name = DEF.toUTF8( buf, pos, fnlen);
 			}
 			catch( Exception e ){
 				name = "Unknown";
@@ -981,51 +979,9 @@ public class ImageManager extends InputStream implements Runnable {
 		return data;
 	}
 
-	private boolean checkUFT8(byte buf[], long start, long len){
-		// ZIP及びRAR4.xのファイル名がShift-JISではなくUTF-8で保存されている場合の判定関数
-		// ある程度の推測で判断しています
-		// 日本語以外では問題があるのかもしれません
-		boolean isUTF8 = false;
-		int namePos = (int)start;
-		byte check_code;
-		byte check_code2;
-		while( true ){
-			// ファイル名の最後まで判別出来なかった
-			if( namePos >= len ) {
-				break;
-			}
-			check_code = buf[ namePos ];
-			check_code2 = buf[ namePos+1 ];
-			// 先頭のバイトコードで簡易判定を行う
-			if( check_code >= (byte)0x00 && check_code <= (byte)0x7e ){
-				// Asciiなので次のバイトに判断を委ねる
-				namePos++;
-			}else {
-				if (check_code2 >= (byte)0x80 && check_code2 <= (byte)0xbf) {
-					if (check_code >= (byte)0xf0 && check_code <= (byte)0xfd) {
-						// UTF-8確定
-						isUTF8 = true;
-					} else if (check_code >= (byte)0x80 && check_code <= (byte)0x9f) {
-						// Shift-JIS確定
-						isUTF8 = false;
-					} else if (check_code >= (byte)0xa0 && check_code <= (byte)0xc1) {
-						// Shift-JIS確定
-						isUTF8 = false;
-					} else if (check_code >= (byte)0xe0 && check_code <= (byte)0xef) {
-						// UTF-8推定
-						isUTF8 = true;
-					} else if (check_code >= (byte)0xc2 && check_code <= (byte)0xdf) {
-						// UTF-8推定
-						isUTF8 = true;
-					}
-				}
-				break;
-			}
-		}
-		return isUTF8;
-	}
-
 	public FileListItem rarFileListItem(byte buf[], long cmppos, long orgpos, int readsize) throws IOException {
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "rarFileListItem: 開始します.");}
 		int hcrc = getShort(buf, OFFSET_RAR_HCRC);
 		int htype = buf[OFFSET_RAR_HTYPE];
 		int hflags = getShort(buf, OFFSET_RAR_HFLAGS);
@@ -1092,14 +1048,7 @@ public class ImageManager extends InputStream implements Runnable {
 						break;
 					}
 				}
-//				name = new String(buf, posFName, lenFName, mCharset);
-				// 日本語環境に限った話でShift-JISではなくUTF-8だった場合に変換しておく
-				if( checkUFT8( buf, posFName, lenFName ) ){
-					// RAR5がUTF-8なので定義を流用
-					name = new String(buf, posFName, lenFName, mRarCharset);
-				}else{
-					name = new String(buf, posFName, lenFName, mCharset);
-				}
+				name = DEF.toUTF8(buf, posFName, lenFName, mCharset);
 			}
 			catch (Exception e) {
 				name = "Unknown";
@@ -1138,7 +1087,8 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	private void DirFileList(String path, String user, String pass) throws IOException {
-		Log.d("ImageManager", "DirFileList: 開始します. path=" + path + ", user=" + user + ", pass=" + pass);
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "DirFileList: 開始します. path=" + path + ", user=" + user + ", pass=" + pass);}
 		int maxorglen = 0;
 
 		// ファイルリストを作成
@@ -1175,11 +1125,12 @@ public class ImageManager extends InputStream implements Runnable {
 		sort(list);
 		mFileList = (FileListItem[]) list.toArray(new FileListItem[0]);
 		mMaxOrgLength = maxorglen;
-		Log.d("ImageManager", "DirFileList: 終了します. ");
+		if(debug) {Log.d("ImageManager", "DirFileList: 終了します. ");}
 	}
 
 	private void ImageFileList(String path, String user, String pass) throws IOException {
-		Log.d("ImageManager", "ImageFileList: 開始します. path=" + path + ", user=" + user + ", pass=" + pass);
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "ImageFileList: 開始します. path=" + path + ", user=" + user + ", pass=" + pass);}
 		mFileList = new FileListItem[1];
 		FileListItem filelist = new FileListItem();
 		mFileList[0] = filelist;
@@ -1202,18 +1153,19 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	private void PdfFileList(String path, String user, String pass) throws IOException {
+		boolean debug = false;
 		int maxPage = 0;
 		mMaxOrgLength = 0;
 
-		Log.d("ImageManager", "PdfFileList: 開始します. path=" + path + ", user=" + user + ", pass=" + pass);
+		if(debug) {Log.d("ImageManager", "PdfFileList: 開始します. path=" + path + ", user=" + user + ", pass=" + pass);}
 
 		if (mPdfRenderer == null) {
-			Log.d("ImageManager", "PdfFileList: PdfRendererを取得します.");
+			if(debug) {Log.d("ImageManager", "PdfFileList: PdfRendererを取得します.");}
 			ParcelFileDescriptor parcelFileDescriptor = null;
 			FileDescriptor fd = null;
 			File pdfFile = null;
 			if (mHostType == HOSTTYPE_SAMBA) {
-				Log.d("ImageManager", "PdfFileList: HOSTTYPE_SAMBA です.");
+				if(debug) {Log.d("ImageManager", "PdfFileList: HOSTTYPE_SAMBA です.");}
 
 				Resources res = mActivity.getResources();
 				WorkStream ws;
@@ -1273,7 +1225,7 @@ public class ImageManager extends InputStream implements Runnable {
 				pdfFile = targetFile;
 			}
 			else if (mHostType == HOSTTYPE_LOCAL) {
-				Log.d("ImageManager", "PdfFileList: HOSTTYPE_LOCAL です.");
+				if(debug) {Log.d("ImageManager", "PdfFileList: HOSTTYPE_LOCAL です.");}
 				pdfFile = new File(mFilePath);
 			}
 
@@ -1314,7 +1266,7 @@ public class ImageManager extends InputStream implements Runnable {
 				mHandler.sendMessage(message);
 			}
 		}
-		Log.d("ImageManager", "PdfFileList: 終了します.");
+		if(debug) {Log.d("ImageManager", "PdfFileList: 終了します.");}
 	}
 
 	// ソート実行
@@ -1481,7 +1433,8 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public void run() {
-		Log.d("ImageManager", "run: 開始します.");
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "run: 開始します.");}
 		// 読込用バッファ
 		final int CACHE_FPAGE = 4;
 		final int CACHE_BPAGE = 2;
@@ -1989,7 +1942,7 @@ public class ImageManager extends InputStream implements Runnable {
 			}
 		}
 		mTerminate = true;
-		Log.d("ImageManager", "run: 終了します.");
+		if(debug) {Log.d("ImageManager", "run: 終了します.");}
 	}
 
 	private void sendMessage(Handler handler, int what, int arg1, int arg2, Object obj) {
@@ -2355,7 +2308,8 @@ public class ImageManager extends InputStream implements Runnable {
 	private boolean mCheEnable;
 
 	public void fileCacheInit(int total, boolean isEnable) throws IOException {
-		Log.d("ImageManager", "fileCacheInit: 開始します. total=" + total + ", isEnable=" + isEnable);
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "fileCacheInit: 開始します. total=" + total + ", isEnable=" + isEnable);}
 		mCheEnable = isEnable;
 
 		// サーバアクセス時はファイルキャッシュも行う
@@ -2386,7 +2340,7 @@ public class ImageManager extends InputStream implements Runnable {
 				mCheCacheFlag[i] = false;
 			}
 		}
-		Log.d("ImageManager", "fileCacheInit: 終了します.");
+		if(debug) {Log.d("ImageManager", "fileCacheInit: 終了します.");}
 	}
 
 	public void cheSetCacheFlag(int index) {
@@ -2482,7 +2436,8 @@ public class ImageManager extends InputStream implements Runnable {
 	private int mCmpPos;
 
 	public void fileAccessInit(String path) throws IOException {
-		Log.d("ImageManager", "fileAccessInit: 開始します. path=" + path);
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "fileAccessInit: 開始します. path=" + path);}
 		// 参照先
 		if (mHostType == HOSTTYPE_SAMBA) {
 //			mSambaRnd = FileAccess.jcifsAccessFile(path, mUser, mPass);
@@ -2498,7 +2453,7 @@ public class ImageManager extends InputStream implements Runnable {
 		else {
 
 		}
-		Log.d("ImageManager", "fileAccessInit: 終了します. path=" + path);
+		if(debug) {Log.d("ImageManager", "fileAccessInit: 終了します. path=" + path);}
 	}
 
 	public int cmpDirectRead(byte buf[], int off, int len) throws IOException {
@@ -2550,6 +2505,7 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public long cmpDirectLength() throws IOException {
+		boolean debug = false;
 		long fileLength = 0;
 
 		// エントリーサイズ
@@ -2566,7 +2522,7 @@ public class ImageManager extends InputStream implements Runnable {
 		if ((fileLength & 0xFFFFFFFF00000000L) == fileLength) {
 			fileLength = (fileLength >> 32) & 0x00000000FFFFFFFFL;
 		}
-		Log.d("ImageManager", "cmpDirectLength filelength=" + fileLength);
+		if(debug) {Log.d("ImageManager", "cmpDirectLength filelength=" + fileLength);}
 		return fileLength;
 	}
 
@@ -2605,7 +2561,7 @@ public class ImageManager extends InputStream implements Runnable {
 				int lenFName = getShort(buf, OFFSET_LCL_FNAME_LEN);
 
 				if (ret >= SIZE_LOCALHEADER + lenFName) {
-					String name = new String(buf, SIZE_LOCALHEADER, lenFName, mCharset);
+					String name = DEF.toUTF8(buf, SIZE_LOCALHEADER, lenFName, mCharset);
 					for (int i = 0; i < lenFName - 4; i++) {
 						buf[off + SIZE_LOCALHEADER + i] = '0';
 					}
@@ -2645,7 +2601,12 @@ public class ImageManager extends InputStream implements Runnable {
 		mCmpPos = 0;
 //		mHeaderPos = 0;
 		if (mFileType != FILETYPE_PDF) {
-			mWorkStream.seek(pos);
+			if (mWorkStream != null) {
+				mWorkStream.seek(pos);
+			}
+			else {
+				throw new IOException();
+			}
 		}
 //		if (mHostType == HOSTTYPE_SAMBA) {
 //			mSambaRnd.seek(pos);
@@ -2900,7 +2861,8 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	private boolean MemoryCacheInit(int memsize, int next, int prev, int total, long maxorglen) {
-		Log.d("ImageManager", "MemoryCacheInit: 開始します. memsize=" + memsize + ", prev=" + prev + ", total=" + total + ", maxorglen=" + maxorglen);
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager", "MemoryCacheInit: 開始します. memsize=" + memsize + ", prev=" + prev + ", total=" + total + ", maxorglen=" + maxorglen);}
 		mMemNextPages = next;
 		if (mMemNextPages == 0) {
 			mMemNextPages = 1;
@@ -2958,7 +2920,7 @@ public class ImageManager extends InputStream implements Runnable {
 				mMemPriority[i] = prevIdx;
 			}
 		}
-		Log.d("ImageManager", "MemoryCacheInit: 終了します.");
+		if(debug) {Log.d("ImageManager", "MemoryCacheInit: 終了します.");}
 		return true;
 	}
 
@@ -3142,7 +3104,7 @@ public class ImageManager extends InputStream implements Runnable {
 				if (file.lastIndexOf(".") != -1) {
 					extType = FileData.getExtType(file.substring(file.lastIndexOf(".")));
 				} else {
-					Log.e("ImageManager", "GetBitmapFromPath: 拡張子がありません.");
+					Log.e("ImageManager", "GetBitmapFromPath: 拡張子がありません. file=" + file);
 				}
 				int[] imagesize = new int[2];
 				if (debug) {Log.d("ImageManager", "GetBitmapFromPath: サイズ取得(Native)を実行します. type=" + extType + ", orglen=" + orglen);}
@@ -3236,16 +3198,23 @@ public class ImageManager extends InputStream implements Runnable {
 				if (mFileType == FILETYPE_PDF) {
 					//ページ番号を指定してPdfRenderer.Pageインスタンスを取得する。
 					PdfRenderer.Page pdfPage = mPdfRenderer.openPage(page);
-					int maxsize = Math.min(3000, Math.max(mScrWidth, mScrHeight));
-					if (pdfPage.getWidth() > pdfPage.getHeight()) {
-						width = maxsize;
-						height = maxsize * pdfPage.getHeight() / pdfPage.getWidth();
+					if (mScrWidth == 0 || mScrHeight == 0) {
+						// サムネイル作成なので、元のサイズを返す
+						width = pdfPage.getWidth();
+						height = pdfPage.getHeight();
 					} else {
-						width = maxsize * pdfPage.getWidth() / pdfPage.getHeight();
-						height = maxsize;
+						// 取得したサイズのままだと画質が悪いため、大きなサイズに変換する
+						int maxsize = Math.min(3000, Math.max(mScrWidth, mScrHeight));
+						if (pdfPage.getWidth() > pdfPage.getHeight()) {
+							width = maxsize;
+							height = maxsize * pdfPage.getHeight() / pdfPage.getWidth();
+						} else {
+							width = maxsize * pdfPage.getWidth() / pdfPage.getHeight();
+							height = maxsize;
+						}
 					}
 					if (debug) {Log.d("ImageManager", "SizeCheckImage(1):  pdfファイルです. pdfPage.getWidth()=" + pdfPage.getWidth() + ", pdfPage.getHeight()=" + pdfPage.getHeight() + ", " + mFileList[page].name);}
-					if (debug) {Log.d("ImageManager", "SizeCheckImage(1):  pdfファイルです. width =" + width + ", height=" + height + ", " + mFileList[page].name);}
+					if (debug) {Log.d("ImageManager", "SizeCheckImage(1):  pdfファイルです. width=" + width + ", height=" + height + ", " + mFileList[page].name);}
 					//PdfRenderer.Pageを閉じる、この処理を忘れると次回読み込む時に例外が発生する。
 					pdfPage.close();
 				}
@@ -3597,6 +3566,9 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public byte[] loadExpandData(String filename) {
+		boolean debug = false;
+		if (debug) {Log.d("ImageManager", "loadExpandData: 開始します. filename=" + filename + ", mFileList.length=" + mFileList.length);}
+
 		int page = -1;
 
 		// データを探す
@@ -3609,6 +3581,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 		if (page < 0 || mFileList.length <= page) {
 			// 範囲外
+			Log.e("ImageManager", "loadExpandData: ファイルがみつかりませんでした. filename=" + filename);
 			return null;
 		}
 
@@ -3656,6 +3629,8 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	public void getImageSize(String filename, Point pt) throws IOException {
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager","getImageSize: filename=" + filename);}
 		int page = -1;
 		pt.x = 0;
 		pt.y = 0;
@@ -3670,6 +3645,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 		if (page < 0 || mFileList.length <= page) {
 			// 範囲外
+			Log.e("ImageManager","getImageSize: File not found. filename=" + filename);
 			return;
 		}
 
@@ -3686,10 +3662,14 @@ public class ImageManager extends InputStream implements Runnable {
 
 	// テキスト用
 	public Bitmap loadBitmapByName(String filename) throws IOException {
+		boolean debug = false;
+		if(debug) {Log.d("ImageManager","loadBitmapByName: filename=" + filename);}
+
 		int page = -1;
 
 		// データを探す
 		for (int i = 0; i < mFileList.length; i++) {
+			if(debug) {Log.d("ImageManager","loadBitmapByName: mFileList[" + i + "].name=" + mFileList[i].name);}
 			if (filename.equals(mFileList[i].name)) {
 				page = i;
 				break;
@@ -3698,6 +3678,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 		if (page < 0 || mFileList.length <= page) {
 			// 範囲外
+			Log.e("ImageManager","loadBitmapByName: File not found. filename=" + filename);
 			return null;
 		}
 
@@ -3758,6 +3739,7 @@ public class ImageManager extends InputStream implements Runnable {
 		if (mFileList[page].width <= 0) {
 			SizeCheckImage(page);
 		}
+		if (debug) {Log.d("ImageManager", "LoadThumbnail: 開始します. page=" + page + ", mFileList[page].width=" + mFileList[page].width + ", mFileList[page].height=" + mFileList[page].height);}
 
 		int sampleSize = 1;
 		if (width != 0 && height != 0) {
@@ -3766,7 +3748,9 @@ public class ImageManager extends InputStream implements Runnable {
 		else {
 			sampleSize = 1;
 		}
+		if (debug) {Log.d("ImageManager", "LoadThumbnail: 開始します. page=" + page + ", sampleSize=" + sampleSize);}
 		Bitmap bm = LoadThumbnailMain(page, sampleSize);
+		if (debug) {Log.d("ImageManager", "LoadThumbnail: 開始します. page=" + page + ", bm.getWidth()=" + bm.getWidth() + ", bm.getHeight()=" + bm.getHeight());}
 
 		if (debug) {Log.d("ImageManager", "LoadThumbnail: 終了します.");}
 		return bm;
@@ -3890,7 +3874,7 @@ public class ImageManager extends InputStream implements Runnable {
 	}
 
 	private ImageData LoadPdfImageData(int page, PdfRenderer mPdfRenderer) {
-		boolean debug = true;
+		boolean debug = false;
 		int ret = 0;
 		ImageData id = null;
 		//ページ番号を指定してPdfRenderer.Pageインスタンスを取得する。
@@ -4771,6 +4755,7 @@ public class ImageManager extends InputStream implements Runnable {
 	// 指定した保存ファイル名で指定ページを書き出し
 	// nameがnullなら元のファイル名で
 	public String decompFile(int page, String name) {
+		boolean debug = false;
 		if (page < 0 || mFileList.length <= page) {
 			// 範囲外
 			return null;
@@ -4790,6 +4775,9 @@ public class ImageManager extends InputStream implements Runnable {
 				if (name == null) {
 					name = new String();
 					name = mFileList[page].name;
+					if (mFileType == FILETYPE_PDF) {
+						name += ".jpg";
+					}
 				}
 				name = name.replace("\\", "_");
 				name = name.replace("/", "_");
@@ -4810,7 +4798,7 @@ public class ImageManager extends InputStream implements Runnable {
 					setLoadBitmapStart(page, false);
 
 					if (mFileType == FILETYPE_PDF) {
-						Log.d("ImageManager", "decompFile: PDFファイルを開きます.");
+						if(debug) {Log.d("ImageManager", "decompFile: PDFファイルを開きます.");}
 						//ページ番号を指定してPdfRenderer.Pageインスタンスを取得する。
 						PdfRenderer.Page pdfPage = mPdfRenderer.openPage(page);
 						//PdfRenderer.Pageの情報を使って空の描画用Bitmapインスタンスを作成する。
@@ -4828,8 +4816,8 @@ public class ImageManager extends InputStream implements Runnable {
 							return null;
 						}
 						else {
-							Log.d("ImageManager", "decompFile: PDFファイルのレンダリングに成功しました.");
-							Log.d("ImageManager", "decompFile: JPG形式で保存します.");
+							if(debug) {Log.d("ImageManager", "decompFile: PDFファイルのレンダリングに成功しました.");}
+							if(debug) {Log.d("ImageManager", "decompFile: JPG形式で保存します.");}
 							// jpegで保存
 							bm.compress(Bitmap.CompressFormat.JPEG, 100, os);
 						}
@@ -4936,7 +4924,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 		@Override
 		public int read() throws IOException {
-			// TODO 自動生成されたメソッド・スタブ
+			// 自動生成されたメソッド・スタブ
 			return 0;
 		}
 

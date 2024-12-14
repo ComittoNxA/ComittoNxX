@@ -70,8 +70,9 @@ public class PageSelectDialog extends Dialog implements Handler.Callback, OnClic
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(R.drawable.dialognoframe);
 
 		// 画面下に表示
 		WindowManager.LayoutParams wmlp = dlgWindow.getAttributes();

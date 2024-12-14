@@ -14,7 +14,6 @@ public class RecordItem {
 	public static final int TYPE_FOLDER		=  3;	// ディレクトリオープン
 	public static final int TYPE_SERVER		=  4;	// サーバ
 	public static final int TYPE_MENU		=  5;	// オプションメニュー
-	public static final int TYPE_EPUB		=  6;	// オプションメニュー
 
 	private int server;
 	private String servername;

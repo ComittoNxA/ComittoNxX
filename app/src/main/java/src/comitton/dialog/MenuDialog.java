@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -46,20 +47,26 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 
 	public MenuDialog(Activity context, int cx, int cy, boolean isclose, MenuSelectListener listener) {
 		super(context);
-		MenuDialogProc(context, cx, cy, isclose, false, false, listener);
+		MenuDialogProc(context, cx, cy, isclose, false, false, false, listener);
 	}
 
 	public MenuDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, MenuSelectListener listener) {
 		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, false, listener);
+		MenuDialogProc(context, cx, cy, isclose, halfview, false, false, listener);
 	}
 
 	public MenuDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, MenuSelectListener listener) {
 		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, top, listener);
+		MenuDialogProc(context, cx, cy, isclose, halfview, top, false, listener);
 	}
 
-	private void MenuDialogProc(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, MenuSelectListener listener) {
+	public MenuDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
+		super(context);
+		MenuDialogProc(context, cx, cy, isclose, halfview, top, wide, listener);
+	}
+
+	private void MenuDialogProc(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
+		boolean debug = false;
 		Window dlgWindow = getWindow();
 
 		// タイトルなし
@@ -69,8 +76,9 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を透明に
-		PaintDrawable paintDrawable = new PaintDrawable(0);
-		dlgWindow.setBackgroundDrawable(paintDrawable);
+		//PaintDrawable paintDrawable = new PaintDrawable(0);
+		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
 
 		// 画面下に表示
 		WindowManager.LayoutParams wmlp=dlgWindow.getAttributes();
@@ -88,11 +96,11 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 			mWidth = Math.min(cx, cy) * 20 / 100;
 		}
 		else {
-			mWidth = Math.min(cx, cy) * 95 / 100;
+			mWidth = Math.min(cx, cy) * 80 / 100;
 		}
 		int maxWidth = (int)(20 * mScale * 16);
-		if (mWidth > maxWidth) {
-			mWidth = maxWidth;
+		if (!wide) {
+			mWidth = Math.min(mWidth, maxWidth);
 		}
 
 		mSelected = false;
@@ -134,7 +142,7 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 			}
 			else {
 				txtcolor = 0xFFFFFFFF;
-				bakcolor = 0x70000000;
+				bakcolor = 0x80000000;
 				txtsize = (int)(20 * mScale);
 			}
 			MenuItemView itemview = new MenuItemView(mContext, type, subtype, text, sub1, sub2, index, id, txtsize, mWidth, txtcolor, bakcolor, curcolor);

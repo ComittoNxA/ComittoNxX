@@ -34,8 +34,8 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	private final int DRAW_LEFT = 1;
 	private final int DRAW_RIGHT = 2;
 
-	private final int BACKGROUND_COLOR = 0x40000000;
-	private final int PAGE_COLOR = 0x40FFFFFF;
+	private final int BACKGROUND_COLOR = 0x80000000;
+	private final int PAGE_COLOR = 0x80FFFFFF;
 	//0x8FCCCCCC
 
 	private int mMaxPage;
@@ -185,7 +185,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	}
 
 	private Rect drawBitmap(Canvas canvas, int page, int x, int y, float rate, int flag) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 開始します. canvas=[" + canvas.getWidth() + ", " + canvas.getHeight() + "], x=" + x + ", y=" + y + ", rate=" + rate + ", flag=" + flag);}
 		page = calcReversePage(page);
 

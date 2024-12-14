@@ -94,7 +94,6 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 
 	public void setDuration(int duration) {
 		mDuration = duration;
-		Log.d("ListArea", "ロングタッチ遅延時間=" + mDuration);
 	}
 
 		// コンストラクタ
@@ -620,6 +619,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	
 	@Override
 	public boolean handleMessage(Message msg) {
+		boolean debug = false;
 		if (msg.what == HMSG_OPERATION) {
 			if (mOperationMsg == msg) {
     			long nowtime = SystemClock.uptimeMillis();
@@ -681,7 +681,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 					mListNoticeListener.onItemLongClick(mListType, msg.arg1);
 				}
 				*/
-				Log.d("ListArea", "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));
+				if(debug) {Log.d("ListArea", "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));}
 				mLongClickMsg = null;
 				mTouchIndex = -1;
 				mTouchDraw = false;

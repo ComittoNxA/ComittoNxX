@@ -267,6 +267,8 @@
         <item>EUC-KR</item>
         <item>Big5</item>
         <item>GB2312</item>
+        <item>GB18030</item>
+        <item>Big5-HKSCS</item>
     </string-array>
     <string-array name="charset_value_list">
         <item>0</item>
@@ -275,6 +277,8 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
+        <item>6</item>
+        <item>7</item>
     </string-array>
     <string-array name="scroll_name_list">
         <item>横方向 → 縦方向</item>
@@ -374,6 +378,9 @@
         <item>元画像サイズの3倍</item>
         <item>元画像サイズの4倍</item>
         <item>画面サイズに拡大</item>
+        <item>画面サイズに拡大(余白無視)</item>
+        <item>画面サイズに拡大(見開き対応)</item>
+        <item>画面サイズに拡大(見開き対応:余白無視)</item>
     </string-array>
     <string-array name="txpic_value_list">
         <item>0</item>
@@ -381,6 +388,9 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
     </string-array>
     <string-array name="effect_name_list">
         <item>なし</item>

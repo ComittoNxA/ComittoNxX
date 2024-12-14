@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="MyTheme" parent="@android:style/Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
 
         <item name="android:textColor">@color/white1</item>
         <item name="android:textColorPrimary">@color/white1</item>
@@ -13,6 +14,7 @@
     <style name="AppCompat.MyTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
 
         <!-- 参考： https://qiita.com/ryo_mm2d/items/3c0e3850a6c87824776c -->
         <item name="android:statusBarColor">@android:color/black</item>

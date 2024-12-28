@@ -64,7 +64,7 @@ public class ThumbnailPreference extends DialogPreference implements SeekBar.OnS
 		for (int i = 0 ; i < mSeekBar.length ; i ++) {
 			// スライダ
 			mSeekBar[i] = new SeekBar(mContext);
-			layout.addView(mSeekBar[i], new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+			layout.addView(mSeekBar[i], new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		}
 
 		// サマリ

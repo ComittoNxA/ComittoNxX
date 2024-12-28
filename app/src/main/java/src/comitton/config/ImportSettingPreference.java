@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.DialogPreference;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
@@ -55,6 +56,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 		super(context, attrs);
 		mContext = context;
 		mSp = PreferenceManager.getDefaultSharedPreferences(context);
+		setSummary(getSummary().toString().replace("[sdcard]", "[" + Environment.getExternalStorageDirectory().getAbsolutePath() + "]"));
 
 		// OKボタンを非表示にする
 		//setPositiveButtonText(null);
@@ -77,8 +79,8 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 		updateImportList();
 
 		layout.addView(mMsgView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		layout.addView(mEditView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		layout.addView(mListView, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+		layout.addView(mEditView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		layout.addView(mListView, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 		String str = (String) getDialogMessage();
 		mMsgView.setText(str);

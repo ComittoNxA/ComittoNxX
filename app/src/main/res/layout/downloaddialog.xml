@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/listlayout"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/dialogframe_transparent" >
 
 		<TextView
 			android:id="@+id/text_title"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center"
 			android:textSize="22sp"
@@ -16,7 +16,7 @@
 			android:text="@string/dlTitle" />
 
 		<ImageView
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="1sp"
 			android:background="#FFFFFFFF"
 			android:layout_marginTop="0sp"
@@ -37,7 +37,7 @@
 
 		<ProgressBar
 			android:id="@+id/progress" 
-			android:layout_width="fill_parent" 
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="5sp"
 			android:layout_marginRight="5sp"
@@ -46,7 +46,7 @@
 
 		<TextView
 			android:id="@+id/text_progress"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center"
 			android:textSize="18sp"
@@ -54,7 +54,7 @@
 			android:text="" />
 
 		<ImageView
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="1sp"
 			android:background="#FFFFFFFF"
 			android:layout_marginTop="0sp"

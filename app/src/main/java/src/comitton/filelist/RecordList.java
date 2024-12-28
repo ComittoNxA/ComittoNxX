@@ -52,8 +52,8 @@ public class RecordList {
 	private static final int MENU_ITEM[] = {DEF.MENU_SHORTCUT, DEF.MENU_SIORI, DEF.MENU_THUMBDEL,
 			DEF.MENU_ROTATE, DEF.MENU_ONLINE, DEF.MENU_NOTICE, DEF.MENU_ABOUT, DEF.MENU_SETTING};
 
-	private static final int MENU_IMAGE[] = {R.drawable.add_smartphone, R.drawable.broom,
-			R.drawable.broom, R.drawable.rotate, R.drawable.help,
+	private static final int MENU_IMAGE[] = {R.drawable.add_smartphone, R.drawable.delete_favorite,
+			R.drawable.delete_history, R.drawable.rotate, R.drawable.help,
 			R.drawable.note, R.drawable.info,
 			R.drawable.config};
 

@@ -80,7 +80,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 		for (int i = 0 ; i < mSeekBar.length ; i ++) {
 			// スライダ
 			mSeekBar[i] = new SeekBar(mContext);
-			layout.addView(mSeekBar[i], new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+			layout.addView(mSeekBar[i], new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 			// サマリ
 			mTextView[i] = new TextView(mContext);
@@ -97,7 +97,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 			mSampleView[i].setTypeface(Typeface.DEFAULT_BOLD);
 			mSampleView[i].setGravity(Gravity.CENTER);
 
-			layout.addView(mSampleView[i], new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+			layout.addView(mSampleView[i], new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		}
 
 //        Button buttonOK = new Button(mContext);

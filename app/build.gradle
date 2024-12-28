@@ -9,7 +9,7 @@ def applicationName = "ComittoNxX"
 
 def versionMajor = 2
 def versionMinor = 2
-def versionPatch = 1
+def versionPatch = 2
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -221,8 +221,13 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.core:core:1.15.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation "androidx.constraintlayout:constraintlayout:2.2.0"
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation "androidx.viewpager2:viewpager2:1.1.0"
+    implementation "androidx.preference:preference:1.2.1"
+    implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
 
     // SMB接続用ライブラリjcifs(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
     implementation 'org.codelibs:jcifs:2.1.39'

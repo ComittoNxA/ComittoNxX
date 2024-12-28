@@ -79,15 +79,12 @@ public class CloseDialog extends Dialog implements OnClickListener, OnDismissLis
 		Resources res = mContext.getResources();
 		switch (layout) {
 			case LAYOUT_BACK:
-				mTitle = res.getString(R.string.backTitle);
 				mLayoutId = R.layout.closedialog_back;
 				break;
 			case LAYOUT_TOP:
-				mTitle = res.getString(R.string.topTitle);
 				mLayoutId = R.layout.closedialog_top;
 				break;
 			case LAYOUT_LAST:
-				mTitle = res.getString(R.string.lastTitle);
 				mLayoutId = R.layout.closedialog_last;
 				break;
 		}

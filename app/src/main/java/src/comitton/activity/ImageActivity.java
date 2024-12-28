@@ -19,10 +19,12 @@ import src.comitton.data.RecordItem;
 import src.comitton.dialog.BookmarkDialog;
 import src.comitton.dialog.CheckDialog;
 import src.comitton.dialog.CloseDialog;
+import src.comitton.dialog.DirTreeDialog;
 import src.comitton.dialog.ImageConfigDialog;
 import src.comitton.dialog.Information;
 import src.comitton.dialog.ListDialog;
 import src.comitton.dialog.MenuDialog;
+import src.comitton.dialog.PageSelectCheckDialog;
 import src.comitton.dialog.PageSelectDialog;
 import src.comitton.dialog.PageThumbnail;
 import src.comitton.dialog.BookmarkDialog.BookmarkListenerInterface;
@@ -31,6 +33,7 @@ import src.comitton.dialog.CloseDialog.CloseListenerInterface;
 import src.comitton.dialog.ListDialog.ListSelectListener;
 import src.comitton.dialog.MenuDialog.MenuSelectListener;
 import src.comitton.dialog.ImageConfigDialog.ImageConfigListenerInterface;
+import src.comitton.dialog.TabDialogFragment;
 import src.comitton.filelist.RecordList;
 import src.comitton.listener.PageSelectListener;
 import src.comitton.noise.NoiseSwitch;
@@ -548,6 +551,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		// 設定の読み込み
 		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SetCommonActivity.loadSettings(mSharedPreferences);
 		ReadSetting(mSharedPreferences);
 		if (mNotice) {
 			// 通知領域非表示
@@ -1192,6 +1196,26 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					// ビットマップを設定
 					synchronized (mImageView) {
 						mImageView.setImageBitmap(mSourceImage);
+
+						// 表示中の画像が1枚か2枚かを判定
+						int shareType;
+						if (mSourceImage[0] != null && mSourceImage[1] != null) {
+							shareType = DEF.SHARE_LR;
+						}
+						else {
+							shareType = DEF.SHARE_SINGLE;
+						}
+
+						// ページ番号入力が開いていたら共有タイプを設定
+						if (PageSelectDialog.mIsOpened == true) {
+							mPageDlg.setShareType(shareType);
+						}
+						// サムネイルページ選択が開いていたら共有タイプを設定
+						if (PageThumbnail.mIsOpened == true) {
+							mThumbDlg.setShareType(shareType);
+						}
+
+
 						// 2011/11/18 ルーペ機能
 						// mSourceBitmap = null;
 						this.updateOverSize(false);
@@ -2467,14 +2491,26 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 								finishImageActivity(CloseDialog.CLICK_PREVLAST, false, true);
 								break;
 							case 8:
+								// 表示中の画像が1枚か2枚かを判定
+								ImageData bm[] = mImageView.getImageBitmap();
+								int shareType;
+								if (bm[0] != null && bm[1] != null) {
+									shareType = DEF.SHARE_LR;
+								}
+								else {
+									shareType = DEF.SHARE_SINGLE;
+								}
+
 								if (mPageSelect == PAGE_INPUT) {
 
 									// ページ番号入力
 									if (PageSelectDialog.mIsOpened == false) {
-										PageSelectDialog pageDlg = new PageSelectDialog(this, mImmEnable);
-										pageDlg.setParams(mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT);
+										PageSelectDialog pageDlg = new PageSelectDialog(this);
+										pageDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 										pageDlg.setPageSelectListear(this);
 										pageDlg.show();
+										pageDlg.setShareType(shareType);
+										mPageDlg = pageDlg;
 									}
 								}
 								else if (mPageSelect == PAGE_THUMB) {
@@ -2482,9 +2518,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 									// サムネイルページ選択
 									if (PageThumbnail.mIsOpened == false) {
 										PageThumbnail thumbDlg = new PageThumbnail(this);
-										thumbDlg.setParams(mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID);
+										thumbDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 										thumbDlg.setPageSelectListear(this);
 										thumbDlg.show();
+										thumbDlg.setShareType(shareType);
+										mThumbDlg = thumbDlg;
 									}
 								}
 								break;
@@ -3212,87 +3250,92 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
-		mMenuDialog = new MenuDialog(this, mImageView.getWidth(), mImageView.getHeight(), true, this);
+		TabDialogFragment dialog = new TabDialogFragment(this, mImageView.getWidth(), mImageView.getHeight(), true, this);
 
 		// 操作カテゴリ
-		mMenuDialog.addSection(res.getString(R.string.operateSec));
+		dialog.addSection(res.getString(R.string.operateSec));
+		if (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR) {
+			// ディレクトリ選択
+			dialog.addItem(DEF.MENU_SEL_DIR_TREE, res.getString(R.string.selDirTreeMenu));
+		}
 		// ブックマーク選択
-		mMenuDialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
+		dialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
 		// ブックマーク追加
-		mMenuDialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
+		dialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
 		// // ブックマーク選択
-		// menuDlg.addItem(DEF.MENU_SELBOOKMARK,
+		// dialog.addItem(DEF.MENU_SELBOOKMARK,
 		// res.getString(R.string.selBookmarkMenu));
 		// // ページ選択
-		// menuDlg.addItem(DEF.MENU_PAGESEL,
+		// dialog.addItem(DEF.MENU_PAGESEL,
 		// res.getString(R.string.pageselMenu));
 		// 音操作
-		mMenuDialog.addItem(DEF.MENU_NOISE, res.getString(R.string.noiseMenu), mNoiseSwitch != null);
+		dialog.addItem(DEF.MENU_NOISE, res.getString(R.string.noiseMenu), mNoiseSwitch != null);
 		// 自動再生
-		mMenuDialog.addItem(DEF.MENU_AUTOPLAY, res.getString(R.string.playMenu));
+		dialog.addItem(DEF.MENU_AUTOPLAY, res.getString(R.string.playMenu));
 		// 画面回転
 		// if (mViewRota == DEF.ROTATE_PORTRAIT || mViewRota ==
 		// DEF.ROTATE_LANDSCAPE) {
-		mMenuDialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
+		dialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
 		// }
 		ImageData bm[] = mImageView.getImageBitmap();
 		if (bm[0] != null && bm[1] != null) {
 			// 共有 (右画像)
-			mMenuDialog.addItem(DEF.MENU_SHARER, res.getString(R.string.shareRMenu));
+			dialog.addItem(DEF.MENU_SHARER, res.getString(R.string.shareRMenu));
 			// 共有 (左画像)
-			mMenuDialog.addItem(DEF.MENU_SHAREL, res.getString(R.string.shareLMenu));
+			dialog.addItem(DEF.MENU_SHAREL, res.getString(R.string.shareLMenu));
 		}
 		else {
 			// 共有
-			mMenuDialog.addItem(DEF.MENU_SHARE, res.getString(R.string.shareMenu));
+			dialog.addItem(DEF.MENU_SHARE, res.getString(R.string.shareMenu));
 		}
 		// 共有一時ファイル削除
-		mMenuDialog.addItem(DEF.MENU_DELSHARE, res.getString(R.string.delshareMenu));
-		mMenuDialog.addItem(DEF.MENU_SETTHUMB, res.getString(R.string.setThumb));
-		mMenuDialog.addItem(DEF.MENU_SETTHUMBCROPPED, res.getString(R.string.setThumbCropped));
+		dialog.addItem(DEF.MENU_DELSHARE, res.getString(R.string.delshareMenu));
+		dialog.addItem(DEF.MENU_SETTHUMB, res.getString(R.string.setThumb));
+		dialog.addItem(DEF.MENU_SETTHUMBCROPPED, res.getString(R.string.setThumbCropped));
 
 		// 一時設定
-		mMenuDialog.addSection(res.getString(R.string.settingSec));
+		dialog.addSection(res.getString(R.string.settingSec));
 		// イメージ表示設定
-		mMenuDialog.addItem(DEF.MENU_IMGCONF, res.getString(R.string.imgConfMenu));
+		dialog.addItem(DEF.MENU_IMGCONF, res.getString(R.string.imgConfMenu));
 //		// 画像補間方式
-//		mMenuDialog.addItem(DEF.MENU_IMGALGO, res.getString(R.string.algoriMenu));
+//		dialog.addItem(DEF.MENU_IMGALGO, res.getString(R.string.algoriMenu));
 		// 画像回転
-		mMenuDialog.addItem(DEF.MENU_IMGROTA, res.getString(R.string.imgRotaMenu));
+		dialog.addItem(DEF.MENU_IMGROTA, res.getString(R.string.imgRotaMenu));
 //		// 見開き設定
-//		mMenuDialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
+//		dialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
 //		// 画像サイズ
-//		mMenuDialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
+//		dialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
 //		// 余白削除
-//		mMenuDialog.addItem(DEF.MENU_MGNCUT, res.getString(R.string.mgnCutMenu), mMgnCut > 0);
+//		dialog.addItem(DEF.MENU_MGNCUT, res.getString(R.string.mgnCutMenu), mMgnCut > 0);
 //		// シャープ化
-//		mMenuDialog.addItem(DEF.MENU_SHARPEN, res.getString(R.string.sharpenMenu), mSharpen);
+//		dialog.addItem(DEF.MENU_SHARPEN, res.getString(R.string.sharpenMenu), mSharpen);
 //		// 色反転
-//		mMenuDialog.addItem(DEF.MENU_INVERT, res.getString(R.string.invertMenu), mInvert);
+//		dialog.addItem(DEF.MENU_INVERT, res.getString(R.string.invertMenu), mInvert);
 //		// グレースケール
-//		mMenuDialog.addItem(DEF.MENU_GRAY, res.getString(R.string.grayMenu), mGray);
+//		dialog.addItem(DEF.MENU_GRAY, res.getString(R.string.grayMenu), mGray);
 		// ページ逆順
-		mMenuDialog.addItem(DEF.MENU_REVERSE, res.getString(R.string.reverseMenu), mReverseOrder);
+		dialog.addItem(DEF.MENU_REVERSE, res.getString(R.string.reverseMenu), mReverseOrder);
 		// 開き方向入れ替え
-		mMenuDialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
+		dialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
 		// 表紙方向
-		mMenuDialog.addItem(DEF.MENU_PAGEWAY, res.getString(R.string.pageWayMenu), res.getString(R.string.pageWayMenuSub1), res.getString(R.string.pageWayMenuSub2), mPageWay == DEF.PAGEWAY_RIGHT ? 0 : 1);
+		dialog.addItem(DEF.MENU_PAGEWAY, res.getString(R.string.pageWayMenu), res.getString(R.string.pageWayMenuSub1), res.getString(R.string.pageWayMenuSub2), mPageWay == DEF.PAGEWAY_RIGHT ? 0 : 1);
 		// スクロール方向入れ替え
-		mMenuDialog.addItem(DEF.MENU_SCRLWAY, res.getString(R.string.scrlWayMenu), res.getString(R.string.scrlWayMenuSub1), res.getString(R.string.scrlWayMenuSub2), mScrlWay == DEF.SCRLWAY_H ? 0 : 1);
+		dialog.addItem(DEF.MENU_SCRLWAY, res.getString(R.string.scrlWayMenu), res.getString(R.string.scrlWayMenuSub1), res.getString(R.string.scrlWayMenuSub2), mScrlWay == DEF.SCRLWAY_H ? 0 : 1);
 
 		// 一時設定
-		mMenuDialog.addSection(res.getString(R.string.otherSec));
+		dialog.addSection(res.getString(R.string.otherSec));
 		// ヘルプ
-		mMenuDialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
+		dialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
 		// 操作確認
-		mMenuDialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
+		dialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
 		// 上部選択メニュー設定
-		mMenuDialog.addItem(DEF.MENU_TOP_SETTING, res.getString(R.string.setTopMenu));
+		dialog.addItem(DEF.MENU_TOP_SETTING, res.getString(R.string.setTopMenu));
 		// 設定
-		mMenuDialog.addItem(DEF.MENU_SETTING, res.getString(R.string.setMenu));
+		dialog.addItem(DEF.MENU_SETTING, res.getString(R.string.setMenu));
 		// バージョン情報
-		mMenuDialog.addItem(DEF.MENU_ABOUT, res.getString(R.string.aboutMenu));
-		mMenuDialog.show();
+		dialog.addItem(DEF.MENU_ABOUT, res.getString(R.string.aboutMenu));
+
+		dialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	// メニューを開く
@@ -3323,6 +3366,24 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		mMenuDialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
 
 		mMenuDialog.show();
+	}
+
+	// メニューを開く
+	private void openDirTreeMenu() {
+		if (mImageMgr == null || mImageView == null || mMenuDialog != null) {
+			return;
+		}
+
+		Resources res = getResources();
+		DirTreeDialog dialog = new DirTreeDialog(this, mImageView.getWidth(), mImageView.getHeight(), true, false, false, true, this);
+
+		// タイトル
+		dialog.addSection(res.getString(R.string.selDirTreeMenu));
+		// ファイルリスト
+		dialog.addFileList(mImageMgr.getList());
+
+		dialog.show();
+
 	}
 
 	// メニューを開く
@@ -3661,6 +3722,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				this.updateOverSize(false);
 				break;
 			}
+			case DEF.MENU_SEL_DIR_TREE: {
+				// ディレクトリ選択ダイアログ表示
+				openDirTreeMenu();
+				break;
+			}
 			case DEF.MENU_ADDBOOKMARK: {
 				// ブックマーク追加ダイアログ表示
 				BookmarkDialog bookmarkDlg = new BookmarkDialog(this);
@@ -3675,7 +3741,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 			}
 			default: {
-				if (id >= DEF.MENU_BOOKMARK) {
+				if (id >= DEF.MENU_DIR_TREE) {
+					onSelectPage(id - DEF.MENU_DIR_TREE);
+				}
+				else if (id >= DEF.MENU_BOOKMARK) {
 					onSelectPage(id - DEF.MENU_BOOKMARK);
 				}
 				else {
@@ -3690,7 +3759,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public void onSelectPage(int page) {
+		boolean debug = false;
 		if (!mListLoading && !mImageLoading && !mScrolling) {
+			if(debug) {Log.d("ImageActivity", "onSelectPage: STEP1");}
 			if (mCurrentPage != page) {
 				// ページ選択
 				mCurrentPage = page;
@@ -3706,9 +3777,227 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 		}
 		else {
+			if(debug) {Log.d("ImageActivity", "onSelectPage: STEP2");}
 			mNextPage = page;
 		}
-		Log.d("PageSelect", "current:" + mCurrentPage + ", next:" + mNextPage);
+		if(debug) {Log.d("ImageActivity", "onSelectPage: currentPage=" + mCurrentPage + ", nextPage=" + mNextPage);}
+	}
+
+	@Override
+	public void onSelectPageSelectDialog(int menuId) {
+		switch (menuId) {
+			case DEF.TOOLBAR_BOOK_LEFT: {
+				if (mPageWay == DEF.PAGEWAY_RIGHT) {
+					// 次巻(先頭ページ)
+					// 次のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_NEXTTOP, false, true);
+				}
+				else {
+					// 前巻(最終ページ)
+					// 前のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_PREVLAST, false, true);
+				}
+				break;
+			}
+			case DEF.TOOLBAR_BOOK_RIGHT: {
+				if (mPageWay == DEF.PAGEWAY_RIGHT) {
+					// 前巻(最終ページ)
+					// 前のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_PREVLAST, false, true);
+				}
+				else {
+					// 次巻(先頭ページ)
+					// 次のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_NEXTTOP, false, true);
+				}
+				break;
+			}
+			case DEF.TOOLBAR_BOOKMARK_LEFT: {
+				if (mPageWay == DEF.PAGEWAY_RIGHT) {
+					// 次巻(しおり位置)
+					// 次のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_NEXT, false, true);
+				}
+				else {
+					// 前巻(しおり位置)
+					// 前のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_PREV, false, true);
+				}
+				break;
+			}
+			case DEF.TOOLBAR_BOOKMARK_RIGHT: {
+				if (mPageWay == DEF.PAGEWAY_RIGHT) {
+					// 前巻(しおり位置)
+					// 前のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_PREV, false, true);
+				}
+				else {
+					// 次巻(しおり位置)
+					// 次のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_NEXT, false, true);
+				}
+				break;
+			}
+			case DEF.TOOLBAR_THUMB_SLIDER: {
+				// イメージビュワー専用
+
+				// 表示中の画像が1枚か2枚かを判定
+				ImageData bm[] = mImageView.getImageBitmap();
+				int shareType;
+				if (bm[0] != null && bm[1] != null) {
+					shareType = DEF.SHARE_LR;
+				}
+				else {
+					shareType = DEF.SHARE_SINGLE;
+				}
+
+				if (mPageSelect == PAGE_INPUT) {
+
+					mPageSelect = PAGE_THUMB;
+					Editor ed = mSharedPreferences.edit();
+					ed.putString(DEF.KEY_PAGESELECT, String.valueOf(mPageSelect));
+					ed.commit();
+
+					// サムネイルページ選択
+					if (PageThumbnail.mIsOpened = true) {
+						PageThumbnail thumbDlg = new PageThumbnail(this);
+						thumbDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
+						thumbDlg.setPageSelectListear(this);
+						thumbDlg.show();
+						thumbDlg.setShareType(shareType);
+						mThumbDlg = thumbDlg;
+					}
+				}
+				else if (mPageSelect == PAGE_THUMB) {
+
+					mPageSelect = PAGE_INPUT;
+					Editor ed = mSharedPreferences.edit();
+					ed.putString(DEF.KEY_PAGESELECT, String.valueOf(mPageSelect));
+					ed.commit();
+
+					// ページ番号入力
+					if (PageSelectDialog.mIsOpened = true) {
+						PageSelectDialog pageDlg = new PageSelectDialog(this);
+						pageDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
+						pageDlg.setPageSelectListear(this);
+						pageDlg.show();
+						pageDlg.setShareType(shareType);
+						mPageDlg = pageDlg;
+					}
+				}
+
+				break;
+			}
+			case DEF.TOOLBAR_DIR_TREE: {
+				// イメージビュワー専用
+				// ページ番号入力が開いていたら閉じる
+				if (PageSelectDialog.mIsOpened == true) {
+					mPageDlg.dismiss();
+				}
+				// サムネイルページ選択が開いていたら閉じる
+				if (PageThumbnail.mIsOpened == true) {
+					mThumbDlg.dismiss();
+				}
+
+				openDirTreeMenu();
+				break;
+			}
+			case DEF.TOOLBAR_TOC: {
+				// テキストビュワー専用
+				break;
+			}
+			case DEF.TOOLBAR_FAVORITE: {
+				execCommand(DEF.MENU_SELBOOKMARK);
+				break;
+			}
+			case DEF.TOOLBAR_ADD_FAVORITE: {
+				execCommand(DEF.MENU_ADDBOOKMARK);
+				break;
+			}
+			case DEF.TOOLBAR_SEARCH: {
+				// テキストビュワー専用
+				break;
+			}
+			case DEF.TOOLBAR_SHARE: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_SHARE);
+				break;
+			}
+			case DEF.TOOLBAR_SHARE_LEFT_PAGE: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_SHAREL);
+				break;
+			}
+			case DEF.TOOLBAR_SHARE_RIGHT_PAGE: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_SHARER);
+				break;
+			}
+			case DEF.TOOLBAR_ROTATE: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_ROTATE);
+				break;
+			}
+			case DEF.TOOLBAR_ROTATE_IMAGE: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_IMGROTA);
+				break;
+			}
+			case DEF.TOOLBAR_SELECT_THUMB: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_SETTHUMB);
+				break;
+			}
+			case DEF.TOOLBAR_TRIM_THUMB: {
+				// イメージビュワー専用
+				execCommand(DEF.MENU_SETTHUMBCROPPED);
+				break;
+			}
+			case DEF.TOOLBAR_CONTROL: {
+				execCommand(DEF.MENU_IMGCONF);
+				break;
+			}
+			case DEF.TOOLBAR_MENU: {
+				// ページ番号入力が開いていたら閉じる
+				if (PageSelectDialog.mIsOpened == true) {
+					mPageDlg.dismiss();
+				}
+				// サムネイルページ選択が開いていたら閉じる
+				if (PageThumbnail.mIsOpened == true) {
+					mThumbDlg.dismiss();
+				}
+
+				openMenu();
+				break;
+			}
+			case DEF.TOOLBAR_CONFIG: {
+				// ページ番号入力が開いていたら閉じる
+				if (PageSelectDialog.mIsOpened == true) {
+					mPageDlg.dismiss();
+				}
+				// サムネイルページ選択が開いていたら閉じる
+				if (PageThumbnail.mIsOpened == true) {
+					mThumbDlg.dismiss();
+				}
+
+				execCommand(DEF.MENU_SETTING);
+				break;
+			}
+			case DEF.TOOLBAR_EDIT_TOOLBAR: {
+				// ページ番号入力が開いていたら閉じる
+				if (PageSelectDialog.mIsOpened == true) {
+					mPageDlg.dismiss();
+				}
+				// サムネイルページ選択が開いていたら閉じる
+				if (PageThumbnail.mIsOpened == true) {
+					mThumbDlg.dismiss();
+				}
+
+				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this);
+				dialog.show();
+				break;
+			}
+		}
 	}
 
 	// 他アクティビティからの復帰通知
@@ -4001,8 +4290,22 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				showCloseDialog(CloseDialog.LAYOUT_LAST);
 			}
 			else if (mLastMsg == DEF.LASTMSG_NEXT) {
-				// 次のファイルを開き、続きから記録せず、現在頁保存
-				finishImageActivity(CloseDialog.CLICK_NEXTTOP, false, true);
+				if (mPath.substring(mPath.length() - 1).equals("/")) {
+					if (mImageName == null || mImageName.length() == 0) {
+						// ディレクトリオープンのとき
+						// 前のファイルを開き、続きから記録せず、現在頁保存
+						finishImageActivity(CloseDialog.CLICK_NEXTTOP, false, true);
+					} else {
+						// イメージファイル直接オープンのとき
+						// 閉じる
+						finishImageActivity(false);
+					}
+				}
+				else {
+					// 圧縮ファイルオープンのとき
+					// 前のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_NEXTTOP, false, true);
+				}
 			}
 			else {
 				// 閉じる
@@ -4046,8 +4349,26 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				showCloseDialog(CloseDialog.LAYOUT_TOP);
 			}
 			else if (mLastMsg == DEF.LASTMSG_NEXT) {
-				// 前のファイルを開き、続きから記録せず、現在頁保存
-				finishImageActivity(CloseDialog.CLICK_PREVLAST, false, true);
+				if (mPath.substring(mPath.length() - 1).equals("/")) {
+					if (mImageName == null || mImageName.length() == 0) {
+						// ディレクトリオープンのとき
+						// 前のファイルを開き、続きから記録せず、現在頁保存
+						finishImageActivity(CloseDialog.CLICK_PREVLAST, false, true);
+					} else {
+						// イメージファイル直接オープンのとき
+						// 閉じる
+						finishImageActivity(false);
+					}
+				}
+				else {
+					// 圧縮ファイルオープンのとき
+					// 前のファイルを開き、続きから記録せず、現在頁保存
+					finishImageActivity(CloseDialog.CLICK_PREVLAST, false, true);
+				}
+			}
+			else {
+				// 閉じる
+				finishImageActivity(false);
 			}
 			return;
 		}
@@ -4299,15 +4620,23 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		String lastfile = null;
 		String lastpath = null;
 		if (mFileName == null || mFileName.length() == 0) {
-			// ディレクトリオープンのとき
-			if (mLocalPath != null) {
-				int plen = mLocalPath.length();
-				if (plen > 2) {
-					int index = mLocalPath.lastIndexOf('/', plen - 2);
-					if (index >= 0) {
-						// 先頭以外で/があれば切り出し
-						lastfile = mLocalPath.substring(index + 1);
-						lastpath = mLocalPath.substring(0, index + 1);
+			// 圧縮ファイルオープン以外の時
+			if (select == CloseDialog.CLICK_CLOSE && mImageName != null && mImageName.length() > 0) {
+				// クローズかつイメージファイル直接オープンのとき
+				lastfile = mImageName;
+				lastpath = mLocalPath;
+			}
+			else {
+				// ディレクトリオープンのとき
+				if (mLocalPath != null) {
+					int plen = mLocalPath.length();
+					if (plen > 2) {
+						int index = mLocalPath.lastIndexOf('/', plen - 2);
+						if (index >= 0) {
+							// 先頭以外で/があれば切り出し
+							lastfile = mLocalPath.substring(index + 1);
+							lastpath = mLocalPath.substring(0, index + 1);
+						}
 					}
 				}
 			}

@@ -3,6 +3,7 @@ package src.comitton.common;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
@@ -126,14 +127,53 @@ public class DEF {
 	public static final int MENU_BRIGHT = Menu.FIRST + 48;
 	public static final int MENU_GAMMA = Menu.FIRST + 49;
 	public static final int MENU_BKLIGHT = Menu.FIRST + 50;
+	public static final int MENU_SEL_DIR_TREE = Menu.FIRST + 51;
 	public static final int MENU_BOOKMARK = Menu.FIRST + 1000;
 	public static final int MENU_CHAPTER = Menu.FIRST + 2000;
+	public static final int MENU_DIR_TREE = MENU_CHAPTER;
 
 	public static final int MENU_CMARGIN = Menu.FIRST + 101;
 	public static final int MENU_CSHADOW = Menu.FIRST + 102;
 	public static final int MENU_SETTHUMB = Menu.FIRST + 103;
 	public static final int MENU_SETTHUMBCROPPED = Menu.FIRST + 104;
 	public static final int MENU_LICENSE = Menu.FIRST + 105;
+
+	public static final String KEY_PAGE_SELECT_TOOLBAR = "PageSelectToolbar";
+	public static final int TOOLBAR_LEFTMOST = 1001;
+	public static final int TOOLBAR_LEFT100 = 1002;
+	public static final int TOOLBAR_LEFT10 = 1003;
+	public static final int TOOLBAR_LEFT1 = 1004;
+	public static final int TOOLBAR_RIGHT1 = 1005;
+	public static final int TOOLBAR_RIGHT10 = 1006;
+	public static final int TOOLBAR_RIGHT100 = 1007;
+	public static final int TOOLBAR_RIGHTMOST = 1008;
+	public static final int TOOLBAR_PAGE_RESET = 1009;
+
+	public static final int TOOLBAR_BOOK_LEFT = 1010;
+	public static final int TOOLBAR_BOOK_RIGHT = 1011;
+	public static final int TOOLBAR_BOOKMARK_LEFT = 1012;
+	public static final int TOOLBAR_BOOKMARK_RIGHT = 1013;
+	public static final int TOOLBAR_THUMB_SLIDER = 1014;
+	public static final int TOOLBAR_DIR_TREE = 1015;
+	public static final int TOOLBAR_TOC = 1016;
+	public static final int TOOLBAR_FAVORITE = 1017;
+	public static final int TOOLBAR_ADD_FAVORITE = 1018;
+	public static final int TOOLBAR_SEARCH = 1019;
+	public static final int TOOLBAR_SHARE = 1020;
+	public static final int TOOLBAR_SHARE_LEFT_PAGE = 1021;
+	public static final int TOOLBAR_SHARE_RIGHT_PAGE = 1022;
+	public static final int TOOLBAR_ROTATE = 1023;
+	public static final int TOOLBAR_ROTATE_IMAGE = 1024;
+	public static final int TOOLBAR_SELECT_THUMB = 1025;
+	public static final int TOOLBAR_TRIM_THUMB = 1026;
+	public static final int TOOLBAR_CONTROL = 1027;
+	public static final int TOOLBAR_MENU = 1028;
+	public static final int TOOLBAR_CONFIG = 1029;
+	public static final int TOOLBAR_EDIT_TOOLBAR = 1030;
+
+	public static final int SHARE_SINGLE = 2001;
+	public static final int SHARE_LR = 2002;
+
 
 	public static final int REQUEST_SETTING = 101;
 	public static final int REQUEST_FILE = 102;
@@ -301,7 +341,25 @@ public class DEF {
 	public static final String KEY_ZOOMTYPE = "ZoomType";
 	public static final String KEY_SCRLRNGW = "ScrlRngW";
 	public static final String KEY_SCRLRNGH = "ScrlRngH";
+
+	public static final String KEY_CHAR_DETECT = "CharDetect";
 	public static final String KEY_CHARSET = "Charset";
+	public static final String KEY_SORT_BY_IGNORE_WIDTH = "SortByIgnoreWidth";
+	public static final String KEY_SORT_BY_IGNORE_CASE = "SortByIgnoreCase";
+	public static final String KEY_SORT_BY_SYMBOL = "SortBySymbol";
+	public static final String KEY_SORT_BY_NATURAL_NUMBERS = "SortByNaturalNumbers";
+	public static final String KEY_SORT_BY_KANJI_NUMERALS = "SortByKanjiNumerals";
+	public static final String KEY_SORT_BY_JAPANESE_VOLUME_NAME = "SortByJapaneseVolumeName";
+	public static final String KEY_SORT_PRIORITY_WORD_01 = "SortPriorityWord01";
+	public static final String KEY_SORT_PRIORITY_WORD_02 = "SortPriorityWord02";
+	public static final String KEY_SORT_PRIORITY_WORD_03 = "SortPriorityWord03";
+	public static final String KEY_SORT_PRIORITY_WORD_04 = "SortPriorityWord04";
+	public static final String KEY_SORT_PRIORITY_WORD_05 = "SortPriorityWord05";
+	public static final String KEY_SORT_PRIORITY_WORD_06 = "SortPriorityWord06";
+	public static final String KEY_SORT_PRIORITY_WORD_07 = "SortPriorityWord07";
+	public static final String KEY_SORT_PRIORITY_WORD_08 = "SortPriorityWord08";
+	public static final String KEY_SORT_PRIORITY_WORD_09 = "SortPriorityWord09";
+	public static final String KEY_SORT_PRIORITY_WORD_10 = "SortPriorityWord10";
 	public static final String KEY_EFFECTTIME = "EffectTime";
 	public static final String KEY_MOMENTMODE = "MomentMode";
 	public static final String KEY_PAGESELECT = "PageSelect";
@@ -675,11 +733,11 @@ public class DEF {
 	public static final int THUMBNAIL_BLOCK = 8 * 1024;                // サムネイルブロックサイズ(8KB)
 	public static final int THUMBNAIL_MAXPAGE = 4;                    // サムネイルバッファ数
 
-	public static final boolean EPUB_VIEWER = false;
+	public static final boolean TEXT_VIEWER = false;
 	public static final boolean IMAGE_VIEWER = true;
 
-	public static final int PAGENUMBER_UNREAD = -1; 	// 未読
-	public static final int PAGENUMBER_READ = -2;	    // 既読
+	public static final int PAGENUMBER_UNREAD = -1;    // 未読
+	public static final int PAGENUMBER_READ = -2;        // 既読
 
 	// 縦長チェック
 	static public boolean checkPortrait(int cx, int cy) {
@@ -1279,18 +1337,50 @@ public class DEF {
 	}
 
 	// 番号とか考慮しながら文字列比較
-	// private static final String SERIAL_STR[] = { "上", "中", "下", "短", "外" };
 	private static final int CHTYPE_NUM = 1;
 	private static final int CHTYPE_CHAR = 2;
-	private static final int CHTYPE_JNUM = 3;
-	private static final int CHTYPE_SERIAL = 4;
+	private static final int CHTYPE_KANJI_NUMERALS = 3;
+	private static final int CHTYPE_JAPANESE_VOLUME_NAME = 4;
+	private static final int CHTYPE_SYMBOL_BEFORE = 5;
+	private static final int CHTYPE_SYMBOL_AFTER = 6;
+
+	public static boolean SORT_BY_IGNORE_WIDTH = true;
+	public static boolean SORT_BY_IGNORE_CASE = true;
+	public static boolean SORT_BY_SYMBOL = true;
+	public static boolean SORT_BY_NATURAL_NUMBERS = true;
+	public static boolean SORT_BY_KANJI_NUMERALS = true;
+	public static boolean SORT_BY_JAPANESE_VOLUME_NAME = true;
+	public static String[] PRIORITY_WORDS = new String[0];
 
 	static public int compareFileName(String name1, String name2) {
-		int len1 = name1.length();
-		int len2 = name2.length();
 		int i1, i2;
 		char ch1, ch2;
 		int ct1, ct2;
+		String ext1 = "", ext2 = "";
+
+		if (SORT_BY_IGNORE_WIDTH) {
+			// 全角を半角に変換
+			name1 = Normalizer.normalize(name1, Normalizer.Form.NFKC);
+			name2 = Normalizer.normalize(name2, Normalizer.Form.NFKC);
+		}
+
+		if (SORT_BY_IGNORE_CASE) {
+			// 小文字を大文字に変換
+			name1 = name1.toUpperCase();
+			name2 = name2.toUpperCase();
+		}
+
+		if (name1.lastIndexOf('.') > name1.lastIndexOf('/')) {
+			name1 = name1.substring(0, name1.lastIndexOf('.'));
+			ext1 = name1.substring(name1.lastIndexOf('.') + 1);
+		}
+		if (name2.lastIndexOf('.') > name2.lastIndexOf('/')) {
+			name2 = name2.substring(0, name2.lastIndexOf('.'));
+			ext2 = name2.substring(name2.lastIndexOf('.') + 1);
+		}
+
+		int len1 = name1.length();
+		int len2 = name2.length();
 
 		for (i1 = i2 = 0; i1 < len1 && i2 < len2; i1++, i2++) {
 			ch1 = name1.charAt(i1);
@@ -1298,200 +1388,333 @@ public class DEF {
 			ct1 = getCharType(ch1);
 			ct2 = getCharType(ch2);
 
-			if (ct1 != ct2) {
-				// 文字種が違う場合はそのまま比較
-				if (ch1 != ch2) {
-					return ch1 - ch2;
+			if (PRIORITY_WORDS != null && PRIORITY_WORDS.length > 0) {
+				// 優先単語があれば優先単語を使用している方が先
+				int wlen1 = 0;
+				int wlen2 = 0;
+
+				for (int i = 0; i < PRIORITY_WORDS.length; ++i) {
+					String word;
+					if (PRIORITY_WORDS[i] != null && PRIORITY_WORDS[i].length() != 0) {
+						if (SORT_BY_IGNORE_CASE) {
+							word = PRIORITY_WORDS[i].toUpperCase();
+						} else {
+							word = PRIORITY_WORDS[i];
+						}
+
+						if (name1.startsWith(word, i1)) {
+							wlen1 = word.length();
+						}
+						if (name2.startsWith(word, i2)) {
+							wlen2 = word.length();
+						}
+					}
 				}
-			} else if (ct1 == CHTYPE_NUM) {
-//				Log.d("DEF","compareFileName 文字1=" + ch1 + ", 文字2=" + ch2);
-				String num1 = getNumbers(name1, i1);
-				String num2 = getNumbers(name2, i2);
-				int nlen1 = num1.length();
-				int nlen2 = num2.length();
-
-				// カンマを取り除く
-				num1 = num1.replace(",", "");
-				num2 = num2.replace(",", "");
-
-				boolean minus1 = num1.startsWith("-");
-				boolean minus2 = num2.startsWith("-");
-
-				if (minus1 && !minus2) {
-					// num2が大きい
+				if (wlen1 > 0 && wlen2 <= 0) {
 					return -1;
-				} else if (!minus1 && minus2) {
-					// num1が大きい
+				}
+				if (wlen1 <= 0 && wlen2 > 0) {
 					return 1;
-				} else {
-//					Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2);
-					//小数点の位置
-					int index_dot1 = num1.indexOf(".");
-					int index_dot2 = num2.indexOf(".");
+				}
+				if (wlen1 > 0 && wlen2 > 0) {
+					i1 += wlen1 - 1;
+					i2 += wlen2 - 1;
+				}
+			}
 
-					//小数以下の桁数
-					int col_dec1;
-					int col_dec2;
-					if (index_dot1 == -1) {
-						col_dec1 = 0;
+			if (SORT_BY_SYMBOL) {
+				if (ct1 == CHTYPE_SYMBOL_BEFORE && ct2 != CHTYPE_SYMBOL_BEFORE) {
+					// 1が記号で2が記号以外なら、1が先
+					return -1;
+				} else if (ct1 == CHTYPE_SYMBOL_BEFORE && ct2 == CHTYPE_SYMBOL_BEFORE) {
+					// 1も2も記号なら、記号を比べる
+					int s1 = getSymbolBefore(ch1);
+					int s2 = getSymbolBefore(ch2);
+					if (s1 != s2) {
+						return s1 - s2;
+					}
+					else {
+						continue;
+					}
+				} else if (ct1 != CHTYPE_SYMBOL_BEFORE && ct2 == CHTYPE_SYMBOL_BEFORE) {
+					// 2が記号で1が記号以外なら、2が先
+					return 1;
+				}
+
+				else if (ct1 == CHTYPE_SYMBOL_AFTER && ct2 != CHTYPE_SYMBOL_AFTER) {
+					// 1が記号で2が記号以外なら、2が先
+					return 1;
+				}
+				else if (ct1 == CHTYPE_SYMBOL_AFTER && ct2 == CHTYPE_SYMBOL_AFTER) {
+					// 1も2も記号なら、記号を比べる
+					int s1 = getSymbolAfter(ch1);
+					int s2 = getSymbolAfter(ch2);
+					if (s1 != s2) {
+						return s1 - s2;
+					}
+					else {
+						continue;
+					}
+				}
+				else if (ct1 != CHTYPE_SYMBOL_AFTER && ct2 == CHTYPE_SYMBOL_AFTER) {
+					// 2が記号で1が記号以外なら、1が先
+					return -1;
+				}
+			}
+
+			if (ct1 != ct2) {
+				// 文字種が違う場合
+				char tmp1, tmp2;
+				if (ct1 == CHTYPE_KANJI_NUMERALS) {
+					tmp1 = '一';
+				}
+				else if (ct1 == CHTYPE_JAPANESE_VOLUME_NAME) {
+					tmp1 = '上';
+				}
+				else {
+					tmp1 = ch1;
+				}
+
+				if (ct2 == CHTYPE_KANJI_NUMERALS) {
+					tmp2 = '一';
+				}
+				else if (ct2 == CHTYPE_JAPANESE_VOLUME_NAME) {
+					tmp2 = '上';
+				}
+				else {
+					tmp2 = ch1;
+				}
+
+				if (tmp1 != tmp2) {
+					// 元の値を比較
+					return tmp1 - tmp2;
+				}
+				else {
+					continue;
+				}
+			}
+
+			if (SORT_BY_NATURAL_NUMBERS) {
+				if (ct1 == CHTYPE_NUM) {
+					//Log.d("DEF","compareFileName 文字1=" + ch1 + ", 文字2=" + ch2);
+					String num1 = getNumbers(name1, i1);
+					String num2 = getNumbers(name2, i2);
+					int nlen1 = num1.length();
+					int nlen2 = num2.length();
+
+					// カンマを取り除く
+					num1 = num1.replace(",", "");
+					num2 = num2.replace(",", "");
+
+					// マイナス判定を残しているが、マイナス記号は数字に含めるのをやめた
+					// ファイル名ハイフン001がマイナス001になるとおかしくなるから
+					boolean minus1 = num1.startsWith("-");
+					boolean minus2 = num2.startsWith("-");
+
+					if (minus1 && !minus2) {
+						// num2が大きい
+						return -1;
+					} else if (!minus1 && minus2) {
+						// num1が大きい
+						return 1;
 					} else {
-						col_dec1 = nlen1 - index_dot1 - 1;
-					}
-					if (index_dot2 == -1) {
-						col_dec2 = 0;
-					} else {
-						col_dec2 = nlen2 - index_dot2 - 1;
-					}
+						//Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2);
+						//小数点の位置
+						int index_dot1 = num1.indexOf(".");
+						int index_dot2 = num2.indexOf(".");
 
-					// 小数点以下の桁数を合わせる
-					int col_diff = col_dec1 - col_dec2;
-					for (int i = 1; i <= col_diff; i++) {
-						num2 = num2 + "0";
-					}
-					for (int i = -1; i >= col_diff; i--) {
-						num1 = num1 + "0";
-					}
-//					Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
-					num1 = num1.replace(".", "");
-					num2 = num2.replace(".", "");
-//					Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
-
-					int num_len1 = num1.length();
-					int num_len2 = num2.length();
-
-					if (!minus1 && !minus2) {
-						// どちらも正の数
-
-						if (num_len1 < num_len2) {
-							int difflen = num_len2 - num_len1;
-							for (int i = 0; i < difflen; i++) {
-								int diff = getNumber('０') - getNumber(num2.charAt(i));
-								if (diff != 0) {
-									// num1が大きければプラス
-									return diff;
-								}
-							}
-							// 残り部分で比較
-							num2 = num2.substring(difflen);
-						} else if (num_len1 > num_len2) {
-							int difflen = num_len1 - num_len2;
-							for (int i = 0; i < difflen; i++) {
-								int diff = getNumber(num1.charAt(i)) - getNumber('0');
-								if (diff != 0) {
-									// num1が大きければプラス
-									return diff;
-								}
-							}
-							// 残り部分で比較
-							num1 = num1.substring(difflen);
+						//小数以下の桁数
+						int col_dec1;
+						int col_dec2;
+						if (index_dot1 == -1) {
+							col_dec1 = 0;
+						} else {
+							col_dec1 = nlen1 - index_dot1 - 1;
 						}
-						// 数字が異なる場合は比較
-						if (num1.length() == num2.length()) {
-							for (int i = 0; i < num1.length(); i++) {
-								int diff = getNumber(num1.charAt(i)) - getNumber(num2.charAt(i));
-								if (diff != 0) {
-									// num1が大きければプラス
-									return diff;
+						if (index_dot2 == -1) {
+							col_dec2 = 0;
+						} else {
+							col_dec2 = nlen2 - index_dot2 - 1;
+						}
+
+						// 小数点以下の桁数を合わせる
+						int col_diff = col_dec1 - col_dec2;
+						for (int i = 1; i <= col_diff; i++) {
+							num2 = num2 + "0";
+						}
+						for (int i = -1; i >= col_diff; i--) {
+							num1 = num1 + "0";
+						}
+						//Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
+						num1 = num1.replace(".", "");
+						num2 = num2.replace(".", "");
+						//Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
+
+						int num_len1 = num1.length();
+						int num_len2 = num2.length();
+
+						if (!minus1 && !minus2) {
+							// どちらも正の数
+
+							if (num_len1 < num_len2) {
+								int difflen = num_len2 - num_len1;
+								for (int i = 0; i < difflen; i++) {
+									int diff = getNumber('0') - getNumber(num2.charAt(i));
+									if (diff != 0) {
+										// num1が大きければプラス
+										return diff;
+									}
 								}
+								// 残り部分で比較
+								num2 = num2.substring(difflen);
+							} else if (num_len1 > num_len2) {
+								int difflen = num_len1 - num_len2;
+								for (int i = 0; i < difflen; i++) {
+									int diff = getNumber(num1.charAt(i)) - getNumber('0');
+									if (diff != 0) {
+										// num1が大きければプラス
+										return diff;
+									}
+								}
+								// 残り部分で比較
+								num1 = num1.substring(difflen);
+							}
+							// 数字が異なる場合は比較
+							if (num1.length() == num2.length()) {
+								for (int i = 0; i < num1.length(); i++) {
+									int diff = getNumber(num1.charAt(i)) - getNumber(num2.charAt(i));
+									if (diff != 0) {
+										// num1が大きければプラス
+										return diff;
+									}
+								}
+							} else {
+								Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
 							}
 						} else {
-							Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
-						}
-					} else {
-						// どちらも負の数
+							// どちらも負の数
 
-						// マイナスを取り除く
-						num1 = num1.replace("-", "");
-						num2 = num2.replace("-", "");
+							// マイナスを取り除く
+							num1 = num1.replace("-", "");
+							num2 = num2.replace("-", "");
 
-						if (num_len1 < num_len2) {
-							int difflen = num_len2 - num_len1;
-							for (int i = 0; i < difflen; i++) {
-								int diff = getNumber('０') - getNumber(num2.charAt(i));
-								if (diff != 0) {
-									// num1が大きければマイナス
-									return -diff;
+							if (num_len1 < num_len2) {
+								int difflen = num_len2 - num_len1;
+								for (int i = 0; i < difflen; i++) {
+									int diff = getNumber('0') - getNumber(num2.charAt(i));
+									if (diff != 0) {
+										// num1が大きければマイナス
+										return -diff;
+									}
 								}
-							}
-							// 残り部分で比較
-							num2 = num2.substring(difflen);
-						} else if (num_len1 > num_len2) {
-							int difflen = num_len1 - num_len2;
-							for (int i = 0; i < difflen; i++) {
-								int diff = getNumber(num1.charAt(i)) - getNumber('0');
-								if (diff != 0) {
-									// num1が大きければマイナス
-									return -diff;
+								// 残り部分で比較
+								num2 = num2.substring(difflen);
+							} else if (num_len1 > num_len2) {
+								int difflen = num_len1 - num_len2;
+								for (int i = 0; i < difflen; i++) {
+									int diff = getNumber(num1.charAt(i)) - getNumber('0');
+									if (diff != 0) {
+										// num1が大きければマイナス
+										return -diff;
+									}
 								}
+								// 残り部分で比較
+								num1 = num1.substring(difflen);
 							}
-							// 残り部分で比較
-							num1 = num1.substring(difflen);
+							// 数字が異なる場合は比較
+							if (num1.length() == num2.length()) {
+								for (int i = 0; i < num1.length(); i++) {
+									int diff = getNumber(num1.charAt(i)) - getNumber(num2.charAt(i));
+									if (diff != 0) {
+										// num1が大きければマイナス
+										return -diff;
+									}
+								}
+							} else {
+								Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
+							}
 						}
-						// 数字が異なる場合は比較
-						if (num1.length() == num2.length()) {
-							for (int i = 0; i < num1.length(); i++) {
-								int diff = getNumber(num1.charAt(i)) - getNumber(num2.charAt(i));
-								if (diff != 0) {
-									// num1が大きければマイナス
-									return -diff;
-								}
+						i1 += nlen1 - 1;
+						i2 += nlen2 - 1;
+					}
+					continue;
+				}
+			}
+
+			if (SORT_BY_KANJI_NUMERALS) {
+				if (ct1 == CHTYPE_KANJI_NUMERALS) {
+					Log.d("DEF", "compareFileName 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);
+					String num1 = getKanjiNumerals(name1, i1);
+					String num2 = getKanjiNumerals(name2, i2);
+					int nlen1 = num1.length();
+					int nlen2 = num2.length();
+					Log.d("DEF", "compareFileName 漢数字を比較します. num1=" + num1 + ", num2=" + num2);
+					if (nlen1 < nlen2) {
+						int difflen = nlen2 - nlen1;
+						for (int i = 0; i < difflen; i++) {
+							if (getKanjiNumeral(num2.charAt(i)) != 0) {
+								// num2の方が大きい
+								Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");
+								return -1;
 							}
-						} else {
-							Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
+						}
+						// 残り部分で比較
+						num2 = num2.substring(difflen);
+					} else if (nlen1 > nlen2) {
+						int difflen = nlen1 - nlen2;
+						for (int i = 0; i < difflen; i++) {
+							if (getKanjiNumeral(num1.charAt(i)) > 0) {
+								// num1の方が大きい
+								Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");
+								return 1;
+							}
+						}
+						// 残り部分で比較
+						num1 = num1.substring(difflen);
+					}
+					// 数字が異なる場合は比較
+					for (int i = 0; i < num1.length(); i++) {
+						int diff = getKanjiNumeral(num1.charAt(i)) - getKanjiNumeral(num2.charAt(i));
+						if (diff != 0) {
+							// num1の方が大きい
+							if (diff>0) {Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");}
+							else {Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");}
+							return diff;
 						}
 					}
 					i1 += nlen1 - 1;
 					i2 += nlen2 - 1;
-				}
-			} else if (ct1 == CHTYPE_JNUM) {
-				String num1 = getJnums(name1, i1);
-				String num2 = getJnums(name2, i2);
-				int nlen1 = num1.length();
-				int nlen2 = num2.length();
-				if (nlen1 < nlen2) {
-					int difflen = nlen2 - nlen1;
-					for (int i = 0; i < difflen; i++) {
-						if (getJnum(num2.charAt(i)) != 0) {
-							// num2の方が大きい
-							return -1;
-						}
-					}
-					// 残り部分で比較
-					num2 = num2.substring(difflen);
-				} else if (nlen1 > nlen2) {
-					int difflen = nlen1 - nlen2;
-					for (int i = 0; i < difflen; i++) {
-						if (getJnum(num1.charAt(i)) > 0) {
-							// num1の方が大きい
-							return 1;
-						}
-					}
-					// 残り部分で比較
-					num1 = num1.substring(difflen);
-				}
-				// 数字が異なる場合は比較
-				for (int i = 0; i < num1.length(); i++) {
-					int diff = getJnum(num1.charAt(i)) - getJnum(num2.charAt(i));
-					if (diff != 0) {
-						// num1の方が大きい
-						return diff;
-					}
-				}
-				i1 += nlen1 - 1;
-				i2 += nlen2 - 1;
-			} else if (ct1 == CHTYPE_CHAR) {
-				if (ch1 != ch2) {
-					return ch1 - ch2;
-				}
-			} else {
-				int s1 = getSerial(ch1);
-				int s2 = getSerial(ch2);
-				if (s1 != s2) {
-					return s1 - s2;
+					continue;
 				}
 			}
+
+			if (SORT_BY_JAPANESE_VOLUME_NAME) {
+				if (ct1 == CHTYPE_JAPANESE_VOLUME_NAME) {
+					int s1 = getJapaneseVolumeName(ch1);
+					int s2 = getJapaneseVolumeName(ch2);
+					if (s1 != s2) {
+						return s1 - s2;
+					}
+					continue;
+				}
+			}
+
+			if (ch1 != ch2) {
+				// 両方とも特殊な文字ではない
+				// 元の値を比較
+				return ch1 - ch2;
+			}
 		}
-		return len1 - len2;
+
+		// 最後まで結果が決まらなかった
+		if (name1.compareToIgnoreCase(name2) != 0) {
+			// 単純に大小比較してみる
+			return name1.compareToIgnoreCase(name2);
+		}
+		else {
+			// 完全一致なら拡張子を比較
+			return ext1.compareToIgnoreCase(ext2);
+		}
 	}
 
 	static private String getNumbers(String str, int idx) {
@@ -1538,18 +1761,220 @@ public class DEF {
 		return -2;
 	}
 
-	static private String getJnums(String str, int idx) {
+	static private int getSymbolBefore(char ch) {
+		switch (ch) {
+			case ' ':		// 半角スペース
+				return 0;
+			case '　':		// 全角スペース
+				return 1;
+			case '!':
+				return 2;
+			case '！':
+				return 3;
+			case '#':
+				return 4;
+			case '＃':
+				return 5;
+			case '$':
+				return 6;
+			case '＄':
+				return 7;
+			case '%':
+				return 8;
+			case '％':
+				return 9;
+			case '&':
+				return 10;
+			case '＆':
+				return 11;
+			case '(':
+				return 12;
+			case '（':
+				return 13;
+			case ')':
+				return 14;
+			case '）':
+				return 15;
+			case '*':
+				return 16;
+			case ',':
+				return 17;
+			case '，':
+				return 18;
+			case '.':
+				return 19;
+			case '．':
+				return 20;
+			case '＊':
+				return 21;
+			case '\'':
+				return 22;
+			case '-':
+				return 23;
+			case ':':
+				return 24;
+			case '：':
+				return 25;
+			case ';':
+				return 26;
+			case '；':
+				return 27;
+			case '?':
+				return 28;
+			case '？':
+				return 29;
+			case '@':
+				return 30;
+			case '＠':
+				return 31;
+			case '[':
+				return 32;
+			case '［':
+				return 33;
+			case ']':
+				return 34;
+			case '］':
+				return 35;
+			case '^':
+				return 36;
+			case '＾':
+				return 37;
+			case '_':
+				return 38;
+			case '＿':
+				return 39;
+			case '{':
+				return 40;
+			case '｛':
+				return 41;
+			case '|':
+				return 42;
+			case '｜':
+				return 43;
+			case '}':
+				return 44;
+			case '｝':
+				return 45;
+			case '‘':
+				return 46;
+			case '’':
+				return 47;
+			case '"':
+				return 48;
+			case '“':
+				return 49;
+			case '”':
+				return 50;
+			case '′':
+				return 51;
+			case '\\':
+				return 52;
+			case '￥':
+				return 53;
+			case '「':
+				return 54;
+			case '」':
+				return 55;
+			case '『':
+				return 56;
+			case '』':
+				return 57;
+			case '【':
+				return 58;
+			case '】':
+				return 59;
+			case '+':
+				return 60;
+			case '＋':
+				return 61;
+			case '<':
+				return 62;
+			case '＜':
+				return 63;
+			case '=':
+				return 64;
+			case '＝':
+				return 65;
+			case '>':
+				return 66;
+			case '＞':
+				return 67;
+			case '×':
+				return 68;
+			case '∩':
+				return 69;
+			case '∪':
+				return 70;
+			case '≡':
+				return 71;
+			case '⊂':
+				return 72;
+			case '⊃':
+				return 73;
+			case '■':
+				return 74;
+			case '□':
+				return 75;
+			case '▲':
+				return 76;
+			case '△':
+				return 77;
+			case '▼':
+				return 78;
+			case '▽':
+				return 79;
+			case '◆':
+				return 80;
+			case '◇':
+				return 81;
+			case '○':
+				return 82;
+			case '◎':
+				return 83;
+			case '●':
+				return 84;
+			case '↑':
+				return 85;
+			case '→':
+				return 86;
+			case '←':
+				return 87;
+			case '↓':
+				return 88;
+			case '・':
+				return 89;
+			case '☆':
+				return 90;
+			case '★':
+				return 91;
+			case '※':
+				return 92;
+		}
+		return -2;
+	}
+
+	static private int getSymbolAfter(char ch) {
+		switch (ch) {
+			case 'ー':		// 長音
+				return 0;
+			case '―':		// ダッシュ
+				return 1;
+		}
+		return -2;
+	}
+
+	static private String getKanjiNumerals(String str, int idx) {
 		int i;
 		for (i = idx; i < str.length(); i++) {
 			char ch = str.charAt(i);
-			if (getCharType(ch) != CHTYPE_JNUM) {
+			if (getCharType(ch) != CHTYPE_KANJI_NUMERALS) {
 				break;
 			}
 		}
 		return str.substring(idx, i);
 	}
 
-	static private int getSerial(char ch) {
+	static private int getJapaneseVolumeName(char ch) {
 		switch (ch) {
 			case '上':
 				return 0;
@@ -1561,29 +1986,17 @@ public class DEF {
 				return 3;
 			case '下':
 				return 4;
-			case '短':
+			case '完':
 				return 5;
-			case '外':
+			case '短':
 				return 6;
+			case '外':
+				return 7;
 		}
 		return -1;
-		// int result[] = {-1, 0};
-		// int i;
-		//
-		// for (i = 0 ; i < SERIAL_STR.length ; i ++) {
-		// int len = SERIAL_STR[i].length();
-		// if (str.length() >= idx + len) {
-		// if (str.substring(idx, len).equals(SERIAL_STR[i])) {
-		// result[0] = i;
-		// result[1] = len;
-		// break;
-		// }
-		// }
-		// }
-		// return result;
 	}
 
-	static private int getJnum(char ch) {
+	static private int getKanjiNumeral(char ch) {
 		switch (ch) {
 			case '〇':
 				return 0;
@@ -1660,58 +2073,37 @@ public class DEF {
 	}
 
 	static private int getCharType(char ch) {
-//		if (('0' <= ch && ch <= '9') || '-' == ch || '.' == ch || ',' == ch) {
-		if (('0' <= ch && ch <= '9') || '.' == ch || ',' == ch) {
+		boolean debug = false;
+		if (ch == '三' || ch == '七') {
+			debug = true;
+			Log.d("DEF", "getCharType: ch=" + ch);
+		}
+		if (SORT_BY_SYMBOL && getSymbolBefore(ch) >= 0) {
+			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_SYMBOL_BEFORE");}
+			return CHTYPE_SYMBOL_BEFORE;
+		}
+
+		if (SORT_BY_SYMBOL && getSymbolAfter(ch) >= 0) {
+			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_SYMBOL_AFTER");}
+			return CHTYPE_SYMBOL_AFTER;
+		}
+
+		if (SORT_BY_NATURAL_NUMBERS && (('0' <= ch && ch <= '9') || '.' == ch || ',' == ch)) {
+			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_NUM");}
 			return CHTYPE_NUM;
 		}
 
-		switch (ch) {
-			case '上':
-			case '中':
-			case '下':
-			case '前':
-			case '後':
-			case '短':
-			case '外':
-				return CHTYPE_SERIAL;
+		if (SORT_BY_JAPANESE_VOLUME_NAME && getJapaneseVolumeName(ch) >= 0) {
+			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_JAPANESE_VOLUME_NAME");}
+			return CHTYPE_JAPANESE_VOLUME_NAME;
 		}
 
-		switch (ch) {
-			case '〇':
-			case '零':
-			case '一':
-			case '壱':
-			case '二':
-			case '弐':
-			case '三':
-			case '参':
-			case '四':
-			case '肆':
-			case '五':
-			case '伍':
-			case '六':
-			case '陸':
-			case '七':
-			case '漆':
-			case '八':
-			case '捌':
-			case '九':
-			case '玖':
-			case '十':
-			case '拾':
-			case '什':
-			case '廿':
-			case '卅':
-			case '丗':
-			case '百':
-			case '佰':
-			case '千':
-			case '仟':
-			case '阡':
-			case '万':
-			case '萬':
-				return CHTYPE_JNUM;
+		if (SORT_BY_KANJI_NUMERALS && getKanjiNumeral(ch) >= 0) {
+			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_KANJI_NUMERALS");}
+			return CHTYPE_KANJI_NUMERALS;
 		}
+
+		if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_CHAR");}
 		return CHTYPE_CHAR;
 	}
 
@@ -1873,6 +2265,11 @@ public class DEF {
 		return ret;
 	}
 
+
+	public static boolean CHAR_DETECT = true;
+	public static String CHARSET = "Shift_JIS";
+
+
 	/**
 	 * ファイルにBOMが含まれていた場合、
 	 * BOMなしに変換する。
@@ -1891,7 +2288,7 @@ public class DEF {
 		return s;
 	}
 
-	public static String toUTF8(byte[] bytes, int offset, int length, String defaultCharset) {
+	public static String toUTF8(byte[] bytes, int offset, int length) {
 		boolean debug = false;
 		String encoding = "UTF-8";
 		String dst;
@@ -1905,20 +2302,19 @@ public class DEF {
 			tmp_length = length - 1;
 		}
 
-		if(debug) {Log.d("DEF", "toUTF8: 文字コードを自動判定します.");}
-		encoding = CharDetecter(bytes, tmp_offset, tmp_length, defaultCharset);
+		if (debug) {Log.d("DEF", "toUTF8: 文字コードを自動判定します.");}
+		encoding = CharDetecter(bytes, tmp_offset, tmp_length);
 
 		dst = new String(bytes, tmp_offset, tmp_length, Charset.forName(encoding));
 		if(debug) {Log.d("DEF", "toUTF8: Stringを出力します. dst=" + dst);}
 		return dst;
 	}
 
-	public static String CharDetecter(byte[] bytes, int offset, int length, String defaultCharset) {
+	public static String CharDetecter(byte[] bytes, int offset, int length) {
 		boolean debug = false;
-		if (debug) {
-			Log.d("DEF", "CharDetecter: 文字コードを判定します.");
-		}
+		if (debug) {Log.d("DEF", "CharDetecter: 文字コードを判定します.");}
 
+		String encoding = null;
 		int tmp_offset = offset;
 		int tmp_length = length;
 
@@ -1928,52 +2324,58 @@ public class DEF {
 			tmp_length = length - 1;
 		}
 
-		// 文字コード判定ライブラリの実装
-		UniversalDetector detector = new UniversalDetector(null);
-		// 判定開始
-		detector.handleData(bytes, tmp_offset, tmp_length);
-		// 判定終了
-		detector.dataEnd();
-		// 文字コード判定
-		String encoding = detector.getDetectedCharset();
-		// 判定の初期化
-		detector.reset();
+		if (CHAR_DETECT) {
+			// 文字コード判定ライブラリの実装
+			UniversalDetector detector = new UniversalDetector(null);
+			// 判定開始
+			detector.handleData(bytes, tmp_offset, tmp_length);
+			// 判定終了
+			detector.dataEnd();
+			// 文字コード判定
+			encoding = detector.getDetectedCharset();
+			// 判定の初期化
+			detector.reset();
 
-		if (encoding != null) {
-			if (debug) {
-				Log.d("DEF", "CharDetecter: 文字コードを判定しました. encoding=" + encoding);
-			}
-		} else {
-			if (debug) {
-				Log.d("DEF", "CharDetecter: 文字コードを判定できませんでした.");
-			}
-			byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
-
-			if (debug) {
-				Log.d("DEF", "CharDetecter: 文字コードを自動判定できませんでした.");
-			}
-			// 文字コード判定に失敗したので中国国家標準規格かどうか再度確認する
-			if (debug) {
-				Log.d("DEF", "CharDetecter: 文字コードが GB18030 かどうか判定します.");
-			}
-			if (Arrays.equals(src, new String(src, Charset.forName("GB18030")).getBytes(Charset.forName("GB18030")))) {
-				if (debug) {
-					Log.d("DEF", "CharDetecter: 文字コードは GB18030 です.");
+			if (encoding != null) {
+				if("WINDOWS-1252".equals(encoding)) {
+					// 判定された文字コードがWindows-1252の場合はShift_JISの間違いではないか確認する
+					if (debug) {Log.d("DEF", "CharDetecter: 判定結果が WINDOWS-1252 なのでShift_JISの誤判定かどうか確認します.");}
+					byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
+					if (Arrays.equals(src, new String(src, Charset.forName("MS932")).getBytes(Charset.forName("MS932")))) {
+						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは MS932 です.");}
+						encoding = "MS932";
+					} else {
+						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは MS932 ではありません.");}
+					}
 				}
-				encoding = "GB18030";
+				// 判定された文字コードがShift_JISの場合は、MS932としてデータを読み込む
+				if("Shift_JIS".equals(encoding)) {
+					encoding = "MS932";
+				}
+				if (debug) {Log.d("DEF", "CharDetecter: 文字コードを判定しました. encoding=" + encoding);}
 			} else {
+				if (debug) {Log.d("DEF", "CharDetecter: 文字コードを判定できませんでした.");}
+				byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
+
 				if (debug) {
-					Log.d("DEF", "CharDetecter: 文字コードは GB18030 ではありません.");
+					Log.d("DEF", "CharDetecter: 文字コードを自動判定できませんでした.");
+				}
+				// 文字コード判定に失敗したので中国国家標準規格かどうか再度確認する
+				if (debug) {Log.d("DEF", "CharDetecter: 文字コードが GB18030 かどうか判定します.");}
+				if (Arrays.equals(src, new String(src, Charset.forName("GB18030")).getBytes(Charset.forName("GB18030")))) {
+					if (debug) {Log.d("DEF", "CharDetecter: 文字コードは GB18030 です.");}
+					encoding = "GB18030";
+				} else {
+					if (debug) {Log.d("DEF", "CharDetecter: 文字コードは GB18030 ではありません.");}
 				}
 			}
 		}
 
 		if (encoding == null) {
 			// 判定できなかったら共通の操作設定設定で設定した文字コードに設定する
-			if (debug) {
-				Log.d("DEF", "CharDetecter: 文字コードを設定画面で設定した " + defaultCharset + " に設定します.");
-			}
-			encoding = defaultCharset;
+			String charset = (CHARSET == "Shift_JIS" ? "MS932" : CHARSET);
+			if (debug) {Log.d("DEF", "CharDetecter: 文字コードを設定画面で設定した " + charset + " に設定します.");}
+			encoding = charset;
 		}
 		return encoding;
 	}

@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="Common Settings" >
-        <ListPreference
-            android:defaultValue="1"
-            android:dialogTitle="Charset"
-            android:entries="@array/charset_name_list"
-            android:entryValues="@array/charset_value_list"
-            android:key="Charset"
-            android:summary="dummy"
-            android:title="Charset" />
         <CheckBoxPreference
             android:defaultValue="0"
             android:key="HiddenFile"
@@ -23,6 +16,113 @@
             android:summary="dummy"
             android:title="Button to rotate the screen" />
     </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="Character Code" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="CharDetect"
+            android:summary="The character code will be automatically detected.\nIf it cannot be detected, the specified character code will be used."
+            android:title="Auto detection" />
+        <ListPreference
+            android:defaultValue="1"
+            android:dialogTitle="Specify the Charset"
+            android:entries="@array/charset_name_list"
+            android:entryValues="@array/charset_value_list"
+            android:key="Charset"
+            android:summary="dummy"
+            android:title="Specify the Charset" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Sort Settings" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByIgnoreWidth"
+            android:summary="Full-width characters are converted to half-width characters before comparison."
+            android:title="Ignore full-width and half-width" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByIgnoreCase"
+            android:summary="Lowercase letters [a-z] are converted to uppercase letters [A-Z] before comparison."
+            android:title="Case insensitive" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortBySymbol"
+            android:summary="Arranges symbols in an order similar to Windows Explorer."
+            android:title="Change the order of symbols" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByNaturalNumbers"
+            android:summary="Numbers with different digits, such as 0001, are also sorted in ascending order. \nDecimals and comma-separated numbers every three digits are also supported."
+            android:title="Sort by natural numbers" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByKanjiNumerals"
+            android:summary="They are arranged in the order of［〇一二三四五六七八九十百千万億兆] or \n[零壱弐参肆伍陸漆捌玖拾什廿卅丗佰仟阡萬]."
+            android:title="Sort by Kanji numbers" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByJapaneseVolumeName"
+            android:summary="They are arranged in the order of [上中下] or [前中後]. \n[完短外] is arranged next."
+            android:title="Sort by Japanese volume name" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Sorting priority words" >
+        <Preference
+            android:summary="Treat the priority word as the lowest character in the sort order." />
+        <EditTextPreference
+            android:key="SortPriorityWord01"
+            android:title="priority word 1"
+            app:useSimpleSummaryProvider="true"
+            android:defaultValue="cover"
+            android:dialogTitle="priority word 1" />
+        <EditTextPreference
+            android:key="SortPriorityWord02"
+            android:title="priority word 2"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 2" />
+        <EditTextPreference
+            android:key="SortPriorityWord03"
+            android:title="priority word 3"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 3" />
+        <EditTextPreference
+            android:key="SortPriorityWord04"
+            android:title="priority word 4"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 4" />
+        <EditTextPreference
+            android:key="SortPriorityWord05"
+            android:title="priority word 5"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 5" />
+        <EditTextPreference
+            android:key="SortPriorityWord06"
+            android:title="priority word 6"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 6" />
+        <EditTextPreference
+            android:key="SortPriorityWord07"
+            android:title="priority word 7"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 7" />
+        <EditTextPreference
+            android:key="SortPriorityWord08"
+            android:title="priority word 8"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 8" />
+        <EditTextPreference
+            android:key="SortPriorityWord09"
+            android:title="priority word 9"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 9" />
+        <EditTextPreference
+            android:key="SortPriorityWord10"
+            android:title="priority word 10"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="priority word 10" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Help" >
         <PreferenceScreen
             android:key="CommHelp"

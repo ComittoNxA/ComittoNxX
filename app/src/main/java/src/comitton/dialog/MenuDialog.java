@@ -252,7 +252,8 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 							mSelectView = menuView;
 							mSelectView.setSelect(true);
 							mStartX = (int)event.getX();
-							mStartY = (int)event.getY();						 }
+							mStartY = (int)event.getY();
+						 }
 					 }
 				}
 //				Log.d("scrlPos", "" + mScrlPos);

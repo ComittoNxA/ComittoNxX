@@ -20,7 +20,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.DialogPreference;
+import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -56,6 +58,8 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 		super(context, attrs);
 		mContext = context;
 		mSp = PreferenceManager.getDefaultSharedPreferences(context);
+		setSummary(getSummary().toString().replace("[sdcard]", "[" + Environment.getExternalStorageDirectory().getAbsolutePath() + "]"));
+
 	}
 
 	@Override
@@ -74,8 +78,8 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 		updateImportList();
 
 		layout.addView(mMsgView, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		layout.addView(mEditView, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-		layout.addView(mListView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		layout.addView(mEditView, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		layout.addView(mListView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
 		String str = (String) getDialogMessage();
 		mMsgView.setText(str);

@@ -806,8 +806,8 @@ public class GuideView {
 		Resources res = mContext.getResources();
 		mBackBitmap = ImageAccess.createIcon(res, R.drawable.navi_back, size * 2 / 3, Color.WHITE);
 		mMenuBitmap = ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2 / 3, Color.WHITE);
-		mLeftBitmap = ImageAccess.createIcon(res, R.drawable.navi_left, size * 2 / 3, Color.WHITE);
-		mRightBitmap = ImageAccess.createIcon(res, R.drawable.navi_right, size * 2 / 3, Color.WHITE);
+		mLeftBitmap = ImageAccess.createIcon(res, R.drawable.arrow_left_to_line, size * 2 / 3, Color.WHITE);
+		mRightBitmap = ImageAccess.createIcon(res, R.drawable.arrow_right_to_line, size * 2 / 3, Color.WHITE);
 //		invalidate();
 		return;
 	}

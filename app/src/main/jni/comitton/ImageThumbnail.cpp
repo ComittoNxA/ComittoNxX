@@ -453,7 +453,9 @@ ERROREND:
 
 int ThumbnailImageSize(long long id, int index)
 {
+#ifdef DEBUG
     LOGD("ImageThumbnail: ThumbnailImageSize: 開始します. id=%lld, index=%d", id, index);
+#endif
     // IDの一致チェック
     if (gThumbnailId != id) {
         // 初期化したIDと異なる
@@ -474,8 +476,9 @@ int ThumbnailImageSize(long long id, int index)
     // 保存されている画像のサイズ
     int width = gThImageMng[index].Width;
     int height = gThImageMng[index].Height;
+#ifdef DEBUG
     LOGD("ImageThumbnail: ThumbnailImageSize: 画像のサイズを取得しました. width=%d, height=%d", width, height);
-
+#endif
     return (width << 16 | height);
 }
 

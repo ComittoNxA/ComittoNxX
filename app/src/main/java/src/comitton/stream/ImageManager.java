@@ -676,7 +676,7 @@ public class ImageManager extends InputStream implements Runnable {
 		if (readsize >= lenFName + SIZE_LOCALHEADER) {
 			// ファイル名までのデータがあり
 			try {
-				name = DEF.toUTF8(buf, SIZE_LOCALHEADER, lenFName, mCharset);
+				name = DEF.toUTF8(buf, SIZE_LOCALHEADER, lenFName);
 			}
 			catch (Exception e) {
 				name = "Unknown";
@@ -778,7 +778,7 @@ public class ImageManager extends InputStream implements Runnable {
 		imgfile.dtime = d.getTime();
 		// ファイル名までのデータがあり
 		try {
-			imgfile.name = DEF.toUTF8(buf, OFFSET_CTL_FNAME, lenFName, mCharset);
+			imgfile.name = DEF.toUTF8(buf, OFFSET_CTL_FNAME, lenFName);
 		}
 		catch (Exception e) {
 			imgfile.name = "Unknown";
@@ -1048,7 +1048,7 @@ public class ImageManager extends InputStream implements Runnable {
 						break;
 					}
 				}
-				name = DEF.toUTF8(buf, posFName, lenFName, mCharset);
+				name = DEF.toUTF8(buf, posFName, lenFName);
 			}
 			catch (Exception e) {
 				name = "Unknown";
@@ -2561,7 +2561,7 @@ public class ImageManager extends InputStream implements Runnable {
 				int lenFName = getShort(buf, OFFSET_LCL_FNAME_LEN);
 
 				if (ret >= SIZE_LOCALHEADER + lenFName) {
-					String name = DEF.toUTF8(buf, SIZE_LOCALHEADER, lenFName, mCharset);
+					String name = DEF.toUTF8(buf, SIZE_LOCALHEADER, lenFName);
 					for (int i = 0; i < lenFName - 4; i++) {
 						buf[off + SIZE_LOCALHEADER + i] = '0';
 					}
@@ -4088,7 +4088,8 @@ public class ImageManager extends InputStream implements Runnable {
 
 	// 設定変更
 	public void setConfig(int mode, int center, boolean fFitDual, int dispMode, boolean noExpand, int algoMode, int rotate, int wadjust, int wscale, int scale, int pageway, int mgncut, int mgncutcolor, int quality, int bright, int gamma, int sharpen, boolean invert, boolean gray, boolean pseland, boolean moire, boolean topsingle, boolean scaleinit) {
-		Log.d("ImageManager", "setConfig wscale=" + wscale + ", scale=" + scale);
+		boolean debug = false;
+		if (debug) {Log.d("ImageManager", "setConfig wscale=" + wscale + ", scale=" + scale);}
 		mScrScaleMode = mode;
 		if (scaleinit) {
 			mScrScale = scale;	// 初期化

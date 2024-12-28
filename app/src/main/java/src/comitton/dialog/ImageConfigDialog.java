@@ -19,6 +19,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -211,6 +213,17 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 
 		// ビューのレイアウトをxmlファイルから取得し表示する要素を追加する
 		setContentView(R.layout.imageconfigdialog);
+
+		TextView textView = (TextView)this.findViewById(R.id.text_message);
+		ScrollView scrollView = (ScrollView)this.findViewById(R.id.ScrollView);
+
+		int width = (int)(mContext.getResources().getDisplayMetrics().widthPixels * 0.80);
+		int scale = (int)(mContext.getResources().getDisplayMetrics().scaledDensity * 320);
+		width = Math.max(width, scale);
+
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, LinearLayout.LayoutParams.WRAP_CONTENT);
+		textView.setLayoutParams(lp);
+		scrollView.setLayoutParams(lp);
 
 		if (mCommandId != DEF.MENU_IMGCONF) {
 			this.findViewById(R.id.chk_gray).setVisibility(View.GONE);

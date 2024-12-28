@@ -3,6 +3,8 @@ package src.comitton.listener;
 import java.util.EventListener;
 
 public interface PageSelectListener extends EventListener {
+	// ページ選択通知用
+	public void onSelectPage(int page);
 	// メニュー選択通知用
-	public void onSelectPage(int menuId);
+	public void onSelectPageSelectDialog(int menuId);
 }

@@ -45,9 +45,9 @@
     <string name="picsize02">Original x2</string>
     <string name="picsize03">Original x3</string>
     <string name="picsize04">Fit Screen</string>
-    <string name="picsize05">Fit Screen(Ignore margins)</string>
-    <string name="picsize06">Fit Screen(for Spread)</string>
-    <string name="picsize07">Fit Screen(for Spread, Ignore margins)</string>
+    <string name="picsize05">Fit Screen\n(Ignore margins)</string>
+    <string name="picsize06">Fit Screen\n(for Spread)</string>
+    <string name="picsize07">Fit Screen\n(for Spread, Ignore margins)</string>
     <string name="ascmode00">Vertical</string>
     <string name="ascmode01">Horizontal</string>
     <string name="ascmode02">Blend</string>
@@ -103,6 +103,7 @@
     <string name="marker">Marker</string>
     <string name="addBookmarkMenu">Add Favorite</string>
     <string name="selBookmarkMenu">Select Favorite</string>
+    <string name="selDirTreeMenu">Select Sub Directory</string>
     <string name="selChapterMenu">Select Chapter</string>
     <string name="searchTextMenu">Set Search Text</string>
     <string name="searchJumpMenu">Select Search Result</string>
@@ -486,4 +487,39 @@
     <string name="loupesize00">0</string>
     <string name="loupesize01">+1</string>
     <string name="loupesize02">+2</string>
+
+    <string name="ToolbarEditTitle">Toolbar Settings</string>
+    <string name="ToolbarLeftmost">Leftmost page</string>
+    <string name="ToolbarLeft100">100 pages to the left</string>
+    <string name="ToolbarLeft10">10 pages to the left</string>
+    <string name="ToolbarLeft1">1 pages to the right</string>
+    <string name="ToolbarRight1">1 pages to the right</string>
+    <string name="ToolbarRight10">10 pages to the right</string>
+    <string name="ToolbarRight100">100 pages to the left</string>
+    <string name="ToolbarRightMost">Rightmost page</string>
+    <string name="ToolbarPageReset">Reset page selection</string>
+    <string name="ToolbarBookLeft">Prev File(Last Page)/\nNext File(Top Page)</string>
+    <string name="ToolbarBookRight">Next File(Top Page)/\nPrev File(Last Page)</string>
+    <string name="ToolbarBookmarkLeft">Next(Prev)File(Marked Page)</string>
+    <string name="ToolbarBookmarkRight">Prev(Next)File(Marked Page)</string>
+    <string name="ToolbarThumbSlider">Thumbnail/Slider switching\n(Image viewer only)</string>
+    <string name="ToolbarDirTree">Select sub directory\n(Image viewer only)</string>
+    <string name="ToolbarTOC">Select Chapter\n(Text viewer only)</string>
+    <string name="ToolbarFavorite">Select Favorite</string>
+    <string name="ToolbarAddFavorite">Add Favorite</string>
+    <string name="ToolbarSearch">Set Search Text\n(Text viewer only)</string>
+    <string name="ToolbarShare">Share\n(Image viewer only)</string>
+    <string name="ToolbarRotate">Screen direction</string>
+    <string name="ToolbarRotateImage">Image Rotate\n(Image viewer only)</string>
+    <string name="ToolbarSelectThum">Set as thumbnail\n(Image viewer only)</string>
+    <string name="ToolbarTrimThumb">Crop and set as thumbnail\n(Image viewer only)</string>
+    <string name="ToolbarControl">Image/Text Config</string>
+    <string name="ToolbarMenu">Open Menu</string>
+    <string name="ToolbarConfig">Open Settings</string>
+
+    <string name="ChapMenuFile">File</string>
+    <string name="ChapMenuTOC">TOC</string>
+    <string name="ChapMenuChapter">Chapter</string>
+    <string name="ChapMenuOther">Other</string>
+
 </resources>

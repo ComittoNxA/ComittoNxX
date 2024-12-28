@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/ScrollView"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent" >
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" >
 	<LinearLayout
-		android:layout_width="fill_parent"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_vertical"
 		android:gravity="center_horizontal"
@@ -13,13 +13,13 @@
 	
 		<CheckBox
 			android:id="@+id/chk_disp"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="left|center"
 			android:text= "@string/pnChkDisp" />
 
 		<LinearLayout
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_vertical"
 			android:gravity="left|center"
@@ -35,14 +35,14 @@
 
 			<Spinner
 				android:id="@+id/spin_format"
-				android:layout_width="fill_parent"
+				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:entries="@array/pnfmt_name_list"
 				android:entryValues="@array/pnfmt_value_list" />
 		</LinearLayout>
 
 		<LinearLayout
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_vertical"
 			android:gravity="left|center"
@@ -58,14 +58,14 @@
 
 			<Spinner
 				android:id="@+id/spin_pos"
-				android:layout_width="fill_parent"
+				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:entries="@array/pnpos_name_list"
 				android:entryValues="@array/pnpos_value_list" />
 		</LinearLayout>
 
 		<LinearLayout
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_vertical"
 			android:gravity="left|center"
@@ -90,13 +90,13 @@
 		<SeekBar
 			android:id="@+id/seek_size"
 			style="@style/PageSeekBar"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:paddingLeft="20sp"
 			android:paddingRight="20sp" />
 
 		<LinearLayout
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_vertical"
 			android:gravity="left|center"
@@ -112,7 +112,7 @@
 
 			<Spinner
 				android:id="@+id/spin_color"
-				android:layout_width="fill_parent"
+				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:entries="@array/pncolor_name_list"
 				android:entryValues="@array/pncolor_value_list" />

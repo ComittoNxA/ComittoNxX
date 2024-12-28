@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="MyTheme" parent="@android:style/Theme.NoTitleBar">
+    <style name="MyTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
-
-        <item name="android:textColor">@color/white1</item>
-        <item name="android:textColorPrimary">@color/white1</item>
-        <item name="colorControlNormal">@color/white1</item>
-        <!--item name="android:windowAnimationStyle">@android:style/Animation</item-->
     </style>
 
     <style name="AppCompat.MyTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
@@ -43,6 +38,8 @@
         <item name="buttonStyle">@style/MyButton</item>
         <!-- EditTextのスタイル -->
         <item name="editTextStyle">@style/MyEditText</item>
+        <!-- ImageButtonのスタイル -->
+        <item name="android:imageButtonStyle">@style/MyImageButton</item>
     </style>
 
     <!-- AlertDialogのスタイル -->
@@ -80,9 +77,22 @@
         <item name="android:textColor">@color/black1</item>
     </style>
 
+    <!-- ImageButtonのスタイル -->
+    <style name="MyImageButton" parent="@style/Widget.AppCompat.ImageButton">
+        <item name="android:layout_width">24sp</item>
+        <item name="android:layout_height">24sp</item>
+        <item name="android:background">"@null"</item>
+        <item name="android:tint">@color/white1</item>
+    </style>
+
     <!-- EditTextのスタイル -->
     <style name="MyEditText" parent="@style/Widget.AppCompat.EditText">
         <item name="android:textColorHint">@color/darkgrey1</item>
+    </style>
+
+    <!-- TabLayoutのスタイル -->
+    <style name="MyTabLayout" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="PageSeekBar">

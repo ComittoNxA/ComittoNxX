@@ -279,6 +279,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		// 設定の読込
 		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SetCommonActivity.loadSettings(mSharedPreferences);
 		readConfig();
 
 		// Intentを取得する
@@ -587,10 +588,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					int nextopen = data.getExtras().getInt("nextopen", -1);
 					String file = data.getExtras().getString("lastfile");
 					String path = data.getExtras().getString("lastpath");
-					if (file.endsWith("/")) {
-						path = path + file;
-						file = "";
-					}
 					if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen=" + nextopen + ", file=" + file + ", path=" + path);}
 					if (nextopen != CloseDialog.CLICK_CLOSE) {
 						if (debug) {Log.d("FileSelectActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");}
@@ -2008,7 +2005,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					data.setState(state);
 				}
 				if (type == FileData.FILETYPE_EPUB) {
-					if (DEF.EPUB_VIEWER == mEpubViewer) {
+					if (DEF.TEXT_VIEWER == mEpubViewer) {
 						state = (int) mSharedPreferences.getFloat(DEF.createUrl(path + name + "META-INF/container.xml", user, pass) + "#pageRate", (float) DEF.PAGENUMBER_UNREAD);
 						if (state == DEF.PAGENUMBER_UNREAD) {
 							state = sharedPreferences.getInt(DEF.createUrl(path + name + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_UNREAD);
@@ -2445,7 +2442,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				items[i] = ope5;
 				mOperate[i] = OPERATE_EXPAND;
 				i++;
-				if (DEF.EPUB_VIEWER == mEpubViewer) {
+				if (DEF.TEXT_VIEWER == mEpubViewer) {
 					// zip/rar/pdfファイルを開く
 					items[i] = ope7;
 				} else {
@@ -2559,7 +2556,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						break;
 					}
 					case OPERATE_EPUB: // ビュワーで開く
-						if (DEF.EPUB_VIEWER == mEpubViewer) {
+						if (DEF.TEXT_VIEWER == mEpubViewer) {
 							// zip/rar/pdfファイルを開く
 							openCompFile(mFileData.getName(), "");
 						} else {
@@ -2572,7 +2569,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						ed = mSharedPreferences.edit();
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
-						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.EPUB_VIEWER == mEpubViewer) {
+						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.TEXT_VIEWER == mEpubViewer) {
 							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass));
 							ed.remove(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass) + "#pageRate");
 						}
@@ -2611,7 +2608,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						ed = mSharedPreferences.edit();
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
-						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.EPUB_VIEWER == mEpubViewer) {
+						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.TEXT_VIEWER == mEpubViewer) {
 							ed.putInt(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_READ);
 							ed.putFloat(DEF.createUrl(mURI + mPath + mFileData.getName() + "META-INF/container.xml", user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
 						}
@@ -3234,7 +3231,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					openCompFile(fd.getName(), infile);
 					break;
 				case FileData.FILETYPE_EPUB:
-					if (DEF.EPUB_VIEWER == epubviewer) {
+					if (DEF.TEXT_VIEWER == epubviewer) {
 						Log.d("FileSelectActivity", "openFile: DEF.EPUB_VIEWER");
 						// Epubビューワーで開く
 						openEpubFile(fd.getName(), pagerate, page);
@@ -3332,7 +3329,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	private void openImageFile(String name) {
 		// saveLastOpenComp(mServer.getCode(), mPath, null, name,
 		// DEF.LASTOPEN_IMAGE);
-		Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, mPath + name, Toast.LENGTH_SHORT).show();
 
 		// 描画停止
 		setDrawEnable();
@@ -3355,7 +3352,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	private void openImageDir(String name) {
 		// saveLastOpenComp(mServer.getCode(), mPath + name, null, null,
 		// DEF.LASTOPEN_IMAGE);
-		Toast.makeText(this, mPath, Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, mPath + name, Toast.LENGTH_SHORT).show();
 
 		// Intentをつかって画面遷移する
 		Intent intent = new Intent(FileSelectActivity.this, ImageActivity.class);
@@ -3785,7 +3782,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					} else if (type == FileData.FILETYPE_EPUB) {
 						// サムネイル解放
 						releaseThumbnail();
-						if (DEF.EPUB_VIEWER == mEpubViewer) {
+						if (DEF.TEXT_VIEWER == mEpubViewer) {
 							Log.d("FileSelectActivity", "onItemClick: DEF.EPUB_VIEWER");
 							// EpubViewerで開く
 							openEpubFile(name, (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);

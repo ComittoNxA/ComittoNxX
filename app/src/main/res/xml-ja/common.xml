@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="共通設定" >
-        <ListPreference
-            android:defaultValue="1"
-            android:dialogTitle="文字コード"
-            android:entries="@array/charset_name_list"
-            android:entryValues="@array/charset_value_list"
-            android:key="Charset"
-            android:summary="dummy"
-            android:title="文字コード" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="HiddenFile"
@@ -23,6 +16,112 @@
             android:summary="dummy"
             android:title="画面を回転するボタン" />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="文字コード" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="CharDetect"
+            android:summary="文字コードを自動判別します。\n判別できない場合は指定した文字コードを使用します。"
+            android:title="自動判別" />
+    <ListPreference
+        android:defaultValue="1"
+        android:dialogTitle="文字コード指定"
+        android:entries="@array/charset_name_list"
+        android:entryValues="@array/charset_value_list"
+        android:key="Charset"
+        android:summary="dummy"
+        android:title="文字コード指定" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="ソートの設定" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByIgnoreWidth"
+            android:summary="全角を半角に変換してから比較します。"
+            android:title="全角半角を区別しない" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByIgnoreCase"
+            android:summary="半角小文字 [a-z] を半角大文字 [A-Z] に変換してから比較します。"
+            android:title="大文字小文字を区別しない" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortBySymbol"
+            android:summary="記号をWindowsのエクスプローラーに似せた順番で並べます。"
+            android:title="記号の順番を変える" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByNaturalNumbers"
+            android:summary="0001のように桁数を合わせていない数字も大小順に並べます。\n小数や3桁毎のカンマ区切りにも対応します。"
+            android:title="自然数順で並べる" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByKanjiNumerals"
+            android:summary="「〇一二三四五六七八九十百千万億兆」や\n「零壱弐参肆伍陸漆捌玖拾什廿卅丗佰仟阡萬」の順に並べます。"
+            android:title="漢数字で並べ替える" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByJapaneseVolumeName"
+            android:summary="「上中下」や「前中後」の順に並べます。\n「完短外」はその次に並びます。"
+            android:title="上中下巻で並べ替える" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="ソートの優先ワード" >
+        <Preference
+            android:summary="優先ワードをソート順序が最小の文字として扱います。" />
+        <EditTextPreference
+            android:key="SortPriorityWord01"
+            android:title="優先ワード1"
+            app:useSimpleSummaryProvider="true"
+            android:defaultValue="cover"
+            android:dialogTitle="優先ワード1" />
+        <EditTextPreference
+            android:key="SortPriorityWord02"
+            android:title="優先ワード2"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード2" />
+        <EditTextPreference
+            android:key="SortPriorityWord03"
+            android:title="優先ワード3"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード3" />
+        <EditTextPreference
+            android:key="SortPriorityWord04"
+            android:title="優先ワード4"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード4" />
+        <EditTextPreference
+            android:key="SortPriorityWord05"
+            android:title="優先ワード5"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード5" />
+        <EditTextPreference
+            android:key="SortPriorityWord06"
+            android:title="優先ワード6"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード6" />
+        <EditTextPreference
+            android:key="SortPriorityWord07"
+            android:title="優先ワード7"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード7" />
+        <EditTextPreference
+            android:key="SortPriorityWord08"
+            android:title="優先ワード8"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード8" />
+        <EditTextPreference
+            android:key="SortPriorityWord09"
+            android:title="優先ワード9"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード9" />
+        <EditTextPreference
+            android:key="SortPriorityWord10"
+            android:title="優先ワード10"
+            app:useSimpleSummaryProvider="true"
+            android:dialogTitle="優先ワード10" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="ヘルプ" >
         <PreferenceScreen
             android:key="CommHelp"

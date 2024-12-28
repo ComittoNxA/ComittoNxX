@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="4dip"
@@ -9,13 +9,13 @@
 	<SeekBar
 		android:id="@+id/seek_chapter"
 		style="@style/PageSeekBar"
-		android:layout_width="fill_parent"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:paddingLeft="20sp"
 		android:paddingRight="20sp" />
 
 	<LinearLayout
-		android:layout_width="fill_parent"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_vertical"
 		android:gravity="center_horizontal"
@@ -63,13 +63,13 @@
 		<SeekBar
 	    android:id="@+id/seek_page"
 	    style="@style/PageSeekBar"
-	    android:layout_width="fill_parent"
+	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:paddingLeft="20sp"
 	    android:paddingRight="20sp" />
 
 	<LinearLayout
-	    android:layout_width="fill_parent"
+	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="center_vertical"
 	    android:gravity="center_horizontal"
@@ -121,7 +121,7 @@
 	</LinearLayout>
 
     <LinearLayout
-	    android:layout_width="fill_parent"
+	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="center_vertical"
 		android:layout_weight="1"

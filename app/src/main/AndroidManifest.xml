@@ -82,50 +82,62 @@
         </activity>
         <activity
             android:name="src.comitton.config.SetConfigActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetFileListActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetRecorderActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetFileColorActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageDetailActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetTextActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageTextDetailActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageTextColorActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetNoiseActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetCacheActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetCommonActivity"
+            android:theme="@style/MyTheme"
             android:resizeableActivity="true" >
         </activity>
 

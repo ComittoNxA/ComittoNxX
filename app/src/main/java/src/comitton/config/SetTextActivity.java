@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -122,6 +123,7 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 		mScrlRngH = (TextScrlRngHSeekbar)getPreferenceScreen().findPreference(DEF.KEY_TX_SCRLRNGH);
 
 		mFontName = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_TX_FONTNAME);
+		mFontName.setTitle(mFontName.getTitle().toString().replace("[sdcard]", "[" + Environment.getExternalStorageDirectory().getAbsolutePath() + "]"));
 
 		mTapPattern = (OperationPreference)getPreferenceScreen().findPreference(DEF.KEY_TAPPATTERN);
 

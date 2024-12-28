@@ -227,7 +227,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					fileList.get(i).setState(state);
 				}
 				if (fileList.get(i).getType() == FileData.FILETYPE_EPUB) {
-					if (DEF.EPUB_VIEWER == mEpubViewer) {
+					if (DEF.TEXT_VIEWER == mEpubViewer) {
                         state = (int)mSp.getFloat(DEF.createUrl(mUri + mPath + name + "META-INF/container.xml", mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
                         if (state == DEF.PAGENUMBER_UNREAD) {
                             state = mSp.getInt(DEF.createUrl(mUri + mPath + name + "META-INF/container.xml", mUser, mPass), DEF.PAGENUMBER_UNREAD);

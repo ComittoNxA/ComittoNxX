@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/ScrollView"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent" >
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" >
 	<LinearLayout
-		android:layout_width="fill_parent"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_vertical"
 		android:gravity="center_horizontal"
@@ -18,10 +18,10 @@
 			android:gravity="center"
 			android:textSize="20sp"
 			android:textColor="#FFFFFFFF"
-			android:text="@string/lastTitle" />
+			android:text="@string/topTitle" />
 
 		<ImageView
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="1sp"
 			android:background="#FFFFFFFF"
 			android:layout_marginTop="6sp"
@@ -29,27 +29,31 @@
 
 		<Button
 			android:id="@+id/btn_prev"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:paddingTop="16sp"
+			android:paddingBottom="16sp"
 			android:textSize="18sp"
 			android:text="@string/cdBtnPrev" />
 
 		<Button
 			android:id="@+id/btn_prevlast"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:paddingTop="16sp"
+			android:paddingBottom="16sp"
 			android:textSize="18sp"
 			android:text="@string/cdBtnPrevLast" />
 
 		<ImageView
 			android:background="#00FFFFFF"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="0.5sp"
 			android:layout_marginBottom="6sp" />
 
 		<Button
 			android:id="@+id/btn_close"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:paddingTop="16sp"
 			android:paddingBottom="24sp"
@@ -58,7 +62,7 @@
 
 		<CheckBox
 			android:id="@+id/chk_mark"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="left|center"
 			android:textSize="17sp"
@@ -66,7 +70,7 @@
 
 		<CheckBox
 			android:id="@+id/chk_resume"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="left|center"
 			android:textSize="17sp"

@@ -150,6 +150,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 		mHandler = new Handler(this);
 		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SetCommonActivity.loadSettings(mSharedPreferences);
+
 		mBefColor = SetFileColorActivity.getBefColor(mSharedPreferences);
 		mNowColor = SetFileColorActivity.getNowColor(mSharedPreferences);
 		mAftColor = SetFileColorActivity.getAftColor(mSharedPreferences);

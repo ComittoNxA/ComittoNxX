@@ -1234,7 +1234,7 @@ public class TextManager {
 
 	// xmlを解析して青空文庫に変換する
 	public void formatTextFile(int width, int height, float headfont, float textfont, float rubifont, float space_w, float space_h, int margin_w, int margin_h, int pic_scale, String fontfile, int ascmode, String charset) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d("TextManager", "formatTextFile: 開始します. width=" + width + ",  height=" + height + ", headfont=" + headfont + ", textfont=" + textfont + ", rubifont=" + rubifont);}
 
 		// リスト確保
@@ -1300,7 +1300,7 @@ public class TextManager {
 			if (debug) {Log.d("TextManager", "formatTextFile: EPUBコンテナファイルを解析します.");}
 
 			LoadTextFile(filename);
-			inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+			inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length);
 			inputStr = inputStr.replaceAll("\r\n", "\n");
 
 			// XML読み込み
@@ -1363,7 +1363,7 @@ public class TextManager {
 			if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイルを解析します. filename=" + filename);}
 			if (filename != mTextFile) {
 				LoadTextFile(filename);
-				inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+				inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length);
 				inputStr = inputStr.replaceAll("\r\n", "\n");
 			}
 			// XML読み込み
@@ -1432,6 +1432,7 @@ public class TextManager {
 									String id = "";
 									String href = "";
 									String type = "";
+									String properties = "";
 									for (int i = 0; i < atr_count; i++) {
 										String atr_name = xmlPullParser.getAttributeName(i);
 										if (atr_name.equals("id")) {
@@ -1443,10 +1444,17 @@ public class TextManager {
 										if (atr_name.equals("media-type")) {
 											type = xmlPullParser.getAttributeValue(i);
 										}
+										if (atr_name.equals("properties")) {
+											properties = xmlPullParser.getAttributeValue(i);
+										}
 									}
 									if (id.length() > 0) {
 										manifest.add(new EpubFile(id, href, type));
 										if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: manifest[" + (manifest.size()-1) + "]: id=" + manifest.get(manifest.size()-1).getId() + ", href=" + manifest.get(manifest.size()-1).getHref() + ", mediaType=" + manifest.get(manifest.size()-1).getType());}
+										if (id.equals("toc") && properties.equals("nav")) {
+											mToc = href;
+											if (debug) {Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: mToc=" + mToc);}
+										}
 									}
 								}
 							}
@@ -1455,7 +1463,7 @@ public class TextManager {
 								String id = "";
 								for (int i = 0; i < atr_count; i++) {
 									String atr_name = xmlPullParser.getAttributeName(i);
-									if (atr_name.equals("toc")) {
+									if (atr_name.equals("toc") && (mToc == null || mToc.length() == 0)) {
 										id = xmlPullParser.getAttributeValue(i);
 										if (id.length() > 0) {
 											for(int j = 0; j < manifest.size(); ++j){
@@ -1620,7 +1628,7 @@ public class TextManager {
 					Log.d("TextManager", "formatTextFile: 目次情報ファイルを解析します. filename=" + filename);
 				}
 				if (mInputBuff != null) {
-					inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+					inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length);
 					inputStr = inputStr.replaceAll("\r\n", "\n");
 				}
 				// XML読み込み
@@ -1639,6 +1647,7 @@ public class TextManager {
 					int tag_level_navpoint = 0;
 					int tag_level_navlabel = 0;
 					int tag_level_text = 0;
+					int tag_level_a = 0;
 					String id = "";
 					String href = "";
 					String type = "";
@@ -1674,6 +1683,18 @@ public class TextManager {
 										}
 									}
 								}
+								else if (tag_name.equals("a")) {
+									id = "";
+									href = "";
+									type = "";
+									for (int i = 0; i < atr_count; i++) {
+										String atr_name = xmlPullParser.getAttributeName(i);
+										if (atr_name.equals("href")) {
+											href = getPath(filename, xmlPullParser.getAttributeValue(i));
+										}
+									}
+									tag_level_a++;
+								}
 							} else if (eventType == XmlPullParser.END_TAG) {
 								if (debug) {
 									Log.d("TextManager", "formatTextFile: END_TAG: " + tag_name);
@@ -1681,15 +1702,18 @@ public class TextManager {
 								if (tag_name.equals("navPoint")) {
 									if (href.length() != 0) {
 										toc.add(new EpubFile(id, href, type));
-										if (debug) {
-											Log.d("TextManager", "formatTextFile: EPUB書誌情報ファイル: toc[" + (toc.size() - 1) + "]: id=" + toc.get(toc.size() - 1).getId() + ", href=" + toc.get(toc.size() - 1).getHref() + ", mediaType=" + toc.get(toc.size() - 1).getType());
-										}
+										if (debug) {Log.d("TextManager", "formatTextFile: EPUB目次情報ファイル: toc[" + (toc.size() - 1) + "]: id=" + toc.get(toc.size() - 1).getId() + ", href=" + toc.get(toc.size() - 1).getHref() + ", mediaType=" + toc.get(toc.size() - 1).getType());}
 									}
 									tag_level_navpoint--;
 								} else if (tag_name.equals("navLabel")) {
 									tag_level_navlabel--;
 								} else if (tag_name.equals("text")) {
 									tag_level_text--;
+								}
+								else if (tag_name.equals("a")) {
+									toc.add(new EpubFile(id, href, type));
+									if (debug) {Log.d("TextManager", "formatTextFile: EPUB目次情報ファイル: toc[" + (toc.size() - 1) + "]: id=" + toc.get(toc.size() - 1).getId() + ", href=" + toc.get(toc.size() - 1).getHref() + ", mediaType=" + toc.get(toc.size() - 1).getType());}
+									tag_level_a--;
 								}
 							} else if (eventType == XmlPullParser.TEXT) {
 								//if(debug) {Log.d("TextManager", "formatTextFile: Text '" + xmlPullParser.getText() + "'");}
@@ -1706,6 +1730,11 @@ public class TextManager {
 								text = text.replaceAll(" ", "");
 
 								if (tag_level_navpoint > 0 && tag_level_navlabel > 0 && tag_level_text > 0) {
+									if (text.length() > 0) {
+										id = id + text;
+									}
+								}
+								else if (tag_level_a > 0) {
 									if (text.length() > 0) {
 										id = id + text;
 									}
@@ -1738,7 +1767,7 @@ public class TextManager {
 			filename = spine.get(epubFileIndex).getHref();
 			if (filename.length() != 0) {
 				LoadTextFile(filename);
-				inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length, mCharset);
+				inputStr = DEF.toUTF8(mInputBuff, 0, mInputBuff.length);
 				inputStr = inputStr.replaceAll("\r\n", "\n");
 				// 本文の解析
 				if (debug) {Log.d("TextManager", "formatTextFile: 本文を解析します. filename=" + filename);}

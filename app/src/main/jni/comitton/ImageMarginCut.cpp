@@ -76,6 +76,7 @@ int GetModeColor(int Page, int Half, int Index, int SclWidth, int SclHeight, int
     // 元データ配列化
     ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
     if (ret < 0) {
+        LOGE("GetModeColor 元データ配列化に失敗しました. return=%d", ret);
         return ret;
     }
 #ifdef DEBUG

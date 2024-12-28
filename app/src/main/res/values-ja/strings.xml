@@ -45,9 +45,9 @@
     <string name="picsize02">元画像サイズの3倍</string>
     <string name="picsize03">元画像サイズの4倍</string>
     <string name="picsize04">画面サイズに拡大</string>
-    <string name="picsize05">画面サイズに拡大(余白無視)</string>
-    <string name="picsize06">画面サイズに拡大(見開き対応)</string>
-    <string name="picsize07">画面サイズに拡大(見開き対応:余白無視)</string>
+    <string name="picsize05">画面サイズに拡大\n(余白無視)</string>
+    <string name="picsize06">画面サイズに拡大\n(見開き対応)</string>
+    <string name="picsize07">画面サイズに拡大\n(見開き対応:余白無視)</string>
     <string name="ascmode00">縦表示</string>
     <string name="ascmode01">横表示(回転)</string>
     <string name="ascmode02">縦/横併用</string>
@@ -103,6 +103,7 @@
     <string name="marker">マーカー</string>
     <string name="addBookmarkMenu">ブックマーク追加</string>
     <string name="selBookmarkMenu">ブックマーク選択</string>
+    <string name="selDirTreeMenu">ディレクトリ選択</string>
     <string name="selChapterMenu">見出し選択</string>
     <string name="searchTextMenu">検索文字列設定</string>
     <string name="searchJumpMenu">検索ヒット選択</string>
@@ -486,4 +487,39 @@
     <string name="loupesize00">通常</string>
     <string name="loupesize01">大</string>
     <string name="loupesize02">特大</string>
+
+    <string name="ToolbarEditTitle">ツールバー設定</string>
+    <string name="ToolbarLeftmost">一番左のページ</string>
+    <string name="ToolbarLeft100">左へ100ページ</string>
+    <string name="ToolbarLeft10">左へ10ページ</string>
+    <string name="ToolbarLeft1">左へ1ページ</string>
+    <string name="ToolbarRight1">右へ1ページ</string>
+    <string name="ToolbarRight10">右へ10ページ</string>
+    <string name="ToolbarRight100">右へ100ページ</string>
+    <string name="ToolbarRightMost">一番右のページ</string>
+    <string name="ToolbarPageReset">ページ選択をリセット</string>
+    <string name="ToolbarBookLeft">前のファイル(最終ページ)/\n次のファイル(先頭ページ)</string>
+    <string name="ToolbarBookRight">次のファイル(先頭ページ)/\n前のファイル(最終ページ)</string>
+    <string name="ToolbarBookmarkLeft">前(次)のファイル(しおり位置)</string>
+    <string name="ToolbarBookmarkRight">次(前)のファイル(しおり位置)</string>
+    <string name="ToolbarThumbSlider">サムネイル/スライダー切り替え\n(イメージビュワーのみ)</string>
+    <string name="ToolbarDirTree">サブディレクトリ選択\n(イメージビュワーのみ)</string>
+    <string name="ToolbarTOC">見出し選択\n(テキストビュワーのみ)</string>
+    <string name="ToolbarFavorite">ブックマーク選択</string>
+    <string name="ToolbarAddFavorite">ブックマーク追加</string>
+    <string name="ToolbarSearch">検索文字列設定\n(テキストビュワーのみ)</string>
+    <string name="ToolbarShare">共有\n(イメージビュワーのみ)</string>
+    <string name="ToolbarRotate">画面方向切り替え</string>
+    <string name="ToolbarRotateImage">画像の回転\n(イメージビュワーのみ)</string>
+    <string name="ToolbarSelectThum">サムネイルに設定\n(イメージビュワーのみ)</string>
+    <string name="ToolbarTrimThumb">範囲選択してサムネイルに設定\n(イメージビュワーのみ)</string>
+    <string name="ToolbarControl">画像/テキスト表示設定</string>
+    <string name="ToolbarMenu">メニューを開く</string>
+    <string name="ToolbarConfig">設定画面を開く</string>
+
+    <string name="ChapMenuFile">ファイル</string>
+    <string name="ChapMenuTOC">目次</string>
+    <string name="ChapMenuChapter">見出し</string>
+    <string name="ChapMenuOther">その他</string>
+
 </resources>

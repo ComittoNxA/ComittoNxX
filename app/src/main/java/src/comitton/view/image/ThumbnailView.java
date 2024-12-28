@@ -143,7 +143,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		}
 		int xpos = mScrollView.getScrollX();
 
-		canvas.drawColor(BACKGROUND_COLOR);
+		//canvas.drawColor(BACKGROUND_COLOR);
 
 		mPageAreaNum = 0;
 

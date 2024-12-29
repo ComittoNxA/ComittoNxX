@@ -1281,7 +1281,7 @@ public class ImageManager extends InputStream implements Runnable {
 		public int compare(FileListItem file1, FileListItem file2) {
 			int result;
 //			result = file1.name.toUpperCase().compareTo(file2.name.toUpperCase());
-			result = DEF.compareFileName(file1.name.toLowerCase(), file2.name.toLowerCase());
+			result = DEF.compareFileName(file1.name, file2.name);
 			if (mFileSort == FILESORT_NAME_DOWN) {
 				result *= -1;
 			}

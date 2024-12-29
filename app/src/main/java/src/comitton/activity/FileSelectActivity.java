@@ -3611,7 +3611,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if (type1 != type2) {
 				return type1 - type2;
 			}
-			return DEF.compareFileName(file1.getName().toLowerCase(), file2.getName().toLowerCase());
+			return DEF.compareFileName(file1.getName(), file2.getName());
 		}
 	}
 
@@ -3883,19 +3883,19 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					if (result == 0) {
 						String str1 = data1.getPath() + data1.getFile();
 						String str2 = data2.getPath() + data2.getFile();
-						result = DEF.compareFileName(str1.toLowerCase(), str2.toLowerCase());
+						result = DEF.compareFileName(str1, str2);
 					}
 					if (result == 0) {
 						String str1 = data1.getDispName() + data1.getDispName();
 						String str2 = data2.getDispName() + data2.getDispName();
-						result = DEF.compareFileName(str1.toLowerCase(), str2.toLowerCase());
+						result = DEF.compareFileName(str1, str2);
 					}
 					break;
 				case 2: // 名前(昇順)
 				case 3: // 名前(降順)
 					String str1 = data1.getDispName();
 					String str2 = data2.getDispName();
-					result = DEF.compareFileName(str1.toLowerCase(), str2.toLowerCase());
+					result = DEF.compareFileName(str1, str2);
 					break;
 				case 4: // 登録日時(昇順)
 				case 5: // 登録日時(降順)

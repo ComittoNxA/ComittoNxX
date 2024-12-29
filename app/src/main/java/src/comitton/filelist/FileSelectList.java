@@ -352,7 +352,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				case DEF.ZIPSORT_FILEMGR:
 				case DEF.ZIPSORT_FILESEP:
 //					return file1.getName().toUpperCase().compareTo(file2.getName().toUpperCase());
-					return DEF.compareFileName(file1.getName().toLowerCase(), file2.getName().toLowerCase());
+					return DEF.compareFileName(file1.getName(), file2.getName());
 				case DEF.ZIPSORT_NEWMGR:
 				case DEF.ZIPSORT_NEWSEP:
 				{

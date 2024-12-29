@@ -1352,7 +1352,24 @@ public class DEF {
 	public static boolean SORT_BY_JAPANESE_VOLUME_NAME = true;
 	public static String[] PRIORITY_WORDS = new String[0];
 
-	static public int compareFileName(String name1, String name2) {
+	static public int compareFileName(final String str1, final String str2) {
+		boolean debug = false;
+
+		String name1 = str1;
+		String name2 = str2;
+
+		if (name1 == null && name2 == null) {
+			return 0;
+		}
+		if (name1 == null) {
+			return 1;
+		}
+		if (name2 == null) {
+			return -1;
+		}
+
+		if (debug) {Log.d("DEF","compareFileName 開始します. name1=" + name1 + ", name2=" + name2);}
+
 		int i1, i2;
 		char ch1, ch2;
 		int ct1, ct2;
@@ -1383,6 +1400,7 @@ public class DEF {
 		int len2 = name2.length();
 
 		for (i1 = i2 = 0; i1 < len1 && i2 < len2; i1++, i2++) {
+			if (debug) {Log.d("DEF","compareFileName ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);}
 			ch1 = name1.charAt(i1);
 			ch2 = name2.charAt(i2);
 			ct1 = getCharType(ch1);
@@ -1395,7 +1413,7 @@ public class DEF {
 
 				for (int i = 0; i < PRIORITY_WORDS.length; ++i) {
 					String word;
-					if (PRIORITY_WORDS[i] != null && PRIORITY_WORDS[i].length() != 0) {
+					if (PRIORITY_WORDS[i] != null && !PRIORITY_WORDS[i].isEmpty()) {
 						if (SORT_BY_IGNORE_CASE) {
 							word = PRIORITY_WORDS[i].toUpperCase();
 						} else {
@@ -1463,6 +1481,7 @@ public class DEF {
 			}
 
 			if (ct1 != ct2) {
+				if (debug) {Log.d("DEF","compareFileName 文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);}
 				// 文字種が違う場合
 				char tmp1, tmp2;
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
@@ -1482,7 +1501,7 @@ public class DEF {
 					tmp2 = '上';
 				}
 				else {
-					tmp2 = ch1;
+					tmp2 = ch2;
 				}
 
 				if (tmp1 != tmp2) {
@@ -1589,7 +1608,7 @@ public class DEF {
 									}
 								}
 							} else {
-								Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
+								if (debug) {Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);}
 							}
 						} else {
 							// どちらも負の数
@@ -1631,7 +1650,7 @@ public class DEF {
 									}
 								}
 							} else {
-								Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);
+								if (debug) {Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);}
 							}
 						}
 						i1 += nlen1 - 1;
@@ -1643,18 +1662,18 @@ public class DEF {
 
 			if (SORT_BY_KANJI_NUMERALS) {
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
-					Log.d("DEF", "compareFileName 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);
+					if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);}
 					String num1 = getKanjiNumerals(name1, i1);
 					String num2 = getKanjiNumerals(name2, i2);
 					int nlen1 = num1.length();
 					int nlen2 = num2.length();
-					Log.d("DEF", "compareFileName 漢数字を比較します. num1=" + num1 + ", num2=" + num2);
+					if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. num1=" + num1 + ", num2=" + num2);}
 					if (nlen1 < nlen2) {
 						int difflen = nlen2 - nlen1;
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num2.charAt(i)) != 0) {
 								// num2の方が大きい
-								Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");
+								if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");}
 								return -1;
 							}
 						}
@@ -1665,7 +1684,7 @@ public class DEF {
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num1.charAt(i)) > 0) {
 								// num1の方が大きい
-								Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");
+								if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");}
 								return 1;
 							}
 						}
@@ -1677,8 +1696,10 @@ public class DEF {
 						int diff = getKanjiNumeral(num1.charAt(i)) - getKanjiNumeral(num2.charAt(i));
 						if (diff != 0) {
 							// num1の方が大きい
-							if (diff>0) {Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");}
-							else {Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");}
+							if (debug) {
+								if (diff>0) {Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");}
+								else {Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");}
+							}
 							return diff;
 						}
 					}
@@ -2074,10 +2095,6 @@ public class DEF {
 
 	static private int getCharType(char ch) {
 		boolean debug = false;
-		if (ch == '三' || ch == '七') {
-			debug = true;
-			Log.d("DEF", "getCharType: ch=" + ch);
-		}
 		if (SORT_BY_SYMBOL && getSymbolBefore(ch) >= 0) {
 			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_SYMBOL_BEFORE");}
 			return CHTYPE_SYMBOL_BEFORE;
@@ -2338,9 +2355,17 @@ public class DEF {
 
 			if (encoding != null) {
 				if("WINDOWS-1252".equals(encoding)) {
-					// 判定された文字コードがWindows-1252の場合はShift_JISの間違いではないか確認する
-					if (debug) {Log.d("DEF", "CharDetecter: 判定結果が WINDOWS-1252 なのでShift_JISの誤判定かどうか確認します.");}
+					// 判定された文字コードがWindows-1252の場合は誤判定ではないか確認する
+					if (debug) {Log.d("DEF", "CharDetecter: 判定結果が WINDOWS-1252 なので誤判定かどうか確認します.");}
 					byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
+					String charset = (CHARSET == "Shift_JIS" ? "MS932" : CHARSET);
+					if (Arrays.equals(src, new String(src, Charset.forName(charset)).getBytes(Charset.forName(charset)))) {
+						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは " + charset + " です.");}
+						encoding = charset;
+						return encoding;
+					} else {
+						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは " + charset + " ではありません.");}
+					}
 					if (Arrays.equals(src, new String(src, Charset.forName("MS932")).getBytes(Charset.forName("MS932")))) {
 						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは MS932 です.");}
 						encoding = "MS932";

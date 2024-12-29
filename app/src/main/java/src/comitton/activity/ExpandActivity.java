@@ -1021,7 +1021,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	// ファイル名でソート
 	public static class FilenameComparator implements Comparator<FileData> {
 		public int compare(FileData file1, FileData file2) {
-			return DEF.compareFileName(file1.getName().toLowerCase(), file2.getName().toLowerCase());
+			return DEF.compareFileName(file1.getName(), file2.getName());
 		}
 	}
 

@@ -499,7 +499,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private CloseDialog mCloseDialog;
 	private ListDialog mListDialog;
 	private CheckDialog mCheckDialog;
-	private MenuDialog mMenuDialog;
+	private TabDialogFragment mMenuDialog;
 
 	private PageSelectDialog mPageDlg = null;
 	private PageThumbnail mThumbDlg = null;
@@ -2762,7 +2762,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(this, title, items, selIndex, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, mImageView.getWidth(), mImageView.getHeight(), title, items, selIndex, true, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -2871,7 +2871,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mImageConfigDialog != null) {
 			return;
 		}
-		mImageConfigDialog = new ImageConfigDialog(this, command_id);
+		mImageConfigDialog = new ImageConfigDialog(this, command_id, mImageView.getWidth(), mImageView.getHeight(), false, this);
 
 		// 画像サイズの選択項目を求める
 		int selIndex = 0;
@@ -2963,7 +2963,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				mImageConfigDialog = null;
 			}
 		});
-		mImageConfigDialog.show();
+		mImageConfigDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	private void showCheckList() {
@@ -2989,7 +2989,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		boolean[] states = loadTopMenuState();
 
-		mCheckDialog = new CheckDialog(this, title, states, items, new CheckListener() {
+		mCheckDialog = new CheckDialog(this, mImageView.getWidth(), mImageView.getHeight(), title, states, items, new CheckListener() {
 			@Override
 			public void onSelected(boolean[] states) {
 				// 選択完了
@@ -3250,122 +3250,94 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
-		TabDialogFragment dialog = new TabDialogFragment(this, mImageView.getWidth(), mImageView.getHeight(), true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mImageView.getWidth(), mImageView.getHeight(), true, this);
 
 		// 操作カテゴリ
-		dialog.addSection(res.getString(R.string.operateSec));
+		mMenuDialog.addSection(res.getString(R.string.operateSec));
 		if (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR) {
 			// ディレクトリ選択
-			dialog.addItem(DEF.MENU_SEL_DIR_TREE, res.getString(R.string.selDirTreeMenu));
+			mMenuDialog.addItem(DEF.MENU_SEL_DIR_TREE, res.getString(R.string.selDirTreeMenu));
 		}
 		// ブックマーク選択
-		dialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
+		mMenuDialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
 		// ブックマーク追加
-		dialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
+		mMenuDialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
 		// // ブックマーク選択
-		// dialog.addItem(DEF.MENU_SELBOOKMARK,
+		// mMenuDialog.addItem(DEF.MENU_SELBOOKMARK,
 		// res.getString(R.string.selBookmarkMenu));
 		// // ページ選択
-		// dialog.addItem(DEF.MENU_PAGESEL,
+		// mMenuDialog.addItem(DEF.MENU_PAGESEL,
 		// res.getString(R.string.pageselMenu));
 		// 音操作
-		dialog.addItem(DEF.MENU_NOISE, res.getString(R.string.noiseMenu), mNoiseSwitch != null);
+		mMenuDialog.addItem(DEF.MENU_NOISE, res.getString(R.string.noiseMenu), mNoiseSwitch != null);
 		// 自動再生
-		dialog.addItem(DEF.MENU_AUTOPLAY, res.getString(R.string.playMenu));
+		mMenuDialog.addItem(DEF.MENU_AUTOPLAY, res.getString(R.string.playMenu));
 		// 画面回転
 		// if (mViewRota == DEF.ROTATE_PORTRAIT || mViewRota ==
 		// DEF.ROTATE_LANDSCAPE) {
-		dialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
+		mMenuDialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
 		// }
 		ImageData bm[] = mImageView.getImageBitmap();
 		if (bm[0] != null && bm[1] != null) {
 			// 共有 (右画像)
-			dialog.addItem(DEF.MENU_SHARER, res.getString(R.string.shareRMenu));
+			mMenuDialog.addItem(DEF.MENU_SHARER, res.getString(R.string.shareRMenu));
 			// 共有 (左画像)
-			dialog.addItem(DEF.MENU_SHAREL, res.getString(R.string.shareLMenu));
+			mMenuDialog.addItem(DEF.MENU_SHAREL, res.getString(R.string.shareLMenu));
 		}
 		else {
 			// 共有
-			dialog.addItem(DEF.MENU_SHARE, res.getString(R.string.shareMenu));
+			mMenuDialog.addItem(DEF.MENU_SHARE, res.getString(R.string.shareMenu));
 		}
 		// 共有一時ファイル削除
-		dialog.addItem(DEF.MENU_DELSHARE, res.getString(R.string.delshareMenu));
-		dialog.addItem(DEF.MENU_SETTHUMB, res.getString(R.string.setThumb));
-		dialog.addItem(DEF.MENU_SETTHUMBCROPPED, res.getString(R.string.setThumbCropped));
+		mMenuDialog.addItem(DEF.MENU_DELSHARE, res.getString(R.string.delshareMenu));
+		mMenuDialog.addItem(DEF.MENU_SETTHUMB, res.getString(R.string.setThumb));
+		mMenuDialog.addItem(DEF.MENU_SETTHUMBCROPPED, res.getString(R.string.setThumbCropped));
 
 		// 一時設定
-		dialog.addSection(res.getString(R.string.settingSec));
+		mMenuDialog.addSection(res.getString(R.string.settingSec));
 		// イメージ表示設定
-		dialog.addItem(DEF.MENU_IMGCONF, res.getString(R.string.imgConfMenu));
+		mMenuDialog.addItem(DEF.MENU_IMGCONF, res.getString(R.string.imgConfMenu));
 //		// 画像補間方式
-//		dialog.addItem(DEF.MENU_IMGALGO, res.getString(R.string.algoriMenu));
+//		mMenuDialog.addItem(DEF.MENU_IMGALGO, res.getString(R.string.algoriMenu));
 		// 画像回転
-		dialog.addItem(DEF.MENU_IMGROTA, res.getString(R.string.imgRotaMenu));
+		mMenuDialog.addItem(DEF.MENU_IMGROTA, res.getString(R.string.imgRotaMenu));
 //		// 見開き設定
-//		dialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
+//		mMenuDialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
 //		// 画像サイズ
-//		dialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
+//		mMenuDialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
 //		// 余白削除
-//		dialog.addItem(DEF.MENU_MGNCUT, res.getString(R.string.mgnCutMenu), mMgnCut > 0);
+//		mMenuDialog.addItem(DEF.MENU_MGNCUT, res.getString(R.string.mgnCutMenu), mMgnCut > 0);
 //		// シャープ化
-//		dialog.addItem(DEF.MENU_SHARPEN, res.getString(R.string.sharpenMenu), mSharpen);
+//		mMenuDialog.addItem(DEF.MENU_SHARPEN, res.getString(R.string.sharpenMenu), mSharpen);
 //		// 色反転
-//		dialog.addItem(DEF.MENU_INVERT, res.getString(R.string.invertMenu), mInvert);
+//		mMenuDialog.addItem(DEF.MENU_INVERT, res.getString(R.string.invertMenu), mInvert);
 //		// グレースケール
-//		dialog.addItem(DEF.MENU_GRAY, res.getString(R.string.grayMenu), mGray);
+//		mMenuDialog.addItem(DEF.MENU_GRAY, res.getString(R.string.grayMenu), mGray);
 		// ページ逆順
-		dialog.addItem(DEF.MENU_REVERSE, res.getString(R.string.reverseMenu), mReverseOrder);
+		mMenuDialog.addItem(DEF.MENU_REVERSE, res.getString(R.string.reverseMenu), mReverseOrder);
 		// 開き方向入れ替え
-		dialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
+		mMenuDialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
 		// 表紙方向
-		dialog.addItem(DEF.MENU_PAGEWAY, res.getString(R.string.pageWayMenu), res.getString(R.string.pageWayMenuSub1), res.getString(R.string.pageWayMenuSub2), mPageWay == DEF.PAGEWAY_RIGHT ? 0 : 1);
+		mMenuDialog.addItem(DEF.MENU_PAGEWAY, res.getString(R.string.pageWayMenu), res.getString(R.string.pageWayMenuSub1), res.getString(R.string.pageWayMenuSub2), mPageWay == DEF.PAGEWAY_RIGHT ? 0 : 1);
 		// スクロール方向入れ替え
-		dialog.addItem(DEF.MENU_SCRLWAY, res.getString(R.string.scrlWayMenu), res.getString(R.string.scrlWayMenuSub1), res.getString(R.string.scrlWayMenuSub2), mScrlWay == DEF.SCRLWAY_H ? 0 : 1);
+		mMenuDialog.addItem(DEF.MENU_SCRLWAY, res.getString(R.string.scrlWayMenu), res.getString(R.string.scrlWayMenuSub1), res.getString(R.string.scrlWayMenuSub2), mScrlWay == DEF.SCRLWAY_H ? 0 : 1);
 
 		// 一時設定
-		dialog.addSection(res.getString(R.string.otherSec));
+		mMenuDialog.addSection(res.getString(R.string.otherSec));
 		// ヘルプ
-		dialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
+		mMenuDialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
 		// 操作確認
-		dialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
+		mMenuDialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
 		// 上部選択メニュー設定
-		dialog.addItem(DEF.MENU_TOP_SETTING, res.getString(R.string.setTopMenu));
+		mMenuDialog.addItem(DEF.MENU_TOP_SETTING, res.getString(R.string.setTopMenu));
+		// ツールバー設定
+		mMenuDialog.addItem(DEF.MENU_EDIT_TOOLBAR, res.getString(R.string.ToolbarEditToolbar));
 		// 設定
-		dialog.addItem(DEF.MENU_SETTING, res.getString(R.string.setMenu));
+		mMenuDialog.addItem(DEF.MENU_SETTING, res.getString(R.string.setMenu));
 		// バージョン情報
-		dialog.addItem(DEF.MENU_ABOUT, res.getString(R.string.aboutMenu));
+		mMenuDialog.addItem(DEF.MENU_ABOUT, res.getString(R.string.aboutMenu));
 
-		dialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
-	}
-
-	// メニューを開く
-	private void openMiniMenu() {
-		if (mImageMgr == null || mImageView == null || mMenuDialog != null) {
-			return;
-		}
-
-		if (mAutoPlay) {
-			// オートプレイ中は解除
-			setAutoPlay(false);
-		}
-
-		Resources res = getResources();
-		mMenuDialog = new MenuDialog(this, mImageView.getWidth(), mImageView.getHeight(), true, false, true,this);
-
-		// 操作カテゴリ
-		mMenuDialog.addSection(res.getString(R.string.operateSec));
-		// 見開き設定
-		mMenuDialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
-		// 画像サイズ
-		mMenuDialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
-		// 余白削除
-		mMenuDialog.addItem(DEF.MENU_MGNCUT, res.getString(R.string.mgnCutMenu));
-		// 余白削除
-		mMenuDialog.addItem(DEF.MENU_MGNCUTCOLOR, res.getString(R.string.mgnCutColorMenu));
-		// 画面回転
-		mMenuDialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
-
-		mMenuDialog.show();
+		mMenuDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	// メニューを開く
@@ -3375,14 +3347,14 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
-		DirTreeDialog dialog = new DirTreeDialog(this, mImageView.getWidth(), mImageView.getHeight(), true, false, false, true, this);
+		DirTreeDialog mMenuDialog = new DirTreeDialog(this, mImageView.getWidth(), mImageView.getHeight(), true, false, false, true, this);
 
 		// タイトル
-		dialog.addSection(res.getString(R.string.selDirTreeMenu));
+		mMenuDialog.addSection(res.getString(R.string.selDirTreeMenu));
 		// ファイルリスト
-		dialog.addFileList(mImageMgr.getList());
+		mMenuDialog.addFileList(mImageMgr.getList());
 
-		dialog.show();
+		mMenuDialog.show();
 
 	}
 
@@ -3392,7 +3364,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			return;
 		}
 
-		mMenuDialog = new MenuDialog(this, mImageView.getWidth(), mImageView.getHeight(), false, this);
+		Resources res = getResources();
+
+		// ブックマーク選択
+		mMenuDialog.addSection(res.getString(R.string.selBookmarkMenu));
 
 		ArrayList<RecordItem> list = RecordList.load(null, RecordList.TYPE_BOOKMARK, mServer, mLocalPath, mFileName);
 
@@ -3403,14 +3378,14 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			String image = data.getImage();
 			for (int j = 0; j < mImageMgr.mFileList.length; j++) {
 				if (mImageMgr.mFileList[j].name.equals(image)) {
-					mMenuDialog.addItem(DEF.MENU_BOOKMARK + j, data.getDispName() + " (P." + (j + 1) + ")");
+					mMenuDialog.addItem(DEF.MENU_BOOKMARK + j, data.getDispName(), "P." + (j + 1));
 					isAdd = true;
 					break;
 				}
 			}
 		}
 		if (isAdd) {
-			mMenuDialog.show();
+			mMenuDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 		}
 		else {
 			Toast.makeText(this, R.string.bmNotFound, Toast.LENGTH_SHORT).show();
@@ -3740,6 +3715,12 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				openBookmarkMenu();
 				break;
 			}
+			case DEF.MENU_EDIT_TOOLBAR: {
+				// ツールバー編集ダイアログ表示
+				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this, mImageView.getWidth(), mImageView.getHeight());
+				dialog.show();
+				break;
+			}
 			default: {
 				if (id >= DEF.MENU_DIR_TREE) {
 					onSelectPage(id - DEF.MENU_DIR_TREE);
@@ -3984,17 +3965,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 			}
 			case DEF.TOOLBAR_EDIT_TOOLBAR: {
-				// ページ番号入力が開いていたら閉じる
-				if (PageSelectDialog.mIsOpened == true) {
-					mPageDlg.dismiss();
-				}
-				// サムネイルページ選択が開いていたら閉じる
-				if (PageThumbnail.mIsOpened == true) {
-					mThumbDlg.dismiss();
-				}
-
-				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this);
-				dialog.show();
+				execCommand(DEF.MENU_EDIT_TOOLBAR);
 				break;
 			}
 		}

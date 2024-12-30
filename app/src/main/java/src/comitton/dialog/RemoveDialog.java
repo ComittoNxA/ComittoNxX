@@ -9,11 +9,10 @@ import src.comitton.common.FileAccess;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.data.FileData;
 
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,7 +26,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class RemoveDialog extends Dialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
+public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
 	public static final int MSG_MESSAGE = 1;
 	public static final int MSG_ERRMSG = 2;
 
@@ -48,7 +47,7 @@ public class RemoveDialog extends Dialog implements Runnable, Handler.Callback, 
 	private Button mBtnCancel;
 	private boolean mIsLocal;
 
-	public RemoveDialog(Context context, FileSelectActivity activity, String uri, String path, String user, String pass, String item, RemoveListener removeListener) {
+	public RemoveDialog(Activity context, FileSelectActivity activity, String uri, String path, String user, String pass, String item, RemoveListener removeListener) {
 		super(context);
 		mActivity = activity;
 		Window dlgWindow = getWindow();
@@ -63,9 +62,7 @@ public class RemoveDialog extends Dialog implements Runnable, Handler.Callback, 
 		// Activityを暗くしない
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-		// 背景を透明に
-		//PaintDrawable paintDrawable = new PaintDrawable(0xC0000000);
-		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		// 背景を設定
 		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
 
 		setCanceledOnTouchOutside(false);

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical" >
+
+	<ScrollView
+		android:id="@+id/ScrollView"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_weight="1" >
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="8dip"
+			android:orientation="vertical" >
+
+			<CheckBox
+				android:id="@+id/chk_topsingle"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left|center"
+				android:textSize="17sp"
+				android:text= "@string/topsingleMenu" />
+
+			<TextView
+				android:id="@+id/label_bklight"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/bklightMenu" />
+
+			<SeekBar
+				android:id="@+id/seek_bklight"
+				style="@style/PageSeekBar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="4sp"
+				android:paddingRight="4sp" />
+
+			<TextView
+				android:id="@+id/label_algomode"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/algoriMenu" />
+
+			<Button
+				android:id="@+id/btn_algomode"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+			<TextView
+				android:id="@+id/label_spread"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:gravity="left"
+				android:text="@string/tguide02" />
+
+			<Button
+				android:id="@+id/btn_spread"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+			<TextView
+				android:id="@+id/label_scale"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:gravity="left"
+				android:text="@string/tguide03" />
+
+			<Button
+				android:id="@+id/btn_scale"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+			<TextView
+				android:id="@+id/label_mgncut"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:gravity="left"
+				android:text="@string/mgnCutMenu" />
+
+			<Button
+				android:id="@+id/btn_mgncut"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+			<TextView
+				android:id="@+id/label_mgncutcolor"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:gravity="left"
+				android:text="@string/mgnCutColorMenu" />
+
+			<Button
+				android:id="@+id/btn_mgncutcolor"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+		</LinearLayout>
+	</ScrollView>
+
+</LinearLayout>

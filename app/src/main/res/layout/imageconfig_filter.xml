@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+	<ScrollView
+		android:id="@+id/ScrollView"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_weight="1" >
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="8dip"
+			android:orientation="vertical" >
+
+			<CheckBox
+				android:id="@+id/chk_gray"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left|center"
+				android:textSize="17sp"
+				android:text= "@string/grayMenu" />
+	
+			<CheckBox
+				android:id="@+id/chk_invert"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left|center"
+				android:textSize="17sp"
+				android:text= "@string/invertMenu" />
+
+			<CheckBox
+				android:id="@+id/chk_moire"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left|center"
+				android:textSize="17sp"
+				android:text= "@string/moireMenu" />
+	
+			<TextView
+				android:id="@+id/label_sharpen"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/sharpenMenu" />
+
+			<SeekBar
+				android:id="@+id/seek_sharpen"
+				style="@style/PageSeekBar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="4sp"
+				android:paddingRight="4sp" />
+
+			<TextView
+				android:id="@+id/label_bright"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/brightMenu" />
+	
+			<SeekBar
+				android:id="@+id/seek_bright"
+				style="@style/PageSeekBar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="4sp"
+				android:paddingRight="4sp" />
+	
+			<TextView
+				android:id="@+id/label_gamma"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/gammaMenu" />
+	
+			<SeekBar
+				android:id="@+id/seek_gamma"
+				style="@style/PageSeekBar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="4sp"
+				android:paddingRight="4sp" />
+
+		</LinearLayout>
+	</ScrollView>
+				
+</LinearLayout>

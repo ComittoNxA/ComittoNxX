@@ -9,11 +9,10 @@ import src.comitton.common.FileAccess;
 import src.comitton.data.FileData;
 import src.comitton.stream.WorkStream;
 
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,7 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DownloadDialog extends Dialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
+public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
 	public static final int MSG_MESSAGE = 1;
 	public static final int MSG_SETMAX = 2;
 	public static final int MSG_PROGRESS = 3;
@@ -50,8 +49,8 @@ public class DownloadDialog extends Dialog implements Runnable, Handler.Callback
 	private ProgressBar mProgress;
 	private Button mBtnCancel;
 
-	public DownloadDialog(Context context, String uri, String path, String user, String pass, String item, String local) {
-		super(context);
+	public DownloadDialog(Activity activity, String uri, String path, String user, String pass, String item, String local) {
+		super(activity);
 		Window dlgWindow = getWindow();
 
 		// 画面をスリープ有効
@@ -63,15 +62,13 @@ public class DownloadDialog extends Dialog implements Runnable, Handler.Callback
 		// Activityを暗くしない
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-		// 背景を透明に
-		//PaintDrawable paintDrawable = new PaintDrawable(0xC0000000);
-		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		// 背景を設定
 		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
 
 		setCanceledOnTouchOutside(false);
 		setOnDismissListener(this);
 
-		mContext = context.getApplicationContext();
+		mContext = activity.getApplicationContext();
 
 		mUri = uri;
 		mPath = path;

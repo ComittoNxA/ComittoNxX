@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/footer"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_alignParentBottom="true"
+	android:orientation="vertical" >
+
+	<CheckBox
+		android:id="@+id/chk_save"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="left|center"
+		android:textSize="17sp"
+		android:text= "@string/idSaveConfig" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:gravity="center"
+		android:orientation="horizontal" >
+
+		<Button
+			android:id="@+id/btn_revert"
+			android:layout_width="100sp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textSize="20sp"
+			android:text="@string/btnRevert" />
+
+		<Button
+			android:id="@+id/btn_apply"
+			android:layout_width="100sp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textSize="20sp"
+			android:text="@string/btnApply" />
+
+		<Button
+			android:id="@+id/btn_ok"
+			android:layout_width="100sp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textSize="20sp"
+			android:text="@string/btnOK" />
+	</LinearLayout>
+</LinearLayout>

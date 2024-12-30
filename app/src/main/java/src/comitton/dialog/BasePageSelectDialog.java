@@ -2,12 +2,8 @@ package src.comitton.dialog;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -26,14 +22,11 @@ import src.comitton.common.DEF;
 import src.comitton.listener.PageSelectListener;
 
 @SuppressLint("NewApi")
-public class BasePageSelectDialog extends Dialog implements
+public class BasePageSelectDialog extends ImmersiveDialog implements
 		OnClickListener, OnSeekBarChangeListener, DialogInterface.OnDismissListener {
 
 	protected PageSelectListener mListener = null;
-	protected Activity mContext;
-
-	private final int HMSG_PAGESELECT		 = 5001;
-	private final int TERM_PAGESEELCT		 = 100;
+	protected Activity mActivity;
 
 	// パラメータ
 	protected boolean mViewer;
@@ -79,8 +72,8 @@ public class BasePageSelectDialog extends Dialog implements
 	private AppCompatImageButton mBtnConfig;
 	private AppCompatImageButton mBtnEditButton;
 
-	public BasePageSelectDialog(Activity context) {
-		super(context);
+	public BasePageSelectDialog(Activity activity) {
+		super(activity);
 		Window dlgWindow = getWindow();
 
 		// タイトルなし
@@ -89,9 +82,7 @@ public class BasePageSelectDialog extends Dialog implements
 		// Activityを暗くしない
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-		// 背景を透明に
-		//PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
-		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		// 背景を設定
 		dlgWindow.setBackgroundDrawableResource(R.drawable.dialognoframe);
 
 		// 画面下に表示
@@ -102,7 +93,7 @@ public class BasePageSelectDialog extends Dialog implements
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-		mContext = context;
+		mActivity = activity;
 
 		// ダイアログ終了通知設定
 		setOnDismissListener(this);
@@ -213,7 +204,7 @@ public class BasePageSelectDialog extends Dialog implements
 		mBtnConfig.setOnClickListener(this);
 		mBtnEditButton.setOnClickListener(this);
 
-		boolean[] states = PageSelectCheckDialog.loadToolbarState(mContext);
+		boolean[] states = PageSelectCheckDialog.loadToolbarState(mActivity);
 		if (debug) {Log.d("BasePageSelectDialog", "onCreate: states[]=" + Arrays.toString(states));}
 
 		for (int i = 0; i < states.length; ++i) {
@@ -383,42 +374,14 @@ public class BasePageSelectDialog extends Dialog implements
 					}
 					break;
 				}
+				case DEF.TOOLBAR_EDIT_TOOLBAR: {
+					if (!states[i]) {
+						mBtnEditButton.setVisibility(View.GONE);
+					}
+					break;
+				}
 			}
 		}
-	}
-
-	// ダイアログを表示してもIMMERSIVEが解除されない方法
-	// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
-	/**
-	 * An hack used to show the dialogs in Immersive Mode (that is with the NavBar hidden). To
-	 * obtain this, the method makes the dialog not focusable before showing it, change the UI
-	 * visibility of the window like the owner activity of the dialog and then (after showing it)
-	 * makes the dialog focusable again.
-	 */
-	@Override
-	public void show() {
-		// Set the dialog to not focusable.
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-		// 設定をコピー
-		copySystemUiVisibility();
-
-		// Show the dialog with NavBar hidden.
-		super.show();
-
-		// Set the dialog to focusable again.
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-	}
-
-	/**
-	 * Copy the visibility of the Activity that has started the dialog {@link mActivity}. If the
-	 * activity is in Immersive mode the dialog will be in Immersive mode too and vice versa.
-	 */
-	@SuppressLint("NewApi")
-	private void copySystemUiVisibility() {
-	    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-	        getWindow().getDecorView().setSystemUiVisibility(
-	                mContext.getWindow().getDecorView().getSystemUiVisibility());
-	    }
 	}
 
 	public void setPageSelectListear(PageSelectListener listener) {

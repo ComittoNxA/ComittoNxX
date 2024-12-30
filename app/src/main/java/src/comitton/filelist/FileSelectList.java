@@ -10,6 +10,7 @@ import src.comitton.data.FileData;
 import src.comitton.dialog.LoadingDialog;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -48,14 +49,14 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	public LoadingDialog mDialog;
 	private Handler mHandler;
 	private Handler mActivityHandler;
-	private Context mContext;
+	private Activity mActivity;
 	private SharedPreferences mSp;
 	private Thread mThread;
 
-	public FileSelectList(Handler handler, Context context, SharedPreferences sp) {
+	public FileSelectList(Handler handler, Activity activity, SharedPreferences sp) {
 		mActivityHandler = handler;
 		mHandler = new Handler(this);
-		mContext = context;
+		mActivity = activity;
 		mSp = sp;
 		return;
 	}
@@ -105,7 +106,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	}
 
 	public void loadFileList() {
-		mDialog = new LoadingDialog(mContext);
+		mDialog = new LoadingDialog(mActivity);
 		mDialog.setOnDismissListener(this);
 		mDialog.show();
 
@@ -143,7 +144,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 			if (fileList.size() == 0) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && (mUri + mPath).equals("/storage/")) {
 					// Get emulated/0, SD card paths
-					for (String _name: FileAccess.getExtSdCardPaths(mContext)) {
+					for (String _name: FileAccess.getExtSdCardPaths(mActivity)) {
 						_name = _name.substring(9);
 						int index = _name.indexOf("/");
 						if (index > 0) {
@@ -436,7 +437,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 		// 終了
 		closeDialog();
 		if (msg.obj != null) {
-			Toast.makeText(mContext, (String)msg.obj, Toast.LENGTH_LONG).show();
+			Toast.makeText(mActivity, (String)msg.obj, Toast.LENGTH_LONG).show();
 		}
 		return false;
 	}

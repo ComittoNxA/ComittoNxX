@@ -1,5 +1,6 @@
 package src.comitton.dialog;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,10 +13,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -29,33 +29,37 @@ import java.util.ArrayList;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.view.MenuItemView;
 
-public class TabDialogFragment extends DialogFragment implements View.OnTouchListener {
+public class TabDialogFragment extends ImmersiveDialogFragment implements View.OnTouchListener {
 
-    private View mView;
-    private TabLayout mTabLayout;
-    private ViewPager2 mViewPager;
+    protected View mView;
+    protected LinearLayout mHeader;
+    protected TabLayout mTabLayout;
+    protected ViewPager2 mViewPager;
+    protected LinearLayout mFooter;
 
     private MenuDialog.MenuSelectListener mListener = null;
     private FragmentActivity mActivity;
     private Context mContext;
 
-    private ArrayList<String> mTitleArray = new ArrayList<String>(0);
-    private ArrayList<View> mViewArray = new ArrayList<View>(0);
+    protected ArrayList<String> mTitleArray = new ArrayList<String>(0);
+    protected ArrayList<View> mViewArray = new ArrayList<View>(0);
     private DialogAdapter mAdapter;
 
     private boolean mTop;
     private boolean mHalfView;
-    private int mWidth;
-    private int mHeight;
+    protected int mWidth;
+    protected int mHeight;
     private float mScale;
     private boolean mSelected;
     private boolean mIsClose;
 
     private static int curcolor = 0x90008000;
-    private static int title_txtcolor_selected = 0xFFFFFFFF;
-    private static int title_txtcolor = 0xBBFFFFFF;
+    private static int title_txtcolor = 0xFFFFFFFF;
     private static int title_bakcolor = 0xA0000080;
     private int title_txtsize;
+    private static int tab_txtcolor_selected = 0xFFFFFFFF;
+    private static int tab_txtcolor = 0xBBFFFFFF;
+    private static int tab_bakcolor = 0xA0000080;
     private static int item_txtcolor = 0xFFFFFFFF;
     private static int item_bakcolor = 0x00000000;
     private static int separater_txtcolor = 0xBBFFFFFF;
@@ -88,19 +92,18 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
 
         if (mHalfView) {
             mWidth = Math.min(cx, cy) * 20 / 100;
-        }
-        else {
+        } else {
             mWidth = Math.min(cx, cy) * 80 / 100;
         }
-        int maxWidth = (int)(20 * mScale * 16);
+        int maxWidth = (int) (20 * mScale * 16);
         if (!wide) {
             mWidth = Math.max(mWidth, maxWidth);
         }
         mHeight = cy * 80 / 100;
 
         mScale = mContext.getResources().getDisplayMetrics().scaledDensity;
-        title_txtsize = (int)(18 * mScale);
-        item_txtsize = (int)(20 * mScale);
+        title_txtsize = (int) (18 * mScale);
+        item_txtsize = (int) (20 * mScale);
 
         mSelected = false;
         mIsClose = isclose;
@@ -111,7 +114,8 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         boolean debug = false;
-        Window dlgWindow = getDialog().getWindow();
+        Dialog dialog = getDialog();
+        Window dlgWindow = dialog.getWindow();
 
         // タイトルなし
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -130,21 +134,28 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
         wmlp.gravity =(mTop ? Gravity.TOP : Gravity.CENTER) | (mHalfView ? Gravity.RIGHT : 0);
         dlgWindow.setAttributes(wmlp);
 
+        dialog.getWindow().setLayout(mWidth, mHeight);
+
+        ViewGroup.LayoutParams layoutParams;
+
         mView = inflater.inflate(R.layout.tabdialog, container);
-        ViewGroup.LayoutParams layoutParams =  new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams = new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
         mView.setLayoutParams(layoutParams);
+
+        mHeader = (LinearLayout) mView.findViewById(R.id.header);
+        mFooter = (LinearLayout) mView.findViewById(R.id.footer);
 
         mTabLayout = (TabLayout) mView.findViewById(R.id.tablayout);
         layoutParams = mTabLayout.getLayoutParams();
         layoutParams.width = mWidth;
         mTabLayout.setLayoutParams(layoutParams);
-        mTabLayout.setBackgroundColor(title_bakcolor);
-        mTabLayout.setTabTextColors(title_txtcolor, title_txtcolor_selected);
+        mTabLayout.setBackgroundColor(tab_bakcolor);
+        mTabLayout.setTabTextColors(tab_txtcolor, tab_txtcolor_selected);
 
         mViewPager = (ViewPager2) mView.findViewById(R.id.viewpager);
         layoutParams = mViewPager.getLayoutParams();
         layoutParams.width = mWidth;
-        layoutParams.height = mHeight;
+        layoutParams.height = mHeight - mTabLayout.getHeight();
         mViewPager.setLayoutParams(layoutParams);
 
         mAdapter = new DialogAdapter(mActivity, this, mViewArray);
@@ -196,6 +207,21 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
         return true;
     }
 
+    public void addHeader(String text) {
+        AppCompatTextView textView = new AppCompatTextView(mActivity);
+        textView.setText(text);
+        textView.setPadding(0,16,0,0);
+        textView.setTextSize(20);
+        textView.setTextColor(title_txtcolor);
+        textView.setBackgroundColor(0x00000000);
+        mHeader.setBackgroundColor(title_bakcolor);
+        mHeader.addView(textView);
+    }
+
+    public void addFooter(View view) {
+        mFooter.addView(view);
+    }
+
     public void addSection(String text) {
         mTitleArray.add(text);
 
@@ -205,6 +231,10 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
         linearLayout.setLayoutParams(layoutParams);
         mViewArray.add(linearLayout);
+    }
+
+    public void addItem(View view) {
+        ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(view);
     }
 
     public void addItem(int id, String text) {
@@ -244,7 +274,7 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
         private final FragmentActivity mActivity;
         private final View.OnTouchListener mListener;
         private final ArrayList<View> mViewArray;
-        private ArrayList<ScrollView> mScrollView = new ArrayList<ScrollView>(0);;
+        private ArrayList<ScrollView> mScrollView = new ArrayList<ScrollView>(0);
 
         public DialogAdapter(FragmentActivity activity, View.OnTouchListener listener, ArrayList<View> viewArray) {
             super(activity);
@@ -259,7 +289,6 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
             DialogFragment fragment = new DialogFragment(mActivity);
             ScrollView scrlView = fragment.getScrollView();
             scrlView.addView(mViewArray.get(position));
-            //scrlView.setOnTouchListener(mListener);
             mScrollView.add(scrlView);
             return fragment;
         }
@@ -267,10 +296,6 @@ public class TabDialogFragment extends DialogFragment implements View.OnTouchLis
         @Override
         public int getItemCount() {
             return mViewArray.size();
-        }
-
-        public ScrollView[] getScrollViews() {
-            return mScrollView.toArray(new ScrollView[mScrollView.size()]);
         }
     }
 

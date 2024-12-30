@@ -1,6 +1,5 @@
 package src.comitton.dialog;
 
-import src.comitton.listener.PageSelectListener;
 import src.comitton.stream.ImageManager;
 import src.comitton.view.image.ThumbnailView;
 import jp.dip.muracoro.comittonx.R;
@@ -30,8 +29,8 @@ public class PageThumbnail extends BasePageSelectDialog implements OnTouchListen
 	private HorizontalScrollView mScroll;
 	private ThumbnailView mThumView;
 
-	public PageThumbnail(Activity context) {
-		super(context);
+	public PageThumbnail(Activity activity) {
+		super(activity);
 		mAutoApply = false;
 	}
 
@@ -115,15 +114,6 @@ public class PageThumbnail extends BasePageSelectDialog implements OnTouchListen
 
 	protected void setProgress(int pos, boolean fromThumb) {
 		super.setProgress(pos, fromThumb);
-		//int convpos;
-
-		//if (mReverse == false) {
-		//	convpos = pos;
-		//}
-		//else {
-		//	convpos = mSeekPage.getMax() - pos;
-		//}
-		//mSeekPage.setProgress(convpos);
 		if (!fromThumb) {
 			mThumView.setPosition(pos);
 		}

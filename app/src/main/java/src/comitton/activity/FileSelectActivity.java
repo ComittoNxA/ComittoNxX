@@ -2223,7 +2223,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			items[3] = res.getString(R.string.lsort04);
 			items[4] = res.getString(R.string.lsort05);
 			items[5] = res.getString(R.string.lsort06);
-			mListDialog = new ListDialog(this, title, items, mSortMode - 1, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, mSortMode - 1, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					if (item >= 0 && item < 6) {
@@ -2268,7 +2268,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			else {
 				select = mSortType - (mSortType >= 2 ? 2 : 0);
 			}
-			mListDialog = new ListDialog(this, title, items, select, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, select, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					int listtype = mListScreenView.getListType();
@@ -2525,7 +2525,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				i++;
 			}
 		}
-		mListDialog = new ListDialog(this, title, items, -1, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
 			@SuppressWarnings("deprecation")
 			@Override
 			public void onSelectItem(int item) {
@@ -2691,7 +2691,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		if (listtype == RecordList.TYPE_DIRECTORY) {
 			String[] items = new String[1];
 			items[0] = res.getString(R.string.bm02);
-			mListDialog = new ListDialog(this, title, items, -1, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					switch (item) {
@@ -2731,7 +2731,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			items[0] = res.getString(R.string.bm00);
 			items[1] = res.getString(R.string.bm01);
 			items[2] = res.getString(R.string.bm02);
-			mListDialog = new ListDialog(this, title, items, -1, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					switch (item) {
@@ -2793,7 +2793,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		final String[] items = { siori0, siori1, siori2, siori3 };
 
 		String title = res.getString(R.string.sioriTitle);
-		mListDialog = new ListDialog(this, title, items, -1, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int item) {
 				Editor ed = mSharedPreferences.edit();
@@ -2903,7 +2903,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		items[3] = res.getString(R.string.listmode03);
 		int select = 0;
 		select = (mListMode == FileListArea.LISTMODE_LIST ? 0 : 2) + (mThumbnail == true ? 0 : 1);
-		mListDialog = new ListDialog(this, title, items, select, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, select, true, new ListSelectListener() {
 			public void onSelectItem(int pos) {
 				boolean isChange = false;
 				switch (pos) {

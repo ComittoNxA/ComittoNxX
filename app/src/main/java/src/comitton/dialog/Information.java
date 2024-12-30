@@ -71,10 +71,10 @@ public class Information implements DialogInterface.OnDismissListener {
 		mIsOpened = false;
 	}
 
-	public class NoticeDialog extends AlertDialog {
+	public class NoticeDialog extends ImmersiveAlertDialog {
 
-		public NoticeDialog(Context context, int themeResId) {
-			super(context, themeResId);
+		public NoticeDialog(Activity activity, int themeResId) {
+			super(activity, themeResId);
 			boolean debug = false;
 			if (debug) {Log.d("Information", "NoticeDialog: NoticeDialog: 開始します.");}
 
@@ -83,7 +83,7 @@ public class Information implements DialogInterface.OnDismissListener {
 			//requestWindowFeature(Window.FEATURE_NO_TITLE);
 			// Activityを暗くしない
 			dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-			// 背景を透明に
+			// 背景を設定
 			dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 			String text = "";
@@ -107,11 +107,11 @@ public class Information implements DialogInterface.OnDismissListener {
 
 	}
 
-	public class AboutDialog extends AlertDialog {
+	public class AboutDialog extends ImmersiveAlertDialog {
 
 		@SuppressWarnings("deprecation")
-		public AboutDialog(Context context, int themeResId) {
-			super(context, themeResId);
+		public AboutDialog(Activity activity, int themeResId) {
+			super(activity, themeResId);
 			boolean debug = false;
 
 			Window dlgWindow = getWindow();
@@ -119,14 +119,14 @@ public class Information implements DialogInterface.OnDismissListener {
 			//requestWindowFeature(Window.FEATURE_NO_TITLE);
 			// Activityを暗くしない
 			dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-			// 背景を透明に
+			// 背景を設定
 			dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 			setIcon(BuildConfig.icon);
 			setTitle(MODULE.aboutTitle(mContext));
 			WebView webView = new WebView(mContext);
 			Resources res = mContext.getResources();
-			webView.loadDataWithBaseURL(null,MODULE.aboutText(context),"text/html", "utf-8", null);
+			webView.loadDataWithBaseURL(null,MODULE.aboutText(mContext),"text/html", "utf-8", null);
 			webView.setBackgroundColor(Color.TRANSPARENT);
 			webView.setWebViewClient(new WebViewClient() {
 				@Override

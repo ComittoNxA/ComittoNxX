@@ -9,7 +9,7 @@ def applicationName = "ComittoNxX"
 
 def versionMajor = 2
 def versionMinor = 2
-def versionPatch = 3
+def versionPatch = 4
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -28,7 +28,7 @@ android {
     compileSdk 35 // Android 15("Vanilla Ice Cream")
 
     // 28にすると -lpthread が勝手に追加されてビルドできない時がある
-    // C言語の書式でビルドエラーが発生する場合はndkバージョンを24まで下げること
+    // C言語の書式バージョン問題でビルドエラーが発生する場合はndkバージョンを24まで下げること
     //ndkVersion "28.0.12674087"
     ndkVersion "27.0.12077973"
     //ndkVersion "24.0.8215888"

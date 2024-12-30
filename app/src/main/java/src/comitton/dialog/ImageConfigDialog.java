@@ -8,26 +8,26 @@ import src.comitton.dialog.ListDialog.ListSelectListener;
 import jp.dip.muracoro.comittonx.R;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.fragment.app.FragmentActivity;
+
 @SuppressLint("NewApi")
-public class ImageConfigDialog extends Dialog implements OnClickListener, OnDismissListener, OnSeekBarChangeListener {
+public class ImageConfigDialog extends TabDialogFragment implements OnClickListener, OnDismissListener, OnSeekBarChangeListener {
 	public static final int CLICK_REVERT   = 0;
 	public static final int CLICK_OK       = 1;
 	public static final int CLICK_APPLY    = 2;
@@ -41,7 +41,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private final int SCALENAME_ORDER[] = { 0, 1, 6, 2, 3, 7, 4, 5 };
 
 	private ImageConfigListenerInterface mListener = null;
-	private Activity mContext;
+	private Activity mActivity;
 
 	private ListDialog mListDialog;
 
@@ -69,7 +69,6 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private Button mBtnRevert;
 	private Button mBtnApply;
 	private Button mBtnOK;
-	//private CheckBox mChkSharpen;
 	private CheckBox mChkGray;
 	private CheckBox mChkInvert;
 	private CheckBox mChkMoire;
@@ -83,12 +82,11 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private SeekBar mSkbBright;
 	private SeekBar mSkbGamma;
 	private SeekBar mSkbBkLight;
-//	private Spinner mSpnBright;
-//	private Spinner mSpnGamma;
-//	private Spinner mSpnAlgoMode;
-//	private Spinner mSpnDispMode;
-//	private Spinner mSpnScaleMode;
-//	private Spinner mSpnMgncut;
+	private TextView mTxtAlgoMode;
+	private TextView mTxtDispMode;
+	private TextView mTxtScaleMode;
+	private TextView mTxtMgncut;
+	private TextView mTxtMgncutColor;
 	private Button mBtnAlgoMode;
 	private Button mBtnDispMode;
 	private Button mBtnScaleMode;
@@ -118,34 +116,21 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 	private int mSelectMode;
 	private int mCommandId;
 
-	String mTitle;
-	int mLayoutId;
+	private int mX;
+	private int mY;
 
-	public ImageConfigDialog(Activity context, int command_id) {
-		super(context);
-		Window dlgWindow = getWindow();
+	public ImageConfigDialog(FragmentActivity activity, int command_id, int cx, int cy, boolean isclose, MenuDialog.MenuSelectListener listener) {
+		super(activity, cx, cy, isclose, listener);
 
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		mActivity = activity;
+		mX = cx;
+		mY = cy;
 
-		Resources res = context.getResources();
+		Resources res = activity.getResources();
 		mAutoStr = res.getString(R.string.auto);
 		mNoneStr = res.getString(R.string.none);
 
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を透明に
-		//PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
-		//dlgWindow.setBackgroundDrawable(paintDrawable);
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
-
-		// 外をタッチすると閉じる
-		setCanceledOnTouchOutside(true);
-		setOnDismissListener(this);
-
 		mCommandId = command_id;
-		mContext = context;
 
 		int nItem;
 
@@ -188,6 +173,16 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		for (int i = 0; i < nItem; i++) {
 			mMgnCutColorItems[i] = res.getString(SetImageActivity.MgnCutColorName[i]);
 		}
+
+		LayoutInflater inflater = LayoutInflater.from(mActivity);
+
+		addSection(res.getString(R.string.imgConfFilter));
+		addItem(inflater.inflate(R.layout.imageconfig_filter, null, false));
+
+		if (mCommandId == DEF.MENU_IMGCONF) {
+			addSection(res.getString(R.string.imgConfOther));
+		}
+		addItem(inflater.inflate(R.layout.imageconfig_other, null, false));
 	}
 
 	public void setConfig(boolean gray, boolean invert, boolean moire, boolean topsingle, int sharpen, int bright, int gamma, int bklight, int algomode, int dispmode, int scalemode, int mgncut, int mgncutcolor, boolean issave) {
@@ -208,174 +203,148 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 		mIsSave = issave;
 	}
 
-	protected void onCreate(Bundle savedInstanceState){
-		super.onCreate(savedInstanceState);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+		super.onCreateView(inflater, container, savedInstanceState);
 
-		// ビューのレイアウトをxmlファイルから取得し表示する要素を追加する
-		setContentView(R.layout.imageconfigdialog);
+		Resources res = mActivity.getResources();
+		addHeader(res.getString(R.string.imgConfMenu));
 
-		TextView textView = (TextView)this.findViewById(R.id.text_message);
-		ScrollView scrollView = (ScrollView)this.findViewById(R.id.ScrollView);
+		LinearLayout footer = (LinearLayout)inflater.inflate(R.layout.imagetextconfig_footer, null, false);
+		footer.setBackgroundColor(0x80000000);
+		addFooter(footer);
 
-		int width = (int)(mContext.getResources().getDisplayMetrics().widthPixels * 0.80);
-		int scale = (int)(mContext.getResources().getDisplayMetrics().scaledDensity * 320);
-		width = Math.max(width, scale);
+		mView.getViewTreeObserver().addOnWindowFocusChangeListener(new ViewTreeObserver.OnWindowFocusChangeListener() {
+			@Override
+			public void onWindowFocusChanged(boolean hasFocus) {
+				// ビューページャーのサイズを設定する
+				ViewGroup.LayoutParams layoutParams = mViewPager.getLayoutParams();
+				layoutParams.width = mWidth;
+				layoutParams.height = mHeight - mHeader.getHeight() - mTabLayout.getHeight() - mFooter.getHeight();
+				mViewPager.setLayoutParams(layoutParams);
+			}
+		});
 
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, LinearLayout.LayoutParams.WRAP_CONTENT);
-		textView.setLayoutParams(lp);
-		scrollView.setLayoutParams(lp);
+		mChkIsSave = (CheckBox) mView.findViewById(R.id.chk_save);
+
+		for( int i = 0; i < mViewArray.size(); ++i) {
+			mChkGray = mChkGray != null ? mChkGray : (CheckBox) mViewArray.get(i).findViewById(R.id.chk_gray);
+			mChkInvert = mChkInvert != null ? mChkInvert : (CheckBox) mViewArray.get(i).findViewById(R.id.chk_invert);
+			mChkMoire = mChkMoire != null ? mChkMoire : (CheckBox) mViewArray.get(i).findViewById(R.id.chk_moire);
+			mChkTopSingle = mChkTopSingle != null ? mChkTopSingle : (CheckBox) mViewArray.get(i).findViewById(R.id.chk_topsingle);
+
+			mTxtSharpen = mTxtSharpen != null ? mTxtSharpen : (TextView) mViewArray.get(i).findViewById(R.id.label_sharpen);
+			mTxtBright = mTxtBright != null ? mTxtBright : (TextView) mViewArray.get(i).findViewById(R.id.label_bright);
+			mTxtGamma = mTxtGamma != null ? mTxtGamma : (TextView) mViewArray.get(i).findViewById(R.id.label_gamma);
+			mTxtBkLight = mTxtBkLight != null ? mTxtBkLight : (TextView) mViewArray.get(i).findViewById(R.id.label_bklight);
+
+			mSkbSharpen = mSkbSharpen != null ? mSkbSharpen : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_sharpen);
+			mSkbBright = mSkbBright != null ? mSkbBright : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_bright);
+			mSkbGamma = mSkbGamma != null ? mSkbGamma : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_gamma);
+			mSkbBkLight = mSkbBkLight != null ? mSkbBkLight : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_bklight);
+
+			mTxtAlgoMode = mTxtAlgoMode != null ? mTxtAlgoMode : (TextView) mViewArray.get(i).findViewById(R.id.label_algomode);
+			mTxtDispMode = mTxtDispMode != null ? mTxtDispMode : (TextView) mViewArray.get(i).findViewById(R.id.label_spread);
+			mTxtScaleMode = mTxtScaleMode != null ? mTxtScaleMode : (TextView) mViewArray.get(i).findViewById(R.id.label_scale);
+			mTxtMgncut = mTxtMgncut != null ? mTxtMgncut : (TextView) mViewArray.get(i).findViewById(R.id.label_mgncut);
+			mTxtMgncutColor = mTxtMgncutColor != null ? mTxtMgncutColor : (TextView) mViewArray.get(i).findViewById(R.id.label_mgncutcolor);
+
+			mBtnAlgoMode = mBtnAlgoMode != null ? mBtnAlgoMode : (Button) mViewArray.get(i).findViewById(R.id.btn_algomode);
+			mBtnDispMode = mBtnDispMode != null ? mBtnDispMode : (Button) mViewArray.get(i).findViewById(R.id.btn_spread);
+			mBtnScaleMode = mBtnScaleMode != null ? mBtnScaleMode : (Button) mViewArray.get(i).findViewById(R.id.btn_scale);
+			mBtnMgncut = mBtnMgncut != null ? mBtnMgncut : (Button) mViewArray.get(i).findViewById(R.id.btn_mgncut);
+			mBtnMgncutColor = mBtnMgncutColor != null ? mBtnMgncutColor : (Button) mViewArray.get(i).findViewById(R.id.btn_mgncutcolor);
+		}
+
+
 
 		if (mCommandId != DEF.MENU_IMGCONF) {
-			this.findViewById(R.id.chk_gray).setVisibility(View.GONE);
-			this.findViewById(R.id.chk_invert).setVisibility(View.GONE);
-			this.findViewById(R.id.chk_moire).setVisibility(View.GONE);
-			this.findViewById(R.id.chk_topsingle).setVisibility(View.GONE);
+			mChkGray.setVisibility(View.GONE);
+			mChkInvert.setVisibility(View.GONE);
+			mChkMoire.setVisibility(View.GONE);
+			mChkTopSingle.setVisibility(View.GONE);
 
-			this.findViewById(R.id.label_algomode).setVisibility(View.GONE);
-			this.findViewById(R.id.label_spread).setVisibility(View.GONE);
-			this.findViewById(R.id.label_scale).setVisibility(View.GONE);
-			this.findViewById(R.id.label_mgncut).setVisibility(View.GONE);
-			this.findViewById(R.id.label_mgncutcolor).setVisibility(View.GONE);
+			mTxtAlgoMode.setVisibility(View.GONE);
+			mTxtDispMode.setVisibility(View.GONE);
+			mTxtScaleMode.setVisibility(View.GONE);
+			mTxtMgncut.setVisibility(View.GONE);
+			mTxtMgncutColor.setVisibility(View.GONE);
 
-			this.findViewById(R.id.btn_algomode).setVisibility(View.GONE);
-			this.findViewById(R.id.btn_spread).setVisibility(View.GONE);
-			this.findViewById(R.id.btn_scale).setVisibility(View.GONE);
-			this.findViewById(R.id.btn_mgncut).setVisibility(View.GONE);
-			this.findViewById(R.id.btn_mgncutcolor).setVisibility(View.GONE);
+			mBtnAlgoMode.setVisibility(View.GONE);
+			mBtnDispMode.setVisibility(View.GONE);
+			mBtnScaleMode.setVisibility(View.GONE);
+			mBtnMgncut.setVisibility(View.GONE);
+			mBtnMgncutColor.setVisibility(View.GONE);
+
 		}
 		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_SHARPEN) {
-			this.findViewById(R.id.label_sharpen).setVisibility(View.GONE);
-			this.findViewById(R.id.seek_sharpen).setVisibility(View.GONE);
+			mTxtSharpen.setVisibility(View.GONE);
+			mSkbSharpen.setVisibility(View.GONE);
 		}
 		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_BRIGHT) {
-			this.findViewById(R.id.label_bright).setVisibility(View.GONE);
-			this.findViewById(R.id.seek_bright).setVisibility(View.GONE);
+			mTxtBright.setVisibility(View.GONE);
+			mSkbBright.setVisibility(View.GONE);
 		}
 		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_GAMMA) {
-			this.findViewById(R.id.label_gamma).setVisibility(View.GONE);
-			this.findViewById(R.id.seek_gamma).setVisibility(View.GONE);
+			mTxtGamma.setVisibility(View.GONE);
+			mSkbGamma.setVisibility(View.GONE);
 		}
 		if (mCommandId != DEF.MENU_IMGCONF && mCommandId != DEF.MENU_BKLIGHT) {
-			this.findViewById(R.id.label_bklight).setVisibility(View.GONE);
-			this.findViewById(R.id.seek_bklight).setVisibility(View.GONE);
+			mTxtBkLight.setVisibility(View.GONE);
+			mSkbBkLight.setVisibility(View.GONE);
 		}
 
-		mChkGray = (CheckBox) this.findViewById(R.id.chk_gray);
-		mChkInvert = (CheckBox) this.findViewById(R.id.chk_invert);
-		mChkMoire = (CheckBox) this.findViewById(R.id.chk_moire);
-		mChkTopSingle = (CheckBox) this.findViewById(R.id.chk_topsingle);
-		mChkIsSave = (CheckBox) this.findViewById(R.id.chk_save);
+		if (mChkGray != null) mChkGray.setChecked(mGray);
+		if (mChkInvert != null) mChkInvert.setChecked(mInvert);
+		if (mChkMoire != null) mChkMoire.setChecked(mMoire);
+		if (mChkTopSingle != null) mChkTopSingle.setChecked(mTopSingle);
+		if (mChkIsSave != null) mChkIsSave.setChecked(mIsSave);
 
-		mChkGray.setChecked(mGray);
-		mChkInvert.setChecked(mInvert);
-		mChkMoire.setChecked(mMoire);
-		mChkTopSingle.setChecked(mTopSingle);
-		mChkIsSave.setChecked(mIsSave);
+		if (mTxtSharpen != null) mSharpenStr = mTxtSharpen.getText().toString();
+		if (mTxtBright != null) mBrightStr = mTxtBright.getText().toString();
+		if (mTxtGamma != null) mGammaStr = mTxtGamma.getText().toString();
+		if (mTxtBkLight != null) mBkLightStr = mTxtBkLight.getText().toString();
 
-		mTxtSharpen = (TextView)this.findViewById(R.id.label_sharpen);
-		mTxtBright = (TextView)this.findViewById(R.id.label_bright);
-		mTxtGamma = (TextView)this.findViewById(R.id.label_gamma);
-		mTxtBkLight = (TextView)this.findViewById(R.id.label_bklight);
+		if (mTxtSharpen != null && mTxtSharpen != null) mTxtSharpen.setText(mSharpenStr.replaceAll("%", getSharpenStr(mSharpen)));
+		if (mTxtBright != null && mTxtBright != null) mTxtBright.setText(mBrightStr.replaceAll("%", getBrightGammaStr(mBright)));
+		if (mTxtGamma != null && mTxtGamma != null) mTxtGamma.setText(mGammaStr.replaceAll("%", getBrightGammaStr(mGamma)));
+		if (mTxtBkLight != null && mTxtBkLight != null) mTxtBkLight.setText(mBkLightStr.replaceAll("%", getBkLight(mBkLight)));
 
-		mSharpenStr = mTxtSharpen.getText().toString();
-		mBrightStr = mTxtBright.getText().toString();
-		mGammaStr = mTxtGamma.getText().toString();
-		mBkLightStr = mTxtBkLight.getText().toString();
+		if (mSkbSharpen != null) mSkbSharpen.setMax(32);
+		if (mSkbSharpen != null) mSkbSharpen.setOnSeekBarChangeListener(this);
+		if (mSkbBright != null) mSkbBright.setMax(10);
+		if (mSkbBright != null) mSkbBright.setOnSeekBarChangeListener(this);
+		if (mSkbGamma != null) mSkbGamma.setMax(10);
+		if (mSkbGamma != null) mSkbGamma.setOnSeekBarChangeListener(this);
+		if (mSkbBkLight != null) mSkbBkLight.setMax(11);
+		if (mSkbBkLight != null) mSkbBkLight.setOnSeekBarChangeListener(this);
 
-		mTxtSharpen.setText(mSharpenStr.replaceAll("%", getSharpenStr(mSharpen)));
-		mTxtBright.setText(mBrightStr.replaceAll("%", getBrightGammaStr(mBright)));
-		mTxtGamma.setText(mGammaStr.replaceAll("%", getBrightGammaStr(mGamma)));
-		mTxtBkLight.setText(mBkLightStr.replaceAll("%", getBkLight(mBkLight)));
+		if (mSkbSharpen != null) mSkbSharpen.setProgress(mSharpen);
+		if (mSkbBright != null) mSkbBright.setProgress(mBright + 5);
+		if (mSkbGamma != null) mSkbGamma.setProgress(mGamma + 5);
+		if (mSkbBkLight != null) mSkbBkLight.setProgress(mBkLight);
 
-		mSkbSharpen = (SeekBar)this.findViewById(R.id.seek_sharpen);
-		mSkbBright = (SeekBar)this.findViewById(R.id.seek_bright);
-		mSkbGamma = (SeekBar)this.findViewById(R.id.seek_gamma);
-		mSkbBkLight = (SeekBar)this.findViewById(R.id.seek_bklight);
+		if (mBtnAlgoMode != null) mBtnAlgoMode.setText(mAlgoModeItems[mAlgoMode]);
+		if (mBtnDispMode != null) mBtnDispMode.setText(mDispModeItems[mDispMode]);
+		if (mBtnScaleMode != null) mBtnScaleMode.setText(mScaleModeItems[mScaleMode]);
+		if (mBtnMgncut != null) mBtnMgncut.setText(mMgnCutItems[mMgnCut]);
+		if (mBtnMgncutColor != null) mBtnMgncutColor.setText(mMgnCutColorItems[mMgnCutColor]);
 
-		mSkbSharpen.setMax(32);
-		mSkbSharpen.setOnSeekBarChangeListener(this);
-		mSkbBright.setMax(10);
-		mSkbBright.setOnSeekBarChangeListener(this);
-		mSkbGamma.setMax(10);
-		mSkbGamma.setOnSeekBarChangeListener(this);
-		mSkbBkLight.setMax(11);
-		mSkbBkLight.setOnSeekBarChangeListener(this);
+		if (mBtnAlgoMode != null) mBtnAlgoMode.setOnClickListener(this);
+		if (mBtnDispMode != null) mBtnDispMode.setOnClickListener(this);
+		if (mBtnScaleMode != null) mBtnScaleMode.setOnClickListener(this);
+		if (mBtnMgncut != null) mBtnMgncut.setOnClickListener(this);
+		if (mBtnMgncutColor != null) mBtnMgncutColor.setOnClickListener(this);
 
-		mSkbSharpen.setProgress(mSharpen);
-		mSkbBright.setProgress(mBright + 5);
-		mSkbGamma.setProgress(mGamma + 5);
-		mSkbBkLight.setProgress(mBkLight);
-
-//		mSpnAlgoMode = (Spinner) this.findViewById(R.id.spin_algomode);
-//		mSpnDispMode = (Spinner) this.findViewById(R.id.spin_spread);
-//		mSpnScaleMode = (Spinner) this.findViewById(R.id.spin_scale);
-//		mSpnMgncut = (Spinner) this.findViewById(R.id.spin_mgncut);
-//		mSpnMgncutColor = (Spinner) this.findViewById(R.id.spin_mgncut);
-
-//		mSpnAlgoMode.setSelection(mAlgoMode);
-//		mSpnDispMode.setSelection(mDispMode);
-//		mSpnScaleMode.setSelection(mScaleMode);
-//		mSpnMgncut.setSelection(mMgnCut);
-
-		mBtnAlgoMode = (Button) this.findViewById(R.id.btn_algomode);
-		mBtnDispMode = (Button) this.findViewById(R.id.btn_spread);
-		mBtnScaleMode = (Button) this.findViewById(R.id.btn_scale);
-		mBtnMgncut = (Button) this.findViewById(R.id.btn_mgncut);
-		mBtnMgncutColor = (Button) this.findViewById(R.id.btn_mgncutcolor);
-
-		mBtnAlgoMode.setText(mAlgoModeItems[mAlgoMode]);
-		mBtnDispMode.setText(mDispModeItems[mDispMode]);
-		mBtnScaleMode.setText(mScaleModeItems[mScaleMode]);
-		mBtnMgncut.setText(mMgnCutItems[mMgnCut]);
-		mBtnMgncutColor.setText(mMgnCutColorItems[mMgnCutColor]);
-
-		mBtnAlgoMode.setOnClickListener(this);
-		mBtnDispMode.setOnClickListener(this);
-		mBtnScaleMode.setOnClickListener(this);
-		mBtnMgncut.setOnClickListener(this);
-		mBtnMgncutColor.setOnClickListener(this);
-
-		mBtnOK  = (Button) this.findViewById(R.id.btn_ok);
-		mBtnApply   = (Button) this.findViewById(R.id.btn_apply);
-		mBtnRevert = (Button) this.findViewById(R.id.btn_revert);
+		mBtnOK = (Button) mView.findViewById(R.id.btn_ok);
+		mBtnApply = (Button) mView.findViewById(R.id.btn_apply);
+		mBtnRevert = (Button) mView.findViewById(R.id.btn_revert);
 
 		mBtnOK.setOnClickListener(this);
 		mBtnApply.setOnClickListener(this);
 		mBtnRevert.setOnClickListener(this);
-	}
 
-	// ダイアログを表示してもIMMERSIVEが解除されない方法
-	// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
-	/**
-	 * An hack used to show the dialogs in Immersive Mode (that is with the NavBar hidden). To
-	 * obtain this, the method makes the dialog not focusable before showing it, change the UI
-	 * visibility of the window like the owner activity of the dialog and then (after showing it)
-	 * makes the dialog focusable again.
-	 */
-	@Override
-	public void show() {
-		// Set the dialog to not focusable.
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-		// 設定をコピー
-		copySystemUiVisibility();
-
-		// Show the dialog with NavBar hidden.
-		super.show();
-
-		// Set the dialog to focusable again.
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-	}
-
-	/**
-	 * Copy the visibility of the Activity that has started the dialog {@link mActivity}. If the
-	 * activity is in Immersive mode the dialog will be in Immersive mode too and vice versa.
-	 */
-	@SuppressLint("NewApi")
-	private void copySystemUiVisibility() {
-	    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-	        getWindow().getDecorView().setSystemUiVisibility(
-	                mContext.getWindow().getDecorView().getSystemUiVisibility());
-	    }
+		return mView;
 	}
 
 	public void setImageConfigListner(ImageConfigListenerInterface listener) {
@@ -436,7 +405,7 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(mContext, title, items, selIndex, false, new ListSelectListener() {
+		mListDialog = new ListDialog(mActivity, mX, mY, title, items, selIndex, false, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -532,12 +501,6 @@ public class ImageConfigDialog extends Dialog implements OnClickListener, OnDism
 			int bright = mSkbBright.getProgress() - 5;
 			int gamma = mSkbGamma.getProgress() - 5;
 			int bklight = mSkbBkLight.getProgress();
-//			int algomode = mSpnAlgoMode.getSelectedItemPosition();
-//			int dispmode = mSpnDispMode.getSelectedItemPosition();
-//			int scalemode = mSpnScaleMode.getSelectedItemPosition();
-//			int mgncut = mSpnMgncut.getSelectedItemPosition();
-//			int mgncutcolor = mSpnMgncutColor.getSelectedItemPosition();
-
 
 			mListener.onButtonSelect(select, gray, invert, moire, topsingle, sharpen, bright, gamma, bklight, mAlgoModeTemp, mDispModeTemp, mScaleModeTemp, mMgnCutTemp, mMgnCutColorTemp, issave);
 		}

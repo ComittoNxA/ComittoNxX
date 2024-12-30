@@ -10,11 +10,9 @@ import src.comitton.view.MenuItemView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,13 +20,14 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 @SuppressLint("NewApi")
-public class MenuDialog extends Dialog implements OnTouchListener, OnDismissListener {
+public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDismissListener {
 	private static int RANGE_CANCEL;
 
 	private MenuSelectListener mListener = null;
@@ -41,6 +40,7 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 	private LinearLayout mLinear;
 
 	private int mWidth;
+	private int mHeight;
 	private float mScale;
 	private boolean mSelected;
 	private boolean mIsClose;
@@ -75,9 +75,7 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 		// Activityを暗くしない
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-		// 背景を透明に
-		//PaintDrawable paintDrawable = new PaintDrawable(0);
-		//dlgWindow.setBackgroundDrawable(paintDrawable);
+		// 背景を設定
 		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
 
 		// 画面下に表示
@@ -102,6 +100,7 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 		if (!wide) {
 			mWidth = Math.min(mWidth, maxWidth);
 		}
+		mHeight = cy * 80 / 100;
 
 		mSelected = false;
 		mIsClose = isclose;
@@ -155,50 +154,21 @@ public class MenuDialog extends Dialog implements OnTouchListener, OnDismissList
 				mLinear.addView(sepview);
 			}
 		}
+
 		setContentView(mScrlView);
 	}
 
-	// ダイアログを表示してもIMMERSIVEが解除されない方法
-	// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
-	/**
-	 * An hack used to show the dialogs in Immersive Mode (that is with the NavBar hidden). To
-	 * obtain this, the method makes the dialog not focusable before showing it, change the UI
-	 * visibility of the window like the owner activity of the dialog and then (after showing it)
-	 * makes the dialog focusable again.
-	 */
 	@Override
-	public void show() {
-		// Set the dialog to not focusable.
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-		// 設定をコピー
-		copySystemUiVisibility();
-
-		// Show the dialog with NavBar hidden.
-		super.show();
-
-		// Set the dialog to focusable again.
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		// スクロールビューの最大サイズを設定する
+		// 最大サイズ以下ならそのまま表示する
+		ViewGroup.LayoutParams layoutParams = mScrlView.getLayoutParams();
+		layoutParams.width = mWidth;
+		layoutParams.height = Math.min(mHeight, mLinear.getHeight());
+		mScrlView.setLayoutParams(layoutParams);
 	}
 
-	/**
-	 * Copy the visibility of the Activity that has started the dialog {@link mActivity}. If the
-	 * activity is in Immersive mode the dialog will be in Immersive mode too and vice versa.
-	 */
-	@SuppressLint("NewApi")
-	private void copySystemUiVisibility() {
-	    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-	        getWindow().getDecorView().setSystemUiVisibility(
-	                mActivity.getWindow().getDecorView().getSystemUiVisibility());
-	    }
-	}
-
-//	// オプションメニューが表示される度に呼び出されます
-//	@Override
-//	public boolean onPrepareOptionsMenu(Menu menu) {
-//		dismiss();
-//		return false;
-//	}
-	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 			switch (event.getKeyCode()) {

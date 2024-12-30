@@ -6,29 +6,29 @@ import src.comitton.common.DEF;
 import src.comitton.config.SetTextActivity;
 import src.comitton.dialog.ListDialog.ListSelectListener;
 import jp.dip.muracoro.comittonx.R;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.fragment.app.FragmentActivity;
+
 @SuppressLint("NewApi")
-public class TextConfigDialog extends Dialog implements OnClickListener, OnDismissListener, OnSeekBarChangeListener {
+public class TextConfigDialog extends TabDialogFragment implements OnClickListener, OnDismissListener, OnSeekBarChangeListener {
 	public static final int CLICK_REVERT   = 0;
 	public static final int CLICK_OK       = 1;
 	public static final int CLICK_APPLY    = 2;
@@ -37,7 +37,7 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 	private final int SELLIST_ASCMODE = 1;
 
 	private TextConfigListenerInterface mListener = null;
-	private Activity mContext;
+	private Activity mActivity;
 
 	private ListDialog mListDialog;
 
@@ -106,34 +106,20 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 
 	private int mSelectMode;
 
-	String mTitle;
-	int mLayoutId;
+	private int mX;
+	private int mY;
 
-	public TextConfigDialog(Activity context) {
-		super(context);
-		Window dlgWindow = getWindow();
+	public TextConfigDialog(FragmentActivity activity, int cx, int cy, boolean isclose, MenuDialog.MenuSelectListener listener) {
+		super(activity, cx, cy, isclose, listener);
 
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		mActivity = activity;
+		mX = cx;
+		mY = cy;
 
-		Resources res = context.getResources();
+		Resources res = mActivity.getResources();
 		mDefaultStr = res.getString(R.string.auto);
 		mSpUnitStr = res.getString(R.string.unitSumm1);
 		mDotUnitStr = res.getString(R.string.rangeSumm1);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を透明に
-		//PaintDrawable paintDrawable = new PaintDrawable(0x80000000);
-		//dlgWindow.setBackgroundDrawable(paintDrawable);
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
-
-		// 外をタッチすると閉じる
-		setCanceledOnTouchOutside(true);
-		setOnDismissListener(this);
-
-		mContext = context;
 
 		int nItem;
 
@@ -151,6 +137,14 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 		for (int i = 0; i < nItem; i++) {
 			mAscModeItems[i] = res.getString(SetTextActivity.AscModeName[i]);
 		}
+
+		LayoutInflater inflater = LayoutInflater.from(mActivity);
+
+		addSection(res.getString(R.string.txtConfFormat));
+		addItem(inflater.inflate(R.layout.textconfig_format, null, false));
+
+		addSection(res.getString(R.string.txtConfOther));
+		addItem(inflater.inflate(R.layout.textconfig_other, null, false));
 	}
 
 	public void setConfig(int picsize, int bklight, int top, int body, int rubi, int info, int spacew, int spaceh, int marginw, int marginh, int ascmode, boolean issave) {
@@ -169,35 +163,56 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 		mIsSave = issave;
 	}
 
-	protected void onCreate(Bundle savedInstanceState){
-		super.onCreate(savedInstanceState);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+		super.onCreateView(inflater, container, savedInstanceState);
 
-		setContentView(R.layout.textconfigdialog);
+		Resources res = mActivity.getResources();
+		addHeader(res.getString(R.string.txtConfMenu));
 
-		TextView textView = (TextView)this.findViewById(R.id.text_message);
-		ScrollView scrollView = (ScrollView)this.findViewById(R.id.ScrollView);
+		LinearLayout footer = (LinearLayout)inflater.inflate(R.layout.imagetextconfig_footer, null, false);
+		footer.setBackgroundColor(0x80000000);
+		addFooter(footer);
 
-		int width = (int)(mContext.getResources().getDisplayMetrics().widthPixels * 0.80);
-		int scale = (int)(mContext.getResources().getDisplayMetrics().scaledDensity * 320);
-		width = Math.max(width, scale);
+		mView.getViewTreeObserver().addOnWindowFocusChangeListener(new ViewTreeObserver.OnWindowFocusChangeListener() {
+			@Override
+			public void onWindowFocusChanged(boolean hasFocus) {
+				// ビューページャーのサイズを設定する
+				ViewGroup.LayoutParams layoutParams = mViewPager.getLayoutParams();
+				layoutParams.width = mWidth;
+				layoutParams.height = mHeight - mHeader.getHeight() - mTabLayout.getHeight() - mFooter.getHeight();
+				mViewPager.setLayoutParams(layoutParams);
+			}
+		});
 
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, LinearLayout.LayoutParams.WRAP_CONTENT);
-		textView.setLayoutParams(lp);
-		scrollView.setLayoutParams(lp);
-
-		mChkIsSave = (CheckBox) this.findViewById(R.id.chk_save);
+		mChkIsSave = (CheckBox) mView.findViewById(R.id.chk_save);
 
 		mChkIsSave.setChecked(mIsSave);
 
-		mTxtBkLight = (TextView)this.findViewById(R.id.label_bklight);
-		mTxtFontTop = (TextView)this.findViewById(R.id.label_fonttop);
-		mTxtFontBody = (TextView)this.findViewById(R.id.label_fontbody);
-		mTxtFontRubi = (TextView)this.findViewById(R.id.label_fontrubi);
-		mTxtFontInfo = (TextView)this.findViewById(R.id.label_fontinfo);
-		mTxtSpaceW = (TextView)this.findViewById(R.id.label_spacew);
-		mTxtSpaceH = (TextView)this.findViewById(R.id.label_spaceh);
-		mTxtMarginW = (TextView)this.findViewById(R.id.label_marginw);
-		mTxtMarginH = (TextView)this.findViewById(R.id.label_marginh);
+		for( int i = 0; i < mViewArray.size(); ++i) {
+			mTxtBkLight = mTxtBkLight != null ? mTxtBkLight : (TextView) mViewArray.get(i).findViewById(R.id.label_bklight);
+			mTxtFontTop = mTxtFontTop != null ? mTxtFontTop : (TextView) mViewArray.get(i).findViewById(R.id.label_fonttop);
+			mTxtFontBody = mTxtFontBody != null ? mTxtFontBody : (TextView) mViewArray.get(i).findViewById(R.id.label_fontbody);
+			mTxtFontRubi = mTxtFontRubi != null ? mTxtFontRubi : (TextView) mViewArray.get(i).findViewById(R.id.label_fontrubi);
+			mTxtFontInfo = mTxtFontInfo != null ? mTxtFontInfo : (TextView) mViewArray.get(i).findViewById(R.id.label_fontinfo);
+			mTxtSpaceW = mTxtSpaceW != null ? mTxtSpaceW : (TextView) mViewArray.get(i).findViewById(R.id.label_spacew);
+			mTxtSpaceH = mTxtSpaceH != null ? mTxtSpaceH : (TextView) mViewArray.get(i).findViewById(R.id.label_spaceh);
+			mTxtMarginW = mTxtMarginW != null ? mTxtMarginW : (TextView) mViewArray.get(i).findViewById(R.id.label_marginw);
+			mTxtMarginH = mTxtMarginH != null ? mTxtMarginH : (TextView) mViewArray.get(i).findViewById(R.id.label_marginh);
+
+			mSkbBkLight = mSkbBkLight != null ? mSkbBkLight : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_bklight);
+			mSkbFontTop = mSkbFontTop != null ? mSkbFontTop : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_fonttop);
+			mSkbFontBody = mSkbFontBody != null ? mSkbFontBody : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_fontbody);
+			mSkbFontRubi = mSkbFontRubi != null ? mSkbFontRubi : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_fontrubi);
+			mSkbFontInfo = mSkbFontInfo != null ? mSkbFontInfo : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_fontinfo);
+			mSkbSpaceW = mSkbSpaceW != null ? mSkbSpaceW : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_spacew);
+			mSkbSpaceH = mSkbSpaceH != null ? mSkbSpaceH : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_spaceh);
+			mSkbMarginW = mSkbMarginW != null ? mSkbMarginW : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_marginw);
+			mSkbMarginH = mSkbMarginH != null ? mSkbMarginH : (SeekBar) mViewArray.get(i).findViewById(R.id.seek_marginh);
+
+			mBtnPicSize = mBtnPicSize != null ? mBtnPicSize : (Button) mViewArray.get(i).findViewById(R.id.btn_picsize);
+			mBtnAscMode = mBtnAscMode != null ? mBtnAscMode : (Button) mViewArray.get(i).findViewById(R.id.btn_ascmode);
+		}
 
 		mBkLightStr  = mTxtBkLight.getText().toString();
 		mFontTopStr  = mTxtFontTop.getText().toString();
@@ -218,17 +233,6 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 		mTxtSpaceH.setText(mSpaceHStr.replaceAll("%", getBkLight(mSpaceH)));
 		mTxtMarginW.setText(mMarginWStr.replaceAll("%", getBkLight(mMarginW)));
 		mTxtMarginH.setText(mMarginHStr.replaceAll("%", getBkLight(mMarginH)));
-
-
-		mSkbBkLight = (SeekBar)this.findViewById(R.id.seek_bklight);
-		mSkbFontTop = (SeekBar)this.findViewById(R.id.seek_fonttop);
-		mSkbFontBody = (SeekBar)this.findViewById(R.id.seek_fontbody);
-		mSkbFontRubi = (SeekBar)this.findViewById(R.id.seek_fontrubi);
-		mSkbFontInfo = (SeekBar)this.findViewById(R.id.seek_fontinfo);
-		mSkbSpaceW = (SeekBar)this.findViewById(R.id.seek_spacew);
-		mSkbSpaceH = (SeekBar)this.findViewById(R.id.seek_spaceh);
-		mSkbMarginW = (SeekBar)this.findViewById(R.id.seek_marginw);
-		mSkbMarginH = (SeekBar)this.findViewById(R.id.seek_marginh);
 
 		mSkbBkLight.setMax(11);
 		mSkbBkLight.setOnSeekBarChangeListener(this);
@@ -259,66 +263,21 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 		mSkbMarginW.setProgress(mMarginW);
 		mSkbMarginH.setProgress(mMarginH);
 
-//		mSpnAlgoMode = (Spinner) this.findViewById(R.id.spin_algomode);
-//		mSpnDispMode = (Spinner) this.findViewById(R.id.spin_spread);
-//		mSpnScaleMode = (Spinner) this.findViewById(R.id.spin_scale);
-//		mSpnMgncut = (Spinner) this.findViewById(R.id.spin_mgncut);
-
-//		mSpnAlgoMode.setSelection(mAlgoMode);
-//		mSpnDispMode.setSelection(mDispMode);
-//		mSpnScaleMode.setSelection(mScaleMode);
-//		mSpnMgncut.setSelection(mMgnCut);
-
-		mBtnPicSize = (Button) this.findViewById(R.id.btn_picsize);
-		mBtnAscMode = (Button) this.findViewById(R.id.btn_ascmode);
-
 		mBtnPicSize.setText(mPicSizeItems[mPicSize]);
 		mBtnAscMode.setText(mAscModeItems[mAscMode]);
 
 		mBtnPicSize.setOnClickListener(this);
 		mBtnAscMode.setOnClickListener(this);
 
-		mBtnOK  = (Button) this.findViewById(R.id.btn_ok);
-		mBtnApply   = (Button) this.findViewById(R.id.btn_apply);
-		mBtnRevert = (Button) this.findViewById(R.id.btn_revert);
+		mBtnOK = (Button) mView.findViewById(R.id.btn_ok);
+		mBtnApply = (Button) mView.findViewById(R.id.btn_apply);
+		mBtnRevert = (Button) mView.findViewById(R.id.btn_revert);
 
 		mBtnOK.setOnClickListener(this);
 		mBtnApply.setOnClickListener(this);
 		mBtnRevert.setOnClickListener(this);
-	}
 
-	// ダイアログを表示してもIMMERSIVEが解除されない方法
-	// http://stackoverflow.com/questions/22794049/how-to-maintain-the-immersive-mode-in-dialogs
-	/**
-	 * An hack used to show the dialogs in Immersive Mode (that is with the NavBar hidden). To
-	 * obtain this, the method makes the dialog not focusable before showing it, change the UI
-	 * visibility of the window like the owner activity of the dialog and then (after showing it)
-	 * makes the dialog focusable again.
-	 */
-	@Override
-	public void show() {
-		// Set the dialog to not focusable.
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-		// 設定をコピー
-		copySystemUiVisibility();
-
-		// Show the dialog with NavBar hidden.
-		super.show();
-
-		// Set the dialog to focusable again.
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-	}
-
-	/**
-	 * Copy the visibility of the Activity that has started the dialog {@link mActivity}. If the
-	 * activity is in Immersive mode the dialog will be in Immersive mode too and vice versa.
-	 */
-	@SuppressLint("NewApi")
-	private void copySystemUiVisibility() {
-	    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-	        getWindow().getDecorView().setSystemUiVisibility(
-	                mContext.getWindow().getDecorView().getSystemUiVisibility());
-	    }
+		return mView;
 	}
 
 	public void setTextConfigListner(TextConfigListenerInterface listener) {
@@ -361,7 +320,7 @@ public class TextConfigDialog extends Dialog implements OnClickListener, OnDismi
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(mContext, title, items, selIndex, false, new ListSelectListener() {
+		mListDialog = new ListDialog(mActivity, mX, mY, title, items, selIndex, false, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {

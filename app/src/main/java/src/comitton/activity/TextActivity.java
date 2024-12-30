@@ -1,7 +1,6 @@
 package src.comitton.activity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 import jp.dip.muracoro.comittonx.R;
@@ -17,21 +16,18 @@ import src.comitton.config.SetTextActivity;
 import src.comitton.data.FileData;
 import src.comitton.data.RecordItem;
 import src.comitton.data.TextDrawData;
-import src.comitton.dialog.BasePageSelectDialog;
 import src.comitton.dialog.BookmarkDialog;
 import src.comitton.dialog.CloseDialog;
 import src.comitton.dialog.Information;
 import src.comitton.dialog.InputDialog;
 import src.comitton.dialog.InputDialog.SearchListener;
 import src.comitton.dialog.ListDialog;
-import src.comitton.dialog.MenuDialog;
 import src.comitton.dialog.PageSelectCheckDialog;
 import src.comitton.dialog.PageSelectDialog;
 import src.comitton.dialog.BookmarkDialog.BookmarkListenerInterface;
 import src.comitton.dialog.CloseDialog.CloseListenerInterface;
 import src.comitton.dialog.ListDialog.ListSelectListener;
 import src.comitton.dialog.MenuDialog.MenuSelectListener;
-import src.comitton.dialog.PageThumbnail;
 import src.comitton.dialog.TabDialogFragment;
 import src.comitton.dialog.TextConfigDialog;
 import src.comitton.dialog.TextConfigDialog.TextConfigListenerInterface;
@@ -74,7 +70,6 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -321,7 +316,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private CloseDialog mCloseDialog;
 	private ListDialog mListDialog;
 	private InputDialog mInputDialog;
-	private MenuDialog mMenuDialog;
+	private TabDialogFragment mMenuDialog;
 
 	private PageSelectDialog mPageDlg = null;
 
@@ -1793,7 +1788,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(this, title, items, selIndex, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, mTextView.getWidth(), mTextView.getHeight(), title, items, selIndex, true, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -1961,53 +1956,55 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		Resources res = getResources();
 //		setOptionMenu(menu);
-		TabDialogFragment dialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), true, this);
 
-		dialog.addSection(res.getString(R.string.operateSec));
+		mMenuDialog.addSection(res.getString(R.string.operateSec));
 		if (mTextMgr.getMidashiSize() > 0) {
 			// 見出し選択
-			dialog.addItem(DEF.MENU_SELCHAPTER, res.getString(R.string.selChapterMenu));
+			mMenuDialog.addItem(DEF.MENU_SELCHAPTER, res.getString(R.string.selChapterMenu));
 		}
 		// ブックマーク選択
-		dialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
+		mMenuDialog.addItem(DEF.MENU_SELBOOKMARK, res.getString(R.string.selBookmarkMenu));
 		// ブックマーク追加
-		dialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
+		mMenuDialog.addItem(DEF.MENU_ADDBOOKMARK, res.getString(R.string.addBookmarkMenu));
 		// 検索
-		dialog.addItem(DEF.MENU_SEARCHTEXT, res.getString(R.string.searchTextMenu));
+		mMenuDialog.addItem(DEF.MENU_SEARCHTEXT, res.getString(R.string.searchTextMenu));
 		if (mTextMgr.getMarker() != null) {
 			// 検索
-			dialog.addItem(DEF.MENU_SEARCHJUMP, res.getString(R.string.searchJumpMenu));
+			mMenuDialog.addItem(DEF.MENU_SEARCHJUMP, res.getString(R.string.searchJumpMenu));
 		}
 //		// ページ選択
-//		menuDlg.addItem(DEF.MENU_PAGESEL, res.getString(R.string.pageselMenu));
+//		mMenuDialog.addItem(DEF.MENU_PAGESEL, res.getString(R.string.pageselMenu));
 		// 音操作
-		dialog.addItem(DEF.MENU_NOISE, res.getString(R.string.noiseMenu), mNoiseSwitch != null);
+		mMenuDialog.addItem(DEF.MENU_NOISE, res.getString(R.string.noiseMenu), mNoiseSwitch != null);
 		// 画面回転
 		if (mViewRota == DEF.ROTATE_PORTRAIT || mViewRota == DEF.ROTATE_LANDSCAPE) {
-			dialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
+			mMenuDialog.addItem(DEF.MENU_ROTATE, res.getString(R.string.rotateMenu));
 		}
 
-		dialog.addSection(res.getString(R.string.settingSec));
+		mMenuDialog.addSection(res.getString(R.string.settingSec));
 		// テキスト表示設定
-		dialog.addItem(DEF.MENU_TXTCONF, res.getString(R.string.txtConfMenu));
+		mMenuDialog.addItem(DEF.MENU_TXTCONF, res.getString(R.string.txtConfMenu));
 		// 見開き設定
-		dialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
+		mMenuDialog.addItem(DEF.MENU_IMGVIEW, res.getString(R.string.tguide02));
 		// 画像サイズ
-		dialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
+		mMenuDialog.addItem(DEF.MENU_IMGSIZE, res.getString(R.string.tguide03));
 		// ページめくりタップの入れ替え
-		dialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
+		mMenuDialog.addItem(DEF.MENU_CHG_OPE, res.getString(R.string.chgOpeMenu), mChgPage);
 
-		dialog.addSection(res.getString(R.string.otherSec));
+		mMenuDialog.addSection(res.getString(R.string.otherSec));
 		// ヘルプ
-		dialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
+		mMenuDialog.addItem(DEF.MENU_ONLINE, res.getString(R.string.onlineMenu));
 		// 操作確認
-		dialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
+		mMenuDialog.addItem(DEF.MENU_HELP, res.getString(R.string.helpMenu), mGuideView.getOperationMode());
+		// ツールバー設定
+		mMenuDialog.addItem(DEF.MENU_EDIT_TOOLBAR, res.getString(R.string.ToolbarEditToolbar));
 		// 設定
-		dialog.addItem(DEF.MENU_SETTING, res.getString(R.string.setMenu));
+		mMenuDialog.addItem(DEF.MENU_SETTING, res.getString(R.string.setMenu));
 		// バージョン情報
-		dialog.addItem(DEF.MENU_ABOUT, res.getString(R.string.aboutMenu));
+		mMenuDialog.addItem(DEF.MENU_ABOUT, res.getString(R.string.aboutMenu));
 
-		dialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
+		mMenuDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	// メニューを開く
@@ -2016,9 +2013,17 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			return;
 		}
 
-		mMenuDialog = new MenuDialog(this, mTextView.getWidth(), mTextView.getHeight(), false, this);
-
 		ArrayList<RecordItem>list = RecordList.load(null, RecordList.TYPE_BOOKMARK, mServer, mLocalPath + mFileName, mTextName);
+		if (list == null && list.size() == 0) {
+			Toast.makeText(this, R.string.bmNotFound, Toast.LENGTH_SHORT).show();
+			return;
+		}
+			Resources res = getResources();
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), false, this);
+
+		// ブックマーク選択
+		mMenuDialog.addSection(res.getString(R.string.selBookmarkMenu));
+
 
 		for (int i = 0 ; i < list.size(); i ++) {
 			// ブックマーク追加
@@ -2026,13 +2031,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			int page = data.getPage();
 			mMenuDialog.addItem(DEF.MENU_BOOKMARK + page, data.getDispName(), "P." + (page + 1));
 		}
-		if (list != null && list.size() > 0) {
-			mMenuDialog.show();
-		}
-		else {
-			Toast.makeText(this, R.string.bmNotFound, Toast.LENGTH_SHORT).show();
-			mMenuDialog = null;
-		}
+
+		mMenuDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	// メニューを開く
@@ -2043,14 +2043,14 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 
 		Resources res = getResources();
-		TabDialogFragment dialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), true, false, false, true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), true, false, false, true, this);
 
 		int size = mTextMgr.getMidashiSize();
 		if (debug) {Log.d("TextActivity", "openChapterMenu: size=" + size);}
 
 		if (mFileType == FileData.FILETYPE_EPUB) {
 			// 見出しの追加
-			dialog.addSection(res.getString(R.string.ChapMenuFile));
+			mMenuDialog.addSection(res.getString(R.string.ChapMenuFile));
 			for (int i = 0; i < size; i++) {
 				// ブックマーク追加
 				MidashiData md = mTextMgr.getMidashi(i);
@@ -2059,13 +2059,13 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					int type = md.getType();
 					if ((type == MidashiData.FILE_TITLE) && page >= 0) {
 						if (debug) {Log.d("TextActivity", "openChapterMenu: page=" + page + ", text=" + md.getText());}
-						dialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
+						mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 					}
 				}
 			}
 
 			// 見出しの追加
-			dialog.addSection(res.getString(R.string.ChapMenuTOC));
+			mMenuDialog.addSection(res.getString(R.string.ChapMenuTOC));
 			for (int i = 0; i < size; i++) {
 				// ブックマーク追加
 				MidashiData md = mTextMgr.getMidashi(i);
@@ -2074,14 +2074,14 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					int type = md.getType();
 					if ((type == MidashiData.EPUB_TOC) && page >= 0) {
 						if (debug) {Log.d("TextActivity", "openChapterMenu: page=" + page + ", text=" + md.getText());}
-						dialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
+						mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 					}
 				}
 			}
 		}
 
 		// 見出しの追加
-		dialog.addSection(res.getString(R.string.ChapMenuChapter));
+		mMenuDialog.addSection(res.getString(R.string.ChapMenuChapter));
 		for (int i = 0 ; i < size; i ++) {
 			// ブックマーク追加
 			MidashiData md = mTextMgr.getMidashi(i);
@@ -2090,13 +2090,13 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				int type = md.getType();
 				if ((type == MidashiData.HEADING_LARGE || type == MidashiData.HEADING_MIDDLE || type == MidashiData.HEADING_SMALL) && page >= 0) {
 					if (debug) {Log.d("TextActivity", "openChapterMenu: page=" + page + ", text=" + md.getText());}
-					dialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
+					mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 				}
 			}
 		}
 
 		// 見出しの追加
-		dialog.addSection(res.getString(R.string.ChapMenuOther));
+		mMenuDialog.addSection(res.getString(R.string.ChapMenuOther));
 		for (int i = 0; i < size; i++) {
 			// ブックマーク追加
 			MidashiData md = mTextMgr.getMidashi(i);
@@ -2105,12 +2105,12 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				int type = md.getType();
 				if (type == MidashiData.CAPTION && page >= 0) {
 					if (debug) {Log.d("TextActivity", "openChapterMenu: page=" + page + ", text=" + md.getText());}
-					dialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
+					mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 				}
 			}
 		}
 
-		dialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
+		mMenuDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	// メニューを開く
@@ -2121,11 +2121,15 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		MidashiData[] mdlist = mTextMgr.getSearchList();
 		if (mdlist == null || mdlist.length == 0) {
-			// 該当なし
+			Toast.makeText(this, R.string.searchJumpNotFound, Toast.LENGTH_SHORT).show();
 			return;
 		}
 
-		mMenuDialog = new MenuDialog(this, mTextView.getWidth(), mTextView.getHeight(), false, true, this);
+		Resources res = getResources();
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), false, true, this);
+
+		// ブックマーク選択
+		mMenuDialog.addSection(res.getString(R.string.searchJumpMenu));
 
 		for (int i = 0; i < mdlist.length; i ++) {
 			// 検索結果表示
@@ -2134,21 +2138,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				mMenuDialog.addItem(DEF.MENU_CHAPTER + page, "P." + (page + 1));
 			}
 		}
-		mMenuDialog.show();
+		mMenuDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
-
-//	void setOptionMenu(Menu menu) {
-//		Resources res = getResources();
-//
-//		// メニューをクリア
-//		menu.clear();
-//		return;
-//	}
-
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		int id = item.getItemId();
-//		return super.onOptionsItemSelected(item);
-//	}
 
 	@Override
 	public void onSelectMenuDialog(int id) {
@@ -2288,6 +2279,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
             				// 検索該当箇所クリア
             				mTextMgr.searchClear();
             				mTextView.setMarker(null);
+							Toast.makeText(mActivity, R.string.searchJumpNoText, Toast.LENGTH_SHORT).show();
         				}
         			}
 
@@ -2314,6 +2306,12 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				openSearchMenu();
         		break;
 			}
+			case DEF.MENU_EDIT_TOOLBAR: {
+				// ツールバー編集ダイアログ表示
+				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this, mTextView.getWidth(), mTextView.getHeight());
+				dialog.show();
+				break;
+			}
 			default: {
 				if (id >= DEF.MENU_CHAPTER) {
 					onSelectPage(id - DEF.MENU_CHAPTER);
@@ -2337,7 +2335,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		if (mTextConfigDialog != null) {
 			return;
 		}
-		mTextConfigDialog = new TextConfigDialog(this);
+		mTextConfigDialog = new TextConfigDialog(this, mTextView.getWidth(), mTextView.getHeight(), false, this);
 
 		mTextConfigDialog.setConfig(mPicSize, mBkLight, mHeadSizeOrg, mBodySizeOrg, mRubiSizeOrg, mInfoSizeOrg, mSpaceW, mSpaceH, mMarginWOrg, mMarginHOrg, mAscMode, mIsConfSave);
 		mTextConfigDialog.setTextConfigListner(new TextConfigListenerInterface() {
@@ -2410,7 +2408,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				mTextConfigDialog = null;
 			}
 		});
-		mTextConfigDialog.show();
+		mTextConfigDialog.show(getSupportFragmentManager(), TabDialogFragment.class.getSimpleName());
 	}
 
 	@Override
@@ -2572,17 +2570,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				break;
 			}
 			case DEF.TOOLBAR_EDIT_TOOLBAR: {
-				// ページ番号入力が開いていたら閉じる
-				if (PageSelectDialog.mIsOpened == true) {
-					mPageDlg.dismiss();
-				}
-				// サムネイルページ選択が開いていたら閉じる
-				//if (PageThumbnail.mIsOpened == true) {
-				//	mThumbDlg.dismiss();
-				//}
-
-				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this);
-				dialog.show();
+				onSelectMenuDialog(DEF.MENU_EDIT_TOOLBAR);
 				break;
 			}
 		}

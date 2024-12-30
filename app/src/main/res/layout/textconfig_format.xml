@@ -1,35 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical" >
 
-	<LinearLayout
-		android:id="@+id/header"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:orientation="vertical" >
-
-		<TextView
-			android:id="@+id/text_message"
-			android:layout_width="320sp"
-			android:layout_height="wrap_content"
-			android:gravity="center"
-			android:textSize="20sp"
-			android:textColor="#FFFFFFFF"
-			android:text="@string/txtConfMenu" />
-	
-		<ImageView
-			android:layout_width="match_parent"
-			android:layout_height="1sp"
-			android:background="#FFFFFFFF"
-			android:layout_marginTop="6sp" />
-	</LinearLayout>
-
 	<ScrollView
 		android:id="@+id/ScrollView"
-		android:layout_width="320sp"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_weight="1" >
 
@@ -38,74 +16,17 @@
 			android:layout_height="wrap_content"
 			android:padding="8dip"
 			android:orientation="vertical" >
-		
-			<TextView
-				android:id="@+id/label_bklight"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="10sp"
-				android:layout_marginRight="10sp"
-				android:layout_gravity="left"
-				android:text="@string/bklightMenu" />
-	
-			<SeekBar
-				android:id="@+id/seek_bklight"
-				style="@style/PageSeekBar"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:paddingLeft="4sp"
-				android:paddingRight="4sp" />
-
-			<TextView
-				android:id="@+id/label_picsize"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="10sp"
-				android:layout_marginRight="10sp"
-				android:layout_gravity="left"
-				android:text="@string/picSize" />
-	
-			<Button
-				android:id="@+id/btn_picsize"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:paddingTop="12sp"
-				android:paddingBottom="12sp"
-				android:textSize="17sp" />
-
-			<TextView
-				android:id="@+id/label_ascmode"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="10sp"
-				android:layout_marginRight="10sp"
-				android:layout_gravity="left"
-				android:text="@string/ascMode" />
-	
-			<Button
-				android:id="@+id/btn_ascmode"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:textSize="17sp" />
-
-			<ImageView
-				android:layout_width="match_parent"
-				android:layout_height="1sp"
-				android:background="#FFFFFFFF"
-				android:layout_marginTop="6sp"
-				android:layout_marginBottom="16sp" />
 
 			<TextView
 				android:id="@+id/label_fonttop"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/fontTop" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_fonttop"
 				style="@style/PageSeekBar"
@@ -118,11 +39,12 @@
 				android:id="@+id/label_fontbody"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/fontBody" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_fontbody"
 				style="@style/PageSeekBar"
@@ -135,11 +57,12 @@
 				android:id="@+id/label_fontrubi"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/fontRubi" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_fontrubi"
 				style="@style/PageSeekBar"
@@ -152,11 +75,12 @@
 				android:id="@+id/label_fontinfo"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/fontInfo" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_fontinfo"
 				style="@style/PageSeekBar"
@@ -169,11 +93,12 @@
 				android:id="@+id/label_spacew"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/spaceW" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_spacew"
 				style="@style/PageSeekBar"
@@ -186,11 +111,12 @@
 				android:id="@+id/label_spaceh"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/spaceH" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_spaceh"
 				style="@style/PageSeekBar"
@@ -203,11 +129,12 @@
 				android:id="@+id/label_marginw"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/marginW" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_marginw"
 				style="@style/PageSeekBar"
@@ -220,11 +147,12 @@
 				android:id="@+id/label_marginh"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
 				android:layout_marginLeft="10sp"
 				android:layout_marginRight="10sp"
 				android:layout_gravity="left"
 				android:text="@string/marginH" />
-	
+
 			<SeekBar
 				android:id="@+id/seek_marginh"
 				style="@style/PageSeekBar"
@@ -235,52 +163,5 @@
 
 		</LinearLayout>
 	</ScrollView>
-				
-	<LinearLayout
-		android:id="@+id/footer"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:orientation="vertical" >
-    
-		<CheckBox
-			android:id="@+id/chk_save"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:gravity="left|center"
-			android:textSize="17sp"
-			android:text= "@string/idSaveConfig" />
-	
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
-			android:gravity="center"
-			android:orientation="horizontal" >
-	
-			<Button
-				android:id="@+id/btn_revert"
-				android:layout_width="100sp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:textSize="20sp"
-				android:text="@string/btnRevert" />
-	
-			<Button
-				android:id="@+id/btn_apply"
-				android:layout_width="100sp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:textSize="20sp"
-				android:text="@string/btnApply" />
-	
-			<Button
-				android:id="@+id/btn_ok"
-				android:layout_width="100sp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:textSize="20sp"
-				android:text="@string/btnOK" />
-		</LinearLayout>
-	</LinearLayout>
+
 </LinearLayout>

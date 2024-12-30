@@ -34,9 +34,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	private final int DRAW_LEFT = 1;
 	private final int DRAW_RIGHT = 2;
 
-	private final int BACKGROUND_COLOR = 0x80000000;
 	private final int PAGE_COLOR = 0x80FFFFFF;
-	//0x8FCCCCCC
 
 	private int mMaxPage;
 	private int mFirstPage;
@@ -65,7 +63,6 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	private PageThumbnail mParentDlg;
 	private HorizontalScrollView mScrollView;
 	Paint mRectPaint;
-	Paint mDrawPaint;
 	Paint mTextPaint;
 	Bitmap mDrawBitmap;
 
@@ -83,8 +80,6 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		mRectPaint = new Paint();
 		mRectPaint.setColor(PAGE_COLOR);
 
-
-		mDrawPaint = new Paint();
 		mHandler = new Handler(this);
 		mDrawTop = mDrawLast = -1;
 
@@ -94,8 +89,6 @@ public class ThumbnailView extends View implements Runnable, Callback {
 
 		mBreakThread = false;
 		mWaitFor = new WaitFor(60000);
-
-		// setDrawingCacheEnabled(false);
 	}
 
 	public void initialize(int page, int max, boolean reverse, ImageManager im, PageThumbnail dlg, HorizontalScrollView sv, long thumid, int thumquality) {
@@ -143,8 +136,6 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		}
 		int xpos = mScrollView.getScrollX();
 
-		//canvas.drawColor(BACKGROUND_COLOR);
-
 		mPageAreaNum = 0;
 
 		int width = mSelectWidth;
@@ -180,8 +171,6 @@ public class ThumbnailView extends View implements Runnable, Callback {
 			nx1 = rc.right + MARGIN_WIDTH;
 			mDrawLast = i;
 		}
-//		Log.d("thview_onDraw", "page=" + page + ", top=" + mDrawTop + ", last=" + mDrawLast);
-		return;
 	}
 
 	private Rect drawBitmap(Canvas canvas, int page, int x, int y, float rate, int flag) {
@@ -238,7 +227,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 			if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " サイズを取得しました. w=" + w + ", h=" + h + ", w2=" + w2 + ", h2=" + h2 + ", mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
 
 			// 余白を半透明な背景で埋める
-			if (mThumW / 2 > tmpWidth || mThumH > tmpHeight) {
+			if (mPageWidth > tmpWidth || mThumH > tmpHeight) {
 				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 背景を半透明化します. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
 
 				int posx = 0;
@@ -246,10 +235,10 @@ public class ThumbnailView extends View implements Runnable, Callback {
 
 				dstHeight = mThumH;
 
-				if (mThumW / 2 > tmpWidth) {
+				if (mPageWidth > tmpWidth) {
 					if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 幅が不足しています. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
-					posx = (int) (((mThumW / 2) - tmpWidth) / 2);
-					dstWidth = mThumW / 2;
+					posx = (int) ((mPageWidth - tmpWidth) / 2);
+					dstWidth = mPageWidth;
 				} else {
 					if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 幅が不足していません. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
 					posx = 0;
@@ -345,9 +334,9 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		mViewWidth = pw;
 
 		mPageHeight = ph - MARGIN_HEIGHT * 2 - mTextSize;
-		mPageWidth = mPageHeight * 1000 / 1414;
+		mPageWidth = mPageHeight * 1000 / 1600;
 
-		mThumW = mPageWidth * 2;
+		mThumW = mPageHeight * 2000 / 1000;
 		mThumH = mPageHeight;
 		
 		int bcx = mThumW / mThumQuality;
@@ -383,8 +372,6 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		Message message = new Message();
 		message.what = MESSAGE_INIT;
 		mHandler.sendMessage(message);
-		// setPosition(mCurPage);
-		// startThumbnail();
 	}
 
 	/**

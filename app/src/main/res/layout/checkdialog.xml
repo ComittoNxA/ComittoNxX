@@ -39,6 +39,7 @@
 		android:layout_marginBottom="0sp" />
 	
 	<LinearLayout
+		android:id="@+id/footer"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_vertical"

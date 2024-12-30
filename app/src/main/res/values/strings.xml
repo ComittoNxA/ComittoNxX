@@ -107,6 +107,8 @@
     <string name="selChapterMenu">Select Chapter</string>
     <string name="searchTextMenu">Set Search Text</string>
     <string name="searchJumpMenu">Select Search Result</string>
+    <string name="searchJumpNoText">There are no Search Text</string>
+    <string name="searchJumpNotFound">There are no Search Result</string>
     <string name="thumbSwt">Thumbnail View</string>
     <string name="exitMenu">Exit</string>
     <string name="noticeMenu">Notice</string>
@@ -503,7 +505,7 @@
     <string name="ToolbarBookmarkLeft">Next(Prev)File(Marked Page)</string>
     <string name="ToolbarBookmarkRight">Prev(Next)File(Marked Page)</string>
     <string name="ToolbarThumbSlider">Thumbnail/Slider switching\n(Image viewer only)</string>
-    <string name="ToolbarDirTree">Select sub directory\n(Image viewer only)</string>
+    <string name="ToolbarDirTree">Select Directory\n(Image viewer only)</string>
     <string name="ToolbarTOC">Select Chapter\n(Text viewer only)</string>
     <string name="ToolbarFavorite">Select Favorite</string>
     <string name="ToolbarAddFavorite">Add Favorite</string>
@@ -516,10 +518,17 @@
     <string name="ToolbarControl">Image/Text Config</string>
     <string name="ToolbarMenu">Open Menu</string>
     <string name="ToolbarConfig">Open Settings</string>
+    <string name="ToolbarEditToolbar">Edit Toolbar</string>
 
     <string name="ChapMenuFile">File</string>
     <string name="ChapMenuTOC">TOC</string>
     <string name="ChapMenuChapter">Chapter</string>
-    <string name="ChapMenuOther">Other</string>
+    <string name="ChapMenuOther">Others</string>
+
+    <string name="txtConfFormat">Format</string>
+    <string name="txtConfOther">Others</string>
+
+    <string name="imgConfFilter">Filter</string>
+    <string name="imgConfOther">Others</string>
 
 </resources>

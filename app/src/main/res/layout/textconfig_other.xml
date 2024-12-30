@@ -1,0 +1,75 @@
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical" >
+
+	<ScrollView
+		android:id="@+id/ScrollView"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_weight="1" >
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:padding="8dip"
+			android:orientation="vertical" >
+
+			<TextView
+				android:id="@+id/label_bklight"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="8sp"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/bklightMenu" />
+
+			<SeekBar
+				android:id="@+id/seek_bklight"
+				style="@style/PageSeekBar"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingLeft="4sp"
+				android:paddingRight="4sp" />
+
+			<TextView
+				android:id="@+id/label_picsize"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/picSize" />
+
+			<Button
+				android:id="@+id/btn_picsize"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:paddingTop="12sp"
+				android:paddingBottom="12sp"
+				android:textSize="17sp" />
+
+			<TextView
+				android:id="@+id/label_ascmode"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10sp"
+				android:layout_marginRight="10sp"
+				android:layout_gravity="left"
+				android:text="@string/ascMode" />
+
+			<Button
+				android:id="@+id/btn_ascmode"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="17sp" />
+
+		</LinearLayout>
+	</ScrollView>
+
+</LinearLayout>

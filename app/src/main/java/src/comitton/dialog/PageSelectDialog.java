@@ -1,22 +1,16 @@
 package src.comitton.dialog;
 
-import src.comitton.listener.PageSelectListener;
 import jp.dip.muracoro.comittonx.R;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.text.InputType;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -25,8 +19,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.view.View.OnClickListener;
-
-import androidx.appcompat.widget.AppCompatImageButton;
 
 @SuppressLint("NewApi")
 public class PageSelectDialog extends BasePageSelectDialog implements Handler.Callback,
@@ -46,8 +38,8 @@ public class PageSelectDialog extends BasePageSelectDialog implements Handler.Ca
 	private Button mBtnCancel;
 	private Button mBtnOK;
 
-	public PageSelectDialog(Activity context) {
-		super(context);
+	public PageSelectDialog(Activity activity) {
+		super(activity);
 		mIsCancel = false;
 		mHandler = new Handler(this);
 		mAutoApply = true;
@@ -184,7 +176,7 @@ public class PageSelectDialog extends BasePageSelectDialog implements Handler.Ca
 		if (mIsCancel == true && mAutoApply) {
 			// キャンセルなら元ページへ
 			mListener.onSelectPage(mPage);
-			Toast.makeText(mContext, "Canceled.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mActivity, "Canceled.", Toast.LENGTH_SHORT).show();
 		}
 		mIsOpened = false;
 	}

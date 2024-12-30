@@ -128,6 +128,7 @@ public class DEF {
 	public static final int MENU_GAMMA = Menu.FIRST + 49;
 	public static final int MENU_BKLIGHT = Menu.FIRST + 50;
 	public static final int MENU_SEL_DIR_TREE = Menu.FIRST + 51;
+	public static final int MENU_EDIT_TOOLBAR = Menu.FIRST + 52;
 	public static final int MENU_BOOKMARK = Menu.FIRST + 1000;
 	public static final int MENU_CHAPTER = Menu.FIRST + 2000;
 	public static final int MENU_DIR_TREE = MENU_CHAPTER;

@@ -20,8 +20,8 @@
         <!-- CheckBoxやSwitchのテキスト -->
         <item name="android:textColorPrimaryDisableOnly">@color/white1</item>
 
-        <item name="colorPrimary">@color/white1</item>
-        <item name="colorPrimaryDark">@color/white1</item>
+        <item name="colorPrimary">@color/white1</item> <!-- 半透明にするとAndroid7以下で起動できない-->
+        <item name="colorPrimaryDark">@color/white1</item> <!-- 半透明にするとAndroid7以下で起動できない-->
         <item name="colorAccent">@color/white1</item>
 
         <item name="colorError">@color/red1</item>

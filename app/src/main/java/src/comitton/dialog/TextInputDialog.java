@@ -1,76 +1,83 @@
 package src.comitton.dialog;
 
-import java.util.EventListener;
-
-import jp.dip.muracoro.comittonx.R;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.view.View.OnClickListener;
+
+import androidx.annotation.StyleRes;
+
+import java.util.EventListener;
+
+import jp.dip.muracoro.comittonx.R;
 
 @SuppressLint("NewApi")
-public class InputDialog extends ImmersiveDialog implements OnClickListener, OnDismissListener {
-	private Activity mContext;
+public class TextInputDialog extends ImmersiveDialog implements OnClickListener, OnDismissListener {
 
-	private TextView mTitleText;
+	private TextView mTitleTextView;
+	private TextView mMessageTextView;
+	private TextView mNoticeTextView;
 	private EditText mEditText;
-	private Button mBtnSearch;
 	private Button mBtnCancel;
+	private Button mBtnOK;
 
 	private String mTitle;
+	private String mMessage;
+	private String mNotice;
 	private String mEdit;
 
 	SearchListener mListener;
 
-	public InputDialog(Activity context, String title, String edit, SearchListener listener) {
-		super(context);
-		Window dlgWindow = getWindow();
-
-		dlgWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を設定
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
+	public TextInputDialog(Activity activity, @StyleRes int themeResId, String title, String message, String notice, String edit, SearchListener listener) {
+		super(activity, themeResId, true);
 
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
 
-		mContext = context;
+		Resources res = mActivity.getResources();
+
 		mTitle = title;
-		mEdit = edit != null ? edit : "";
+		mMessage = message;
+		mNotice = notice;
+		mEdit = edit;
 		mListener = listener;
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.inputdialog);
-
-		mTitleText = (TextView)this.findViewById(R.id.text_title);
+		setContentView(R.layout.textinput);
+		mTitleTextView = (TextView)this.findViewById(R.id.text_title);
+		mMessageTextView = (TextView)this.findViewById(R.id.text_message);
+		mNoticeTextView = (TextView)this.findViewById(R.id.text_notice);
 		mEditText = (EditText)this.findViewById(R.id.edit_text);
-		mBtnSearch  = (Button)this.findViewById(R.id.btn_search);
 		mBtnCancel  = (Button)this.findViewById(R.id.btn_cancel);
+		mBtnOK  = (Button)this.findViewById(R.id.btn_ok);
 
-		mTitleText.setText(mTitle);
+		mTitleTextView.setText(mTitle);
+		mMessageTextView.setText(mMessage);
+		mNoticeTextView.setText(mNotice);
 		mEditText.setText(mEdit);
 
+		if (mMessage == null || mMessage.length() == 0) {
+			mMessageTextView.setVisibility(View.GONE);
+		}
+		if (mNotice == null || mNotice.length() == 0) {
+			mNoticeTextView.setVisibility(View.GONE);
+		}
+
 		// キャンセルボタン
-		mBtnSearch.setOnClickListener(this);
 		mBtnCancel.setOnClickListener(this);
+		mBtnOK.setOnClickListener(this);
 	}
 
 	@Override
@@ -81,7 +88,7 @@ public class InputDialog extends ImmersiveDialog implements OnClickListener, OnD
 					dismiss();
 					break;
 				case KeyEvent.KEYCODE_ENTER:
-					onClick(mBtnSearch);
+					onClick(mBtnOK);
 					break;
 			}
 		}
@@ -98,15 +105,15 @@ public class InputDialog extends ImmersiveDialog implements OnClickListener, OnD
 
 	@Override
 	public void onClick(View v) {
-		// キャンセルクリック
-		if (v == mBtnSearch) {
+		if (v == mBtnOK) {
 			String text = null;
 			if (mEditText.getText() != null) {
-				text = mEditText.getText().toString();
+				text = mEditText.getText().toString().trim();
 			}
 			mListener.onSearch(text);
 		}
 		else {
+			// キャンセルクリック
 			mListener.onCancel();
 		}
 		dismiss();

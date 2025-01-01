@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/label_toolbar_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8sp"
+        android:layout_marginLeft="10sp"
+        android:layout_marginRight="10sp"
+        android:layout_gravity="left"
+        android:text="@string/ToolbarSize" />
+
+    <SeekBar
+        android:id="@+id/seek_toolbar_size"
+        style="@style/PageSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6sp"
+        android:paddingBottom="6sp"
+        android:paddingLeft="12sp"
+        android:paddingRight="12sp" />
+
+</LinearLayout>

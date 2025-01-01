@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ScrollView"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/listlayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/dialogframe_transparent">
+
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="22sp"
+        android:textColor="@color/white1"
+        android:text="@string/svTitle" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1sp"
+        android:background="@color/white1"
+        android:layout_marginTop="0sp"
+        android:layout_marginBottom="4sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,7 +29,7 @@
         android:orientation="vertical" >
 
         <TextView
-			android:id="@+id/text_title"
+			android:id="@+id/text_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10sp"
@@ -89,19 +108,50 @@
             android:gravity="left"
             android:text="@string/svPassTitle" />
 
-        <EditText
-            android:id="@+id/edit_pass"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/MyTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10sp"
             android:layout_marginRight="10sp"
-            android:autoText="false"
-            android:capitalize="none"
             android:gravity="fill_horizontal"
-            android:hint="@string/svPassHist"
-            android:maxLength="100"
-            android:scrollHorizontally="true"
-            android:singleLine="true" />
+            app:passwordToggleEnabled="true" >
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_pass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="100"
+                android:scrollHorizontally="true"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
     </LinearLayout>
 
-</ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_horizontal"
+        android:padding="4dip"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:text="@string/btnCancel" />
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:text="@string/btnOK" />
+
+    </LinearLayout>
+
+</LinearLayout>

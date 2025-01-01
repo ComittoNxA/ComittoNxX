@@ -479,6 +479,8 @@ public class DEF {
 	public static final String KEY_MEMNEXT = "MemNext";
 	public static final String KEY_MEMPREV = "MemPrev";
 
+	public static final String KEY_TOOLBAR_SIZE = "ToolbarSize";
+
 	public static final int DEFAULT_INISCHALE = 5; //全体を表示(見開き対応)
 	public static final int DEFAULT_INITVIEW = 1; //見開き表示
 	public static final int DEFAULT_QUALITY = 1; //画質を優先する
@@ -536,6 +538,7 @@ public class DEF {
 	public static final int DEFAULT_THUMBSIZEW = 23; // 270 (23 * 10 + 40)
 	public static final int DEFAULT_THUMBSIZEH = 28; // 320 (28 * 10 + 40)
 	public static final int DEFAULT_LISTTHUMBSIZEH = 20; // 240 (20 * 10 + 40)
+	public static final int DEFAULT_TOOLBAR_SIZE = 2; // 100%
 
 	public static final int MAX_SCROLL = 9;
 	public static final int MAX_CLICKAREA = 100;
@@ -575,6 +578,9 @@ public class DEF {
 	public static final int MAX_LISTTHUMBSIZE = 60; // 640 (60 * 10 + 40)
 
 	public static final int MAX_PNUMSIZE = 54; // 6 + 24 = 60px
+
+	public static final int MAX_TOOLBAR_SIZE = 6; // 200%
+
 	// テキストビュアー設定
 	public static final String KEY_TX_INISCALE = "txIniScale";
 	public static final String KEY_TX_INITVIEW = "txInitView";

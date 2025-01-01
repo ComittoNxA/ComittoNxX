@@ -32,6 +32,6 @@
 	    android:paddingLeft="20sp"
 	    android:paddingRight="20sp" />
 
-	<include layout="@layout/pageselect_toolbar" android:id="@+id/toolbar"/>
+	<include layout="@layout/toolbar" android:id="@+id/toolbar"/>
 
 </LinearLayout>

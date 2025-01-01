@@ -8,7 +8,7 @@
 
 	<TextView
 		android:id="@+id/text_title"
-		android:layout_width="320sp"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:gravity="center"
 		android:textSize="22sp"
@@ -37,30 +37,36 @@
 		android:background="#FFFFFFFF"
 		android:layout_marginTop="0sp"
 		android:layout_marginBottom="0sp" />
-	
+
 	<LinearLayout
 		android:id="@+id/footer"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_gravity="center_vertical"
-		android:gravity="center"
 		android:padding="4dip"
-		android:orientation="horizontal" >
+		android:orientation="vertical" >
 
-		<Button
-			android:id="@+id/btn_cancel"
-			android:layout_width="120sp"
+		<LinearLayout
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:textSize="18sp"
-			android:text="@string/btnCancel" />
+			android:layout_gravity="center_vertical"
+			android:gravity="center"
+			android:orientation="horizontal" >
 
-		<Button
-			android:id="@+id/btn_ok"
-			android:layout_width="120sp"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:textSize="18sp"
-			android:text="@string/btnOK" />
+			<Button
+				android:id="@+id/btn_cancel"
+				android:layout_width="120sp"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="18sp"
+				android:text="@string/btnCancel" />
+
+			<Button
+				android:id="@+id/btn_ok"
+				android:layout_width="120sp"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textSize="18sp"
+				android:text="@string/btnOK" />
+		</LinearLayout>
 	</LinearLayout>
 </LinearLayout>

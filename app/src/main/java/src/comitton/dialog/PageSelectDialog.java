@@ -20,8 +20,10 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
+
 @SuppressLint("NewApi")
-public class PageSelectDialog extends BasePageSelectDialog implements Handler.Callback,
+public class PageSelectDialog extends ToolbarDialog implements Handler.Callback,
 		OnClickListener, OnSeekBarChangeListener, DialogInterface.OnDismissListener, OnEditorActionListener {
 	private final int HMSG_PAGESELECT		 = 5001;
 	private final int TERM_PAGESEELCT		 = 100;
@@ -38,8 +40,8 @@ public class PageSelectDialog extends BasePageSelectDialog implements Handler.Ca
 	private Button mBtnCancel;
 	private Button mBtnOK;
 
-	public PageSelectDialog(Activity activity) {
-		super(activity);
+	public PageSelectDialog(Activity activity, @StyleRes int themeResId) {
+		super(activity, themeResId);
 		mIsCancel = false;
 		mHandler = new Handler(this);
 		mAutoApply = true;

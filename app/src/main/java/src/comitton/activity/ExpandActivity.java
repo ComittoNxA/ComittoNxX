@@ -15,19 +15,19 @@ import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
 import src.comitton.data.FileData;
 import src.comitton.dialog.CloseDialog;
+import src.comitton.dialog.ListDialog;
+import src.comitton.filelist.RecordList;
 import src.comitton.stream.ExpandThumbnailLoader;
 import src.comitton.stream.FileListItem;
 import src.comitton.stream.ImageManager;
 import src.comitton.view.ListItemView;
 import src.comitton.view.TitleView;
+import src.comitton.view.list.FileListArea;
 
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,7 +35,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
@@ -107,6 +106,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	private int mCurrentPage;
 
 	private ProgressDialog mReadDialog;
+	private ListDialog mListDialog;
 	private String mReadingMsg[];
 
 	private ZipLoad mZipLoad;
@@ -524,6 +524,119 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			final FileData filedata = files.get(position);
 			final int datapos = position;
 
+			String[] items;
+
+			String ope0 = res.getString(R.string.ope00);	// 未読設定
+			String ope1 = res.getString(R.string.ope01);	// 既読設定
+			String ope6 = res.getString(R.string.ope06);	// ここまで読んだ
+			String ope7 = res.getString(R.string.ope100);
+
+			int state = filedata.getState();
+			int itemnum;
+			if (filedata.getType() == FileData.FILETYPE_TXT) {
+				// テキストファイル長押し
+				switch (state) {
+					case -1:
+					case -2:
+						itemnum = 1;
+						break;
+					default:
+						itemnum = 2;
+						break;
+				}
+			}
+			else {
+				itemnum = 2;
+			}
+
+			items = new String[itemnum];
+
+			int i = 0;
+			if (filedata.getType() == FileData.FILETYPE_TXT) {
+				// テキストファイル長押し
+				if (state != -1) {
+					// 未読にする
+					items[i] = ope0;
+					mOperate[i] = OPERATE_NONREAD;
+					i++;
+				}
+				if (state != -2) {
+					// 既読にする
+					items[i] = ope1;
+					mOperate[i] = OPERATE_READ;
+					i++;
+				}
+			}
+			else {
+				// イメージファイル長押し
+				items[i] = ope6;
+				mOperate[i] = OPERATE_READHERE;
+				i++;
+				items[i] = ope7;
+				mOperate[i] = OPERATE_SETTHUMBNAIL;
+				i++;
+			}
+
+			mListDialog = new ListDialog(mActivity, R.style.MyDialog, res.getString(R.string.opeTitle), items, -1, true, new ListDialog.ListSelectListener() {
+				public void onSelectItem(int pos) {
+					if (pos < 0 && 2 < pos) {
+						// 選択インデックスが範囲外
+						return;
+					}
+
+					Editor ed;
+
+					switch (mOperate[pos]) {
+						case OPERATE_NONREAD: { // 未読にする
+							ed = mSharedPreferences.edit();
+							ed.remove(DEF.createUrl(mUri + mPath + mFileName + filedata.getName(), mUser, mPass));
+							ed.commit();
+							updateListView();
+							break;
+						}
+						case OPERATE_READ: { // 既読にする
+							ed = mSharedPreferences.edit();
+							ed.putInt(DEF.createUrl(mUri + mPath + mFileName + filedata.getName(), mUser, mPass), -2);
+							ed.commit();
+							updateListView();
+							break;
+						}
+						case OPERATE_READHERE: { // ここまで読んだ
+							int state = 0;
+							for (int i = 0 ; i <= datapos ; i ++) {
+								if (mFileList.get(i).getType() != FileData.FILETYPE_TXT) {
+									state ++;
+								}
+							}
+
+							ed = mSharedPreferences.edit();
+							ed.putInt(DEF.createUrl(mUri + mPath + mFileName, mUser, mPass), state);
+							ed.commit();
+							updateListView();
+							break;
+						}
+						case OPERATE_SETTHUMBNAIL: {
+							FileData data = mFileList.get(datapos);
+							String filepath = mUri + mPath + mFileName + ":" + data.getName();
+							String filepath2 = mUri + mPath + mFileName;
+							mThumbnailLoader.setThumbnailCache(filepath, filepath2);
+							break;
+						}
+					}
+				}
+
+				@Override
+				public void onClose() {
+					// 終了
+					mListDialog = null;
+				}
+			});
+
+
+			mListDialog.show();
+			return true;
+
+/*
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ExpandActivity.this, R.style.MyDialog);
 
 			if (filedata == null) {
@@ -636,6 +749,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			AlertDialog alert = dialogBuilder.create();
 			alert.show();
 			return true;
+ */
 		}
 	}
 

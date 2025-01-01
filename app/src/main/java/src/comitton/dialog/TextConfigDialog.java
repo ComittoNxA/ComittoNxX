@@ -25,6 +25,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
 import androidx.fragment.app.FragmentActivity;
 
 @SuppressLint("NewApi")
@@ -106,15 +107,10 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 
 	private int mSelectMode;
 
-	private int mX;
-	private int mY;
-
-	public TextConfigDialog(FragmentActivity activity, int cx, int cy, boolean isclose, MenuDialog.MenuSelectListener listener) {
-		super(activity, cx, cy, isclose, listener);
+	public TextConfigDialog(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
+		super(activity, themeResId, isclose, false, false, true, listener);
 
 		mActivity = activity;
-		mX = cx;
-		mY = cy;
 
 		Resources res = mActivity.getResources();
 		mDefaultStr = res.getString(R.string.auto);
@@ -172,18 +168,9 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 
 		LinearLayout footer = (LinearLayout)inflater.inflate(R.layout.imagetextconfig_footer, null, false);
 		footer.setBackgroundColor(0x80000000);
+		// Android 5.1でテキストの色がおかしかったので暫定
+		((CheckBox)footer.findViewById(R.id.chk_save)).setTextAppearance(mActivity, mThemeResId);
 		addFooter(footer);
-
-		mView.getViewTreeObserver().addOnWindowFocusChangeListener(new ViewTreeObserver.OnWindowFocusChangeListener() {
-			@Override
-			public void onWindowFocusChanged(boolean hasFocus) {
-				// ビューページャーのサイズを設定する
-				ViewGroup.LayoutParams layoutParams = mViewPager.getLayoutParams();
-				layoutParams.width = mWidth;
-				layoutParams.height = mHeight - mHeader.getHeight() - mTabLayout.getHeight() - mFooter.getHeight();
-				mViewPager.setLayoutParams(layoutParams);
-			}
-		});
 
 		mChkIsSave = (CheckBox) mView.findViewById(R.id.chk_save);
 
@@ -320,7 +307,7 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(mActivity, mX, mY, title, items, selIndex, false, new ListSelectListener() {
+		mListDialog = new ListDialog(mActivity, R.style.MyDialog, title, items, selIndex, false, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -399,6 +386,7 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 	@Override
 	public void onDismiss(DialogInterface dialog) {
 		mListener.onClose();
+		super.dismiss();
 	}
 
 	@Override

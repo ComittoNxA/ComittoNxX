@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
 import androidx.fragment.app.FragmentActivity;
 
 @SuppressLint("NewApi")
@@ -116,15 +118,10 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 	private int mSelectMode;
 	private int mCommandId;
 
-	private int mX;
-	private int mY;
-
-	public ImageConfigDialog(FragmentActivity activity, int command_id, int cx, int cy, boolean isclose, MenuDialog.MenuSelectListener listener) {
-		super(activity, cx, cy, isclose, listener);
+	public ImageConfigDialog(FragmentActivity activity, @StyleRes int themeResId, int command_id, boolean isclose, MenuDialog.MenuSelectListener listener) {
+		super(activity, themeResId, isclose, false, false, true, listener);
 
 		mActivity = activity;
-		mX = cx;
-		mY = cy;
 
 		Resources res = activity.getResources();
 		mAutoStr = res.getString(R.string.auto);
@@ -212,18 +209,9 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 
 		LinearLayout footer = (LinearLayout)inflater.inflate(R.layout.imagetextconfig_footer, null, false);
 		footer.setBackgroundColor(0x80000000);
+		// Android 5.1でテキストの色がおかしかったので暫定
+		((CheckBox)footer.findViewById(R.id.chk_save)).setTextAppearance(mActivity, mThemeResId);
 		addFooter(footer);
-
-		mView.getViewTreeObserver().addOnWindowFocusChangeListener(new ViewTreeObserver.OnWindowFocusChangeListener() {
-			@Override
-			public void onWindowFocusChanged(boolean hasFocus) {
-				// ビューページャーのサイズを設定する
-				ViewGroup.LayoutParams layoutParams = mViewPager.getLayoutParams();
-				layoutParams.width = mWidth;
-				layoutParams.height = mHeight - mHeader.getHeight() - mTabLayout.getHeight() - mFooter.getHeight();
-				mViewPager.setLayoutParams(layoutParams);
-			}
-		});
 
 		mChkIsSave = (CheckBox) mView.findViewById(R.id.chk_save);
 
@@ -405,7 +393,7 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(mActivity, mX, mY, title, items, selIndex, false, new ListSelectListener() {
+		mListDialog = new ListDialog(mActivity, R.style.MyDialog, title, items, selIndex, false, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -507,13 +495,14 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 
 		if (select != CLICK_APPLY) {
 			// 適用以外では閉じる
-			dismiss();
+			this.dismiss();
 		}
 	}
 
 	@Override
 	public void onDismiss(DialogInterface dialog) {
 		mListener.onClose();
+		super.dismiss();
 	}
 
 	@Override

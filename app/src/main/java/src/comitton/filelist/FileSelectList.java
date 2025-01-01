@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 import src.comitton.common.FileAccess;
 import src.comitton.data.FileData;

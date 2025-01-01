@@ -24,12 +24,15 @@ import src.comitton.data.RecordItem;
 import src.comitton.dialog.BookmarkDialog;
 import src.comitton.dialog.CloseDialog;
 import src.comitton.dialog.DownloadDialog;
+import src.comitton.dialog.EditServerDialog;
 import src.comitton.dialog.Information;
 import src.comitton.dialog.ListDialog;
+import src.comitton.dialog.MarkerInputDialog;
 import src.comitton.dialog.RemoveDialog;
 import src.comitton.dialog.BookmarkDialog.BookmarkListenerInterface;
 import src.comitton.dialog.ListDialog.ListSelectListener;
 import src.comitton.dialog.RemoveDialog.RemoveListener;
+import src.comitton.dialog.TextInputDialog;
 import src.comitton.exception.FileAccessException;
 import src.comitton.filelist.FileSelectList;
 import src.comitton.filelist.RecordList;
@@ -85,8 +88,6 @@ import android.view.View.OnTouchListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -136,6 +137,9 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	// ダイアログ情報
 	private Information mInformation;
 	private ListDialog mListDialog;
+	private MarkerInputDialog mMarkerInputDialog;
+	private TextInputDialog mTextInputDialog;
+	EditServerDialog mEditServerDialog;
 
 	// ダイアログ表示中に選択項目を記憶しておくのに使用
 	private FileData mFileData = null;
@@ -1207,7 +1211,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						else {
 							// ディレクトリの場合は中身を順番に消す
 							Log.d("FileSelectActivity", "onCreateDialog ディレクトリを削除します。");
-							RemoveDialog dlg = new RemoveDialog(mActivity, mActivity, mURI, mPath, user, pass, mFileData.getName(), new RemoveListener() {
+							RemoveDialog dlg = new RemoveDialog(mActivity, R.style.MyDialog, mURI, mPath, user, pass, mFileData.getName(), new RemoveListener() {
 								@Override
 								public void onClose() {
 								// 終了でリスト更新
@@ -1278,7 +1282,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							// ダウンロード開始
 							String user = mServer.getUser();
 							String pass = mServer.getPass();
-							DownloadDialog dlg = new DownloadDialog(mActivity, mURI, mPath, user, pass, mFileData.getName(), mServer.getPath(ServerSelect.INDEX_LOCAL));
+							DownloadDialog dlg = new DownloadDialog(mActivity, R.style.MyDialog, mURI, mPath, user, pass, mFileData.getName(), mServer.getPath(ServerSelect.INDEX_LOCAL));
 							dlg.show();
 							mFileData = null;
 						}
@@ -1294,17 +1298,13 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				dialog = dialogBuilder.create();
 				break;
 			case DEF.MESSAGE_SHORTCUT: {
-				// レイアウトの呼び出し
-				LayoutInflater factory = LayoutInflater.from(this);
-				final View inputView = factory.inflate(R.layout.input, null);
+				Resources res = getResources();
+				String title = res.getString(R.string.scTitle);
+				String message = res.getString(R.string.scMsg);
 
-				// ダイアログの作成(AlertDialog.Builder)
-				dialogBuilder.setTitle(R.string.scTitle);
-				dialogBuilder.setView(inputView);
-				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
-						String title = edit.getText().toString();
+				mTextInputDialog = new TextInputDialog(mActivity, R.style.MyDialog, title, null, message, null, new TextInputDialog.SearchListener() {
+					@Override
+					public void onSearch(String title) {
 						// ショートカットに持たせるインテントの内容
 						// ここでは MainActというクラスをACTION_VIEWで呼び出すという内容
 						Intent shortcutIntent = new Intent(Intent.ACTION_VIEW);
@@ -1319,7 +1319,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 						// ショートカットをHOMEに作成する
 						if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-							// Android 8 O API26 以降  
+							// Android 8 O API26 以降
 							Icon icon = Icon.createWithResource(mActivity, R.drawable.icon);
 							ShortcutInfo shortcut = new ShortcutInfo.Builder(mActivity, title)
 									.setShortLabel(title)
@@ -1328,11 +1328,11 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 									.setIntent(shortcutIntent)
 									.build();
 							ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-							shortcutManager.requestPinShortcut(shortcut, null); // フツーのショートカット  
-							// shortcutManager.addDynamicShortcuts(Arrays.asList(shortcut)); // ダイナミックショートカット  
+							shortcutManager.requestPinShortcut(shortcut, null); // フツーのショートカット
+							// shortcutManager.addDynamicShortcuts(Arrays.asList(shortcut)); // ダイナミックショートカット
 						}
 						else {
-							// Android 7以前  
+							// Android 7以前
 							Intent intent = new Intent();
 
 							intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
@@ -1343,50 +1343,54 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							sendBroadcast(intent);
 						}
 					}
-				});
-				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						/* キャンセル処理 */
+
+					@Override
+					public void onCancel() {
+						// キャンセル処理
+					}
+
+					@Override
+					public void onClose() {
+						// 終了
+						mTextInputDialog = null;
 					}
 				});
-				dialog = dialogBuilder.create();
+				mTextInputDialog.show();
 				break;
 			}
 			case DEF.MESSAGE_MARKER: {
-				// レイアウトの呼び出し
-				LayoutInflater factory = LayoutInflater.from(this);
-				final View inputView = factory.inflate(R.layout.mkinput, null);
-				final CheckBox chkFilter = (CheckBox) inputView.findViewById(R.id.chk1);
-				final CheckBox chkApplyDir = (CheckBox) inputView.findViewById(R.id.chk2);
 
-				EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
-				edit.setText(mMarker);
-				chkApplyDir.setEnabled(false);
-				chkFilter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+				mMarkerInputDialog = new MarkerInputDialog(mActivity, R.style.MyDialog, mMarker, mFilter, mApplyDir, new MarkerInputDialog.SearchListener() {
 					@Override
-					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-						chkApplyDir.setEnabled(isChecked);
+					public void onSearch(String text, boolean filter, boolean applyDir) {
+						if (text != null && text.length() > 0) {
+							// 検索文字列セット
+							mMarker = text;
+							mFilter = filter;
+							mApplyDir = applyDir;
+							loadListView();
+						}
+						else {
+							// 検索文字列クリア
+							mMarker = "";
+							Toast.makeText(mActivity, R.string.searchJumpNoText, Toast.LENGTH_SHORT).show();
+						}
 					}
-				});
-				// ダイアログの作成(AlertDialog.Builder)
-				dialogBuilder.setTitle(R.string.mkTitle);
-				dialogBuilder.setView(inputView);
-				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
-						CheckBox chkFilter = (CheckBox) inputView.findViewById(R.id.chk1);
-						mMarker = edit.getText().toString().trim();
-						mFilter = chkFilter.isChecked();
-						mApplyDir = chkApplyDir.isChecked();
+
+					@Override
+					public void onCancel() {
+						// 検索文字列クリア
+						mMarker = "";
 						loadListView();
 					}
-				});
-				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						/* キャンセル処理 */
+
+					@Override
+					public void onClose() {
+						// 終了
+						mMarkerInputDialog = null;
 					}
 				});
-				dialog = dialogBuilder.create();
+				mMarkerInputDialog.show();
 				break;
 			}
 			case DEF.MESSAGE_FILE_RENAME: {
@@ -1397,11 +1401,9 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
 				}
 
-				// レイアウトの呼び出し
-				LayoutInflater factory = LayoutInflater.from(this);
-				final View inputView = factory.inflate(R.layout.rename, null);
-
-				EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
+				Resources res = getResources();
+				String title = res.getText(R.string.renTitle).toString();
+				String notice = res.getText(R.string.renMsg).toString();
 				String fromfile = mFileData.getName();
 				int filetype = mFileData.getType();
 				int index;
@@ -1423,15 +1425,10 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					}
 				}
 				fromfile = fromfile.substring(0, index);
-				edit.setText(fromfile);
 
-				// ダイアログの作成(AlertDialog.Builder)
-				dialogBuilder.setTitle(R.string.renTitle);
-				dialogBuilder.setView(inputView);
-				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText edit = (EditText) inputView.findViewById(R.id.dialog_edittext);
-						String filename = edit.getText().toString().trim();
+				mTextInputDialog = new TextInputDialog(mActivity, R.style.MyDialog, title, fromfile, notice, fromfile, new TextInputDialog.SearchListener() {
+					@Override
+					public void onSearch(String filename) {
 						// ファイル削除 (ローカルのみ)
 						if (mFileData != null) {
 							String user = mServer.getUser();
@@ -1466,14 +1463,20 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						}
 						updateListView();
 					}
-				});
-				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						/* キャンセル処理 */
+
+					@Override
+					public void onCancel() {
+						// 検索文字列クリア
 						mFileData = null;
 					}
+
+					@Override
+					public void onClose() {
+						// 終了
+						mTextInputDialog = null;
+					}
 				});
-				dialog = dialogBuilder.create();
+				mTextInputDialog.show();
 				break;
 			}
 			case DEF.MESSAGE_RESUME: {
@@ -1538,17 +1541,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							}
 							mLoadListNextPage = DEF.PAGENUMBER_UNREAD;
 						} else if (lastView == DEF.LASTOPEN_IMAGE) {
-							// 最後に開いたイメージオープン
-							// if (lastFile.length() == 0) {
-							// int l = path.length();
-							// if (l > 0) {
-							// int p = path.lastIndexOf('/', l - 2);
-							// if (p >= 0) {
-							// lastFile = path.substring(p + 1);
-							// path = path.substring(0, p + 1);
-							// }
-							// }
-							// }
 							mLoadListNextFile = lastFile;
 							mLoadListNextPath = path;
 							mLoadListNextPage = -2;
@@ -1567,17 +1559,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				dialog = dialogBuilder.create();
 				break;
 			}
-//			case DEF.MESSAGE_MOVE_PATH_EROOR:{
-//				//dialogBuilder.setTitle("dummy");
-//				dialogBuilder.setMessage(R.string.movePathErr);
-//				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
-//					public void onClick(DialogInterface dialog, int whichButton) {
-//						dialog.dismiss();
-//					}
-//				});
-//				dialog = dialogBuilder.create();
-//				break;
-//			}
 			case DEF.MESSAGE_RESETLOCAL:{
 				if(debug) {Log.d("FileSelectActivity", "onCreateDialog: ローカルのパスリセットのダイアログを表示します.");}
 				int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
@@ -1611,9 +1592,44 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
 				ServerSelect server = new ServerSelect(mSharedPreferences, this);
 
+				String name = server.getName(serverindex);
+				String host = server.getHost(serverindex);
+				String user = server.getUser(serverindex);
+				String pass = server.getPass(serverindex);
+
+				mEditServerDialog = new EditServerDialog(mActivity, R.style.MyDialog, name, host, user, pass, new EditServerDialog.SearchListener() {
+					@Override
+					public void onSearch(String name, String host, String user, String pass) {
+						int listtype = RecordList.TYPE_SERVER;
+						// リストのデータを更新
+						mSelectRecord.setServerName(name);
+						mSelectRecord.setHost(host);
+						mSelectRecord.setUser(user);
+						mSelectRecord.setPass(pass);
+						mSelectRecord.setPath("/");
+
+						ArrayList<RecordItem> recordList = mListScreenView.getList(listtype);
+						RecordList.update(recordList, listtype);
+						mListScreenView.notifyUpdate(listtype);
+					}
+
+					@Override
+					public void onCancel() {
+						// キャンセル処理
+					}
+
+					@Override
+					public void onClose() {
+						// 終了
+						mEditServerDialog = null;
+					}
+				});
+				mEditServerDialog.show();
+				break;
+/*
 				// レイアウトの呼び出し
 				LayoutInflater factory = LayoutInflater.from(this);
-				mEditDlg = factory.inflate(R.layout.editsvr, null);
+				mEditDlg = factory.inflate(R.layout.editserverdialog, null);
 				// ダイアログの作成(AlertDialog.Builder)
 				dialogBuilder.setTitle(R.string.svTitle);
 				dialogBuilder.setView(mEditDlg);
@@ -1640,11 +1656,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				});
 				dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						/* キャンセル処理 */
+						// キャンセル処理
 					}
 				});
 				dialog = dialogBuilder.create();
 				break;
+*/
 			}
 		}
 		return dialog;
@@ -2223,7 +2240,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			items[3] = res.getString(R.string.lsort04);
 			items[4] = res.getString(R.string.lsort05);
 			items[5] = res.getString(R.string.lsort06);
-			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, mSortMode - 1, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, R.style.MyDialog, title, items, mSortMode - 1, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					if (item >= 0 && item < 6) {
@@ -2268,7 +2285,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			else {
 				select = mSortType - (mSortType >= 2 ? 2 : 0);
 			}
-			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, select, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, R.style.MyDialog, title, items, select, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					int listtype = mListScreenView.getListType();
@@ -2525,7 +2542,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				i++;
 			}
 		}
-		mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, R.style.MyDialog, title, items, -1, true, new ListSelectListener() {
 			@SuppressWarnings("deprecation")
 			@Override
 			public void onSelectItem(int item) {
@@ -2691,7 +2708,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		if (listtype == RecordList.TYPE_DIRECTORY) {
 			String[] items = new String[1];
 			items[0] = res.getString(R.string.bm02);
-			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, R.style.MyDialog, title, items, -1, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					switch (item) {
@@ -2731,7 +2748,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			items[0] = res.getString(R.string.bm00);
 			items[1] = res.getString(R.string.bm01);
 			items[2] = res.getString(R.string.bm02);
-			mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
+			mListDialog = new ListDialog(this, R.style.MyDialog, title, items, -1, true, new ListSelectListener() {
 				@Override
 				public void onSelectItem(int item) {
 					switch (item) {
@@ -2752,7 +2769,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						}
 						case 1: { // 編集
 							// showDialog(DEF.MESSAGE_RENAME);
-							BookmarkDialog renameDlg = new BookmarkDialog(mActivity);
+							BookmarkDialog renameDlg = new BookmarkDialog(mActivity, R.style.MyDialog);
 							renameDlg.setBookmarkListear(mActivity);
 							renameDlg.setName(mSelectRecord.getDispName());
 							renameDlg.show();
@@ -2793,7 +2810,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		final String[] items = { siori0, siori1, siori2, siori3 };
 
 		String title = res.getString(R.string.sioriTitle);
-		mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, -1, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, R.style.MyDialog, title, items, -1, true, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int item) {
 				Editor ed = mSharedPreferences.edit();
@@ -2903,7 +2920,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		items[3] = res.getString(R.string.listmode03);
 		int select = 0;
 		select = (mListMode == FileListArea.LISTMODE_LIST ? 0 : 2) + (mThumbnail == true ? 0 : 1);
-		mListDialog = new ListDialog(this, mListScreenView.getWidth(), mListScreenView.getHeight(), title, items, select, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, R.style.MyDialog, title, items, select, true, new ListSelectListener() {
 			public void onSelectItem(int pos) {
 				boolean isChange = false;
 				switch (pos) {

@@ -3,26 +3,32 @@ package src.comitton.dialog;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
+import androidx.annotation.StyleRes;
 import androidx.appcompat.widget.AppCompatImageButton;
 
 import java.util.Arrays;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.ImageAccess;
 import src.comitton.listener.PageSelectListener;
 
 @SuppressLint("NewApi")
-public class BasePageSelectDialog extends ImmersiveDialog implements
+public class ToolbarDialog extends ImmersiveDialog implements
 		OnClickListener, OnSeekBarChangeListener, DialogInterface.OnDismissListener {
 
 	protected PageSelectListener mListener = null;
@@ -72,8 +78,8 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 	private AppCompatImageButton mBtnConfig;
 	private AppCompatImageButton mBtnEditButton;
 
-	public BasePageSelectDialog(Activity activity) {
-		super(activity);
+	public ToolbarDialog(Activity activity, @StyleRes int themeResId) {
+		super(activity, themeResId);
 		Window dlgWindow = getWindow();
 
 		// タイトルなし
@@ -204,11 +210,11 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 		mBtnConfig.setOnClickListener(this);
 		mBtnEditButton.setOnClickListener(this);
 
-		boolean[] states = PageSelectCheckDialog.loadToolbarState(mActivity);
-		if (debug) {Log.d("BasePageSelectDialog", "onCreate: states[]=" + Arrays.toString(states));}
+		boolean[] states = ToolbarEditDialog.loadToolbarState(mActivity);
+		if (debug) {Log.d("ToolbarDialog", "onCreate: states[]=" + Arrays.toString(states));}
 
 		for (int i = 0; i < states.length; ++i) {
-			switch (PageSelectCheckDialog.COMMAND_ID[i]) {
+			switch (ToolbarEditDialog.COMMAND_ID[i]) {
 				case DEF.TOOLBAR_LEFTMOST: {
 					if (!states[i]) {
 						mBtnLeftMost.setVisibility(View.GONE);
@@ -384,6 +390,62 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 		}
 	}
 
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+
+		// ダイアログのサイズを設定する
+		Rect size = new Rect();
+		mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(size);
+		int cx = size.width();
+		getWindow().setLayout(cx, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+		Resources res = mActivity.getResources();
+		float ratio = ToolbarEditDialog.getToolbarRatio(mActivity);
+
+		// ボタンのサイズを変更する
+		zoom(res, mBtnLeftMost, ratio);
+		zoom(res, mBtnLeft100, ratio);
+		zoom(res, mBtnLeft10, ratio);
+		zoom(res, mBtnLeft1, ratio);
+		zoom(res, mBtnRightMost, ratio);
+		zoom(res, mBtnRight100, ratio);
+		zoom(res, mBtnRight10, ratio);
+		zoom(res, mBtnRight1, ratio);
+		zoom(res, mBtnPageReset, ratio);
+
+		zoom(res, mBtnBookLeft, ratio);
+		zoom(res, mBtnBookRight, ratio);
+		zoom(res, mBtnBookmarkLeft, ratio);
+		zoom(res, mBtnBookmarkRight, ratio);
+		zoom(res, mBtnThumbSlider, ratio);
+		zoom(res, mBtnDirTree, ratio);
+		zoom(res, mBtnTOC, ratio);
+		zoom(res, mBtnFavorite, ratio);
+		zoom(res, mBtnAddFavorite, ratio);
+		zoom(res, mBtnSearch, ratio);
+		zoom(res, mBtnShare, ratio);
+		zoom(res, mBtnShareLeftPage, ratio);
+		zoom(res, mBtnShareRightPage, ratio);
+		zoom(res, mBtnRotate, ratio);
+		zoom(res, mBtnRotateImage, ratio);
+		zoom(res, mBtnSelectThum, ratio);
+		zoom(res, mBtnTrimThumb, ratio);
+		zoom(res, mBtnControl, ratio);
+		zoom(res, mBtnMenu, ratio);
+		zoom(res, mBtnConfig, ratio);
+		zoom(res, mBtnEditButton, ratio);
+	}
+
+	private void zoom(Resources resources, ImageButton imageButton, float ratio){
+		// ボタンのサイズを変更する
+		imageButton.setImageDrawable(ImageAccess.zoom(resources, imageButton.getDrawable(), ratio));
+		imageButton.setPadding((int)(imageButton.getPaddingLeft() * ratio), (int)(imageButton.getPaddingTop() * ratio), (int)(mBtnLeftMost.getPaddingRight() * ratio), (int)(mBtnLeftMost.getPaddingBottom() * ratio));
+		imageButton.getLayoutParams().height = (int)(imageButton.getHeight() * ratio);
+		imageButton.getLayoutParams().width = (int)(imageButton.getWidth() * ratio);
+		imageButton.requestLayout();
+	}
+
 	public void setPageSelectListear(PageSelectListener listener) {
 		mListener = listener;
 	}
@@ -461,71 +523,71 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 		else {
 			// ページ選択の場合
 			int page = calcProgress(mSeekPage.getProgress());
-			if(debug) {Log.d("BasePageSelectDialog", "onClick: 現在ページ=" + page + ", mReverse=" + mReverse);}
+			if(debug) {Log.d("ToolbarDialog", "onClick: 現在ページ=" + page + ", mReverse=" + mReverse);}
 
 			if (mBtnLeftMost == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnLeftMost");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeftMost");}
 				if (mReverse) {
 					page = mMaxPage - 1;
 				} else {
 					page = 0;
 				}
 			} else if (mBtnLeft100 == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnLeft100");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeft100");}
 				if (mReverse) {
 					page += 100;
 				} else {
 					page -= 100;
 				}
 			} else if (mBtnLeft10 == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnLeft10");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeft10");}
 				if (mReverse) {
 					page += 10;
 				} else {
 					page -= 10;
 				}
 			} else if (mBtnLeft1 == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnLeft1");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeft1");}
 				if (mReverse) {
 					page += 1;
 				} else {
 					page -= 1;
 				}
 			} else if (mBtnRight1 == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnRight1");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRight1");}
 				if (mReverse) {
 					page -= 1;
 				} else {
 					page += 1;
 				}
 			} else if (mBtnRight10 == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnRight10");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRight10");}
 				if (mReverse) {
 					page -= 10;
 				} else {
 					page += 10;
 				}
 			} else if (mBtnRight100 == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnRight100");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRight100");}
 				if (mReverse) {
 					page -= 100;
 				} else {
 					page += 100;
 				}
 			} else if (mBtnRightMost == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnRightMost");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRightMost");}
 				if (mReverse) {
 					page = 0;
 				} else {
 					page = mMaxPage - 1;
 				}
 			} else if (mBtnPageReset == v) {
-				if(debug) {Log.d("BasePageSelectDialog", "onClick: v=mBtnPageReset");}
+				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnPageReset");}
 				// ページ選択をリセット
 				page = mPage;
 			}
 
-			if(debug) {Log.d("BasePageSelectDialog", "onClick: 変更後ページ=" + page);}
+			if(debug) {Log.d("ToolbarDialog", "onClick: 変更後ページ=" + page);}
 
 			if (page < 0) {
 				page = 0;
@@ -543,8 +605,8 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 
 	protected void setProgress(int pos, boolean fromThumb) {
 		boolean debug  = false;
-		if(debug) {Log.d("BasePageSelectDialog", "setProgress: pos=" + pos);}
-		//if (debug) {DEF.StackTrace("BasePageSelectDialog", "setProgress:");}
+		if(debug) {Log.d("ToolbarDialog", "setProgress: pos=" + pos);}
+		//if (debug) {DEF.StackTrace("ToolbarDialog", "setProgress:");}
 		int convpos;
 
 		if (mReverse == false) {
@@ -553,7 +615,7 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 		else {
 			convpos = mSeekPage.getMax() - pos;
 		}
-		if(debug) {Log.d("BasePageSelectDialog", "setProgress: convpos=" + convpos);}
+		if(debug) {Log.d("ToolbarDialog", "setProgress: convpos=" + convpos);}
 		mSeekPage.setProgress(convpos);
 	}
 
@@ -572,7 +634,7 @@ public class BasePageSelectDialog extends ImmersiveDialog implements
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int page, boolean fromUser) {
 		boolean debug  = true;
-		if(debug) {Log.d("BasePageSelectDialog", "onProgressChanged: page=" + page + ", fromUser=" + fromUser);}
+		if(debug) {Log.d("ToolbarDialog", "onProgressChanged: page=" + page + ", fromUser=" + fromUser);}
 		// 変更
 		if (fromUser) {
 			int cnvpage = calcProgress(page);

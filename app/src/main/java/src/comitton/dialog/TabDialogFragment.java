@@ -1,7 +1,7 @@
 package src.comitton.dialog;
 
 import android.app.Dialog;
-import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,10 +15,13 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.adapter.FragmentViewHolder;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -39,7 +42,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
 
     private MenuDialog.MenuSelectListener mListener = null;
     private FragmentActivity mActivity;
-    private Context mContext;
+    protected @StyleRes int mThemeResId;
 
     protected ArrayList<String> mTitleArray = new ArrayList<String>(0);
     protected ArrayList<View> mViewArray = new ArrayList<View>(0);
@@ -47,11 +50,14 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
 
     private boolean mTop;
     private boolean mHalfView;
+    private boolean mWide;
     protected int mWidth;
     protected int mHeight;
     private float mScale;
     private boolean mSelected;
     private boolean mIsClose;
+
+    private static int pager_bakcolor = 0x80000000;
 
     private static int curcolor = 0x90008000;
     private static int title_txtcolor = 0xFFFFFFFF;
@@ -66,29 +72,53 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     private static int separater_bakcolor = 0xBBFFFFFF;
     private int item_txtsize;
 
-    public TabDialogFragment(FragmentActivity activity, int cx, int cy, boolean isclose, MenuDialog.MenuSelectListener listener) {
-        TabDialogFragmentProc(activity, cx, cy, isclose, false, false, false, listener);
+    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
+        mThemeResId = themeResId;
+        TabDialogFragmentProc(activity, isclose, false, false, false, listener);
     }
 
-    public TabDialogFragment(FragmentActivity activity, int cx, int cy, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
-        TabDialogFragmentProc(activity, cx, cy, isclose, halfview, false, false, listener);
+    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
+        mThemeResId = themeResId;
+        TabDialogFragmentProc(activity, isclose, halfview, false, false, listener);
     }
 
-    public TabDialogFragment(FragmentActivity activity, int cx, int cy, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
-        TabDialogFragmentProc(activity, cx, cy, isclose, halfview, top, false, listener);
+    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
+        mThemeResId = themeResId;
+        TabDialogFragmentProc(activity, isclose, halfview, top, false, listener);
     }
 
-    public TabDialogFragment(FragmentActivity activity, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
-        TabDialogFragmentProc(activity, cx, cy, isclose, halfview, top, wide, listener);
+    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+        mThemeResId = themeResId;
+        TabDialogFragmentProc(activity, isclose, halfview, top, wide, listener);
     }
 
-    private void TabDialogFragmentProc(FragmentActivity activity, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+    private void TabDialogFragmentProc(FragmentActivity activity, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+        boolean debug = false;
+        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: isclose=" + isclose + ", halfview=" + halfview + ", top=" + top + ", wide=" + wide);}
+
         mActivity = activity;
-        mContext = activity.getApplicationContext();
-        mScale = mContext.getResources().getDisplayMetrics().scaledDensity;
+        mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
 
-        mTop = top;
+        mIsClose = isclose;
         mHalfView = halfview;
+        mTop = top;
+        mWide = wide;
+
+        mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
+        title_txtsize = (int) (18 * mScale);
+        item_txtsize = (int) (20 * mScale);
+
+        mSelected = false;
+        mListener = listener;
+
+        // サイズを決定する
+        Rect size = new Rect();
+        // ソフトウェアキーボードのサイズが引かれるのでgetWindowVisibleDisplayFrame(size)は使用しない
+        //mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(size);
+        View mRootView = mActivity.getWindow().getDecorView().findViewById(android.R.id.content);
+        int cx = mRootView.getWidth();
+        int cy = mRootView.getHeight();
+        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: cx=" + cx + ", cy=" + cy);}
 
         if (mHalfView) {
             mWidth = Math.min(cx, cy) * 20 / 100;
@@ -96,19 +126,13 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
             mWidth = Math.min(cx, cy) * 80 / 100;
         }
         int maxWidth = (int) (20 * mScale * 16);
-        if (!wide) {
-            mWidth = Math.max(mWidth, maxWidth);
+        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: mWidth=" + mWidth);}
+        if (!mWide) {
+            mWidth = Math.min(mWidth, maxWidth);
         }
         mHeight = cy * 80 / 100;
 
-        mScale = mContext.getResources().getDisplayMetrics().scaledDensity;
-        title_txtsize = (int) (18 * mScale);
-        item_txtsize = (int) (20 * mScale);
-
-        mSelected = false;
-        mIsClose = isclose;
-
-        mListener = listener;
+        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: mWidth=" + mWidth + ", mHeight=" + mHeight);}
     }
 
     @Override
@@ -118,7 +142,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
         Window dlgWindow = dialog.getWindow();
 
         // タイトルなし
-        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setStyle(STYLE_NO_TITLE, mThemeResId);
 
         // Activityを暗くしない
         dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -129,42 +153,46 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
         // ソフトウェアキーボードを隠す
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        // 画面下に表示
+        // 表示位置を決定
         WindowManager.LayoutParams wmlp=dlgWindow.getAttributes();
         wmlp.gravity =(mTop ? Gravity.TOP : Gravity.CENTER) | (mHalfView ? Gravity.RIGHT : 0);
         dlgWindow.setAttributes(wmlp);
 
         dialog.getWindow().setLayout(mWidth, mHeight);
 
-        ViewGroup.LayoutParams layoutParams;
-
         mView = inflater.inflate(R.layout.tabdialog, container);
-        layoutParams = new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
         mView.setLayoutParams(layoutParams);
 
         mHeader = (LinearLayout) mView.findViewById(R.id.header);
         mFooter = (LinearLayout) mView.findViewById(R.id.footer);
 
         mTabLayout = (TabLayout) mView.findViewById(R.id.tablayout);
-        layoutParams = mTabLayout.getLayoutParams();
-        layoutParams.width = mWidth;
-        mTabLayout.setLayoutParams(layoutParams);
+        mTabLayout.getLayoutParams().width = mWidth;
+        mTabLayout.requestLayout();
         mTabLayout.setBackgroundColor(tab_bakcolor);
         mTabLayout.setTabTextColors(tab_txtcolor, tab_txtcolor_selected);
 
         mViewPager = (ViewPager2) mView.findViewById(R.id.viewpager);
-        layoutParams = mViewPager.getLayoutParams();
-        layoutParams.width = mWidth;
-        layoutParams.height = mHeight - mTabLayout.getHeight();
-        mViewPager.setLayoutParams(layoutParams);
+        mViewPager.setBackgroundColor(pager_bakcolor);
 
-        mAdapter = new DialogAdapter(mActivity, this, mViewArray);
+        mAdapter = new DialogAdapter(mActivity, mWidth, mViewArray,this);
         mViewPager.setAdapter(mAdapter);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         new TabLayoutMediator(mTabLayout, mViewPager,
                 (tab, position) -> tab.setText(mTitleArray.get(position))
         ).attach();
+
+        mView.getViewTreeObserver().addOnWindowFocusChangeListener(hasFocus -> {
+            // ビューページャーの最大サイズを設定する
+            int maxheight = mHeight - mHeader.getHeight() - mTabLayout.getHeight() - mFooter.getHeight();
+
+            // 最大サイズ以下ならそのまま表示する
+            mViewPager.getLayoutParams().width = mWidth;
+            mViewPager.getLayoutParams().height = maxheight;
+            mViewPager.requestLayout();
+        });
 
         return mView;
     }
@@ -225,7 +253,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     public void addSection(String text) {
         mTitleArray.add(text);
 
-        LinearLayout linearLayout = new LinearLayout(mContext);
+        LinearLayout linearLayout = new LinearLayout(mActivity);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setBackgroundColor(0x00000000);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -238,58 +266,58 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     }
 
     public void addItem(int id, String text) {
-        MenuItemView itemview = new MenuItemView(mContext, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_STRING, text, null, null, 0, id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
+        MenuItemView itemview = new MenuItemView(mActivity, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_STRING, text, null, null, 0, id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
         itemview.setOnTouchListener(this);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(itemview);
-        MenuItemView sepview = new MenuItemView(mContext, mWidth, separater_txtcolor, separater_bakcolor);
+        MenuItemView sepview = new MenuItemView(mActivity, mWidth, separater_txtcolor, separater_bakcolor);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(sepview);
     }
 
     public void addItem(int id, String text, String sub1) {
-        MenuItemView itemview = new MenuItemView(mContext, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_STRING, text, sub1, null, 0, id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
+        MenuItemView itemview = new MenuItemView(mActivity, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_STRING, text, sub1, null, 0, id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
         itemview.setOnTouchListener(this);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(itemview);
-        MenuItemView sepview = new MenuItemView(mContext, mWidth, separater_txtcolor, separater_bakcolor);
+        MenuItemView sepview = new MenuItemView(mActivity, mWidth, separater_txtcolor, separater_bakcolor);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(sepview);
     }
 
     public void addItem(int id, String text, boolean flag) {
-        MenuItemView itemview = new MenuItemView(mContext, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_CHECK, text, null, null, (flag ? 1 : 0), id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
+        MenuItemView itemview = new MenuItemView(mActivity, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_CHECK, text, null, null, (flag ? 1 : 0), id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
         itemview.setOnTouchListener(this);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(itemview);
-        MenuItemView sepview = new MenuItemView(mContext, mWidth, separater_txtcolor, separater_bakcolor);
+        MenuItemView sepview = new MenuItemView(mActivity, mWidth, separater_txtcolor, separater_bakcolor);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(sepview);
     }
 
     public void addItem(int id, String text, String sub1, String sub2, int index) {
-        MenuItemView itemview = new MenuItemView(mContext, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_RADIO, text, sub1, sub2, index, id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
+        MenuItemView itemview = new MenuItemView(mActivity, MenuItemView.TYPE_ITEM, MenuItemView.SUBTYPE_RADIO, text, sub1, sub2, index, id, item_txtsize, mWidth, item_txtcolor, item_bakcolor, curcolor);
         itemview.setOnTouchListener(this);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(itemview);
-        MenuItemView sepview = new MenuItemView(mContext, mWidth, separater_txtcolor, separater_bakcolor);
+        MenuItemView sepview = new MenuItemView(mActivity, mWidth, separater_txtcolor, separater_bakcolor);
         ((LinearLayout)mViewArray.get(mViewArray.size() - 1)).addView(sepview);
     }
 
     private class DialogAdapter extends FragmentStateAdapter {
 
         private final FragmentActivity mActivity;
-        private final View.OnTouchListener mListener;
+        private int mWidth;
         private final ArrayList<View> mViewArray;
-        private ArrayList<ScrollView> mScrollView = new ArrayList<ScrollView>(0);
+        private final View.OnTouchListener mListener;
 
-        public DialogAdapter(FragmentActivity activity, View.OnTouchListener listener, ArrayList<View> viewArray) {
+        public DialogAdapter(FragmentActivity activity, int width, ArrayList<View> viewArray, View.OnTouchListener listener) {
             super(activity);
             mActivity = activity;
-            mListener = listener;
+            mWidth = width;
             mViewArray = viewArray;
+            mListener = listener;
         }
 
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            DialogFragment fragment = new DialogFragment(mActivity);
+            DialogFragment fragment = new DialogFragment(mActivity, mWidth);
             ScrollView scrlView = fragment.getScrollView();
             scrlView.addView(mViewArray.get(position));
-            mScrollView.add(scrlView);
             return fragment;
         }
 
@@ -302,11 +330,14 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     public static class DialogFragment extends Fragment {
         private ScrollView mScrollView;
 
-        private static int scrl_bakcolor = 0x80000000;
+        //private static int scrl_bakcolor = 0x80000000;
 
-        public DialogFragment(FragmentActivity activity) {
+        public DialogFragment(FragmentActivity activity, int width) {
             mScrollView = new ScrollView(activity);
-            mScrollView.setBackgroundColor(scrl_bakcolor);
+            //mScrollView.setBackgroundColor(scrl_bakcolor);
+            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            mScrollView.setLayoutParams(layoutParams);
+
         }
 
         @Override

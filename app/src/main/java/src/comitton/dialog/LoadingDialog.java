@@ -3,12 +3,13 @@ package src.comitton.dialog;
 import jp.dip.muracoro.comittonx.R;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class LoadingDialog extends ImmersiveDialog {
+public class LoadingDialog extends Dialog {
 	public LoadingDialog(Activity activity) {
 		super(activity);
 		Window dlgWindow = getWindow();
@@ -19,10 +20,10 @@ public class LoadingDialog extends ImmersiveDialog {
 		// Activityを暗くしない
 		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-		// 背景を設定
+		// 背景なし
 		dlgWindow.setBackgroundDrawableResource(android.R.color.transparent);
 
-		// 画面下に表示
+		// 画面右上に表示
 		WindowManager.LayoutParams wmlp=dlgWindow.getAttributes();
 		wmlp.gravity = Gravity.RIGHT | Gravity.TOP;
 		dlgWindow.setAttributes(wmlp);

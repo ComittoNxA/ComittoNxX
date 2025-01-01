@@ -19,10 +19,10 @@ import src.comitton.data.TextDrawData;
 import src.comitton.dialog.BookmarkDialog;
 import src.comitton.dialog.CloseDialog;
 import src.comitton.dialog.Information;
-import src.comitton.dialog.InputDialog;
-import src.comitton.dialog.InputDialog.SearchListener;
+import src.comitton.dialog.TextInputDialog;
+import src.comitton.dialog.TextInputDialog.SearchListener;
 import src.comitton.dialog.ListDialog;
-import src.comitton.dialog.PageSelectCheckDialog;
+import src.comitton.dialog.ToolbarEditDialog;
 import src.comitton.dialog.PageSelectDialog;
 import src.comitton.dialog.BookmarkDialog.BookmarkListenerInterface;
 import src.comitton.dialog.CloseDialog.CloseListenerInterface;
@@ -315,7 +315,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private TextConfigDialog mTextConfigDialog;
 	private CloseDialog mCloseDialog;
 	private ListDialog mListDialog;
-	private InputDialog mInputDialog;
+	private TextInputDialog mTextInputDialog;
 	private TabDialogFragment mMenuDialog;
 
 	private PageSelectDialog mPageDlg = null;
@@ -1538,20 +1538,11 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 							}
 						});
 						Dialog dialog = dialogBuilder.create();
-						if (mImmEnable) {
-							//dialog.getWindow().
-							//		setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-							//				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-							dialog.getWindow().getDecorView().setSystemUiVisibility(
-									View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-											| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-											| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-											//| View.SYSTEM_UI_FLAG_FULLSCREEN
-											//| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-											//| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-							);
-						}
+						dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+						dialog.getWindow().getDecorView().setSystemUiVisibility(
+								mActivity.getWindow().getDecorView().getSystemUiVisibility());
 						dialog.show();
+						dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 					}
 					else {
 						switch (index) {
@@ -1607,7 +1598,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 									mCurrentPage = mTextView.getPage(); // 現在ページ取得
 
 									if (PageSelectDialog.mIsOpened == false) {
-										PageSelectDialog pageDlg = new PageSelectDialog(this);
+										PageSelectDialog pageDlg = new PageSelectDialog(this, R.style.MyDialog);
 										pageDlg.setParams(DEF.TEXT_VIEWER, mCurrentPage, mTextMgr.length(), true);
 										pageDlg.setPageSelectListear(this);
 										pageDlg.show();
@@ -1788,7 +1779,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(this, mTextView.getWidth(), mTextView.getHeight(), title, items, selIndex, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, R.style.MyDialog, title, items, selIndex, true, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -1956,7 +1947,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		Resources res = getResources();
 //		setOptionMenu(menu);
-		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, true, this);
 
 		mMenuDialog.addSection(res.getString(R.string.operateSec));
 		if (mTextMgr.getMidashiSize() > 0) {
@@ -2019,7 +2010,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			return;
 		}
 			Resources res = getResources();
-		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), false, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, false, this);
 
 		// ブックマーク選択
 		mMenuDialog.addSection(res.getString(R.string.selBookmarkMenu));
@@ -2043,7 +2034,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 
 		Resources res = getResources();
-		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), true, false, false, true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, true, false, false, true, this);
 
 		int size = mTextMgr.getMidashiSize();
 		if (debug) {Log.d("TextActivity", "openChapterMenu: size=" + size);}
@@ -2126,10 +2117,10 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 
 		Resources res = getResources();
-		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mTextView.getWidth(), mTextView.getHeight(), false, true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, false, true, this);
 
 		// ブックマーク選択
-		mMenuDialog.addSection(res.getString(R.string.searchJumpMenu));
+		mMenuDialog.addSection(res.getString(R.string.searchJumpTitle));
 
 		for (int i = 0; i < mdlist.length; i ++) {
 			// 検索結果表示
@@ -2168,11 +2159,6 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				break;
 			}
 			case DEF.MENU_HELP: {
-				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
-
-				// 操作方法画面に遷移
-				// Intent intent = new Intent(TextActivity.this, HelpActivity.class);
-				// startActivityForResult(intent, DEF.REQUEST_HELP);
 				boolean flag = !mGuideView.getOperationMode();
 				mGuideView.setOperationMode(flag);
 				break;
@@ -2238,7 +2224,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				mCurrentPage = mTextView.getPage(); // 現在ページ取得
 				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
 
-				BookmarkDialog bookmarkDlg = new BookmarkDialog(this);
+				BookmarkDialog bookmarkDlg = new BookmarkDialog(this, R.style.MyDialog);
 				bookmarkDlg.setBookmarkListear(this);
 				bookmarkDlg.setName(String.format("Page : %d / %d (%.2f%%)", mCurrentPage + 1 , mTextMgr.length(), (mCurrentPageRate * 100)));
 				bookmarkDlg.show();
@@ -2256,12 +2242,13 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			}
 			case DEF.MENU_SEARCHTEXT: {
 				// レイアウトの呼び出し
-				if (mInputDialog != null) {
+				if (mTextInputDialog != null) {
 					return;
 				}
 				Resources res = getResources();
 				String title = res.getString(R.string.searchTextMenu);
-				mInputDialog = new InputDialog(this, title, mSearchText, new SearchListener() {
+				String message = res.getString(R.string.searchTextMessage);
+				mTextInputDialog = new TextInputDialog(this, R.style.MyDialog, title, message, null, mSearchText, new SearchListener() {
         			@Override
         			public void onSearch(String text) {
         				if (text != null && text.length() > 0) {
@@ -2295,10 +2282,10 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
         			@Override
         			public void onClose() {
         				// 終了
-        				mInputDialog = null;
+						mTextInputDialog = null;
         			}
         		});
-        		mInputDialog.show();
+				mTextInputDialog.show();
         		break;
 			}
 			case DEF.MENU_SEARCHJUMP: {
@@ -2308,7 +2295,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			}
 			case DEF.MENU_EDIT_TOOLBAR: {
 				// ツールバー編集ダイアログ表示
-				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this, mTextView.getWidth(), mTextView.getHeight());
+				ToolbarEditDialog dialog = new ToolbarEditDialog(this, R.style.MyDialog, mTextView.getWidth(), mTextView.getHeight());
 				dialog.show();
 				break;
 			}
@@ -2335,7 +2322,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		if (mTextConfigDialog != null) {
 			return;
 		}
-		mTextConfigDialog = new TextConfigDialog(this, mTextView.getWidth(), mTextView.getHeight(), false, this);
+		mTextConfigDialog = new TextConfigDialog(this, R.style.MyDialog, false, this);
 
 		mTextConfigDialog.setConfig(mPicSize, mBkLight, mHeadSizeOrg, mBodySizeOrg, mRubiSizeOrg, mInfoSizeOrg, mSpaceW, mSpaceH, mMarginWOrg, mMarginHOrg, mAscMode, mIsConfSave);
 		mTextConfigDialog.setTextConfigListner(new TextConfigListenerInterface() {
@@ -2578,7 +2565,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 	// 他アクティビティからの復帰通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == DEF.REQUEST_SETTING || requestCode == DEF.REQUEST_HELP) {
+		if (requestCode == DEF.REQUEST_SETTING) {
 			// 設定の読込
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -3062,7 +3049,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		if (mCloseDialog != null) {
 			return;
 		}
-		mCloseDialog = new CloseDialog(this);
+		mCloseDialog = new CloseDialog(this, R.style.MyDialog);
 		mCloseDialog.setTitleText(layout);
 		mCloseDialog.setCloseListear(new CloseListenerInterface() {
 			@Override

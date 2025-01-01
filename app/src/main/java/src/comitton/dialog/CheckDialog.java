@@ -25,10 +25,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
+
 @SuppressLint("NewApi")
 public class CheckDialog extends ImmersiveDialog implements OnClickListener, OnDismissListener {
 	private CheckListener mListener = null;
-	private Activity mActivity;
 
 	private TextView mTitleText;
 	private Button mBtnOk;
@@ -40,39 +41,18 @@ public class CheckDialog extends ImmersiveDialog implements OnClickListener, OnD
 	private boolean mStates[];
 	private String mItems[];
 
-	private int mWidth;
-	private int mHeight;
-	private float mScale;
-
 	private ItemArrayAdapter mItemArrayAdapter;
 
-	public CheckDialog(Activity activity, int cx, int cy, String title, boolean states[], String[] items, CheckListener listener) {
-		super(activity);
-		Window dlgWindow = getWindow();
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を設定
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
+	public CheckDialog(Activity activity, @StyleRes int themeResId, String title, boolean states[], String[] items, CheckListener listener) {
+		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
 
-		mActivity = activity;
 		mTitle = title;
 		mStates = states;
 		mItems = items;
 		mListener = listener;
-
-		mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
-		mWidth = Math.min(cx, cy) * 80 / 100;
-		int maxWidth = (int)(20 * mScale * 16);
-		mWidth = Math.min(mWidth, maxWidth);
-		mHeight = cy * 80 / 100;
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
@@ -101,10 +81,10 @@ public class CheckDialog extends ImmersiveDialog implements OnClickListener, OnD
 		super.onWindowFocusChanged(hasFocus);
 		// スクロールビューの最大サイズを設定する
 		// 最大サイズ以下ならそのまま表示する
-		ViewGroup.LayoutParams layoutParams = mListView.getLayoutParams();
-		layoutParams.width = mWidth;
-		layoutParams.height = mHeight - mTitleText.getHeight() - mFooter.getHeight();
-		mListView.setLayoutParams(layoutParams);
+		int maxheight = mHeight - mTitleText.getHeight() - mFooter.getHeight();
+		mListView.getLayoutParams().width = mWidth;
+		mListView.getLayoutParams().height = Math.min(mListView.getHeight(), maxheight);
+		mListView.requestLayout();
 	}
 
 	@Override

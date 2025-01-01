@@ -106,7 +106,9 @@
     <string name="selDirTreeMenu">ディレクトリ選択</string>
     <string name="selChapterMenu">見出し選択</string>
     <string name="searchTextMenu">検索文字列設定</string>
-    <string name="searchJumpMenu">検索ヒット選択</string>
+    <string name="searchTextMessage">検索文字列を入力してください。</string>
+    <string name="searchJumpMenu">検索結果選択</string>
+    <string name="searchJumpTitle">検索結果</string>
     <string name="searchJumpNoText">検索文字列はありません</string>
     <string name="searchJumpNotFound">検索結果はありません</string>
     <string name="thumbSwt">サムネイル表示</string>
@@ -187,6 +189,7 @@
     <string name="btnSearch">検索</string>
     <string name="btnApply">適用</string>
     <string name="btnRevert">戻す</string>
+    <string name="btnClear">クリア</string>
     <string name="btnCancel">キャンセル</string>
     <string name="opLabel">タップのパターンを選択してください。\nメニューの「操作確認」で確認できます。</string>
     <string name="opReverse">反転する</string>
@@ -519,6 +522,7 @@
     <string name="ToolbarMenu">メニューを開く</string>
     <string name="ToolbarConfig">設定画面を開く</string>
     <string name="ToolbarEditToolbar">ツールバーを編集</string>
+    <string name="ToolbarSize">ツールバーサイズ(%)</string>
 
     <string name="ChapMenuFile">ファイル</string>
     <string name="ChapMenuTOC">目次</string>

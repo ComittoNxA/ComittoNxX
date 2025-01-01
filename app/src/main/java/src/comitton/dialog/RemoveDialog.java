@@ -26,14 +26,16 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.StyleRes;
+
 public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
 	public static final int MSG_MESSAGE = 1;
 	public static final int MSG_ERRMSG = 2;
 
 	private RemoveListener mListener = null;
 
-	private FileSelectActivity mActivity; 
-	
+	private FileSelectActivity mActivity;
+
 	private String mFullPath;
 	private String mUser;
 	private String mPass;
@@ -41,26 +43,19 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 	private Thread mThread;
 	private boolean mBreak;
 	private Handler mHandler;
-	private Context mContext;
 
 	private TextView mMsgText;
 	private Button mBtnCancel;
 	private boolean mIsLocal;
 
-	public RemoveDialog(Activity context, FileSelectActivity activity, String uri, String path, String user, String pass, String item, RemoveListener removeListener) {
-		super(context);
+	public RemoveDialog(FileSelectActivity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, RemoveListener removeListener) {
+		super(activity, themeResId);
 		mActivity = activity;
 		Window dlgWindow = getWindow();
 		Log.d("RemoveDialog", "RemoveDialog uri=" + uri + ", path=" + path + ", user=" + user + ", pass=" + pass + ", item=" + item);
 
 		// 画面をスリープ有効
 		dlgWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を設定
 		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
@@ -69,7 +64,6 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 		setOnDismissListener(this);
 
 		mListener = removeListener;
-		mContext = context.getApplicationContext();
 
 		if (uri == null || uri.length() == 0) {
 			mIsLocal = true;
@@ -90,7 +84,7 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+		WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
 		// ディスプレイのインスタンス生成
 		Display disp = wm.getDefaultDisplay();
 		int cx = disp.getWidth();
@@ -228,7 +222,7 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 				return true;
 			case MSG_ERRMSG:
 				String msgstr = (String)msg.obj;
-				Toast.makeText(mContext, msgstr, Toast.LENGTH_LONG).show();
+				Toast.makeText(mActivity, msgstr, Toast.LENGTH_LONG).show();
 				return true;
 		}
 		return false;

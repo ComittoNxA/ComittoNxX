@@ -23,8 +23,7 @@ import src.comitton.dialog.DirTreeDialog;
 import src.comitton.dialog.ImageConfigDialog;
 import src.comitton.dialog.Information;
 import src.comitton.dialog.ListDialog;
-import src.comitton.dialog.MenuDialog;
-import src.comitton.dialog.PageSelectCheckDialog;
+import src.comitton.dialog.ToolbarEditDialog;
 import src.comitton.dialog.PageSelectDialog;
 import src.comitton.dialog.PageThumbnail;
 import src.comitton.dialog.BookmarkDialog.BookmarkListenerInterface;
@@ -88,7 +87,6 @@ import android.graphics.BitmapFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import src.comitton.stream.ThumbnailLoader;
-import java.net.URLDecoder;
 
 /**
  * 画像のスクロールを試すための画面を表します。
@@ -1859,13 +1857,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * @return タッチ操作を他の View へ伝搬しないなら true。する場合は false。
 	 */
 	public boolean onTouch(View v, MotionEvent event) {
-		// システムバーを見えなくする
-		// if (mSdkVersion >= 11 && mSdkVersion < 14) {
-		// getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-		// }
-		// else if (mSdkVersion >= 14) {
-		// getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-		// }
 
 		if (mAutoPlay) {
 			// オートプレイ中は解除
@@ -2428,20 +2419,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 								}
 							});
 							Dialog dialog = dialogBuilder.create();
-							if (mImmEnable) {
-								//dialog.getWindow().
-								//	setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-								//			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-								dialog.getWindow().getDecorView().setSystemUiVisibility(
-										View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-												| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-												| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-												//| View.SYSTEM_UI_FLAG_FULLSCREEN
-												//| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-												//| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-								);
-							}
+							dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+							dialog.getWindow().getDecorView().setSystemUiVisibility(
+								mActivity.getWindow().getDecorView().getSystemUiVisibility());
 							dialog.show();
+							dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 						}
 
 					}
@@ -2505,7 +2487,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 									// ページ番号入力
 									if (PageSelectDialog.mIsOpened == false) {
-										PageSelectDialog pageDlg = new PageSelectDialog(this);
+										PageSelectDialog pageDlg = new PageSelectDialog(this, R.style.MyDialog);
 										pageDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 										pageDlg.setPageSelectListear(this);
 										pageDlg.show();
@@ -2517,7 +2499,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 									// サムネイルページ選択
 									if (PageThumbnail.mIsOpened == false) {
-										PageThumbnail thumbDlg = new PageThumbnail(this);
+										PageThumbnail thumbDlg = new PageThumbnail(this, R.style.MyDialog);
 										thumbDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 										thumbDlg.setPageSelectListear(this);
 										thumbDlg.show();
@@ -2762,7 +2744,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(this, mImageView.getWidth(), mImageView.getHeight(), title, items, selIndex, true, new ListSelectListener() {
+		mListDialog = new ListDialog(this, R.style.MyDialog, title, items, selIndex, true, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {
@@ -2868,10 +2850,12 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void showImageConfigDialog(int command_id) {
+		boolean debug = false;
+
 		if (mImageConfigDialog != null) {
 			return;
 		}
-		mImageConfigDialog = new ImageConfigDialog(this, command_id, mImageView.getWidth(), mImageView.getHeight(), false, this);
+		mImageConfigDialog = new ImageConfigDialog(this, R.style.MyDialog, command_id, false, this);
 
 		// 画像サイズの選択項目を求める
 		int selIndex = 0;
@@ -2989,7 +2973,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		boolean[] states = loadTopMenuState();
 
-		mCheckDialog = new CheckDialog(this, mImageView.getWidth(), mImageView.getHeight(), title, states, items, new CheckListener() {
+		mCheckDialog = new CheckDialog(this, R.style.MyDialog, title, states, items, new CheckListener() {
 			@Override
 			public void onSelected(boolean[] states) {
 				// 選択完了
@@ -3250,7 +3234,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
-		TabDialogFragment mMenuDialog = new TabDialogFragment(this, mImageView.getWidth(), mImageView.getHeight(), true, this);
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, true, this);
 
 		// 操作カテゴリ
 		mMenuDialog.addSection(res.getString(R.string.operateSec));
@@ -3347,7 +3331,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
-		DirTreeDialog mMenuDialog = new DirTreeDialog(this, mImageView.getWidth(), mImageView.getHeight(), true, false, false, true, this);
+		DirTreeDialog mMenuDialog = new DirTreeDialog(this, R.style.MyDialog, true, false, false, true, this);
 
 		// タイトル
 		mMenuDialog.addSection(res.getString(R.string.selDirTreeMenu));
@@ -3365,6 +3349,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
+		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, true, this);
 
 		// ブックマーク選択
 		mMenuDialog.addSection(res.getString(R.string.selBookmarkMenu));
@@ -3499,10 +3484,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 			}
 			case DEF.MENU_HELP: {
-				// 操作方法画面に遷移
-				// Intent intent = new Intent(ImageActivity.this,
-				// HelpActivity.class);
-				// startActivityForResult(intent, DEF.REQUEST_HELP);
 				boolean flag = !mGuideView.getOperationMode();
 				mGuideView.setOperationMode(flag);
 				break;
@@ -3704,7 +3685,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 			case DEF.MENU_ADDBOOKMARK: {
 				// ブックマーク追加ダイアログ表示
-				BookmarkDialog bookmarkDlg = new BookmarkDialog(this);
+				BookmarkDialog bookmarkDlg = new BookmarkDialog(this, R.style.MyDialog);
 				bookmarkDlg.setBookmarkListear(this);
 				bookmarkDlg.setName((mCurrentPage + 1) + " / " + mImageMgr.mFileList.length);
 				bookmarkDlg.show();
@@ -3717,7 +3698,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 			case DEF.MENU_EDIT_TOOLBAR: {
 				// ツールバー編集ダイアログ表示
-				PageSelectCheckDialog dialog = new PageSelectCheckDialog(this, mImageView.getWidth(), mImageView.getHeight());
+				ToolbarEditDialog dialog = new ToolbarEditDialog(this, R.style.MyDialog, mImageView.getWidth(), mImageView.getHeight());
 				dialog.show();
 				break;
 			}
@@ -3841,7 +3822,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 					// サムネイルページ選択
 					if (PageThumbnail.mIsOpened = true) {
-						PageThumbnail thumbDlg = new PageThumbnail(this);
+						PageThumbnail thumbDlg = new PageThumbnail(this, R.style.MyDialog);
 						thumbDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 						thumbDlg.setPageSelectListear(this);
 						thumbDlg.show();
@@ -3858,7 +3839,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 					// ページ番号入力
 					if (PageSelectDialog.mIsOpened = true) {
-						PageSelectDialog pageDlg = new PageSelectDialog(this);
+						PageSelectDialog pageDlg = new PageSelectDialog(this, R.style.MyDialog);
 						pageDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 						pageDlg.setPageSelectListear(this);
 						pageDlg.show();
@@ -3978,7 +3959,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		// バックグラウンドでのキャッシュ読み込み再開
 		mImageMgr.setCacheSleep(false);
 
-		if (requestCode == DEF.REQUEST_SETTING || requestCode == DEF.REQUEST_HELP) {
+		if (requestCode == DEF.REQUEST_SETTING) {
 			// 設定の読込
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -4537,7 +4518,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mCloseDialog != null) {
 			return;
 		}
-		mCloseDialog = new CloseDialog(this);
+		mCloseDialog = new CloseDialog(this, R.style.MyDialog);
 		mCloseDialog.setTitleText(layout);
 		mCloseDialog.setCloseListear(new CloseListenerInterface() {
 			@Override

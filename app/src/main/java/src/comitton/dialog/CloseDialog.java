@@ -17,6 +17,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
+
 @SuppressLint("NewApi")
 public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnDismissListener {
 	public static final int LAYOUT_BACK = 0;
@@ -36,7 +38,6 @@ public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnD
 	public static final int CLICK_THIS     = 9;
 
 	private CloseListenerInterface mListener = null;
-	Activity mContext;
 
 	Button mBtnClose;
 	Button mBtnExit;
@@ -51,28 +52,16 @@ public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnD
 	String mTitle;
 	int mLayoutId;
 
-	public CloseDialog(Activity context) {
-		super(context);
-		Window dlgWindow = getWindow();
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を設定
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
+	public CloseDialog(Activity activity, @StyleRes int themeResId) {
+		super(activity, themeResId);
 
 		// 外をタッチすると閉じる
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
-
-		mContext = context;
 	}
 
 	public void setTitleText(int layout) {
-		Resources res = mContext.getResources();
+		Resources res = mActivity.getResources();
 		switch (layout) {
 			case LAYOUT_BACK:
 				mLayoutId = R.layout.closedialog_back;

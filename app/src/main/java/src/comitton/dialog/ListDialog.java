@@ -26,6 +26,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
+
 @SuppressLint("NewApi")
 public class ListDialog extends ImmersiveDialog implements OnClickListener, OnItemClickListener, OnDismissListener {
 	private ListSelectListener mListener = null;
@@ -39,27 +41,10 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 	private String mItems[];
 	private int mSelect;
 
-	private int mWidth;
-	private int mHeight;
-	private float mScale;
-
 	private ItemArrayAdapter mItemArrayAdapter;
 
-	public ListDialog(Activity activity, int cx, int cy, String title, String[] items, int select, boolean backcolor, ListSelectListener listener) {
-		super(activity);
-		boolean debug = false;
-		if (debug) {Log.d("ListDialog", "ListDialog: 開始します.");}
-
-		Window dlgWindow = getWindow();
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を設定
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
+	public ListDialog(Activity activity, @StyleRes int themeResId, String title, String[] items, int select, boolean backcolor, ListSelectListener listener) {
+		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
@@ -69,14 +54,6 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 		mItems = items;
 		mSelect = select;
 		mListener = listener;
-
-		mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
-		mWidth = Math.min(cx, cy) * 80 / 100;
-		int maxWidth = (int)(20 * mScale * 16);
-		mWidth = Math.min(mWidth, maxWidth);
-		mHeight = cy * 80 / 100;
-
-		if (debug) {Log.d("ListDialog", "ListDialog: 終了します.");}
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
@@ -109,10 +86,9 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 		// スクロールビューの最大サイズを設定する
 		// 最大サイズ以下ならそのまま表示する
 		int maxheight = mHeight - mTitleText.getHeight() - mBtnCancel.getHeight();
-		ViewGroup.LayoutParams layoutParams = mListView.getLayoutParams();
-		layoutParams.width = mWidth;
-		layoutParams.height = Math.min(mListView.getHeight(), maxheight);
-		mListView.setLayoutParams(layoutParams);
+		mListView.getLayoutParams().width = mWidth;
+		mListView.getLayoutParams().height = Math.min(mListView.getHeight(), maxheight);
+		mListView.requestLayout();
 	}
 
 	@Override

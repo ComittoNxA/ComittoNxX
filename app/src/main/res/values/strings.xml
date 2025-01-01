@@ -106,7 +106,9 @@
     <string name="selDirTreeMenu">Select Sub Directory</string>
     <string name="selChapterMenu">Select Chapter</string>
     <string name="searchTextMenu">Set Search Text</string>
+    <string name="searchTextMessage">Enter a search string.</string>
     <string name="searchJumpMenu">Select Search Result</string>
+    <string name="searchJumpTitle">Search Result</string>
     <string name="searchJumpNoText">There are no Search Text</string>
     <string name="searchJumpNotFound">There are no Search Result</string>
     <string name="thumbSwt">Thumbnail View</string>
@@ -187,6 +189,7 @@
     <string name="btnSearch">Search</string>
     <string name="btnApply">Apply</string>
     <string name="btnRevert">Revert</string>
+    <string name="btnClear">Clear</string>
     <string name="btnCancel">Cancel</string>
     <string name="opLabel">Please select a location pattern tap page turning.</string>
     <string name="opReverse">Reversing the direction by tapping</string>
@@ -519,6 +522,7 @@
     <string name="ToolbarMenu">Open Menu</string>
     <string name="ToolbarConfig">Open Settings</string>
     <string name="ToolbarEditToolbar">Edit Toolbar</string>
+    <string name="ToolbarSize">Toolbar Size(%)</string>
 
     <string name="ChapMenuFile">File</string>
     <string name="ChapMenuTOC">TOC</string>

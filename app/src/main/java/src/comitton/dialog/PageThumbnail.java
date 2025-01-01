@@ -16,8 +16,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.view.View.OnClickListener;
 
+import androidx.annotation.StyleRes;
+
 @SuppressLint("NewApi")
-public class PageThumbnail extends BasePageSelectDialog implements OnTouchListener,
+public class PageThumbnail extends ToolbarDialog implements OnTouchListener,
 		OnClickListener, OnSeekBarChangeListener, DialogInterface.OnDismissListener {
 	// 表示中フラグ
 	public static boolean mIsOpened = false;
@@ -29,8 +31,8 @@ public class PageThumbnail extends BasePageSelectDialog implements OnTouchListen
 	private HorizontalScrollView mScroll;
 	private ThumbnailView mThumView;
 
-	public PageThumbnail(Activity activity) {
-		super(activity);
+	public PageThumbnail(Activity activity, @StyleRes int themeResId) {
+		super(activity, themeResId);
 		mAutoApply = false;
 	}
 

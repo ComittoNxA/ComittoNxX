@@ -12,11 +12,10 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -25,7 +24,10 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.annotation.StyleRes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +36,7 @@ import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 
 @SuppressLint("NewApi")
-public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickListener {
-	private Activity mActivity;
+public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListener, SeekBar.OnSeekBarChangeListener {
 
 	private TextView mTitleText;
 	private Button mBtnOk;
@@ -47,9 +48,11 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 	private boolean mStates[];
 	private String mItems[];
 
-	private int mWidth;
-	private int mHeight;
-	private float mScale;
+	private String mDefaultStr;
+	private int mToolbarSize;
+	private TextView mTxtSize;
+	private String mSizeStr;
+	private SeekBar mSkbBkSize;
 
 	private ItemArrayAdapter mItemArrayAdapter;
 
@@ -181,22 +184,9 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 					R.string.ToolbarEditToolbar			// ツールバーを編集
 			};
 
-	public PageSelectCheckDialog(Activity activity, int cx, int cy) {
-		super(activity);
-		Window dlgWindow = getWindow();
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を設定
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
-
+	public ToolbarEditDialog(Activity activity, @StyleRes int themeResId, int cx, int cy) {
+		super(activity, themeResId);
 		setCanceledOnTouchOutside(true);
-
-		mActivity = activity;
 
 		mTitle = activity.getString(R.string.ToolbarEditTitle);
 		mStates = loadToolbarState(mActivity);
@@ -207,12 +197,6 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 			items[i] = activity.getResources().getString(COMMAND_RES[i]);
 		}
 		mItems = items;
-		mScale = activity.getResources().getDisplayMetrics().scaledDensity;
-		mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
-		mWidth = Math.min(cx, cy) * 80 / 100;
-		int maxWidth = (int)(20 * mScale * 16);
-		mWidth = Math.min(mWidth, maxWidth);
-		mHeight = cy * 80 / 100;
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
@@ -225,6 +209,21 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 		mBtnCancel  = (Button)this.findViewById(R.id.btn_cancel);
 		mListView = (ListView)this.findViewById(R.id.listview);
 		mFooter = (LinearLayout)this.findViewById(R.id.footer);
+
+		LayoutInflater inflater = LayoutInflater.from(mActivity);
+
+		Resources res = mActivity.getResources();
+		mDefaultStr = res.getString(R.string.auto);
+		SharedPreferences sharedPreference = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		mToolbarSize = sharedPreference.getInt(DEF.KEY_TOOLBAR_SIZE, DEF.DEFAULT_TOOLBAR_SIZE);
+		mFooter.addView(inflater.inflate(R.layout.toolbar_size, null, false), 0);
+		mTxtSize = mFooter.findViewById(R.id.label_toolbar_size);
+		mSizeStr  = mTxtSize.getText().toString();
+		mTxtSize.setText(mSizeStr.replaceAll("%", getToolbarSize(mToolbarSize)));
+		mSkbBkSize = mFooter.findViewById(R.id.seek_toolbar_size);
+		mSkbBkSize.setMax(DEF.MAX_TOOLBAR_SIZE);
+		mSkbBkSize.setProgress(mToolbarSize);
+		mSkbBkSize.setOnSeekBarChangeListener(this);
 
 		mTitleText.setText(mTitle);
 		// リストの設定
@@ -242,10 +241,10 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 		super.onWindowFocusChanged(hasFocus);
 		// スクロールビューの最大サイズを設定する
 		// 最大サイズ以下ならそのまま表示する
-		ViewGroup.LayoutParams layoutParams = mListView.getLayoutParams();
-		layoutParams.width = mWidth;
-		layoutParams.height = mHeight - mTitleText.getHeight() - mFooter.getHeight();
-		mListView.setLayoutParams(layoutParams);
+		int maxheight = mHeight - mTitleText.getHeight() - mFooter.getHeight();
+		mListView.getLayoutParams().width = mWidth;
+		mListView.getLayoutParams().height = Math.min(mListView.getHeight(), maxheight);
+		mListView.requestLayout();
 	}
 
 	@Override
@@ -264,14 +263,14 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 	// 設定を読み込み
 	public static boolean[] loadToolbarState(Context context) {
 		boolean debug = false;
-		if (debug) {Log.d("PageSelectCheckDialog", "loadToolbarState: 開始します.");}
+		if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 開始します.");}
 
 		boolean states[] = null;
 		try {
 			Resources res = context.getResources();
 			SharedPreferences sharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
 
-			if (debug) {Log.d("PageSelectCheckDialog", "loadToolbarState: 保存された設定を取得します.");}
+			if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 保存された設定を取得します.");}
 			states = new boolean[COMMAND_ID.length];
 			int count = 0;
 			for (int i = 0; i < states.length; i++) {
@@ -283,16 +282,16 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 					}
 				}
 				catch (Exception e) {
-					Log.e("PageSelectCheckDialog", "loadToolbarState: ループ1でエラーが発生しました.");
+					Log.e("ToolbarEditDialog", "loadToolbarState: ループ1でエラーが発生しました.");
 					if (e != null && e.getMessage() != null) {
-						Log.e("PageSelectCheckDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
+						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
 					}
-					Log.e("PageSelectCheckDialog", "loadToolbarState: i=" + i);
-					Log.e("PageSelectCheckDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
+					Log.e("ToolbarEditDialog", "loadToolbarState: i=" + i);
+					Log.e("ToolbarEditDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
 				}
 			}
 
-			if (debug) {Log.d("PageSelectCheckDialog", "loadToolbarState: 表示するコマンドを設定します.");}
+			if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 表示するコマンドを設定します.");}
 			int commandId[] = new int[count];
 			String commandStr[] = new String[count];
 			count = 0;
@@ -306,25 +305,25 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 					}
 				}
 				catch (Exception e) {
-					Log.e("PageSelectCheckDialog", "loadToolbarState: ループ2でエラーが発生しました.");
+					Log.e("ToolbarEditDialog", "loadToolbarState: ループ2でエラーが発生しました.");
 					if (e != null && e.getMessage() != null) {
-						Log.e("PageSelectCheckDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
+						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
 					}
-					Log.e("PageSelectCheckDialog", "loadToolbarState: i=" + i);
-					Log.e("PageSelectCheckDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
+					Log.e("ToolbarEditDialog", "loadToolbarState: i=" + i);
+					Log.e("ToolbarEditDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
 				}
 			}
 			if (debug) {
-				Log.d("PageSelectCheckDialog", "loadToolbarState: 終了します.");
+				Log.d("ToolbarEditDialog", "loadToolbarState: 終了します.");
 			}
 		}
 		catch (Exception e) {
-			Log.e("PageSelectCheckDialog", "loadToolbarState: エラーが発生しました.");
+			Log.e("ToolbarEditDialog", "loadToolbarState: エラーが発生しました.");
 			if (e != null && e.getMessage() != null) {
-				Log.e("PageSelectCheckDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
+				Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
 			}
 		}
-		if (debug) {Log.d("PageSelectCheckDialog", "loadToolbarState: 終了します.");}
+		if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 終了します.");}
 		return states;
 	}
 
@@ -340,14 +339,50 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 				ed.putBoolean(DEF.KEY_PAGE_SELECT_TOOLBAR + COMMAND_ID[i], states[i]);
 			}
 			catch (Exception e) {
-				Log.e("PageSelectCheckDialog", "saveToolbarState: エラーが発生しました.");
+				Log.e("ToolbarEditDialog", "saveToolbarState: エラーが発生しました.");
 				if (e != null && e.getMessage() != null) {
-					Log.e("PageSelectCheckDialog", "saveToolbarState: エラーメッセージ. " + e.getMessage());
+					Log.e("ToolbarEditDialog", "saveToolbarState: エラーメッセージ. " + e.getMessage());
 				}
 			}
 		}
+		ed.putInt(DEF.KEY_TOOLBAR_SIZE, mSkbBkSize.getProgress());
 		ed.commit();
-		if (debug) {Log.d("PageSelectCheckDialog", "saveToolbarState: 終了します.");}
+		if (debug) {Log.d("ToolbarEditDialog", "saveToolbarState: 終了します.");}
+	}
+
+	public static float getToolbarRatio(Context context) {
+		SharedPreferences sharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
+		return 0.25f * (sharedPreference.getInt(DEF.KEY_TOOLBAR_SIZE, DEF.DEFAULT_TOOLBAR_SIZE) + 2);
+	}
+
+	private String getToolbarSize(int progress) {
+		String str;
+		if (progress == DEF.DEFAULT_TOOLBAR_SIZE || progress >= DEF.MAX_TOOLBAR_SIZE) {
+			str = mDefaultStr;
+		}
+		else {
+			str = String.valueOf((progress + 2) * 25) + "%";
+		}
+		return str;
+	}
+
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		// 変更通知
+		if (seekBar == mSkbBkSize) {
+			String str = getToolbarSize(progress);
+			mTxtSize.setText(mSizeStr.replaceAll("%", str));
+		}
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+
 	}
 
 
@@ -367,7 +402,7 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 		@Override
 		public View getView(int index, View view, ViewGroup parent) {
 			boolean debug = false;
-			if (debug) {Log.d("PageSelectCheckDialog", "ItemArrayAdapter: getView: 開始します. index=" + index);}
+			if (debug) {Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: 開始します. index=" + index);}
 
 			// レイアウトの生成
 			CheckBox checkbox;
@@ -430,7 +465,7 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 				});
 			}
 			else {
-				if (debug) {Log.d("PageSelectCheckDialog", "ItemArrayAdapter: getView: 設定済みのビューを呼び出します. index=" + index);}
+				if (debug) {Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: 設定済みのビューを呼び出します. index=" + index);}
 				checkbox = (CheckBox)view.findViewById(0);
 				imageview = (ImageView)view.findViewById(1);
 				textview = (TextView)view.findViewById(2);
@@ -443,7 +478,7 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 			if (imageview != null) {
 				if (0 <= index && index < COMMAND_DRAWABLE.length) {
 					if (debug) {
-						Log.d("PageSelectCheckDialog", "ItemArrayAdapter: getView: アイコンをセットします. index=" + index);
+						Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: アイコンをセットします. index=" + index);
 					}
 					drawable = mActivity.getDrawable(COMMAND_DRAWABLE[index]);
 					drawable.setTint(mActivity.getResources().getColor(R.color.white1));
@@ -451,7 +486,7 @@ public class PageSelectCheckDialog extends ImmersiveDialog implements OnClickLis
 				}
 			}
 			else {
-				Log.d("PageSelectCheckDialog", "ItemArrayAdapter: getView: ImageViewがnullです. index=" + index);
+				Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: ImageViewがnullです. index=" + index);
 			}
 
 			textview.setText(mItems[index]);

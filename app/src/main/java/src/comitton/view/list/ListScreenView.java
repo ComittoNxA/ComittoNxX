@@ -98,7 +98,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 
 	public ListScreenView(Context context, int duration) {
 		this(context);
-		Log.d("ListScreenView", "ロングタッチ遅延時間=" + duration);
 		mFileListArea.setDuration(duration);
 	}
 

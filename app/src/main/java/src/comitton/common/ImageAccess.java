@@ -8,10 +8,15 @@ import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.util.Log;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.io.File;
@@ -552,12 +557,12 @@ public class ImageAccess {
 	}
 
 	// ベクターxmlファイルからアイコンを作成(正方形)
-	public static Bitmap createIcon(Resources res, int resid, int size, Integer drawcolor) {
+	public static Bitmap createIcon(@NonNull Resources res, @DrawableRes int resid, int size, @ColorInt Integer drawcolor) {
 		return createIcon(res, resid, size, size, drawcolor);
 	}
 
 	// ベクターxmlファイルからアイコンを作成(比率不定)
-	public static Bitmap createIcon(Resources res, int resid, int sizeW, int sizeH, Integer drawcolor) {
+	public static Bitmap createIcon(@NonNull Resources res, @DrawableRes int resid, int sizeW, int sizeH, @ColorInt Integer drawcolor) {
 		Bitmap bm = null;
 		try {
 			Drawable drawable = ResourcesCompat.getDrawable(res, resid, null);
@@ -591,14 +596,14 @@ public class ImageAccess {
 	}
 
 	// ベクターxmlファイルからアイコンを作成
-	public static Bitmap createIconFromRawPicture(Resources res, int resid, int size) {
+	public static Bitmap createIconFromRawPicture(@NonNull Resources res, @DrawableRes int resid, int size) {
 		return createIcon(res, resid, size, size, null);
 	}
 
 	/**
 	 * Bitmapデータの色を変更する。
 	 */
-	public static Bitmap setColor(Bitmap bitmap, int color) {
+	public static Bitmap setColor(Bitmap bitmap, @ColorInt int color) {
 		Bitmap mutableBitmap = null;
 		try {
 			//mutable化する
@@ -624,9 +629,20 @@ public class ImageAccess {
 		return mutableBitmap;
 	}
 
+	// Drawableのリサイズ
+	public static Drawable zoom(@NonNull Resources res, Drawable drawable, float ratio) {
+		Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_4444);
+		Canvas canvas = new Canvas(bitmap);
+		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+		drawable.draw(canvas);
+		Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, (int)(bitmap.getWidth() * ratio), (int)(bitmap.getHeight() * ratio), false);
+		return new BitmapDrawable(res, bitmapResized);
+	}
+
 	// デバッグ用に画像をファイル出力する
 	public static int SaveFile (Bitmap bitmap) {
-		Log.d("ImageManager", "SaveFile: 開始します. bitmap=[" + bitmap.getWidth() + ", " + bitmap.getHeight() + "]");
+		boolean debug = false;
+		if (debug) {Log.d("ImageManager", "SaveFile: 開始します. bitmap=[" + bitmap.getWidth() + ", " + bitmap.getHeight() + "]");}
 		try {
 			// sdcardフォルダを指定
 			File root = Environment.getExternalStorageDirectory();

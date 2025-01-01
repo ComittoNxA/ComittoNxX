@@ -66,6 +66,6 @@
 	        android:text="@string/btnCancel" />
 	</LinearLayout>
 
-	<include layout="@layout/pageselect_toolbar" android:id="@+id/toolbar"/>
+	<include layout="@layout/toolbar" android:id="@+id/toolbar"/>
 
 </LinearLayout>

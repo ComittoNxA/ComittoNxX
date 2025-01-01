@@ -21,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import androidx.annotation.StyleRes;
+
 import java.util.ArrayList;
 
 import net.cachapa.expandablelayout.ExpandableLayout;
@@ -36,15 +38,10 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 
 	private LinearLayout mTopLayout;
 	private MenuDialog.MenuSelectListener mListener = null;
-	private Activity mActivity;
-	private Context mContext;
 
 	private ScrollView mScrlView;
 	private LinearLayout mLinear;
 
-	private int mWidth;
-	private int mHeight;
-	private float mScale;
 	private boolean mIsClose;
 
 	private static int curcolor = 0x90008000;
@@ -57,85 +54,54 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 	private static int separater_bakcolor = 0xBBFFFFFF;
 	private int item_txtsize;
 
-	public DirTreeDialog(Activity context, int cx, int cy, boolean isclose, MenuDialog.MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, false, false, false, listener);
+	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, false, false, false, listener);
 	}
 
-	public DirTreeDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, false, false, listener);
+	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, halfview, false, false, listener);
 	}
 
-	public DirTreeDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, top, false, listener);
+	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, halfview, top, false, listener);
 	}
 
-	public DirTreeDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, top, wide, listener);
+	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+		super(activity, themeResId, wide);
+		MenuDialogProc(activity, isclose, halfview, top, wide, listener);
 	}
 
-	private void MenuDialogProc(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
-		boolean debug = false;
-		Dialog dialog = this;
-		Window dlgWindow = dialog.getWindow();
+	private void MenuDialogProc(Activity activity, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
 
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		// 背景を設定
+		getWindow().setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
 
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を透明に
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
-
-		// 画面下に表示
-		WindowManager.LayoutParams wmlp=dlgWindow.getAttributes();
-		wmlp.gravity =(top ? Gravity.TOP : Gravity.CENTER) | (halfview ? Gravity.RIGHT : 0);
-		dlgWindow.setAttributes(wmlp);
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
 
-		mActivity = context;
-		mContext = context.getApplicationContext();
-		mScale = mContext.getResources().getDisplayMetrics().scaledDensity;
-		if (halfview) {
-			mWidth = Math.min(cx, cy) * 20 / 100;
-		}
-		else {
-			mWidth = Math.min(cx, cy) * 80 / 100;
-		}
-		int maxWidth = (int)(20 * mScale * 16);
-		if (!wide) {
-			mWidth = Math.min(mWidth, maxWidth);
-		}
-		mHeight = cy * 80 / 100;
-
-		mScale = mContext.getResources().getDisplayMetrics().scaledDensity;
 		title_txtsize = (int)(18 * mScale);
 		item_txtsize = (int)(20 * mScale);
 
 		mIsClose = isclose;
 		mListener = listener;
 
-		dialog.getWindow().setLayout(mWidth, mHeight);
-
 		ViewGroup.LayoutParams layoutParams;
 
-		mTopLayout = new LinearLayout(mContext);
+		mTopLayout = new LinearLayout(mActivity);
 		mTopLayout.setOrientation(LinearLayout.VERTICAL);
 		layoutParams = new ViewGroup.LayoutParams(mWidth, mHeight);
 		mTopLayout.setLayoutParams(layoutParams);
 		mTopLayout.setBackgroundColor(0x00000000);
 
-		mScrlView = new ScrollView(mContext);
+		mScrlView = new ScrollView(mActivity);
 		layoutParams = new ViewGroup.LayoutParams(mWidth, mHeight - mTopLayout.getHeight());
 		mScrlView.setLayoutParams(layoutParams);
 		mScrlView.setBackgroundColor(0x80000000);
 
-		mLinear = new LinearLayout(mContext);
+		mLinear = new LinearLayout(mActivity);
 		mLinear.setOrientation(LinearLayout.VERTICAL);
 		layoutParams = new ViewGroup.LayoutParams(mWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
 		mLinear.setLayoutParams(layoutParams);
@@ -165,7 +131,7 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 
 	public void addSection(String text) {
 		// カテゴリ
-		MenuItemView itemview = new MenuItemView(mContext, MenuItemView.TYPE_SECTION, MenuItemView.SUBTYPE_STRING, text, null, null, 0, 0, title_txtsize, mWidth, title_txtcolor, title_bakcolor, curcolor);
+		MenuItemView itemview = new MenuItemView(mActivity, MenuItemView.TYPE_SECTION, MenuItemView.SUBTYPE_STRING, text, null, null, 0, 0, title_txtsize, mWidth, title_txtcolor, title_bakcolor, curcolor);
 		mTopLayout.addView(itemview, 0);
 	}
 
@@ -223,7 +189,7 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 						if (sub_dir.equals(parentTitleView.getText())) {
 							if (debug) {Log.d("DirTreeDialog", "addFileList: 親に設定します. parentTitleView.getText()=" + parentTitleView.getText());}
 							parentArrow = (ImageView) parentExpandItem.findViewById(R.id.expand_arrow);
-							parentArrow.setImageDrawable(mContext.getDrawable(R.drawable.expand_arrow));
+							parentArrow.setImageDrawable(mActivity.getDrawable(R.drawable.expand_arrow));
 							parentLayout = (LinearLayout) parentExpandItem.findViewById(R.id.child_layout);
 						}
 					}

@@ -28,7 +28,6 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 	private static final int LAYOUT_PADDING = 10;
 
 	private String mKey;
-	public int mMinValue;
 	public int mDefValue;
 	public int mMaxValue;
 
@@ -38,6 +37,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 		mSP = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
+	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		// 選択された数をテキストに
 		mTextView.setText(getSummaryString(progress));
@@ -68,7 +68,6 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
 		int progress;
 		mSeekBar.setOnSeekBarChangeListener(this);
-		mSeekBar.setMin(mMinValue);
 		mSeekBar.setMax(mMaxValue);
 		progress = getValue();
 		mSeekBar.setProgress(progress);

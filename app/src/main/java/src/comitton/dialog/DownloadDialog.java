@@ -27,6 +27,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.StyleRes;
+
 public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
 	public static final int MSG_MESSAGE = 1;
 	public static final int MSG_SETMAX = 2;
@@ -42,33 +44,17 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 	private Thread mThread;
 	private boolean mBreak;
 	private Handler mHandler;
-	private Context mContext;
 
 	private TextView mMsgText;
 	private TextView mProgressText;
 	private ProgressBar mProgress;
 	private Button mBtnCancel;
 
-	public DownloadDialog(Activity activity, String uri, String path, String user, String pass, String item, String local) {
-		super(activity);
-		Window dlgWindow = getWindow();
-
-		// 画面をスリープ有効
-		dlgWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-		// 背景を設定
-		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
+	public DownloadDialog(Activity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, String local) {
+		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(false);
 		setOnDismissListener(this);
-
-		mContext = activity.getApplicationContext();
 
 		mUri = uri;
 		mPath = path;
@@ -79,13 +65,12 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		mBreak = false;
 
 		mHandler = new Handler(this);
-		return;
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+		WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
 		// ディスプレイのインスタンス生成
 		Display disp = wm.getDefaultDisplay();
 		int cx = disp.getWidth();
@@ -155,16 +140,6 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 			}
 		}
 		else {
-//			// ファイル拡張子チェック
-//			if (item.length() <= 4) {
-//				return false;
-//			}
-//			String ext = DEF.getFileExt(item);
-//			if (!(FileData.isImage(ext) && FileData.isArchive(ext) && FileData.isText(ext))) {
-//				// 対象外
-//				return false;
-//			}
-
 			// ダウンロード実行
 			try {
 				OutputStream localFile = FileAccess.localOutputStream(mLocal + path + item + "_dl");
@@ -271,7 +246,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				return true;
 			case MSG_ERRMSG:
 				String msgstr = (String)msg.obj;
-				Toast.makeText(mContext, msgstr, Toast.LENGTH_LONG).show();
+				Toast.makeText(mActivity, msgstr, Toast.LENGTH_LONG).show();
 				return true;
 		}
 		return false;

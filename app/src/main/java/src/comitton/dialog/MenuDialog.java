@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -26,13 +27,14 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import androidx.annotation.StyleRes;
+
 @SuppressLint("NewApi")
 public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDismissListener {
 	private static int RANGE_CANCEL;
 
 	private MenuSelectListener mListener = null;
 	private Activity mActivity;
-	private Context mContext;
 
 	private List<MenuList> mMenuList;
 
@@ -45,51 +47,50 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 	private boolean mSelected;
 	private boolean mIsClose;
 
-	public MenuDialog(Activity context, int cx, int cy, boolean isclose, MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, false, false, false, listener);
+	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, false, false, false, listener);
 	}
 
-	public MenuDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, false, false, listener);
+	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, halfview, false, false, listener);
 	}
 
-	public MenuDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, top, false, listener);
+	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, halfview, top, false, listener);
 	}
 
-	public MenuDialog(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
-		super(context);
-		MenuDialogProc(context, cx, cy, isclose, halfview, top, wide, listener);
+	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
+		super(activity, themeResId);
+		MenuDialogProc(activity, isclose, halfview, top, wide, listener);
 	}
 
-	private void MenuDialogProc(Activity context, int cx, int cy, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
+	private void MenuDialogProc(Activity activity, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
 		boolean debug = false;
 		Window dlgWindow = getWindow();
-
-		// タイトルなし
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Activityを暗くしない
-		dlgWindow.setFlags(0 , WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
 		// 背景を設定
 		dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe_transparent);
 
-		// 画面下に表示
+		// 表示位置を決定
 		WindowManager.LayoutParams wmlp=dlgWindow.getAttributes();
 		wmlp.gravity =(top ? Gravity.TOP : Gravity.CENTER) | (halfview ? Gravity.RIGHT : 0);
 		dlgWindow.setAttributes(wmlp);
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
 
-		mActivity = context;
-		mContext = context.getApplicationContext();
+		mActivity = activity;
 		mMenuList = new ArrayList<MenuList>();
-		mScale = mContext.getResources().getDisplayMetrics().scaledDensity;
+		mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
 		RANGE_CANCEL = (int)(20 * getContext().getResources().getDisplayMetrics().scaledDensity);
+
+		Rect size = new Rect();
+		mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(size);
+		int cx = size.width();
+		int cy = size.height();
+
 		if (halfview) {
 			mWidth = Math.min(cx, cy) * 20 / 100;
 		}
@@ -111,10 +112,10 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		mScrlView = new ScrollView(mContext);
+		mScrlView = new ScrollView(mActivity);
 		mScrlView.setBackgroundColor(0x00000000);
 
-		mLinear = new LinearLayout(mContext);
+		mLinear = new LinearLayout(mActivity);
 		mLinear.setOrientation(LinearLayout.VERTICAL);
 		mLinear.setBackgroundColor(0x00000000);
 
@@ -144,13 +145,13 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 				bakcolor = 0x80000000;
 				txtsize = (int)(20 * mScale);
 			}
-			MenuItemView itemview = new MenuItemView(mContext, type, subtype, text, sub1, sub2, index, id, txtsize, mWidth, txtcolor, bakcolor, curcolor);
+			MenuItemView itemview = new MenuItemView(mActivity, type, subtype, text, sub1, sub2, index, id, txtsize, mWidth, txtcolor, bakcolor, curcolor);
 			mLinear.addView(itemview);
 
 			if (i != mMenuList.size() - 1) {
 				txtcolor = 0x80808080;
 				bakcolor = 0x00000000;
-				MenuItemView sepview = new MenuItemView(mContext, mWidth, txtcolor, bakcolor);
+				MenuItemView sepview = new MenuItemView(mActivity, mWidth, txtcolor, bakcolor);
 				mLinear.addView(sepview);
 			}
 		}
@@ -163,10 +164,10 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 		super.onWindowFocusChanged(hasFocus);
 		// スクロールビューの最大サイズを設定する
 		// 最大サイズ以下ならそのまま表示する
-		ViewGroup.LayoutParams layoutParams = mScrlView.getLayoutParams();
-		layoutParams.width = mWidth;
-		layoutParams.height = Math.min(mHeight, mLinear.getHeight());
-		mScrlView.setLayoutParams(layoutParams);
+		mScrlView.getLayoutParams().width = mWidth;
+		mScrlView.getLayoutParams().height = Math.min(mHeight, mLinear.getHeight());
+		mScrlView.requestLayout();
+
 	}
 
 	public boolean dispatchKeyEvent(KeyEvent event) {

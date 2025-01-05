@@ -73,6 +73,8 @@ public class DEF {
 	public static final int HMSG_DRAWENABLE = 13;
 	public static final int HMSG_TX_PARSE = 14;
 	public static final int HMSG_TX_LAYOUT = 15;
+	public static final int HMSG_EPUB_PARSE = 16;
+	public static final int HMSG_HTML_PARSE = 17;
 
 	public static final int MENU_HELP = Menu.FIRST + 0;
 	public static final int MENU_SETTING = Menu.FIRST + 1;

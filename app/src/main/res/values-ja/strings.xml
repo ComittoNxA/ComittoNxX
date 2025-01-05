@@ -67,7 +67,9 @@
     <string name="filePrevMark">前のファイル(しおり位置)</string>
     <string name="loading">Loading</string>
     <string name="reading">ファイルリスト読込中</string>
-    <string name="parsing">テキスト解析中</string>
+    <string name="epubParsing">EPUB解析中</string>
+    <string name="htmlParsing">HTML解析中</string>
+    <string name="textParsing">テキスト解析中</string>
     <string name="formatting">ページ構築中</string>
     <string name="readxref">XREF読込中</string>
     <string name="readpage">Page構造読込中</string>

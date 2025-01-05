@@ -564,14 +564,15 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		Resources res = getResources();
-		// mLoadingStr = res.getString(R.string.loading);
-		// mResizingStr = res.getString(R.string.resizing);
 		mLoadErrStr = res.getString(R.string.loaderr);
-		mReadingMsg = new String[4];
+		mReadingMsg = new String[7];
 		mReadingMsg[0] = res.getString(R.string.reading);
 		mReadingMsg[1] = res.getString(R.string.readxref);
 		mReadingMsg[2] = res.getString(R.string.readpage);
 		mReadingMsg[3] = res.getString(R.string.download);
+		mReadingMsg[4] = res.getString(R.string.epubParsing);
+		mReadingMsg[5] = res.getString(R.string.htmlParsing);
+		mReadingMsg[6] = res.getString(R.string.textParsing);
 
 		// this.mDisplayModeTextView = (TextView)
 		// this.findViewById(R.id.display_mode);
@@ -1237,6 +1238,29 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					}
 					else {
 						mReadDialog.setMessage(readmsg + " (" + msg.arg1 + ")");
+					}
+				}
+				return true;
+			case DEF.HMSG_EPUB_PARSE:
+			case DEF.HMSG_HTML_PARSE:
+			case DEF.HMSG_TX_PARSE:
+				// 読込中の表示
+				synchronized (this) {
+					if (mReadDialog != null) {
+						// ページ読み込み中
+						String str = "";
+						if (msg.what == DEF.HMSG_EPUB_PARSE) {
+							str = mReadingMsg[4];
+							mReadDialog.setMessage(str);
+						}
+						else if (msg.what == DEF.HMSG_HTML_PARSE) {
+							str = mReadingMsg[5];
+							mReadDialog.setMessage(str + " (" + msg.arg1 + "%)");
+						}
+						else if (msg.what == DEF.HMSG_TX_PARSE) {
+							str = mReadingMsg[6];
+							mReadDialog.setMessage(str + " (" + msg.arg1 + "%)");
+						}
 					}
 				}
 				return true;

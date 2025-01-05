@@ -292,8 +292,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private boolean mHistorySaved;
 
 	private ProgressDialog mReadDialog;
-	private String mParsingMsg;
-	private String mFormattingMsg;
+	private String mReadingMsg[];
 	private Message mReadTimerMsg;
 
 	private NoiseSwitch mNoiseSwitch = null;
@@ -398,8 +397,11 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 
 		Resources res = getResources();
-		mParsingMsg = res.getString(R.string.parsing);
-		mFormattingMsg = res.getString(R.string.formatting);
+		mReadingMsg = new String[4];
+		mReadingMsg[0] = res.getString(R.string.epubParsing);
+		mReadingMsg[1] = res.getString(R.string.htmlParsing);
+		mReadingMsg[2] = res.getString(R.string.textParsing);
+		mReadingMsg[3] = res.getString(R.string.formatting);
 
 		mCommandStr = new String[COMMAND_RES.length];
 		for (int i = 0 ; i < mCommandStr.length ; i ++) {
@@ -543,7 +545,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		// プログレスダイアログ準備
 		mReadBreak = false;
 		mReadDialog = new ProgressDialog(this, R.style.MyDialog);
-		mReadDialog.setMessage(mParsingMsg + " (0)");
+		mReadDialog.setMessage(mReadingMsg[2] + " (0)");
 		mReadDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		mReadDialog.setCancelable(true);
 		mReadDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -923,20 +925,31 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					}
 				}
 				return true;
+			case DEF.HMSG_EPUB_PARSE:
+			case DEF.HMSG_HTML_PARSE:
 			case DEF.HMSG_TX_PARSE:
 			case DEF.HMSG_TX_LAYOUT:
 				// 読込中の表示
 				synchronized (this) {
     				if (mReadDialog != null) {
     					// ページ読み込み中
-    					String str;
-    					if (msg.what == DEF.HMSG_TX_LAYOUT) {
-    						str = mFormattingMsg;
+    					String str = "";
+    					if (msg.what == DEF.HMSG_EPUB_PARSE) {
+    						str = mReadingMsg[0];
+							mReadDialog.setMessage(str);
     					}
-    					else {
-    						str = mParsingMsg;
+						else if (msg.what == DEF.HMSG_HTML_PARSE) {
+							str = mReadingMsg[1];
+							mReadDialog.setMessage(str + " (" + msg.arg1 + "%)");
+						}
+						else if (msg.what == DEF.HMSG_TX_PARSE) {
+							str = mReadingMsg[2];
+							mReadDialog.setMessage(str + " (" + msg.arg1 + "%)");
+						}
+						else if (msg.what == DEF.HMSG_TX_LAYOUT) {
+    						str = mReadingMsg[3];
+							mReadDialog.setMessage(str + " (" + msg.arg1 + "%)");
     					}
-    					mReadDialog.setMessage(str + " (" + msg.arg1 + "%)");
     				}
 				}
 				return true;
@@ -2627,7 +2640,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		// プログレスダイアログ準備
 		mReadDialog = new ProgressDialog(this, R.style.MyDialog);
-		mReadDialog.setMessage(mParsingMsg + " (0)");
+		mReadDialog.setMessage(mReadingMsg[2] + " (0)");
 		mReadDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		mReadDialog.setCancelable(true);
 		mReadDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {

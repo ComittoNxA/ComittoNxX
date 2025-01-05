@@ -27,6 +27,7 @@ import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -1246,7 +1247,7 @@ public class TextManager {
 				}
 			}
 		}
-		return list.toArray(list.toArray(new FileListItem[list.size()]));
+		return list.toArray(new FileListItem[list.size()]);
 	}
 
 	public String readEpubContainer() {
@@ -1857,6 +1858,10 @@ public class TextManager {
 										}
 									} else {
 										inputSB.append("\n［＃挿絵（");
+										if (!(mActivity instanceof TextActivity)) {
+											// イメージビュワーなら挿絵を保存
+											loadBitmap(src_value, false);
+										}
 									}
 									inputSB.append(src_value);
 									inputSB.append("）入る］");
@@ -2047,6 +2052,8 @@ public class TextManager {
 
 		if (debug) {Log.d("TextManager", "formatTextFile: filename=" + filename);}
 
+		sendMessage(DEF.HMSG_EPUB_PARSE, 0);
+
 		// EPUBコンテナファイルの解析
 		if (filename.equals("META-INF/container.xml")) {
 			filename = readEpubContainer();
@@ -2066,75 +2073,89 @@ public class TextManager {
 			spine.add(new EpubFile("id1", filename, ""));
 		}
 
+		// 本文xhtmlの解析
+		int progress = 0;
+		sendMessage(DEF.HMSG_HTML_PARSE,0);
 		for (int epubFileIndex = 0; epubFileIndex < spine.size(); epubFileIndex++) {
+			++progress;
+			sendMessage(DEF.HMSG_HTML_PARSE,100 * progress / spine.size());
 			filename = spine.get(epubFileIndex).getHref();
 			if (title == null || title.isEmpty()) {
 				title = readTextFile(filename, inputSB, toc);
 			}
 		}
 
-		if (inputSB != null) {
-			outputStr += inputSB.toString();
-			inputSB = null;
-		} else {
-			outputStr += inputStr;
-		}
-
-		char[] intext;
-		if (outputStr.length() > 0) {
-			if(debug) {Log.d("TextManager", "formatTextFile: intext=\n" + outputStr.substring(0, Math.min(500, outputStr.length())));}
-			intext = outputStr.toCharArray();
-			outputStr = null;
+		if (!(mActivity instanceof TextActivity)) {
+			// イメージビュワーならここで終わり
+			if (debug) {Log.d("TextManager", "formatTextFile: イメージビュワー用のイメージリストを作成します.");}
+			mPictures = mPicArray.toArray(new PictureData[mPicArray.size()]);
 		}
 		else {
-			intext = inputStr.toCharArray();
-		}
-		inputStr = null;
-
-		ArrayList<LineData> linedata = new ArrayList<LineData>();
-		int inpos = 0;
-
-		mHeadSize = headfont;
-		mTextSize = textfont;
-		mRubiSize = rubifont;
-
-		// テキスト全体を中間形式に配置
-		parseTextData(intext, inpos, textbuff, linedata);
-		if (mRunningFlag == false) {
-			return;
-		}
-
-		// Char配列化
-		mTextBuff = textbuff.toString().toCharArray();
-		// StringBufferは解放
-		textbuff = null;
-		System.gc();
-
-		// 先頭行の本文を文字列化
-		if (linedata.size() <= 0) {
-			return;
-		}
-
-		// タイトルの設定
-		if (mTitle.isEmpty()) {
-			LineData ld = linedata.get(0);
-			StringBuffer linestr = new StringBuffer();
-			for (TextBlock tb : ld.textblock) {
-				// TextBlockを文字列化
-				linestr.append(getTextString(mTextBuff, tb.tx_index, tb.tx_length, ld.extdata));
+			// テキストビュワーなら最後まで実行
+			if (debug) {Log.d("TextManager", "formatTextFile: テキストビュワー用の処理を行います.");}
+			if (inputSB != null) {
+				outputStr += inputSB.toString();
+				inputSB = null;
+			} else {
+				outputStr += inputStr;
 			}
-			// 1行目の本文をタイトルとして設定
-			mTitle = linestr.toString();
-			if (mTitle == null || mTitle.isEmpty()) {
-				mTitle = title;
-			}
-		}
 
-		LineManager dm = layoutLines(linedata);
-		mTextPages = layoutPages(dm);
+			char[] intext;
+			if (outputStr.length() > 0) {
+				if (debug) {
+					Log.d("TextManager", "formatTextFile: intext=\n" + outputStr.substring(0, Math.min(500, outputStr.length())));
+				}
+				intext = outputStr.toCharArray();
+				outputStr = null;
+			} else {
+				intext = inputStr.toCharArray();
+			}
+			inputStr = null;
+
+			ArrayList<LineData> linedata = new ArrayList<LineData>();
+			int inpos = 0;
+
+			mHeadSize = headfont;
+			mTextSize = textfont;
+			mRubiSize = rubifont;
+
+			// テキスト全体を中間形式に配置
+			parseTextData(intext, inpos, textbuff, linedata);
+			if (mRunningFlag == false) {
+				return;
+			}
+
+			// Char配列化
+			mTextBuff = textbuff.toString().toCharArray();
+			// StringBufferは解放
+			textbuff = null;
+			System.gc();
+
+			// 先頭行の本文を文字列化
+			if (linedata.size() <= 0) {
+				return;
+			}
+
+			// タイトルの設定
+			if (mTitle.isEmpty()) {
+				LineData ld = linedata.get(0);
+				StringBuffer linestr = new StringBuffer();
+				for (TextBlock tb : ld.textblock) {
+					// TextBlockを文字列化
+					linestr.append(getTextString(mTextBuff, tb.tx_index, tb.tx_length, ld.extdata));
+				}
+				// 1行目の本文をタイトルとして設定
+				mTitle = linestr.toString();
+				if (mTitle == null || mTitle.isEmpty()) {
+					mTitle = title;
+				}
+			}
+
+			LineManager dm = layoutLines(linedata);
+			mTextPages = layoutPages(dm);
+		}
 
 		if (debug) {Log.d("TextManager", "formatTextFile: 終了します.");}
-		return;
 	}
 
 	private LineManager layoutLines(ArrayList<LineData> linedata) {
@@ -2643,7 +2664,7 @@ public class TextManager {
 			}
 
 		}
-		mPictures = (PictureData[]) mPicArray.toArray(new PictureData[0]);
+		mPictures = mPicArray.toArray(new PictureData[mPicArray.size()]);
 		return dm;
 	}
 
@@ -3141,30 +3162,6 @@ public class TextManager {
 			result.param1 = 0;
 			return result;
 		}
-//		if (size >= 8) {
-//			// 文字の置き換えチェック
-//			int idx = comment.indexOf("字（fig");
-//			if (idx > 0) {
-//				String work = comment.substring(idx + 1);
-//				String filename = null;
-//				// ファイル名切り出し
-//				for (int i = 0; i < work.length(); i++) {
-//					char ch = work.charAt(i);
-//					if (ch >= 0x80) {
-//						filename = work.substring(0, i);
-//						break;
-//					}
-//				}
-//				int fileindex = loadBitmap(filename, true);
-//				if (fileindex >= 0 && fileindex < 768) {
-//					// ファイル名あり
-//					result.code = COMMENT_PICTURE_CHAR;
-//					result.param1 = 0x1a00 + fileindex;
-//					result.param2 = 1;
-//					return result;
-//				}
-//			}
-//		}
 		if (size >= 8) {
 			// 挿絵チェック
 			if (comment.endsWith("）入る］") || comment.endsWith("）］")) {
@@ -6062,34 +6059,6 @@ public class TextManager {
 					if (debug) {Log.d("TextManager", "loadBitmap: mFileType=FILETYPE_EPUB, mTextPath=" + mTextPath + ",  filename=" + getPath(mTextFile, filename));}
 					mImageMgr.getImageSize(getPath(mTextFile, filename), pt);
 				}
-				/*
-				textpath = mTextPath;
-				if (filename.startsWith("/")) {
-					textpath = "";
-				} else {
-					while (true) {
-						if (filename.startsWith("../")) {
-							// 親ディレクトリ指定
-							filename = filename.substring(3);
-							if (debug) {Log.d("TextManager", "loadBitmap: textpath.length()=" + textpath.length());}
-							if (textpath.length() > 2) {
-								int pridx = textpath.lastIndexOf('/', textpath.length() - 2);
-								if (debug) {Log.d("TextManager", "loadBitmap: pridx=" + pridx);}
-								if (pridx >= 0) {
-									textpath = textpath.substring(0, pridx + 1);
-									if (debug) {Log.d("TextManager", "loadBitmap: textpath=" + textpath);}
-								} else {
-									textpath = "";
-								}
-							}
-						} else {
-							break;
-						}
-					}
-				}
-				mImageMgr.getImageSize(textpath + filename, pt);
-				}
-				 */
 			}
 		} catch (IOException e) {
 			// 読み込みエラー

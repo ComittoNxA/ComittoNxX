@@ -67,7 +67,9 @@
     <string name="filePrevMark">Prev File(Marked Page)</string>
     <string name="loading">Loading</string>
     <string name="reading">Loading File List</string>
-    <string name="parsing">Parsing</string>
+    <string name="epubParsing">EPUB Parsing</string>
+    <string name="htmlParsing">HTML Parsing</string>
+    <string name="textParsing">Text Parsing</string>
     <string name="formatting">Formatting</string>
     <string name="readxref">Loading XRef</string>
     <string name="readpage">Loading Page Object</string>

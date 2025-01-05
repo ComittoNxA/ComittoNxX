@@ -470,96 +470,103 @@ public class ImageManager extends InputStream implements Runnable {
 				Log.e("ImageManager", "cmpFileList: 圧縮ファイルの解析でエラーになりました.");
 				if (e != null && e.getMessage() != null) {
 					Log.e("FileThumbnailLoader", "cmpFileList:  エラーメッセージ. " + e.getMessage());
-					break;
+					// try catch 内では break できない
+					// break;
 				}
-
 			}
 
 			if(debug) {Log.d("ImageManager", "cmpFileList: STEP 2");}
-			if(debug) {Log.d("ImageManager", "cmpFileList: fl.name=" + fl.name);}
-			// 対象ファイル判定
-			if (fl.name != null && fl.name.length() > 4 && fl.orglen > 0 && fl.cmplen > 0) {
-				if (mHidden == false || !DEF.checkHiddenFile(fl.name)) {
-					String ext = DEF.getFileExt(fl.name);
-					fl.type = 0;
-					fl.exttype = 0;
-					if (FileData.isImage(ext)) {
-						if (DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_JPG;
-						}
-						else if (DEF.WITH_PNG && ext.equals(".png")) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_PNG;
-						}
-						else if (DEF.WITH_GIF && ext.equals(".gif")) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_GIF;
-						}
-						else if (DEF.WITH_WEBP && ext.equals(".webp")) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_WEBP;
-						}
-						else if (DEF.WITH_AVIF && ext.equals(".avif")) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_AVIF;
-						}
-						else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_HEIF;
-						}
-						else if (DEF.WITH_JXL && ext.equals(".jxl")) {
-							fl.type = FileData.FILETYPE_IMG;
-							fl.exttype = FileData.EXTTYPE_JXL;
-						}
-					}
-					else if (FileData.isText(ext) && (mOpenMode == OPENMODE_LIST || mOpenMode == OPENMODE_TEXTVIEW)) {
-						fl.type = FileData.FILETYPE_TXT;
-						fl.exttype = FileData.EXTTYPE_TXT;
-					}
-					else if (FileData.isEpubSub(ext) && (mOpenMode == OPENMODE_TEXTVIEW)) {
-						fl.type = FileData.FILETYPE_EPUB_SUB;
-						fl.exttype = FileData.FILETYPE_EPUB_SUB;
-					}
+			if (fl != null) {
+				if (debug) {Log.d("ImageManager", "cmpFileList: fl.name=" + fl.name);}
 
-					if (fl.type != 0) {
-						// リストへ登録
-						list.add(fl);
-						if (mFileType == FILETYPE_RAR) {
-							if (maxcmplen < fl.cmplen - fl.header) {
-								// 最大サイズを求める
-								maxcmplen = fl.cmplen - fl.header;
+				// 対象ファイル判定
+				if (fl.name != null && fl.name.length() > 4 && fl.orglen > 0 && fl.cmplen > 0) {
+					if (mHidden == false || !DEF.checkHiddenFile(fl.name)) {
+						String ext = DEF.getFileExt(fl.name);
+						fl.type = 0;
+						fl.exttype = 0;
+						if (FileData.isImage(ext)) {
+							if (DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_JPG;
+							}
+							else if (DEF.WITH_PNG && ext.equals(".png")) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_PNG;
+							}
+							else if (DEF.WITH_GIF && ext.equals(".gif")) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_GIF;
+							}
+							else if (DEF.WITH_WEBP && ext.equals(".webp")) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_WEBP;
+							}
+							else if (DEF.WITH_AVIF && ext.equals(".avif")) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_AVIF;
+							}
+							else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_HEIF;
+							}
+							else if (DEF.WITH_JXL && ext.equals(".jxl")) {
+								fl.type = FileData.FILETYPE_IMG;
+								fl.exttype = FileData.EXTTYPE_JXL;
 							}
 						}
-						if (maxorglen < fl.orglen) {
-							// 最大サイズを求める
-							maxorglen = fl.orglen;
+						else if (FileData.isText(ext) && (mOpenMode == OPENMODE_LIST || mOpenMode == OPENMODE_TEXTVIEW)) {
+							fl.type = FileData.FILETYPE_TXT;
+							fl.exttype = FileData.EXTTYPE_TXT;
 						}
-						if (!(mFileType == FILETYPE_ZIP && headpos > 0) && mOpenMode == OPENMODE_THUMBNAIL && list.size() >= 5) {
-							// ソートなしのサムネイル取得時は先頭5ファイルから選択
-							// ZIPの場合は設定にかかわらずソート有り
-							break;
+						else if (FileData.isEpubSub(ext) && (mOpenMode == OPENMODE_TEXTVIEW)) {
+							fl.type = FileData.FILETYPE_EPUB_SUB;
+							fl.exttype = FileData.FILETYPE_EPUB_SUB;
+						}
+
+						if (fl.type != 0) {
+							// リストへ登録
+							list.add(fl);
+							if (mFileType == FILETYPE_RAR) {
+								if (maxcmplen < fl.cmplen - fl.header) {
+									// 最大サイズを求める
+									maxcmplen = fl.cmplen - fl.header;
+								}
+							}
+							if (maxorglen < fl.orglen) {
+								// 最大サイズを求める
+								maxorglen = fl.orglen;
+							}
+							if (!(mFileType == FILETYPE_ZIP && headpos > 0) && mOpenMode == OPENMODE_THUMBNAIL && list.size() >= 5) {
+								// ソートなしのサムネイル取得時は先頭5ファイルから選択
+								// ZIPの場合は設定にかかわらずソート有り
+								break;
+							}
 						}
 					}
 				}
-			}
 
-			// 次のファイルへ
-			cmppos += fl.cmplen;
-			orgpos += fl.orglen;
-			if (mFileType == FILETYPE_ZIP && headpos > 0) {
-				// 旧タイプのZIPの場合はセントラルヘッダをアクセス
-				headpos += fl.header;
-				cmpDirectSeek(headpos);
+				// 次のファイルへ
+				cmppos += fl.cmplen;
+				orgpos += fl.orglen;
+				if (mFileType == FILETYPE_ZIP && headpos > 0) {
+					// 旧タイプのZIPの場合はセントラルヘッダをアクセス
+					headpos += fl.header;
+					cmpDirectSeek(headpos);
+				}
+				else {
+					cmpDirectSeek(cmppos);
+				}
+
+				count++;
+				if (sendProgress(0, count) == false) {
+					mFileList = new FileListItem[0];
+					return;
+				}
 			}
 			else {
-				cmpDirectSeek(cmppos);
-			}
-
-			count++;
-			if (sendProgress(0, count) == false) {
-				mFileList = new FileListItem[0];
-				return;
+				if (debug) {Log.d("ImageManager", "cmpFileList: fl=null");}
+				break;
 			}
 		}
 

@@ -270,7 +270,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		public void run() {
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mUri + mPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_LIST, 1);
-			//mImageMgr.LoadImageList(0, 0, 0);
+			mImageMgr.LoadImageList(0, 0, 0);
 
 			// 終了通知
 			Message message = new Message();

@@ -21,12 +21,6 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class TitleView extends View implements Handler.Callback {
-	public static final int ARROW_NONE = 0;
-	public static final int ARROW_LEFT = 1;
-	public static final int ARROW_RIGHT = 2;
-	public static final int ARROW_CHG_LEFT = 3;
-	public static final int ARROW_CHG_RIGHT = 4;
-
 	private final int EVENT_SCROLL = 1;
 	private final int SCROLL_TERM_FIRST = 1000;
 	private final int SCROLL_TERM_NEXT = 30;
@@ -43,13 +37,8 @@ public class TitleView extends View implements Handler.Callback {
 	private float mTextPos;
 	private int mTextAscent;
 	private int mTextDescent;
-	private String mSortName;
-	private boolean mSortType;
 	private int mMarginW;
 	private int mMarginH;
-	private boolean mMenuTouch;
-	private Bitmap mMenuBitmapOn;
-	private Bitmap mMenuBitmapOff;
 
 	// ビューサイズ
 	private int mViewWidth;
@@ -61,9 +50,6 @@ public class TitleView extends View implements Handler.Callback {
 	// 描画オブジェクト
 	private Handler mHandler;
 	private Paint mTextPaint;
-	private Paint mArrowPaint;
-	private Paint mBitmapPaint;
-	private Path mArrowPath;
 
 	private Context mContext;
 
@@ -72,14 +58,9 @@ public class TitleView extends View implements Handler.Callback {
 		mHandler = new Handler(this);
 		mIsRunning = true;
 		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mArrowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mArrowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-		mBitmapPaint = new Paint();
-		mArrowPath = new Path();
 
 		mContext = context;
-		Context c = context.getApplicationContext();
-		float density = c.getResources().getDisplayMetrics().scaledDensity;
+		float density = mContext.getResources().getDisplayMetrics().scaledDensity;
 		mScrollStep = density;
 		if (mScrollStep < 1) {
 			mScrollStep = 1;
@@ -92,25 +73,9 @@ public class TitleView extends View implements Handler.Callback {
 	protected void onDraw(Canvas canvas) {
 		int fullcx = getWidth();
 		int cy = getHeight();
-		int titlecx = fullcx - cy;
-
-		// 背景塗りつぶし
-		// Paint paint = new Paint();
-		// paint.setStrokeWidth(1);
-		// paint.setColor(Color.WHITE);
-		// canvas.drawLine(0, 1, cx, 1, paint);
-
-		// paint.setColor(Color.rgb(255, 64, 64));
-		// canvas.drawLine(0, cy, cx, cy-1, paint);
-
-		// paint.setStyle(Paint.Style.FILL);
-		// paint.setColor(Color.DKGRAY);
-		// canvas.drawRect(0, 5, cx, cy - 5, paint);
 
 		// グラデーション幅算出
 		GradientDrawable grad;
-		// int colors1[] = {Color.rgb(96, 96, 96), Color.rgb(78, 78, 78),
-		// Color.rgb(64, 64, 64)};
 		int colors1[] = { mBackColor[2], mBackColor[1], mBackColor[0] };
 		grad = new GradientDrawable(Orientation.TOP_BOTTOM, colors1);
 		grad.setBounds(new Rect(0, 0, fullcx, cy));
@@ -137,45 +102,6 @@ public class TitleView extends View implements Handler.Callback {
 				}
 			}
 		}
-		// ソート三角描画
-		if (mSortName != null) {
-			mArrowPaint.setColor(mTextColor);
-			int s = mTextSize + mTextDescent;
-			int sh = s * 2 / 5;
-			int x1 = titlecx - s;
-			int x2 = titlecx;
-			int y1 = mMarginH;// mTitle2 != null ? mMarginH : (cy - s) / 2;
-			int y2 = y1 + s;
-
-			mArrowPath.reset();
-			if (mSortType) {
-				// 昇順
-				mArrowPath.moveTo(x1 + s / 2, y1 + sh);
-				mArrowPath.lineTo(x2 - s / 3, y2 - sh);
-				mArrowPath.lineTo(x1 + s / 3, y2 - sh);
-			} else {
-				// 昇順
-				mArrowPath.moveTo(x1 + s / 2, y2 - sh);
-				mArrowPath.lineTo(x2 - s / 3, y1 + sh);
-				mArrowPath.lineTo(x1 + s / 3, y1 + sh);
-			}
-			canvas.drawPath(mArrowPath, mArrowPaint);
-			mTextPaint.setTextAlign(Paint.Align.RIGHT);
-
-			// ソート条件名描画
-			canvas.drawText(mSortName, titlecx - mMarginW - mTextSize, mMarginH + mTextAscent, mTextPaint);
-		}
-
-		// メニューボタン描画
-		Bitmap bm;
-		if (mMenuTouch) {
-			bm = mMenuBitmapOff;
-		}
-		else {
-			bm = mMenuBitmapOn;
-		}
-		canvas.drawBitmap(bm, titlecx, (cy - (mTextSize * 2)) / 2, mBitmapPaint);
-		return;
 	}
 
 	@Override
@@ -209,11 +135,6 @@ public class TitleView extends View implements Handler.Callback {
 
 		mMarginH = size / 32;
 		mMarginW = size / 8;
-
-		// ビットマップリソースを読み込み
-		Resources res = mContext.getResources();
-		mMenuBitmapOn= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, mTextColor);
-		mMenuBitmapOff= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, color2);
 	}
 
 	// 文字列の設定
@@ -231,22 +152,6 @@ public class TitleView extends View implements Handler.Callback {
 		// 文字列幅が入りきらない場合のスクロール開始
 		mTextPos = 0;
 		startScrollTimer();
-
-		// 位置初期化
-		invalidate();
-	}
-
-	// ソート状態の設定
-	public void setSortMode(String name, boolean type) {
-		mSortName = name;
-		mSortType = type;
-		invalidate();
-	}
-
-	// 矢印表示
-	public void setMenuTouch(boolean istouch) {
-		// メニュー押下状態
-		mMenuTouch = istouch;
 
 		// 位置初期化
 		invalidate();

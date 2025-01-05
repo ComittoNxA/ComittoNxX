@@ -9,6 +9,7 @@ import src.comitton.common.DEF;
 import src.comitton.config.SetCacheActivity;
 import src.comitton.config.SetCommonActivity;
 import src.comitton.config.SetConfigActivity;
+import src.comitton.config.SetEpubActivity;
 import src.comitton.config.SetImageActivity;
 import src.comitton.config.SetImageDetailActivity;
 import src.comitton.config.SetImageText;
@@ -49,6 +50,7 @@ import androidx.core.content.FileProvider;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -66,7 +68,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -336,8 +338,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private boolean mViewNext = false; // 次のページを表示
 	private boolean mNextFilter = true;
 	private boolean mChgPageKey = false;
-
-	private String mCharset;
+	private boolean mEpubOrder = false;
+	private boolean mEpubThumb = false;
 
 	// ファイル情報
 	private String mPath;
@@ -487,7 +489,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private final int LOADING_TERM_START = 500;
 	private final int LOADING_TERM = 150;
 
-	private Activity mActivity;
+	private ImageActivity mActivity;
 	private SharedPreferences mSharedPreferences;
 	private float mSDensity;
 	private int mImmCancelRange;
@@ -511,6 +513,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		boolean debug = false;
 		// 回転
 		mInitFlg = 0;
 		mDispMode = DISPMODE_NORMAL;
@@ -613,74 +616,17 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		// Intentを取得する
 		Intent intent = getIntent();
 		mServer = -1;
-		try {
-			// 他のアプリから呼び出された場合にパスを解析する
-			String path = null;
-			if (Intent.ACTION_SEND.equals(getIntent().getAction())) {
-				Uri uri = (Uri) intent.getExtras().get(Intent.EXTRA_STREAM);
-				path = uri.getPath();
-			}
-			else if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-				path = Uri.decode(intent.getDataString());
-			}
-			// 先頭"file://"を削除
-			if (path != null) {
-				if (path.length() > 7 && path.substring(0, 7).equals("file://")) {
-					path = path.substring(7);
-				}
-				if (path.length() > 10 && path.substring(0, 10).equals("content://")) {
-					path = path.substring(10);
-					int i = path.indexOf("/root/");
-					if (i > 0) {
-						path = path.substring(i + 5);
-					}
-				}
-			}
-
-			// ファイルが指定されている
-			if (path != null && path.length() >= 5) {
-
-				// ファイル名の切り出し
-				int prev = 0;
-				prev = path.lastIndexOf("/");
-
-				// パスの構成チェック
-				if (path.length() > prev + 1) {
-					mPath = path.substring(0, prev + 1);
-					String ext = DEF.getFileExt(path);
-					if (FileData.isArchive(ext)) {
-						// 圧縮ファイル
-						mFileName = path.substring(prev + 1);
-						mImageName = "";
-					}
-					else if (FileData.isImage(ext)) {
-						// その他
-						mFileName = "";
-						mImageName = path.substring(prev + 1);
-					}
-					else {
-						mPath = null;
-					}
-				}
-				else {
-					mPath = null;
-				}
-			}
-		} catch (Exception e) {
-			;
-		}
-
 		mHost = "";
-		if (mPath == null) {
-			// 直接アプリを起動した場合にIntentに保存されたデータを取り出す
-			mServer = intent.getIntExtra("Server", -1);
-			mHost = intent.getStringExtra("Uri");
-			mPath = intent.getStringExtra("Path");
-			mUser = intent.getStringExtra("User");
-			mPass = intent.getStringExtra("Pass");
-			mFileName = intent.getStringExtra("File"); // ZIP指定時
-			mImageName = intent.getStringExtra("Image"); // 画像直接指定時
-		}
+
+		// 直接アプリを起動した場合にIntentに保存されたデータを取り出す
+		mServer = intent.getIntExtra("Server", -1);
+		mHost = intent.getStringExtra("Uri");
+		mPath = intent.getStringExtra("Path");
+		mUser = intent.getStringExtra("User");
+		mPass = intent.getStringExtra("Pass");
+		mFileName = intent.getStringExtra("File"); // ZIP指定時
+		mImageName = intent.getStringExtra("Image"); // 画像直接指定時
+
 		if (mPath == null) {
 			// パスの設定がなければ終了
 			return;
@@ -804,7 +750,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	public class ZipLoad implements Runnable {
 		private Handler handler;
-		private Activity mActivity;
+		private AppCompatActivity mActivity;
 
 		public ZipLoad(Handler handler, ImageActivity activity) {
 			super();
@@ -815,11 +761,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		public void run() {
 			boolean debug = false;
 			// ファイルリストの読み込み
-			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, mFileSort, handler, mCharset, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
+			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
 			if(debug) {Log.d("ImageActivity", "run メモリ利用状況.\n" + getMemoryString());}
+			setMgrConfig(true);
 			mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
 			if(debug) {Log.d("ImageActivity", "run メモリ利用状況.(2回目)\n" + getMemoryString());}
-			setMgrConfig(true);
 			// mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode,
 			// mNoExpand, mAlgoMode, mRotate, mWAdjust, mImgScale, mPageWay,
 			// mMgnCut);
@@ -1826,7 +1772,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private void setMgrConfig(boolean scaleinit) {
 		if (mImageMgr != null) {
 			mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode, mNoExpand, mAlgoMode, mRotate, mWAdjust
-					, mWidthScale, mImgScale, mPageWay, mMgnCut, mMgnCutColor, 0, mBright, mGamma, mSharpen, mInvert, mGray, mPseLand, mMoire, mTopSingle, scaleinit);
+					, mWidthScale, mImgScale, mPageWay, mMgnCut, mMgnCutColor, 0, mBright, mGamma, mSharpen, mInvert, mGray, mPseLand, mMoire, mTopSingle, scaleinit, mEpubOrder);
 		}
 		// モードが変わればスケールは初期化
 		if (scaleinit) {
@@ -3448,9 +3394,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 			case DEF.MENU_SHARPEN: {
 				// シャープ化
-				//mSharpen = mSharpen ? false : true;
-				//setImageConfig();
-				//setBitmapImage();
 				showImageConfigDialog(DEF.MENU_SHARPEN);
 				break;
 			}
@@ -4166,7 +4109,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mConfirmBack = SetImageText.getConfirmBack(sharedPreferences); // 戻るキーで確認メッセージ
 			// mResumeOpen = false;
 
-			mCharset = DEF.CharsetList[SetCommonActivity.getCharset(sharedPreferences)];
 			mHidden = SetCommonActivity.getHiddenFile(sharedPreferences);
 
 			mMemSize = DEF.calcMemSize(SetCacheActivity.getMemSize(sharedPreferences));
@@ -4188,6 +4130,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				// 上部メニューの文字列情報をガイドに設定
 				mGuideView.setTopCommandStr(mCommandStr);
 			}
+
+			mEpubOrder = SetEpubActivity.getEpubOrder(sharedPreferences);
 		}
 		catch (Exception e) {
 			Log.e("ImageActivity", "ReadSetting error.");

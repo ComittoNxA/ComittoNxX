@@ -20,7 +20,7 @@ import src.comitton.data.ServerData;
 
 import android.content.SharedPreferences;
 import android.os.Environment;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -53,7 +53,7 @@ public class RecordList {
 			DEF.MENU_ROTATE, DEF.MENU_ONLINE, DEF.MENU_NOTICE, DEF.MENU_ABOUT, DEF.MENU_SETTING};
 
 	private static final int MENU_IMAGE[] = {R.drawable.add_smartphone, R.drawable.delete_favorite,
-			R.drawable.delete_history, R.drawable.rotate, R.drawable.help,
+			R.drawable.delete_thumb, R.drawable.rotate, R.drawable.help,
 			R.drawable.note, R.drawable.info,
 			R.drawable.config};
 

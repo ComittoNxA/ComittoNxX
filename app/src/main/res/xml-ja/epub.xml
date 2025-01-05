@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="ビュワーの設定" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="epubViewer"
+            android:summary="EPUBファイルをテキスト表示画面の代わりにイメージ表示画面で開く"
+            android:title="イメージ表示画面で開く" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="epubOrder"
+            android:summary="イメージビュワーでEPUBファイルを開くときにEPUBファイル内で指定された表示順序に従う"
+            android:title="イメージビュワーの表示順序" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="epubThumb"
+            android:summary="ファイル選択画面のサムネイルにEPUBファイル内で指定された表紙画像を使用する"
+            android:title="サムネイルに表紙画像を使う" />
+    </PreferenceCategory>
+</PreferenceScreen>

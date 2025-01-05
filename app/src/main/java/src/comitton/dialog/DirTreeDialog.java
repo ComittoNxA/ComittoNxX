@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
@@ -54,22 +55,22 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 	private static int separater_bakcolor = 0xBBFFFFFF;
 	private int item_txtsize;
 
-	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
+	public DirTreeDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, false, false, false, listener);
 	}
 
-	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
+	public DirTreeDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, halfview, false, false, listener);
 	}
 
-	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
+	public DirTreeDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, halfview, top, false, listener);
 	}
 
-	public DirTreeDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+	public DirTreeDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId, wide);
 		MenuDialogProc(activity, isclose, halfview, top, wide, listener);
 	}

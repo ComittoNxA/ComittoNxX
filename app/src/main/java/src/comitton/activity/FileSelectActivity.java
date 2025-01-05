@@ -14,6 +14,7 @@ import src.comitton.common.FileAccess;
 import src.comitton.common.ImageAccess;
 import src.comitton.config.SetCommonActivity;
 import src.comitton.config.SetConfigActivity;
+import src.comitton.config.SetEpubActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
@@ -47,8 +48,14 @@ import src.comitton.view.list.TitleArea;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -62,6 +69,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -74,7 +82,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.storage.StorageManager;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
+
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
@@ -179,7 +189,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	private int mRotateBtn;
 	private boolean mListRotaChg;
 
-	private String mCharset;
 	private boolean mHidden;
 	private boolean mThumbSort;
 	private boolean mParentMove;
@@ -190,6 +199,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	private int mShowDelMenu;
 	private int mShowRenMenu;
 	private boolean mEpubViewer;
+	private boolean mEpubThumb;
 
 	private boolean mResumeOpen;
 	private boolean mThumbnail;
@@ -234,8 +244,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	private View mEditDlg = null;
 	private int mInitialize = 0;
-
-	int mCommand;
 
 	private StorageManager mStorageManager;
 
@@ -332,6 +340,74 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		mURI = "";
 
 		// Intentに保存されたデータを取り出す
+
+		try {
+			String action = intent.getAction();
+			String type = intent.getType();
+			Bundle extras = intent.getExtras();
+			ComponentName component = intent.getComponent();
+			Uri contentUri = null;
+			if (debug) {Log.d("FileSelectActivity", "onCreate: Intent解析中. action=" + action + ", type=" + type + ", extras=" + extras + ", component=" + component);}
+
+			if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_VIEW.equals(action)) {
+				// 他のアプリから呼び出された場合
+
+				String path = null;
+				if (Intent.ACTION_SEND.equals(action)) {
+					contentUri = (Uri) intent.getExtras().get(Intent.EXTRA_STREAM);
+					if (debug) {Log.d("FileSelectActivity", "onCreate: Intent解析中. Intent.ACTION_SEND contentUri=" + contentUri.getPath());}
+				} else if (Intent.ACTION_VIEW.equals(action)) {
+					contentUri = intent.getData();
+					if (debug) {Log.d("FileSelectActivity", "onCreate: Intent解析中. Intent.ACTION_VIEW contentUri=" + contentUri.getPath());}
+				}
+
+				path = contentUri.getPath();
+				if (contentUri != null && "content".equals(contentUri.getScheme())) {
+					Cursor cursor = null;
+					cursor = this.getContentResolver().query(contentUri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null);
+					cursor.moveToFirst();
+					if (cursor.getColumnCount() != 0) {
+						path = cursor.getString(0);
+					}
+					cursor.close();
+				} else {
+					path = contentUri.getPath();
+				}
+				if (debug) {Log.d("FileSelectActivity", "onCreate: Intent解析中. path=" + path);}
+
+				// 先頭"file://"を削除
+				if (path != null) {
+					if (path.startsWith("file://")) {
+						path = path.substring(7);
+					}
+					if (path.startsWith("/root/")) {
+						path = path.substring(5);
+					}
+				}
+
+				// 起動処理終了を保存
+				if (mInitialize != 0) {
+					ed.putInt("Initialize", 0);
+					ed.commit();
+					mInitialize = 0;
+				}
+
+				intent.putExtra("Uri", mURI);
+				intent.putExtra("Path", mPath);
+				mServer = new ServerSelect(mSharedPreferences, this);
+				mServer.select(ServerSelect.INDEX_LOCAL);
+				mURI = mServer.getURI();
+				mPath = path.substring(0, path.lastIndexOf('/') + 1);
+				FileData fileData = new FileData(path.substring(path.lastIndexOf('/') + 1));
+				if (debug) {Log.d("FileSelectActivity", "onCreate: Intent解析中. mPath=" + mPath + ", name=" + fileData.getName());}
+
+				openFile(fileData, "", (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD, mEpubViewer);
+			}
+
+		} catch (Exception e) {
+			Log.e("FileSelectActivity", "onCreate: Intent解析中にエラーが発生しました. " + e.getMessage());
+		}
+
 		String path;
 		String server;
 		int serverSelect;
@@ -340,8 +416,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			path = savedInstanceState.getString("Path");
 			server = savedInstanceState.getString("Server");
 			serverSelect = savedInstanceState.getInt("ServerSelect", -2);
-		}
-		else {
+		} else {
 			path = intent.getStringExtra("Path");
 			server = intent.getStringExtra("Server");
 			serverSelect = intent.getIntExtra("ServerSelect", -2);
@@ -358,7 +433,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				}
 			}
 		}
-		if (path != null && !"".equals(path)) {
+		if (path != null && !path.isEmpty()) {
 			mPath = path;
 		}
 		// サーバパス
@@ -366,12 +441,10 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if (mServer.select(serverSelect) == true) {
 				mURI = mServer.getURI();
 			}
-		}
-		else if (server != null && !"".equals(server)) {
+		} else if (server != null && !"".equals(server)) {
 			if (mServer.select(server) == true) {
 				mURI = mServer.getURI();
-			}
-			else {
+			} else {
 				mPath = null;
 				Resources res = getResources();
 				Toast.makeText(this, res.getString(R.string.svNotFound), Toast.LENGTH_LONG).show();
@@ -394,7 +467,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		String cursor = intent.getStringExtra("Cursor");
 
-		if (mPath == null || mPath.equals("")) {
+		if (mPath == null || mPath.isEmpty()) {
 			mServer.select(ServerSelect.INDEX_LOCAL);
 			mPath = mServer.getPath();
 			mURI = mServer.getURI();
@@ -435,51 +508,60 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			// 取得不可エラー
 		}
 
+		ArrayList<String> permissions = new ArrayList<String>(0);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 			if (debug) {Log.d("FileSelectActivity", "onCreate: Android11(R)以降のバージョンです.");}
+			//==== パーミッション承認状態判定(外部ストレージ) ====//
 			if (!Environment.isExternalStorageManager()){
 				if (debug) {Log.d("FileSelectActivity", "onCreate: 外部ストレージアクセス権限がありません.");}
-				ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE);
+				//==== ユーザに自分で権限リストを設定してもらう ====//
 				intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
 				startActivity(intent);
 			}else{
 				if (debug) {Log.d("FileSelectActivity", "onCreate: 外部ストレージアクセス権限があります.");}
 			}
 		} else {
-			if (debug) {Log.d("FileSelectActivity", "onCreate: Android10(Q)以前のバージョンです.");}
+			if (debug) {
+				Log.d("FileSelectActivity", "onCreate: Android10(Q)以前のバージョンです.");
+			}
 
 			//==== パーミッション承認状態判定(読み込み) ====//
 			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
 			{
 				if (debug) {Log.d("FileSelectActivity", "onCreate: READ_EXTERNAL_STORAGE 権限がありません.");}
-				//==== 承認要求を行う ====//
-				ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
+				//==== 承認要求する権限リストに追加 ====//
+				permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
 			}
 			else {
 				if (debug) {Log.d("FileSelectActivity", "onCreate: READ_EXTERNAL_STORAGE 権限があります.");}
 			}
 
 			//==== パーミッション承認状態判定(書き込み) ====//
-			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-			{
-				if (debug) {Log.d("FileSelectActivity", "onCreate: WRITE_EXTERNAL_STORAGE 権限がありません.");}
-				//==== 承認要求を行う ====//
-				ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+				if (debug) {
+					Log.d("FileSelectActivity", "onCreate: WRITE_EXTERNAL_STORAGE 権限がありません.");
+				}
+				//==== 承認要求する権限リストに追加 ====//
+				permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			} else {
+				if (debug) {
+					Log.d("FileSelectActivity", "onCreate: WRITE_EXTERNAL_STORAGE 権限があります.");
+				}
 			}
-			else {
-				if (debug) {Log.d("FileSelectActivity", "onCreate: WRITE_EXTERNAL_STORAGE 権限があります.");}
-			}
-
 		}
 
 		//==== パーミッション承認状態判定(マイク使用) ====//
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
 		{
 			if (debug) {Log.d("FileSelectActivity", "onCreate: RECORD_AUDIO がありません.");}
-			//==== 承認要求を行う ====//
-			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE);
+			//==== 承認要求する権限リストに追加 ====//
+			permissions.add(Manifest.permission.RECORD_AUDIO);
 		}
 
+		if (permissions != null && permissions.size() > 0) {
+			//==== まとめて承認要求を行う ====//
+			ActivityCompat.requestPermissions(this, permissions.toArray(new String[permissions.size()]), REQUEST_CODE);
+		}
 
 		// 前回起動時のバージョン取得
 		String prevVerName = mSharedPreferences.getString("LastVer", null);
@@ -555,24 +637,23 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		// }
 	}
 
+	public ActivityResultLauncher<Intent> startForResult = registerForActivityResult(
+			new ActivityResultContracts.StartActivityForResult(),
+			new ActivityResultCallback<ActivityResult>() {
+				@Override
+				public void onActivityResult(ActivityResult result) {
+					if(result.getResultCode() == RESULT_OK && result.getData() != null){
+						Intent data = result.getData();
+					}
+				}
+			});
+
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		boolean debug = false;
 		if (debug) {Log.d("FileSelectActivity", "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);}
 
-		if (requestCode == WRITE_REQUEST_CODE || requestCode == REQUEST_SDCARD_ACCESS) {
-			// リネームか削除かダウンロードのとき
-			if (debug) {Log.d("FileSelectActivity", "onActivityResult: WRITE_REQUEST_CODE || REQUEST_SDCARD_ACCESS");}
-
-			if (resultCode == RESULT_OK) {}
-		}
-		else if (requestCode == DEF.REQUEST_SERVER) {
-			if (resultCode == RESULT_OK) {
-				int index = data.getExtras().getInt("svrindex");
-				// サーバの選択が変わった
-				moveFileSelect(index, true);
-			}
-		}//クロップ完了
+		//クロップ完了
 		else if (requestCode == DEF.REQUEST_CROP) {
 			if (resultCode == RESULT_OK) {
 				Uri uri = data.getData();
@@ -587,8 +668,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if (requestCode == DEF.REQUEST_IMAGE || requestCode == DEF.REQUEST_TEXT || requestCode == DEF.REQUEST_EPUB || requestCode == DEF.REQUEST_EXPAND) {
 				if (debug) {Log.d("FileSelectActivity", "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EPUB || REQUEST_EXPAND");}
 				if (resultCode == RESULT_OK && data != null) {
-					if (debug) {Log.d("FileSelectActivity", "onActivityResult: RESULT_OK. ビュアーから復帰しました.");}
-					// ビュアーからの復帰
+					if (debug) {Log.d("FileSelectActivity", "onActivityResult: RESULT_OK. ビュワーから復帰しました.");}
+					// ビュワーからの復帰
 					int nextopen = data.getExtras().getInt("nextopen", -1);
 					String file = data.getExtras().getString("lastfile");
 					String path = data.getExtras().getString("lastpath");
@@ -639,8 +720,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				// サムネイル解放
 				releaseThumbnail();
 
-				// readConfig();
-				// updateListView();
 				// 画面遷移によって設定反映
 				if (checkConfigChange()) {
 					Log.d("FileSelectActivity", "onActivityResult: checkConfigChange() == true");
@@ -794,7 +873,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		mShowDelMenu = SetFileListActivity.getFileDelMenu(mSharedPreferences);
 		mShowRenMenu = SetFileListActivity.getFileRenMenu(mSharedPreferences);
 
-		mCharset = DEF.CharsetList[SetCommonActivity.getCharset(mSharedPreferences)];
 		mHidden = SetCommonActivity.getHiddenFile(mSharedPreferences);
 
 		mResumeOpen = SetImageText.getResumeOpen(mSharedPreferences); // 戻るキーで確認メッセージ
@@ -817,6 +895,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		mDuration = DEF.calcMSec100(SetFileListActivity.getMenuLongTap(mSharedPreferences));
 
 		mEpubViewer = SetFileListActivity.getEpubViewer(mSharedPreferences);
+		mEpubThumb = SetEpubActivity.getEpubThumb(mSharedPreferences);
 
 		if (mListRotaChg == false) {
 			// 手動で切り替えていない
@@ -900,10 +979,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		if (mListThumbSizeH != DEF.calcThumbnailSize(SetFileListActivity.getListThumbSizeH(mSharedPreferences))) {
 			return true;
 		}
-		// if (mThumbnail !=
-		// SetFileListActivity.getThumbnail(mSharedPreferences)) {
-		// return true;
-		// }
 		if (mThumbSizeW != DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeW(mSharedPreferences))) {
 			return true;
 		}
@@ -964,11 +1039,9 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		if (mEpubViewer != SetFileListActivity.getEpubViewer(mSharedPreferences)) {
 			return true;
 		}
-		// if (mHistCount !=
-		// DEF.calcSaveNum(SetRecorderActivity.getHistNum(mSharedPreferences));)
-		// {
-		// return true;
-		// }
+		if (mEpubThumb != SetEpubActivity.getEpubThumb(mSharedPreferences)) {
+			return true;
+		}
 		short listtype[] = SetRecorderActivity.getListTypes(mSharedPreferences);
 		if (mListType.length != listtype.length) {
 			return true;
@@ -1179,13 +1252,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		File file;
 		switch (id) {
 			case DEF.MESSAGE_FILE_DELETE:
-
-				//==== パーミッション承認状態判定(書き込み) ====//
-				if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-					//==== 承認要求を行う ====//
-					ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-				}
-
 				dialogBuilder.setTitle("ファイル削除");
 				dialogBuilder.setMessage(R.string.delMsg);
 				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
@@ -1196,12 +1262,17 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						String pass = mServer.getPass();
 						if (mFileData.getType() != FileData.FILETYPE_DIR) {
 							// ファイル単体の場合はそのまま消す
-							Log.d("FileSelectActivity", "onCreateDialog ファイルを削除します。");
+							if (debug) {Log.d("FileSelectActivity", "onCreateDialog ファイルを削除します。");}
 							try {
-								boolean isExist = FileAccess.delete(mURI + mPath + mFileData.getName(), user, pass);
-								if (!isExist) {
-									// 削除されていたら消す
+								boolean isDeleted = FileAccess.delete(mActivity, mURI + mPath + mFileData.getName(), user, pass);
+								if (isDeleted) {
+									if (debug) {Log.d("FileSelectActivity", "onCreateDialog ファイルを削除できました。");}
+									// 削除できていたら画面から消す
 									mListScreenView.removeFileList(mFileData);
+								}
+								else {
+									Log.e("FileSelectActivity", "onCreateDialog:" + getResources().getString(R.string.delErrorMsg));
+									Toast.makeText(mActivity, R.string.delErrorMsg, Toast.LENGTH_LONG).show();
 								}
 							} catch (FileAccessException e) {
 								Toast.makeText(mActivity, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -1268,12 +1339,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				dialog = dialogBuilder.create();
 				break;
 			case DEF.MESSAGE_DOWNLOAD:
-				//==== パーミッション承認状態判定(書き込み) ====//
-				if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-					//==== 承認要求を行う ====//
-					ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-				}
-
 				dialogBuilder.setTitle("Download");
 				dialogBuilder.setMessage("");
 				dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
@@ -1320,7 +1385,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						// ショートカットをHOMEに作成する
 						if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 							// Android 8 O API26 以降
-							Icon icon = Icon.createWithResource(mActivity, R.drawable.icon);
+							Icon icon = Icon.createWithResource(mActivity, R.drawable.comittonxx);
 							ShortcutInfo shortcut = new ShortcutInfo.Builder(mActivity, title)
 									.setShortLabel(title)
 									.setLongLabel(title)
@@ -1394,13 +1459,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				break;
 			}
 			case DEF.MESSAGE_FILE_RENAME: {
-
-				//==== パーミッション承認状態判定(書き込み) ====//
-				if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-					//==== 承認要求を行う ====//
-					ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-				}
-
 				Resources res = getResources();
 				String title = res.getText(R.string.renTitle).toString();
 				String notice = res.getText(R.string.renMsg).toString();
@@ -2107,11 +2165,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				// ボタン押下
 				int result = mListScreenView.mToolbarArea.sendTouchEvent(action, (int) x, (int) y);
 				switch (result) {
-//					case DEF.TOOLBAR_SERVER:
-//						// Intentをつかって画面遷移する
-//						Intent intent = new Intent(FileSelectActivity.this, ServerActivity.class);
-//						startActivityForResult(intent, DEF.REQUEST_SERVER);
-//						break;
 					case DEF.TOOLBAR_ADDDIR:
 						// ディレクトリ登録
 						RecordList.add(RecordList.TYPE_DIRECTORY, RecordItem.TYPE_FOLDER, mServer.getSelect(), mPath, null
@@ -2331,7 +2384,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		String ope7 = res.getString(R.string.ope07); // zip/rar/pdfを開く
 		String ope8 = res.getString(R.string.ope08); // ファイル名変更
 		String ope9 = res.getString(R.string.ope09); // サムネイルキャッシュ削除
-		String ope11 = res.getString(R.string.ope11); // Epubビュアーで開く
+		String ope11 = res.getString(R.string.ope11); // Epubビュワーで開く
 		String ope100 = res.getString(R.string.ope100);;// 親ディレクトリのサムネイルに設定
 		String ope101 = res.getString(R.string.ope101);;// 1枚目を切り抜いてサムネイルに設定
 		String ope10 = res.getString(R.string.ope10); // 先頭から読む
@@ -2392,7 +2445,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if (mFileData.getType() == FileData.FILETYPE_EPUB) {
 				// zip/rar/pdfファイルを展開
 				itemnum++;
-				// Epubビュアーで開く
+				// Epubビュワーで開く
 				itemnum++;
 			}
 			if (state != -1) {
@@ -2463,7 +2516,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					// zip/rar/pdfファイルを開く
 					items[i] = ope7;
 				} else {
-					// Epubビュアーで開く
+					// Epubビュワーで開く
 					items[i] = ope11;
 				}
 				mOperate[i] = OPERATE_EPUB;
@@ -2577,7 +2630,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							// zip/rar/pdfファイルを開く
 							openCompFile(mFileData.getName(), "");
 						} else {
-							// Epubビュアーで開く
+							// Epubビュワーで開く
 							openEpubFile(mFileData.getName(), (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
 						}
 						break;
@@ -2665,7 +2718,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						Intent intent = new Intent(mActivity, CropImageActivity.class);
 						intent.putExtra("Path", mURI + mPath);
 						intent.putExtra("File", mFileData.getName());
-						intent.putExtra("Charset", mCharset);
 						intent.putExtra("User", mServer.getUser());
 						intent.putExtra("Pass", mServer.getPass());
 						intent.putExtra("aspectRatio", (float) mThumbSizeW / (float) mThumbSizeH);
@@ -2864,15 +2916,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 									}
 								}
 								ed.remove(key);
-								/*
-								// しおり情報の存在確認
-                                try {
-                                    Log.i("bookmark-check", key + " is " + mSharedPreferences.getInt(key, -99) + "page.");   // 圧縮ファイル等でなければページ情報は既読と同じ-2
-                                }catch(Exception e){
-								    //
-                                    Log.e("bookmark-check","error.");
-                                }
-                                */
 							}
 						}
 						break;
@@ -3214,6 +3257,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルオープン
 	 */
 	private boolean openFile(FileData fd, String infile, float pagerate, int page, boolean epubviewer) {
+		boolean debug = false;
+		if (debug) {Log.d("FileSelectActivity", "openFile: 開始します. mPath=" + mPath + ", name=" + fd.getName());}
 		// ファイルを表示
 		if (fd == null) {
 			if (page != -2) {
@@ -3299,8 +3344,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 */
 	private void openTextFile(String name, float pageRate, int page) {
 		boolean debug = false;
-		if (debug) {Log.d("FileSelectActivity", "openTextFile: 開始します. name=" + name);}
-		if (debug) {DEF.StackTrace("FileSelectActivity", "openTextFile:");}
+		if (debug) {Log.d("FileSelectActivity", "openTextFile: 開始します. mPath=" + mPath + ", name=" + name);}
+		//if (debug) {DEF.StackTrace("FileSelectActivity", "openTextFile:");}
 
 		// saveLastOpenComp(mServer.getCode(), mPath, null, name,
 		// DEF.LASTOPEN_TEXT);
@@ -3531,7 +3576,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		String user = mServer.getUser();
 		String pass = mServer.getPass();
 		int filesort = SetImageActivity.getFileSort(mSharedPreferences);
-		mThumbnailLoader = new FileThumbnailLoader(this, mURI, mPath, user, pass, mHandler, mThumbID, mFileList.getFileList(), mThumbSizeW, mThumbSizeH, mThumbNum, filesort, mCharset, mHidden, mThumbSort, mThumbCrop, mThumbMargin);
+		mThumbnailLoader = new FileThumbnailLoader(this, mURI, mPath, user, pass, mHandler, mThumbID, mFileList.getFileList(), mThumbSizeW, mThumbSizeH, mThumbNum, filesort, mHidden, mThumbSort, mThumbCrop, mThumbMargin, mEpubThumb);
 		mThumbnailLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
 
 		// 現在時をIDに設定

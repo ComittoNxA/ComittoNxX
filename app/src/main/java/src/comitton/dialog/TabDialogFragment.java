@@ -112,7 +112,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
         mListener = listener;
 
         // サイズを決定する
-        Rect size = new Rect();
+        //Rect size = new Rect();
         // ソフトウェアキーボードのサイズが引かれるのでgetWindowVisibleDisplayFrame(size)は使用しない
         //mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(size);
         View mRootView = mActivity.getWindow().getDecorView().findViewById(android.R.id.content);

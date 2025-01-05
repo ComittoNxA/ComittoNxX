@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class ListDialog extends ImmersiveDialog implements OnClickListener, OnItemClickListener, OnDismissListener {
@@ -43,7 +44,7 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 
 	private ItemArrayAdapter mItemArrayAdapter;
 
-	public ListDialog(Activity activity, @StyleRes int themeResId, String title, String[] items, int select, boolean backcolor, ListSelectListener listener) {
+	public ListDialog(AppCompatActivity activity, @StyleRes int themeResId, String title, String[] items, int select, boolean backcolor, ListSelectListener listener) {
 		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(true);

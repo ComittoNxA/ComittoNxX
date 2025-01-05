@@ -8,21 +8,22 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import jp.dip.muracoro.comittonx.R;
 
 @SuppressLint("NewApi")
 public class ImmersiveAlertDialog extends AlertDialog {
-	protected Activity mActivity;
+	protected AppCompatActivity mActivity;
 	protected int mWidth;
 	protected int mHeight;
 	protected float mScale;
 
-	public ImmersiveAlertDialog(Activity activity, int themeResId) {
+	public ImmersiveAlertDialog(AppCompatActivity activity, int themeResId) {
 		this(activity, themeResId, false);
 	}
 
-	public ImmersiveAlertDialog(Activity activity, int themeResId, boolean wide) {
+	public ImmersiveAlertDialog(AppCompatActivity activity, int themeResId, boolean wide) {
 		super(activity, themeResId);
 		mActivity = activity;
 		Window dlgWindow = getWindow();

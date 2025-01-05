@@ -38,8 +38,8 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="epubViewer"
-            android:summary="Open in image viewer instead of epub viewer"
-            android:title="Open the Epub file in Image viewer" />
+            android:summary="Opens EPUB files in image Viewer instead of text Viewer."
+            android:title="Open the EPUB file in Image viewer" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="ParentMove"

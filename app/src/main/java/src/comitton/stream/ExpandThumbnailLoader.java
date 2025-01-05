@@ -25,6 +25,7 @@ public class ExpandThumbnailLoader extends ThumbnailLoader implements Runnable {
 		super(uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
 
 		mImageMgr = imagemgr;
+
 		// スレッド起動
 		mThread = new Thread(this);
 		mThread.start();

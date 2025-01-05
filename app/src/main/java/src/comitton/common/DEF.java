@@ -2,7 +2,6 @@ package src.comitton.common;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.Locale;
@@ -10,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.SortedMap;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -351,6 +349,7 @@ public class DEF {
 	public static final String KEY_SORT_BY_NATURAL_NUMBERS = "SortByNaturalNumbers";
 	public static final String KEY_SORT_BY_KANJI_NUMERALS = "SortByKanjiNumerals";
 	public static final String KEY_SORT_BY_JAPANESE_VOLUME_NAME = "SortByJapaneseVolumeName";
+	public static final String KEY_SORT_BY_FILE_TYPE = "SortByFileType";
 	public static final String KEY_SORT_PRIORITY_WORD_01 = "SortPriorityWord01";
 	public static final String KEY_SORT_PRIORITY_WORD_02 = "SortPriorityWord02";
 	public static final String KEY_SORT_PRIORITY_WORD_03 = "SortPriorityWord03";
@@ -581,7 +580,7 @@ public class DEF {
 
 	public static final int MAX_TOOLBAR_SIZE = 6; // 200%
 
-	// テキストビュアー設定
+	// テキストビュワー設定
 	public static final String KEY_TX_INISCALE = "txIniScale";
 	public static final String KEY_TX_INITVIEW = "txInitView";
 	public static final String KEY_TX_VIEWROTA = "txViewRota";
@@ -597,6 +596,8 @@ public class DEF {
 	public static final String KEY_TX_PAGESELECT = "txPageSelect";
 	public static final String KEY_TX_ASCMODE = "txAscMode";
 	public static final String KEY_EP_VIEWER = "epubViewer";
+	public static final String KEY_EP_ORDER = "epubOrder";
+	public static final String KEY_EP_THUMB = "epubThumb";
 
 	public static final String KEY_TX_MGNRGB = "txMgnRGB";
 	public static final String KEY_TX_CNTRGB = "txCntRGB";
@@ -1357,9 +1358,119 @@ public class DEF {
 	public static boolean SORT_BY_NATURAL_NUMBERS = true;
 	public static boolean SORT_BY_KANJI_NUMERALS = true;
 	public static boolean SORT_BY_JAPANESE_VOLUME_NAME = true;
+	public static boolean SORT_BY_FILE_TYPE = true;
 	public static String[] PRIORITY_WORDS = new String[0];
 
 	static public int compareFileName(final String str1, final String str2) {
+		return compareFileName(str1, str2, false);
+	}
+
+	static public int compareFileName(final String str1, final String str2, final boolean sortByFileType) {
+		boolean debug = false;
+		if (debug) {Log.d("DEF","compareFileName: 開始します. str1=" + str1 + ", str2=" + str2 + ", sortByFileType=" + sortByFileType);}
+
+		String name1 = str1;
+		String name2 = str2;
+		int index1, index2;
+		String dir1 = "", dir2 = "";
+		String ext1 = "", ext2 = "";
+		boolean flag1 = false, flag2 = false;
+		boolean file1 = false, file2 = false;
+
+		// 拡張子とそれ以外に分ける
+		index1 = name1.lastIndexOf('.');
+		if (index1 > name1.lastIndexOf('/')) {
+			name1 = name1.substring(0, index1);
+			if (index1 < name1.length() - 1) {
+				ext1 = name1.substring(index1 + 1);
+			}
+			else {
+				ext1 = "";
+			}
+		}
+		index2 = name2.lastIndexOf('.');
+		if (index2 > name2.lastIndexOf('/')) {
+			name2 = name2.substring(0, index2);
+			if (index2 < name2.length() - 1) {
+				ext2 = name2.substring(index2 + 1);
+			}
+			else {
+				ext2 = "";
+			}
+		}
+		if (debug) {Log.d("DEF","compareFileName: ext1=" + ext1 + ", ext2=" + ext2 + ", sortByFileType=" + sortByFileType);}
+		if (debug) {Log.d("DEF","compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
+
+		while (!flag1 && !flag2) {
+			// 最上位ディレクトリとそれ以外に分ける
+			index1 = name1.indexOf('/');
+			if (index1 >= 0) {
+				dir1 = name1.substring(0, index1);
+				if (index1 < name1.length() - 1) {
+					name1 = name1.substring(index1 + 1);
+				}
+				else {
+					name1 = "";
+				}
+			} else {
+				dir1 = name1;
+				name1 = "";
+				file1 = true;
+				flag1 = true;
+			}
+			index2 = name2.indexOf('/');
+			if (index2 >= 0) {
+				dir2 = name2.substring(0, index2);
+				if (index2 < name2.length() - 1) {
+					name2 = name2.substring(index2 + 1);
+				}
+				else {
+					name2 = "";
+				}
+			} else {
+				dir2 = name2;
+				name2 = "";
+				file2 = true;
+				flag2 = true;
+			}
+
+			if (debug) {Log.d("DEF","compareFileName: dir1=" + dir1 + ", dir2=" + dir2 + ", sortByFileType=" + sortByFileType);}
+			if (debug) {Log.d("DEF","compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
+			// ファイル優先ならファイルをディレクトリより優先
+			if (sortByFileType && file1 && !file2) {
+				if (debug) {Log.d("DEF","compareFileName: dir1 はファイルです.");}
+				return -1;
+			} else if (sortByFileType && !file1 && file2) {
+				if (debug) {Log.d("DEF","compareFileName: dir2 はファイルです.");}
+				return 1;
+			} else {
+				// ディレクトリ同士を比較
+				int returnCode = compareText(dir1, dir2);
+				if (returnCode != 0) {
+					return returnCode;
+				}
+			}
+		}
+
+		// ディレクトリ部分を削除したファイル名部分を比較
+		int returnCode = compareText(name1, name2);
+		if (returnCode != 0) {
+			return returnCode;
+		}
+
+		// 最後まで結果が決まらなかった
+		if (str1.compareTo(str2) != 0) {
+			// 単純に大小比較してみる
+			return str1.compareTo(str2);
+		}
+		else {
+			// 完全一致なら拡張子を比較
+			return compareText(ext1, ext2);
+		}
+
+	}
+
+	static public int compareText(final String str1, final String str2) {
 		boolean debug = false;
 
 		String name1 = str1;
@@ -1375,12 +1486,11 @@ public class DEF {
 			return -1;
 		}
 
-		if (debug) {Log.d("DEF","compareFileName 開始します. name1=" + name1 + ", name2=" + name2);}
+		if (debug) {Log.d("DEF","compareFileName: 開始します. name1=" + name1 + ", name2=" + name2);}
 
 		int i1, i2;
 		char ch1, ch2;
 		int ct1, ct2;
-		String ext1 = "", ext2 = "";
 
 		if (SORT_BY_IGNORE_WIDTH) {
 			// 全角を半角に変換
@@ -1394,20 +1504,11 @@ public class DEF {
 			name2 = name2.toUpperCase();
 		}
 
-		if (name1.lastIndexOf('.') > name1.lastIndexOf('/')) {
-			name1 = name1.substring(0, name1.lastIndexOf('.'));
-			ext1 = name1.substring(name1.lastIndexOf('.') + 1);
-		}
-		if (name2.lastIndexOf('.') > name2.lastIndexOf('/')) {
-			name2 = name2.substring(0, name2.lastIndexOf('.'));
-			ext2 = name2.substring(name2.lastIndexOf('.') + 1);
-		}
-
 		int len1 = name1.length();
 		int len2 = name2.length();
 
 		for (i1 = i2 = 0; i1 < len1 && i2 < len2; i1++, i2++) {
-			if (debug) {Log.d("DEF","compareFileName ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);}
+			if (debug) {Log.d("DEF","compareFileName: ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);}
 			ch1 = name1.charAt(i1);
 			ch2 = name2.charAt(i2);
 			ct1 = getCharType(ch1);
@@ -1488,7 +1589,7 @@ public class DEF {
 			}
 
 			if (ct1 != ct2) {
-				if (debug) {Log.d("DEF","compareFileName 文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);}
+				if (debug) {Log.d("DEF","compareFileName: 文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);}
 				// 文字種が違う場合
 				char tmp1, tmp2;
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
@@ -1615,7 +1716,7 @@ public class DEF {
 									}
 								}
 							} else {
-								if (debug) {Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);}
+								if (debug) {Log.d("DEF", "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
 							}
 						} else {
 							// どちらも負の数
@@ -1657,7 +1758,7 @@ public class DEF {
 									}
 								}
 							} else {
-								if (debug) {Log.d("DEF", "compareFileName 長さが違います。 num1=" + num1 + ", num2=" + num2);}
+								if (debug) {Log.d("DEF", "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
 							}
 						}
 						i1 += nlen1 - 1;
@@ -1669,18 +1770,18 @@ public class DEF {
 
 			if (SORT_BY_KANJI_NUMERALS) {
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
-					if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);}
+					if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);}
 					String num1 = getKanjiNumerals(name1, i1);
 					String num2 = getKanjiNumerals(name2, i2);
 					int nlen1 = num1.length();
 					int nlen2 = num2.length();
-					if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. num1=" + num1 + ", num2=" + num2);}
+					if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. num1=" + num1 + ", num2=" + num2);}
 					if (nlen1 < nlen2) {
 						int difflen = nlen2 - nlen1;
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num2.charAt(i)) != 0) {
 								// num2の方が大きい
-								if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");}
+								if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. num1が小さいです.");}
 								return -1;
 							}
 						}
@@ -1691,7 +1792,7 @@ public class DEF {
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num1.charAt(i)) > 0) {
 								// num1の方が大きい
-								if (debug) {Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");}
+								if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. num2が小さいです.");}
 								return 1;
 							}
 						}
@@ -1704,8 +1805,8 @@ public class DEF {
 						if (diff != 0) {
 							// num1の方が大きい
 							if (debug) {
-								if (diff>0) {Log.d("DEF", "compareFileName 漢数字を比較します. num2が小さいです.");}
-								else {Log.d("DEF", "compareFileName 漢数字を比較します. num1が小さいです.");}
+								if (diff>0) {Log.d("DEF", "compareFileName: 漢数字を比較します. num2が小さいです.");}
+								else {Log.d("DEF", "compareFileName: 漢数字を比較します. num1が小さいです.");}
 							}
 							return diff;
 						}
@@ -1735,14 +1836,12 @@ public class DEF {
 		}
 
 		// 最後まで結果が決まらなかった
-		if (name1.compareToIgnoreCase(name2) != 0) {
+		if (str1.compareTo(str2) != 0) {
 			// 単純に大小比較してみる
-			return name1.compareToIgnoreCase(name2);
+			return str1.compareTo(str2);
 		}
-		else {
-			// 完全一致なら拡張子を比較
-			return ext1.compareToIgnoreCase(ext2);
-		}
+
+		return 0;
 	}
 
 	static private String getNumbers(String str, int idx) {
@@ -2186,8 +2285,8 @@ public class DEF {
 		if (key.indexOf('/') >= 0) {
 			// 安全のため、しおり削除の条件に一致しないKeyは対象外としておく
 			int len = key.length();
-			if (len >= 1 && key.substring(0, 1).equals("/")) {
-			} else if (len >= 6 && key.substring(0, 6).equals("smb://")) {
+			if (len >= 1 && key.startsWith("/")) {
+			} else if (len >= 6 && key.startsWith("smb://")) {
 			} else {
 				return false;
 			}
@@ -2204,9 +2303,9 @@ public class DEF {
 		if (key.indexOf('/') >= 0) {
 			// 安全のため、しおり削除の条件に一致しないKeyは対象外としておく
 			int len = key.length();
-			if (len >= 1 && key.substring(0, 1).equals("/")) {
+			if (len >= 1 && key.startsWith("/")) {
 				return true;
-			} else if (len >= 6 && key.substring(0, 6).equals("smb://")) {
+			} else if (len >= 6 && key.startsWith("smb://")) {
 				return true;
 			}
 		} else if (key.startsWith("smb-")) {
@@ -2281,9 +2380,14 @@ public class DEF {
 			return url;
 		}
 		// サーバ名
-		String ret = "smb://" + URLEncoder.encode(user);
-		if (pass != null && pass.length() > 0) {
-			ret += ":" + URLEncoder.encode(pass);
+		String ret = "";
+		try {
+			ret = "smb://" + URLEncoder.encode(user, "UTF-8");
+			if (pass != null && pass.length() > 0) {
+				ret += ":" + URLEncoder.encode(pass, "UTF-8");
+			}
+		} catch (UnsupportedEncodingException e) {
+			Log.e("DEF", "createUrl: " + e.getMessage());
 		}
 		ret += "@" + url.substring(6);
 		return ret;
@@ -2321,7 +2425,7 @@ public class DEF {
 		int tmp_length = length;
 
 		// UTF-8のBOMがあったら削除する
-		if( bytes[offset] == 0xFE && bytes[offset+1] == 0xFF ){
+		if( bytes[offset] == (byte)0xFE && bytes[offset+1] == (byte)0xFF ){
 			tmp_offset = offset + 1;
 			tmp_length = length - 1;
 		}
@@ -2343,7 +2447,7 @@ public class DEF {
 		int tmp_length = length;
 
 		// UTF-8のBOMがあったら削除する
-		if( bytes[offset] == 0xFE && bytes[offset+1] == 0xFF ){
+		if( bytes[offset] == (byte)0xFE && bytes[offset+1] == (byte)0xFF ){
 			tmp_offset = offset + 1;
 			tmp_length = length - 1;
 		}
@@ -2365,7 +2469,7 @@ public class DEF {
 					// 判定された文字コードがWindows-1252の場合は誤判定ではないか確認する
 					if (debug) {Log.d("DEF", "CharDetecter: 判定結果が WINDOWS-1252 なので誤判定かどうか確認します.");}
 					byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
-					String charset = (CHARSET == "Shift_JIS" ? "MS932" : CHARSET);
+					String charset = (CHARSET.equals("Shift_JIS") ? "MS932" : CHARSET);
 					if (Arrays.equals(src, new String(src, Charset.forName(charset)).getBytes(Charset.forName(charset)))) {
 						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは " + charset + " です.");}
 						encoding = charset;
@@ -2405,7 +2509,7 @@ public class DEF {
 
 		if (encoding == null) {
 			// 判定できなかったら共通の操作設定設定で設定した文字コードに設定する
-			String charset = (CHARSET == "Shift_JIS" ? "MS932" : CHARSET);
+			String charset = (CHARSET.equals("Shift_JIS") ? "MS932" : CHARSET);
 			if (debug) {Log.d("DEF", "CharDetecter: 文字コードを設定画面で設定した " + charset + " に設定します.");}
 			encoding = charset;
 		}

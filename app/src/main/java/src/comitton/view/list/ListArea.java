@@ -259,13 +259,13 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 				mTouchY = y;
 				mTouchCounter = 0;
 				mTouchState = STATE_FIRST;
-				mTouchDraw = false;
+				mTouchDraw = true;
 				mTouchTime = SystemClock.uptimeMillis();
 
 				// タッチによりカーソル非表示
 				mCursorDisp = false;
-//				mCursorPosX = mTouchIndex % mColumnNum;
-//				mCursorPosY = mTouchIndex / mColumnNum;
+				//mCursorPosX = mTouchIndex % mColumnNum;
+				//mCursorPosY = mTouchIndex / mColumnNum;
 
 				// ロングクリックのイベント発生用メッセージ
 				if (index >= 0) {
@@ -292,7 +292,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			}
 			case MotionEvent.ACTION_UP: {
 				if (mTouchIndex != -1 && mLongClickMsg != null) {
-					mTouchDraw = true;
+					mTouchDraw = false;
 					update(true);
 					mListNoticeListener.onItemClick(mListType, mTouchIndex, point);
 					mTouchIndex = -1;

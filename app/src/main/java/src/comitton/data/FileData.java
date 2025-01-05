@@ -47,6 +47,9 @@ public class FileData {
 	public FileData () {
 		;
 	}
+	public FileData (String name) {
+		setName(name);
+	}
 
 	public String getName() {
 		return name;
@@ -56,6 +59,8 @@ public class FileData {
 	}
 	public void setName(String name) {
 		this.name = name;
+		this.type = getType(name);
+		this.exttype = getExtType(name);
 	}
 
 	public int getState() {
@@ -78,46 +83,77 @@ public class FileData {
 		return exttype;
 	}
 
-	public static short getExtType(String filepath) {
+	public static short getType(String filepath) {
+
+		if (filepath.equals("..")) {
+			return FILETYPE_PARENT;
+		}
+		if (filepath.endsWith("/")) {
+			return FILETYPE_DIR;
+		}
+
 		int lastIndex = filepath.lastIndexOf(".");
 		String ext = filepath;
 		if (lastIndex == -1) {
-			return EXTTYPE_NONE;
+			return FILETYPE_NONE;
 		}
 		else {
 			ext = filepath.substring(lastIndex);
 		}
-		if (ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub")) {
+		if (isArchive(ext)) {
+			return FILETYPE_ARC;
+		}
+		if (isImage(ext)) {
+			return FILETYPE_IMG;
+		}
+		if (isPdf(ext)) {
+			return FILETYPE_PDF;
+		}
+		if (isText(ext)) {
+			return FILETYPE_TXT;
+		}
+		if (isEpub(ext)) {
+			return FILETYPE_EPUB;
+		}
+		if (isEpubSub(ext)) {
+			return FILETYPE_EPUB_SUB;
+		}
+		return FILETYPE_NONE;
+	}
+
+	public static short getExtType(String filepath) {
+
+		if (filepath.endsWith(".zip") || filepath.endsWith(".cbz") || filepath.endsWith(".epub")) {
 			return EXTTYPE_ZIP;
 		}
-		if (ext.equals(".rar") || ext.equals(".cbr")) {
+		if (filepath.endsWith(".rar") || filepath.endsWith(".cbr")) {
 			return EXTTYPE_RAR;
 		}
-		if (ext.equals(".pdf")) {
+		if (filepath.endsWith(".pdf")) {
 			return EXTTYPE_PDF;
 		}
-		if (ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html")) {
+		if (filepath.endsWith(".txt") || filepath.endsWith(".xhtml") || filepath.endsWith(".html")) {
 			return EXTTYPE_TXT;
 		}
-		if(DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))){
+		if(DEF.WITH_JPEG && (filepath.endsWith(".jpg") || filepath.endsWith(".jpeg"))){
 			return EXTTYPE_JPG;
 		}
-		if(DEF.WITH_PNG && ext.equals(".png")){
+		if(DEF.WITH_PNG && filepath.endsWith(".png")){
 			return EXTTYPE_PNG;
 		}
-		if(DEF.WITH_GIF && ext.equals(".gif")){
+		if(DEF.WITH_GIF && filepath.endsWith(".gif")){
 			return EXTTYPE_GIF;
 		}
-		if(DEF.WITH_WEBP && ext.equals(".webp")){
+		if(DEF.WITH_WEBP && filepath.endsWith(".webp")){
 			return EXTTYPE_WEBP;
 		}
-		if(DEF.WITH_AVIF && ext.equals(".avif")){
+		if(DEF.WITH_AVIF && filepath.endsWith(".avif")){
 			return EXTTYPE_AVIF;
 		}
-		if(DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+		if(DEF.WITH_HEIF && (filepath.endsWith(".heif") || filepath.endsWith(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
 			return EXTTYPE_HEIF;
 		}
-		if(DEF.WITH_JXL && ext.equals(".jxl")){
+		if(DEF.WITH_JXL && filepath.endsWith(".jxl")){
 			return EXTTYPE_JXL;
 		}
 		return EXTTYPE_NONE;
@@ -166,18 +202,6 @@ public class FileData {
 		}
 	}
 
-//	public String getFileSize() {
-//		NumberFormat format = NumberFormat.getNumberInstance();
-//		String sizeStr = format.format(size);
-//		int len = sizeStr.length();
-//		if (len > 11) {
-//			sizeStr = "999,999,999";
-//			len = 11;
-//		}
-//		sizeStr = ("           " + sizeStr).substring(len);
-//		return sizeStr + "Bytes";  
-//	}
-
 	public void setDate(long date) {
 		this.date = date;
 	}
@@ -203,52 +227,52 @@ public class FileData {
 		return false;
 	}
 
-	public static boolean isImage(String ext) {
+	public static boolean isImage(String filepath) {
 
 		//return ext.equals(".jpg") || ext.equals(".jpeg") || ext.equals(".png") /*|| ext.equals(".gif")*/ || ext.equals(".webp") || ext.equals(".avif") /*|| ext.equals(".heif") || ext.equals(".jxl")*/;
 
-		if(DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))){
+		if(DEF.WITH_JPEG && (filepath.endsWith(".jpg") || filepath.endsWith(".jpeg"))){
 			return true;
 		}
-		if(DEF.WITH_PNG && ext.equals(".png")){
+		if(DEF.WITH_PNG && filepath.endsWith(".png")){
 			return true;
 		}
-		if(DEF.WITH_GIF && ext.equals(".gif")){
+		if(DEF.WITH_GIF && filepath.endsWith(".gif")){
 			return true;
 		}
-		if(DEF.WITH_WEBP && ext.equals(".webp")){
+		if(DEF.WITH_WEBP && filepath.endsWith(".webp")){
 			return true;
 		}
-		if(DEF.WITH_AVIF && ext.equals(".avif")){
+		if(DEF.WITH_AVIF && filepath.endsWith(".avif")){
 			return true;
 		}
-		if(DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+		if(DEF.WITH_HEIF && (filepath.endsWith(".heif") || filepath.endsWith(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
 			return true;
 		}
-		if(DEF.WITH_JXL && ext.equals(".jxl")){
+		if(DEF.WITH_JXL && filepath.endsWith(".jxl")){
 			return true;
 		}
 		return false;
 	}
-	public static boolean isArchive(String ext) {
-		return ext.equals(".zip") || ext.equals(".rar") || ext.equals(".cbz") || ext.equals(".cbr");
+	public static boolean isArchive(String filepath) {
+		return filepath.endsWith(".zip") || filepath.endsWith(".rar") || filepath.endsWith(".cbz") || filepath.endsWith(".cbr");
 	}
-	public static boolean isZip(String ext) {
-		return ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub");
+	public static boolean isZip(String filepath) {
+		return filepath.endsWith(".zip") || filepath.endsWith(".cbz") || filepath.endsWith(".epub");
 	}
-	public static boolean isRar(String ext) {
-		return ext.equals(".rar") || ext.equals(".cbr");
+	public static boolean isRar(String filepath) {
+		return filepath.endsWith(".rar") || filepath.endsWith(".cbr");
 	}
-	public static boolean isPdf(String ext) {
-		return ext.equals(".pdf");
+	public static boolean isPdf(String filepath) {
+		return filepath.endsWith(".pdf");
 	}
-	public static boolean isEpub(String ext) {
-		return ext.equals(".epub");
+	public static boolean isEpub(String filepath) {
+		return filepath.endsWith(".epub");
 	}
-	public static boolean isEpubSub(String ext) {
-		return  ext.equals(".css") || ext.equals(".xml") || ext.equals(".opf") || ext.equals(".ncx");
+	public static boolean isEpubSub(String filepath) {
+		return filepath.endsWith(".css") || filepath.endsWith(".xml") || filepath.endsWith(".opf") || filepath.endsWith(".ncx");
 	}
-	public static boolean isText(String ext) {
-		return ext.equals(".txt") || ext.equals(".xhtml") || ext.equals(".html");
+	public static boolean isText(String filepath) {
+		return filepath.endsWith(".txt") || filepath.endsWith(".xhtml") || filepath.endsWith(".html");
 	}
 }

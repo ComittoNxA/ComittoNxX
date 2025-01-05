@@ -10,21 +10,22 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 import jp.dip.muracoro.comittonx.R;
 
 @SuppressLint("NewApi")
 public class ImmersiveDialog extends Dialog {
-	protected Activity mActivity;
+	protected AppCompatActivity mActivity;
 	protected int mWidth;
 	protected int mHeight;
 	protected float mScale;
 
-	public ImmersiveDialog(Activity activity, int themeResId) {
+	public ImmersiveDialog(AppCompatActivity activity, int themeResId) {
 		this(activity, themeResId, false);
 	}
 
-	public ImmersiveDialog(Activity activity, int themeResId, boolean wide) {
+	public ImmersiveDialog(AppCompatActivity activity, int themeResId, boolean wide) {
 		super(activity, themeResId);
 		mActivity = activity;
 		Window dlgWindow = getWindow();

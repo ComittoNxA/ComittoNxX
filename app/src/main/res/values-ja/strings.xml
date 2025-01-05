@@ -154,6 +154,7 @@
     <string name="marginH">上下の余白(%)</string>
     <string name="delTitle"></string>
     <string name="delMsg">ファイルを削除してよろしいですか？</string>
+    <string name="delErrorMsg">ファイルを削除できませんでした。</string>
     <string name="downMsg1"></string>
     <string name="downMsg2"> にダウンロードします。</string>
     <string name="scTitle">ショートカットの作成</string>
@@ -238,11 +239,11 @@
     <string name="ope04">ダウンロード</string>
     <string name="ope05">ファイルの展開</string>
     <string name="ope06">ここまで既読</string>
-    <string name="ope07">イメージ表示</string>
+    <string name="ope07">イメージビュワーで表示</string>
     <string name="ope08">名称変更</string>
     <string name="ope09">サムネイルキャッシュ削除</string>
     <string name="ope10">先頭ページを開く</string>
-    <string name="ope11">Epubビュアーで表示</string>
+    <string name="ope11">テキストビュワーで表示</string>
     <string name="lmTitle">表示モード</string>
     <string name="listmode00">リスト表示 (サムネイルON)</string>
     <string name="listmode01">リスト表示 (サムネイルOFF)</string>

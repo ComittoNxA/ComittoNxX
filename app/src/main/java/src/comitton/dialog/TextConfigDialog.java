@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 @SuppressLint("NewApi")
@@ -38,7 +39,7 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 	private final int SELLIST_ASCMODE = 1;
 
 	private TextConfigListenerInterface mListener = null;
-	private Activity mActivity;
+	private AppCompatActivity mActivity;
 
 	private ListDialog mListDialog;
 
@@ -107,7 +108,7 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 
 	private int mSelectMode;
 
-	public TextConfigDialog(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
+	public TextConfigDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId, isclose, false, false, true, listener);
 
 		mActivity = activity;

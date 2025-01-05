@@ -4,7 +4,7 @@
         <PreferenceScreen
             android:key="FileListSet"
             android:title="ファイル選択画面の設定"
-            android:summary="ファイル選択画面の起動時の表示や操作を設定する">
+            android:summary="ファイル選択画面の起動時の表示や操作を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetFileListActivity"
                 android:targetPackage="@string/application_id" />
@@ -12,7 +12,7 @@
         <PreferenceScreen
             android:key="RecorderSet"
             android:title="記録系リストの設定"
-            android:summary="ディレクトリ／ブックマーク／履歴一覧の表示や動作を設定する">
+            android:summary="ディレクトリ／ブックマーク／履歴一覧の表示や動作を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetRecorderActivity"
                 android:targetPackage="@string/application_id" />
@@ -20,7 +20,7 @@
         <PreferenceScreen
             android:key="FileColor"
             android:title="ファイル選択画面の色設定"
-            android:summary="ファイル選択画面の表示色を設定する">
+            android:summary="ファイル選択画面の表示色を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetFileColorActivity"
                 android:targetPackage="@string/application_id" />
@@ -30,7 +30,7 @@
         <PreferenceScreen
             android:key="ImageSet"
             android:title="イメージ表示画面の設定"
-            android:summary="イメージ表示画面の起動時の表示や操作を設定する">
+            android:summary="イメージ表示画面の起動時の表示や操作を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetImageActivity"
                 android:targetPackage="@string/application_id" />
@@ -38,7 +38,7 @@
         <PreferenceScreen
             android:key="DetailSet"
             android:title="イメージ表示画面の詳細設定"
-            android:summary="イメージ表示画面の動作に影響するパラメータを設定する">
+            android:summary="イメージ表示画面の動作に影響するパラメータを設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetImageDetailActivity"
                 android:targetPackage="@string/application_id" />
@@ -46,15 +46,23 @@
         <PreferenceScreen
             android:key="TextSet"
             android:title="テキスト表示画面の設定"
-            android:summary="テキスト表示画面の起動時の表示や操作を設定する">
+            android:summary="テキスト表示画面の起動時の表示や操作を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetTextActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
+            android:key="EpubSet"
+            android:title="EPubの設定"
+            android:summary="EPubの表示方法を設定する" >
+            <intent
+                android:targetClass="src.comitton.config.SetEpubActivity"
+                android:targetPackage="@string/application_id" />
+        </PreferenceScreen>
+        <PreferenceScreen
             android:key="ImageTextDetailSet"
             android:title="共通の表示詳細設定"
-            android:summary="イメージ／テキスト表示画面で共通なパラメータを設定する">
+            android:summary="イメージ／テキスト表示画面で共通なパラメータを設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetImageTextDetailActivity"
                 android:targetPackage="@string/application_id" />
@@ -62,7 +70,7 @@
         <PreferenceScreen
             android:key="ImageColor"
             android:title="共通の色設定"
-            android:summary="イメージ／テキスト表示画面の表示色を設定する">
+            android:summary="イメージ／テキスト表示画面の表示色を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetImageTextColorActivity"
                 android:targetPackage="@string/application_id" />
@@ -72,7 +80,7 @@
         <PreferenceScreen
             android:key="CommOpeSet"
             android:title="共通の操作設定"
-            android:summary="各画面で共通な操作を設定する">
+            android:summary="各画面で共通な操作を設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetCommonActivity"
                 android:targetPackage="@string/application_id" />
@@ -82,7 +90,7 @@
         <PreferenceScreen
             android:key="NoiseSet"
             android:title="音操作の設定"
-            android:summary="音操作での認識速度や検知レベル等のパラメータを設定する">
+            android:summary="音操作での認識速度や検知レベル等のパラメータを設定する" >
             <intent
                 android:targetClass="src.comitton.config.SetNoiseActivity"
                 android:targetPackage="@string/application_id" />
@@ -90,7 +98,7 @@
         <PreferenceScreen
             android:key="MemoryCache"
             android:title="メモリキャッシュの設定"
-            android:summary="メモリキャッシュのサイズやページ数のパラメータを設定する（再起動で反映）">
+            android:summary="メモリキャッシュのサイズやページ数のパラメータを設定する（再起動で反映）" >
             <intent
                 android:targetClass="src.comitton.config.SetCacheActivity"
                 android:targetPackage="@string/application_id" />

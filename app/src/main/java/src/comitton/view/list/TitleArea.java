@@ -18,15 +18,10 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public class TitleArea implements Handler.Callback {
-	public static final int ARROW_NONE = 0;
-	public static final int ARROW_LEFT = 1;
-	public static final int ARROW_RIGHT = 2;
-	public static final int ARROW_CHG_LEFT = 3;
-	public static final int ARROW_CHG_RIGHT = 4;
-
 	public static final int SELECT_NONE = 0;
 	public static final int SELECT_SORT = 1;
 	public static final int SELECT_MENU = 2;
@@ -53,8 +48,6 @@ public class TitleArea implements Handler.Callback {
 	private int mMarginW;
 	private int mMarginH;
 	private int mSelectArea;
-	private Bitmap mMenuBitmapOn;
-	private Bitmap mMenuBitmapOff;
 
 	// ビューサイズ
 	private int mViewWidth;
@@ -67,7 +60,6 @@ public class TitleArea implements Handler.Callback {
 	private Handler mHandler;
 	private Paint mTextPaint;
 	private Paint mArrowPaint;
-	private Paint mBitmapPaint;
 	private Path mArrowPath;
 
 	private Context mContext;
@@ -82,12 +74,10 @@ public class TitleArea implements Handler.Callback {
 		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mArrowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mArrowPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-		mBitmapPaint = new Paint();
 		mArrowPath = new Path();
 
 		mContext = context;
-		Context c = context.getApplicationContext();
-		float density = c.getResources().getDisplayMetrics().scaledDensity;
+		float density = mContext.getResources().getDisplayMetrics().scaledDensity;
 		mScrollStep = density;
 		if (mScrollStep < 1) {
 			mScrollStep = 1;
@@ -97,14 +87,12 @@ public class TitleArea implements Handler.Callback {
 	}
 
 	public void drawArea(Canvas canvas) {
+		boolean debug = false;
 		int fullcx = mAreaWidth;
 		int cy = mAreaHeight;
-		int titlecx = fullcx - cy;
 
 		// グラデーション幅算出
 		GradientDrawable grad;
-		// int colors1[] = {Color.rgb(96, 96, 96), Color.rgb(78, 78, 78),
-		// Color.rgb(64, 64, 64)};
 		int colors1[] = { mBackColor[2], mBackColor[1], mBackColor[0] };
 		grad = new GradientDrawable(Orientation.TOP_BOTTOM, colors1);
 		grad.setBounds(new Rect(0, 0, fullcx, cy));
@@ -138,9 +126,9 @@ public class TitleArea implements Handler.Callback {
 			mArrowPaint.setColor(mSelectArea != SELECT_SORT ? mTextColor1 : mTextColor2);
 			int s = mTextSize + mTextDescent;
 			int sh = s * 2 / 5;
-			int x1 = titlecx - s;
-			int x2 = titlecx;
-			int y1 = mMarginH;// mTitle2 != null ? mMarginH : (cy - s) / 2;
+			int x1 = fullcx - s;
+			int x2 = fullcx;
+			int y1 = mMarginH;
 			int y2 = y1 + s;
 
 			mArrowPath.reset();
@@ -151,7 +139,7 @@ public class TitleArea implements Handler.Callback {
 					mArrowPath.lineTo(x2 - s / 3, y2 - sh);
 					mArrowPath.lineTo(x1 + s / 3, y2 - sh);
 				} else {
-					// 昇順
+					// 降順
 					mArrowPath.moveTo(x1 + s / 2, y2 - sh);
 					mArrowPath.lineTo(x2 - s / 3, y1 + sh);
 					mArrowPath.lineTo(x1 + s / 3, y1 + sh);
@@ -159,20 +147,8 @@ public class TitleArea implements Handler.Callback {
 			}
 			canvas.drawPath(mArrowPath, mArrowPaint);
 			mTextPaint.setTextAlign(Paint.Align.RIGHT);
-			canvas.drawText(mSortName, titlecx - mMarginW - mTextSize, mMarginH + mTextAscent, mTextPaint);
+			canvas.drawText(mSortName, fullcx - mMarginW - mTextSize, mMarginH + mTextAscent, mTextPaint);
 		}
-
-//		// メニューボタン描画
-//		Bitmap bm;
-//		if (mSelectArea == SELECT_MENU) {
-//			bm = mMenuBitmapOff;
-//		}
-//		else {
-//			bm = mMenuBitmapOn;
-//		}
-//		canvas.drawBitmap(bm, titlecx, (mAreaHeight - (mTextSize * 2)) / 2, mBitmapPaint);
-
-		return;
 	}
 
 	public Rect setDrawArea(int x1, int y1, int x2, int y2, int orientation) {
@@ -204,11 +180,6 @@ public class TitleArea implements Handler.Callback {
 
 		mMarginH = size / 32;
 		mMarginW = size / 8;
-
-		// ビットマップリソースを読み込み
-		Resources res = mContext.getResources();
-		mMenuBitmapOn= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, mTextColor1);
-		mMenuBitmapOff= ImageAccess.createIcon(res, R.drawable.navi_menu, size * 2, mTextColor2);
 	}
 
 	// 文字列の設定
@@ -299,12 +270,6 @@ public class TitleArea implements Handler.Callback {
 			case MotionEvent.ACTION_UP:
 				if (0 <= x && x < mAreaWidth && 0 <= y && y < mAreaHeight) {
 					mSelectArea = SELECT_SORT;
-//					if (x < mAreaWidth - mAreaHeight) {
-//						mSelectArea = SELECT_SORT;
-//					}
-//					else {
-//						mSelectArea = SELECT_MENU;
-//					}
 				}
 				else {
 					mSelectArea = SELECT_NONE;

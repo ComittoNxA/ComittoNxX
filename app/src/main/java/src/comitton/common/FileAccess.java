@@ -1,18 +1,34 @@
 package src.comitton.common;
 
+import android.app.Activity;
+import android.app.RecoverableSecurityException;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
@@ -29,6 +45,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbRandomAccessFile;
 
+import src.comitton.activity.FileSelectActivity;
 import src.comitton.data.FileData;
 import src.comitton.exception.FileAccessException;
 
@@ -548,8 +565,8 @@ public class FileAccess {
 			}
 
 			FileData fileData = new FileData();
-			fileData.setType(type);
-			fileData.setExtType(exttype);
+			//fileData.setType(type);
+			//fileData.setExtType(exttype);
 			fileData.setName(name);
 			fileData.setSize(size);
 			fileData.setDate(date);
@@ -574,7 +591,7 @@ public class FileAccess {
 				return 1;
 			}
 			else {
-				return f1.getName().compareTo(f2.getName());
+				return DEF.compareFileName(f1.getName(), f2.getName(), DEF.SORT_BY_FILE_TYPE);
 			}
 		}
 	}
@@ -641,15 +658,218 @@ public class FileAccess {
 	}
 
 	// ファイル削除
-	public static boolean delete(String url, String user, String pass) throws FileAccessException {
+	public static boolean delete(Activity activity, String url, String user, String pass) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d("FileAccess", "delete: url=" + url + ", user=" + user + ", pass=" + pass );}
+		if (debug) {Log.d("FileAccess", "delete: 開始します. url=" + url + ", user=" + user + ", pass=" + pass );}
 		boolean result;
 		if (url.startsWith("/")) {
 			// ローカルの場合
-			File orgfile = new File(url);
-			orgfile.delete();
-			return orgfile.exists();
+			if (debug) {Log.d("FileAccess", "delete: ローカルファイルを削除します.");}
+			File file = new File(url);
+
+
+			// existsメソッドを使用してファイルの存在を確認する
+			if (file.exists()) {
+				if (!file.canRead()) {
+					Log.e("FileAccess", "delete: 読み込み権限がありません.");
+				}
+				if (!file.canWrite()) {
+					Log.e("FileAccess", "delete: 書き込み権限がありません.");
+				}
+
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+					Path path = Paths.get(url);
+					try {
+						if (Files.deleteIfExists(path)) {
+							if (debug) {Log.d("FileAccess", "delete: Files.deleteIfExists() 成功しました.");}
+						} else {
+							Log.e("FileAccess", "delete: Files.deleteIfExists() 失敗しました.");
+						}
+					}
+					catch (DirectoryNotEmptyException e) {
+						Log.e("FileAccess", "delete: SecurityException: " + e.getMessage());
+						throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+					}
+					catch (SecurityException e) {
+						// ソース読んだらSecurityException返さないじゃないか！！
+						Log.e("FileAccess", "delete: SecurityException: " + e.getMessage());
+						throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+					}
+					catch (IOException e) {
+						Log.e("FileAccess", "delete: IOException: " + e.getMessage());
+					}
+
+					// 消せたかどうかチェック
+					if (!file.exists()) {
+						return true;
+					}
+					else {
+						Log.e("FileAccess", "delete: ファイルが存在します.");
+					}
+				}
+
+				try {
+					// deleteメソッドを使用してファイルを削除する
+					if (file.delete()) {
+						if (debug) {Log.d("FileAccess", "delete: file.delete() 成功しました.");}
+					} else {
+						Log.e("FileAccess", "delete: file.delete() 失敗しました.");
+					}
+				} catch (SecurityException e) {
+					Log.e("FileAccess", "delete: SecurityException: " + e.getMessage());
+					throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+				}
+
+				// 消せたかどうかチェック
+				if (!file.exists()) {
+					return true;
+				}
+				else {
+					Log.e("FileAccess", "delete: ファイルが存在します.");
+				}
+
+				if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+					// Android10(Q) のとき
+
+					// なにしても消せない…
+
+					final String where = MediaStore.MediaColumns.DATA + "=?";
+					final String[] selectionArgs = new String[] {
+							file.getAbsolutePath()
+					};
+					ContentResolver contentResolver = activity.getContentResolver();
+					Uri uri = FileProvider.getUriForFile(activity, activity.getPackageName() + ".provider", file);
+					activity.grantUriPermission(activity.getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+					DocumentFile documentFile = DocumentFile.fromSingleUri(activity, uri);
+					if (debug) {Log.d("FileAccess", "delete: uri=" + uri);}
+
+					// 永続的なアクセス権を要求する
+					//final int takeFlags =
+					//		( Intent.FLAG_GRANT_READ_URI_PERMISSION |
+					//				Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+					//				Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
+					//				Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+					//		);
+					//activity.grantUriPermission(activity.getPackageName(), uri, takeFlags);
+
+					// ディレクトリにアクセス権を要求するUIを表示する
+					//Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+					//intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+					//activity.startActivityForResult(intent, FileSelectActivity.WRITE_REQUEST_CODE);
+
+
+					try {
+						boolean isDeleted = DocumentFile.fromSingleUri(activity, uri).delete();
+						if (isDeleted) {
+							if (debug) {Log.d("FileAccess", "delete: DocumentFile.fromSingleUri.delete() 成功しました.");}
+						}
+						else {
+							Log.e("FileAccess", "delete: DocumentFile.fromSingleUri.delete() 失敗しました.");
+						}
+					} catch (NullPointerException e) {
+						Log.e("FileAccess", "delete: NullPointerException: " + e.getMessage());
+						throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+					}
+
+					// 消せたかどうかチェック
+					if (!file.exists()) {
+						return true;
+					}
+					else {
+						Log.e("FileAccess", "delete: ファイルが存在します.");
+					}
+
+					try {
+						boolean isDeleted = DocumentsContract.deleteDocument(contentResolver, documentFile.getUri());
+						if (isDeleted) {
+							if (debug) {Log.d("FileAccess", "delete: DocumentsContract.deleteDocument() 成功しました.");}
+						}
+						else {
+							Log.e("FileAccess", "delete: DocumentsContract.deleteDocument() 失敗しました.");
+						}
+					} catch (FileNotFoundException e) {
+						Log.e("FileAccess", "delete: FileNotFoundException: " + e.getMessage());
+						throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+					}
+
+					// 消せたかどうかチェック
+					if (!file.exists()) {
+						return true;
+					}
+					else {
+						Log.e("FileAccess", "delete: ファイルが存在します.");
+					}
+
+					if (documentFile.delete()) {
+						if (debug) {Log.d("FileAccess", "delete: documentFile.delete() 成功しました.");}
+					}
+					else {
+						Log.e("FileAccess", "delete: documentFile.delete() 失敗しました.");
+					}
+
+					// 消せたかどうかチェック
+					if (!file.exists()) {
+						return true;
+					}
+					else {
+						Log.e("FileAccess", "delete: ファイルが存在します.");
+					}
+
+					try {
+						// android 28 and below
+						int numDeleted = contentResolver.delete(uri, where, selectionArgs);
+						if (numDeleted != 0) {
+							if (debug) {Log.d("FileAccess", "delete: contentResolver.delete() 成功しました.");}
+						}
+						else {
+							Log.e("FileAccess", "delete: contentResolver.delete() 失敗しました.");
+						}
+					} catch (IllegalArgumentException e) {
+						Log.e("FileAccess", "delete: IllegalArgumentException: " + e.getMessage());
+						throw new FileAccessException("FileAccess: delete: " + e.getMessage());
+					} catch (SecurityException e) {
+						// ソース読んだらSecurityException返さないじゃないか！！
+						if (debug) {Log.d("FileAccess", "delete: SecurityException をキャッチしました.");}
+						IntentSender intentSender = null;
+						// android 30 (Android 11)
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+							if (debug) {Log.d("FileAccess", "delete: Android11(R)以降のバージョンです.");}
+							intentSender = MediaStore.createDeleteRequest(contentResolver, Collections.singletonList(uri)).getIntentSender();
+						}
+						// android 29 (Android 10)
+						else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+							if (debug) {Log.d("FileAccess", "delete: Android10(Q)です.");}
+							RecoverableSecurityException recoverableSecurityException = (RecoverableSecurityException) e;
+							if (recoverableSecurityException != null) {
+								intentSender = recoverableSecurityException.getUserAction().getActionIntent().getIntentSender();
+							}
+						}
+
+						if (intentSender != null) {
+							int REQUEST_CODE = 2025;
+							try {
+								activity.startIntentSenderForResult(intentSender, REQUEST_CODE, null, 0, 0, 0, null);
+							} catch (IntentSender.SendIntentException ex) {
+								throw new RuntimeException(ex);
+							}
+						}
+					}
+
+					// 消せたかどうかチェック
+					if (!file.exists()) {
+						return true;
+					}
+					else {
+						Log.e("FileAccess", "delete: ファイルが存在します.");
+					}
+
+				}
+
+			} else {
+				// 最初からファイルが存在しない場合
+				Log.e("FileAccess", "delete: ファイルが存在しません.");
+				throw new FileAccessException("ファイルが存在しません.");
+			}
 		}
 		else if (SMBLIB == SMBLIB_JCIFS) {
 			// jcifsの場合
@@ -664,7 +884,7 @@ public class FileAccess {
 				}
 				try {
 					orgfile.delete();
-					return orgfile.exists();
+					return !orgfile.exists();
 				} catch (SmbException e) {
 					throw new FileAccessException("FileAccess: delete: " + e.getMessage());
 				}
@@ -683,7 +903,7 @@ public class FileAccess {
 						}
 						try {
 							orgfile.delete();
-							return orgfile.exists();
+							return !orgfile.exists();
 						} catch (SmbException e) {
 							throw new FileAccessException("FileAccess: delete: " + e.getMessage());
 						}

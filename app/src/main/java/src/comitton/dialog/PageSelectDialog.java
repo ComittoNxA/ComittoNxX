@@ -21,6 +21,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class PageSelectDialog extends ToolbarDialog implements Handler.Callback,
@@ -40,7 +41,7 @@ public class PageSelectDialog extends ToolbarDialog implements Handler.Callback,
 	private Button mBtnCancel;
 	private Button mBtnOK;
 
-	public PageSelectDialog(Activity activity, @StyleRes int themeResId) {
+	public PageSelectDialog(AppCompatActivity activity, @StyleRes int themeResId) {
 		super(activity, themeResId);
 		mIsCancel = false;
 		mHandler = new Handler(this);

@@ -17,6 +17,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class PageThumbnail extends ToolbarDialog implements OnTouchListener,
@@ -31,7 +32,7 @@ public class PageThumbnail extends ToolbarDialog implements OnTouchListener,
 	private HorizontalScrollView mScroll;
 	private ThumbnailView mThumView;
 
-	public PageThumbnail(Activity activity, @StyleRes int themeResId) {
+	public PageThumbnail(AppCompatActivity activity, @StyleRes int themeResId) {
 		super(activity, themeResId);
 		mAutoApply = false;
 	}

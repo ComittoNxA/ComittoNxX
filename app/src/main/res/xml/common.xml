@@ -65,6 +65,11 @@
             android:key="SortByJapaneseVolumeName"
             android:summary="They are arranged in the order of [上中下] or [前中後]. \n[完短外] is arranged next."
             android:title="Sort by Japanese volume name" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByFileType"
+            android:summary="Prefer files over directories.\nOnly valid for image viewer and thumbnails."
+            android:title="Give priority to files" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Sorting priority words" >

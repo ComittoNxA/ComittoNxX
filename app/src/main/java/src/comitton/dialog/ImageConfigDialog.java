@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 @SuppressLint("NewApi")
@@ -43,7 +44,7 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 	private final int SCALENAME_ORDER[] = { 0, 1, 6, 2, 3, 7, 4, 5 };
 
 	private ImageConfigListenerInterface mListener = null;
-	private Activity mActivity;
+	private AppCompatActivity mActivity;
 
 	private ListDialog mListDialog;
 
@@ -118,7 +119,7 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 	private int mSelectMode;
 	private int mCommandId;
 
-	public ImageConfigDialog(FragmentActivity activity, @StyleRes int themeResId, int command_id, boolean isclose, MenuDialog.MenuSelectListener listener) {
+	public ImageConfigDialog(AppCompatActivity activity, @StyleRes int themeResId, int command_id, boolean isclose, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId, isclose, false, false, true, listener);
 
 		mActivity = activity;
@@ -207,11 +208,11 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 		Resources res = mActivity.getResources();
 		addHeader(res.getString(R.string.imgConfMenu));
 
-		LinearLayout footer = (LinearLayout)inflater.inflate(R.layout.imagetextconfig_footer, null, false);
+		LinearLayout footer = (LinearLayout)inflater.inflate(R.layout.imagetextconfig_footer, mFooter, true);
 		footer.setBackgroundColor(0x80000000);
 		// Android 5.1でテキストの色がおかしかったので暫定
 		((CheckBox)footer.findViewById(R.id.chk_save)).setTextAppearance(mActivity, mThemeResId);
-		addFooter(footer);
+		//addFooter(footer);
 
 		mChkIsSave = (CheckBox) mView.findViewById(R.id.chk_save);
 

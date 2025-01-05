@@ -60,7 +60,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -216,7 +216,6 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private boolean mPinchEnable;
 
 	private String mFontFile;
-	private String mCharset;
 
 	// ファイル情報
 	private int mServer;
@@ -229,7 +228,6 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private String mFilePath;
 	private int mPage;
 	private float mPageRate;
-	private int mChapter;
 	private int mFileType;
 
 
@@ -242,7 +240,6 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private float mRestorePageRate;
 	private float mCurrentPageRate;
 	private int mSelectPage = 0;
-//	private boolean mPageBack = false;
 	private int mInitFlg = 0; // 初期表示の制御用フラグ
 
 	// 画像の表示制御情報
@@ -278,7 +275,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	// ビットマップ読み込みスレッドの制御用
 	private Handler mHandler;
 
-	private Activity mActivity;
+	private TextActivity mActivity;
 	SharedPreferences mSharedPreferences;
 	private float mDensity;
 	private int mImmCancelRange;
@@ -652,11 +649,11 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			if (debug) {Log.d("TextActivity", "TextLoad: run: 開始します.");}
 			// ファイルリストの読み込み
 			if (debug) {Log.d("TextActivity", "TextLoad: run: mPath=" + mPath + ", mFileName=" + mFileName + ", mTextName=" + mTextName);}
-			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, mCharset, true, ImageManager.OPENMODE_TEXTVIEW, 1);
+			mImageMgr = new ImageManager(this.mActivity, mPath, mFileName, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, true, ImageManager.OPENMODE_TEXTVIEW, 1);
 			mImageMgr.LoadImageList(0, 0, 0);
 			mTextMgr = new TextManager(mImageMgr, mTextName, mUser, mPass, handler, mActivity, mFileType);
 			//mTextMgr.LoadTextFile();
-			mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode,mCharset);
+			mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
 
 			String imagePath;
 			if (mImageMgr == null) {
@@ -1496,53 +1493,78 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					}
 					else if (result == 0x4002 || result == 0x4003) {
 						int mPageWay = DEF. PAGEWAY_RIGHT;
-						AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.MyDialog);
-						if ((result == 0x4002 && mPageWay == DEF.PAGEWAY_RIGHT) || (result == 0x4003 && mPageWay != DEF.PAGEWAY_RIGHT)) {
-							dialogBuilder.setTitle(R.string.pageTop);
+
+						if (mPageSelect == PAGE_SLIDE) {
+							// ページ選択方法が画面下をスワイプのとき
+							// 末尾ボタン
+							if (result == 0x4003) {
+								if (mSelectPage != mTextMgr.length() - 1) {
+									mSelectPage = mTextMgr.length() - 1;
+								}
+							}
+							else {
+								// 右側ボタン
+								if (mSelectPage != 0) {
+									mSelectPage = 0;
+								}
+							}
+							// ページ選択確定
+							if (mSelectPage != mCurrentPage) {
+								// ページ変更時に振動
+								startVibrate();
+								mCurrentPage = mSelectPage;
+								setPage(false);
+							}
 						}
 						else {
-							dialogBuilder.setTitle(R.string.pageLast);
-						}
-						dialogBuilder.setMessage(null);
-						dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int whichButton) {
-								if (result == 0x4003) {
-									// 左側ボタン
-									int leftpage = mPageWay == DEF.PAGEWAY_RIGHT ? mTextMgr.length() - 1 : 0;
-									if (mSelectPage != leftpage) {
-										mSelectPage = leftpage;
-									}
-								}
-								else {
-									// 右側ボタン
-									int rightpage = mPageWay == DEF.PAGEWAY_RIGHT ? 0 : mTextMgr.length() - 1;
-									if (mSelectPage != rightpage) {
-										mSelectPage = rightpage;
-									}
-								}
-								// ページ選択確定
-								if (mSelectPage != mCurrentPage) {
-									// ページ変更時に振動
-									startVibrate();
-									mCurrentPage = mSelectPage;
-									setPage(false);
-								}
+							// ページ選択方法がスライダー表示かサムネイルのとき
 
-								dialog.dismiss();
+							AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.MyDialog);
+							if ((result == 0x4002 && mPageWay == DEF.PAGEWAY_RIGHT) || (result == 0x4003 && mPageWay != DEF.PAGEWAY_RIGHT)) {
+								dialogBuilder.setTitle(R.string.pageTop);
+							} else {
+								dialogBuilder.setTitle(R.string.pageLast);
 							}
-						});
-						dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								// dialog.cancel();
-							}
-						});
-						Dialog dialog = dialogBuilder.create();
-						dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-						dialog.getWindow().getDecorView().setSystemUiVisibility(
-								mActivity.getWindow().getDecorView().getSystemUiVisibility());
-						dialog.show();
-						dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+							dialogBuilder.setMessage(null);
+							dialogBuilder.setPositiveButton(R.string.btnOK, new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int whichButton) {
+									if (result == 0x4003) {
+										// 左側ボタン
+										int leftpage = mPageWay == DEF.PAGEWAY_RIGHT ? mTextMgr.length() - 1 : 0;
+										if (mSelectPage != leftpage) {
+											mSelectPage = leftpage;
+										}
+									} else {
+										// 右側ボタン
+										int rightpage = mPageWay == DEF.PAGEWAY_RIGHT ? 0 : mTextMgr.length() - 1;
+										if (mSelectPage != rightpage) {
+											mSelectPage = rightpage;
+										}
+									}
+									// ページ選択確定
+									if (mSelectPage != mCurrentPage) {
+										// ページ変更時に振動
+										startVibrate();
+										mCurrentPage = mSelectPage;
+										setPage(false);
+									}
+
+									dialog.dismiss();
+								}
+							});
+							dialogBuilder.setNegativeButton(R.string.btnCancel, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int whichButton) {
+									// dialog.cancel();
+								}
+							});
+							Dialog dialog = dialogBuilder.create();
+							dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+							dialog.getWindow().getDecorView().setSystemUiVisibility(
+									mActivity.getWindow().getDecorView().getSystemUiVisibility());
+							dialog.show();
+							dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+						}
 					}
 					else {
 						switch (index) {
@@ -2699,7 +2721,6 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		mVolKeyMode = SetImageText.getVolKey(sharedPreferences); // 音量キー操作
 		mRotateBtn = DEF.RotateBtnList[SetCommonActivity.getRotateBtn(sharedPreferences)];
-		mCharset = DEF.CharsetList[SetCommonActivity.getCharset(sharedPreferences)];
 
 		mConfirmBack = SetImageText.getConfirmBack(sharedPreferences);	// 戻るキーで確認メッセージ
 

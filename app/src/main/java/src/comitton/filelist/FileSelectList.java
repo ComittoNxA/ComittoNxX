@@ -249,6 +249,10 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					fileList.remove(i);
 					continue;
 				}
+				if (fileList.get(i).getType() == FileData.FILETYPE_EPUB_SUB){
+					fileList.remove(i);
+					continue;
+				}
 				if (fileList.get(i).getType() != FileData.FILETYPE_DIR && fileList.get(i).getType() != FileData.FILETYPE_PARENT) {
 					// 通常のファイル
 					int len = name.length();

@@ -18,6 +18,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 	private AppCompatImageButton mBtnConfig;
 	private AppCompatImageButton mBtnEditButton;
 
-	public ToolbarDialog(Activity activity, @StyleRes int themeResId) {
+	public ToolbarDialog(AppCompatActivity activity, @StyleRes int themeResId) {
 		super(activity, themeResId);
 		Window dlgWindow = getWindow();
 

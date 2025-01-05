@@ -1,5 +1,4 @@
-#cmake_minimum_required(VERSION 3.31.0)
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.16)
 project(comitton C CXX ASM)
 include(FetchContent)
 include(GNUInstallDirs)

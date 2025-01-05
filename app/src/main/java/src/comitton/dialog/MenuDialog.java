@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDismissListener {
@@ -47,22 +48,22 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 	private boolean mSelected;
 	private boolean mIsClose;
 
-	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, MenuSelectListener listener) {
+	public MenuDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, false, false, false, listener);
 	}
 
-	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuSelectListener listener) {
+	public MenuDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, halfview, false, false, listener);
 	}
 
-	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuSelectListener listener) {
+	public MenuDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, halfview, top, false, listener);
 	}
 
-	public MenuDialog(Activity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
+	public MenuDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuSelectListener listener) {
 		super(activity, themeResId);
 		MenuDialogProc(activity, isclose, halfview, top, wide, listener);
 	}

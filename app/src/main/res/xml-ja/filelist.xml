@@ -38,8 +38,8 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="epubViewer"
-            android:summary="Epubビュアーの代わりにイメージビュアーで開く"
-            android:title="Epubファイルをイメージビュアーで開く" />
+            android:summary="EPUBファイルをテキスト表示画面の代わりにイメージ表示画面で開く"
+            android:title="EPUBファイルをイメージ表示画面で開く" />
         <CheckBoxPreference
             android:layout_height="wrap_content"
             android:defaultValue="true"

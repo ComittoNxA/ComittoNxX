@@ -36,7 +36,6 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
     private String mPath;
     private String mUser;
     private String mPass;
-    private String mCharset;
     private String mCropPath;
 
     private CropImageView mCropImageView;
@@ -56,7 +55,7 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
         message.what = DEF.HMSG_ERROR;
         ImageManager imageMgr = null;
         if(mCropPath == null) {
-            imageMgr = new ImageManager(this, mPath, mFile, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, mCharset, true, ImageManager.OPENMODE_THUMBSORT, 1);
+            imageMgr = new ImageManager(this, mPath, mFile, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler,true, ImageManager.OPENMODE_THUMBSORT, 1);
             imageMgr.LoadImageList(0, 0, 0);
             mCropPath = imageMgr.decompFile(0, null);
         }
@@ -133,7 +132,6 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
             mFile = intent.getStringExtra("File");
             mUser = intent.getStringExtra("User");
             mPass = intent.getStringExtra("Pass");
-            mCharset = intent.getStringExtra("Charset");
         }
 //        mUri = Uri.parse("file://" + uri);
         mAspectRatio = intent.getFloatExtra("aspectRatio", 3.0f / 4.0f);

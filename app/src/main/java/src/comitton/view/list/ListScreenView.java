@@ -18,7 +18,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 //import android.util.Log;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -39,13 +39,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	public final static short AREATYPE_LIST = 0x200;
 
 	public final static short AREATYPE_ALL = 0xFFF;
-
-//	public final static short LISTINDEX_FILE = 0;
-//	public final static short LISTINDEX_DIR = 1;
-//	public final static short LISTINDEX_SERVER = 2;
-//	public final static short LISTINDEX_FAVO = 3;
-//	public final static short LISTINDEX_HIST = 4;
-//	public final static short LISTINDEX_MENU = 5;
 
 	// 描画情報
 	public TitleArea mTitleArea;
@@ -505,78 +498,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			mSelectorArea.drawArea(canvas, mSelectorRect.left, mSelectorRect.top);
 		}
 
-		// if ((areatype & AREATYPE_TOOLLIST) == AREATYPE_TOOLLIST) {
-		// // 背景塗りつぶし
-		// canvas.drawColor(mBakColor);
-		// }
-		// if ((areatype & AREATYPE_FILELIST) != 0) {
-		// mFileListArea.drawArea(canvas, mFileListRect.left + mListOffsetX,
-		// mFileListRect.top);
-		// }
-		// if ((areatype & AREATYPE_TOOLBAR) != 0) {
-		// mToolbarArea.drawArea(canvas, mToolbarRect.left + mListOffsetX,
-		// mToolbarRect.top);
-		// }
-		// if ((areatype & AREATYPE_TITLE) != 0) {
-		// mTitleArea.drawArea(canvas);
-		// }
-		// if ((areatype & AREATYPE_SELECTOR) != 0) {
-		// mSelectorArea.drawArea(canvas, mSelectorRect.left,
-		// mSelectorRect.top);
-		// }
-
-		// // 背景塗りつぶし
-		// canvas.drawColor(mBakColor);
-		//
-		// if (mListOffsetX < 0) {
-		//
-		// }
-		// for (int i = 0; i < 2; i++) {
-		// int type = -1;
-		// int offsetX;
-		// int listindex;
-		// if (i == 0) {
-		// // 1週目
-		// type = mListType[mListIndex];
-		// offsetX = mListOffsetX;
-		// }
-		// else {
-		// if (Math.abs(mListOffsetX) < mListBorder) {
-		// break;
-		// }
-		// else if (mListOffsetX < 0) {
-		// offsetX = mListOffsetX + (mFileListRect.right + mListBorder);
-		// listindex = calcListIndex(+1);
-		// }
-		// else {
-		// offsetX = mListOffsetX - (mFileListRect.right + mListBorder);
-		// listindex = calcListIndex(-1);
-		// }
-		// type = mListType[listindex];
-		// }
-		//
-		// if (type == RecordList.TYPE_FILELIST) {
-		// mFileListArea.drawArea(canvas, mFileListRect.left + offsetX,
-		// mFileListRect.top);
-		// mToolbarArea.drawArea(canvas, mToolbarRect.left + offsetX,
-		// mToolbarRect.top);
-		// }
-		// else if (type == RecordList.TYPE_DIRECTORY) {
-		// mDirListArea.drawArea(canvas, mDirListRect.left + offsetX,
-		// mDirListRect.top);
-		// }
-		// else if (type == RecordList.TYPE_BOOKMARK) {
-		// mFavoListArea.drawArea(canvas, mFavoListRect.left + offsetX,
-		// mFavoListRect.top);
-		// }
-		// else if (type == RecordList.TYPE_HISTORY) {
-		// mHistListArea.drawArea(canvas, mHistListRect.left + offsetX,
-		// mHistListRect.top);
-		// }
-		// }
-		// mTitleArea.drawArea(canvas);
-		// mSelectorArea.drawArea(canvas, mSelectorRect.left,
-		// mSelectorRect.top);
 	}
 
 	public float areaPosX(short areatype, float x) {

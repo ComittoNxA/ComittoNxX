@@ -3,21 +3,25 @@
     <PreferenceCategory>
         <PreferenceScreen
             android:key="FileListSet"
-            android:title="Settings for File List">
+            android:title="Settings for File List"
+            android:summary="Setting the display and operation of the File List when it starts." >
             <intent
                 android:targetClass="src.comitton.config.SetFileListActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="RecorderSet"
-            android:title="Settings for Recoder">
-            <intent
+            android:title="Settings for Recoder"
+            android:summary="Setting the display and behavior of directory/bookmark/history lists." >
+
+        <intent
                 android:targetClass="src.comitton.config.SetRecorderActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="FileColor"
-            android:title="Color Settings for File List">
+            android:title="Color Settings for File List"
+            android:summary="Setting the display color of the File List." >
             <intent
                 android:targetClass="src.comitton.config.SetFileColorActivity"
                 android:targetPackage="@string/application_id" />
@@ -26,35 +30,48 @@
     <PreferenceCategory android:title="Image &amp; Text Viewer Settings" >
         <PreferenceScreen
             android:key="ImageSet"
-            android:title="Settings for Image Viewer" >
+            android:title="Settings for Image Viewer"
+            android:summary="Setting the display and operation when the Image Viewer starts." >
             <intent
                 android:targetClass="src.comitton.config.SetImageActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="DetailSet"
-            android:title="Detail Settings for Image Viewer" >
+            android:title="Detail Settings for Image Viewer"
+            android:summary="Sets parameters that affect the behavior of the Image Viewer." >
             <intent
                 android:targetClass="src.comitton.config.SetImageDetailActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="TextSet"
-            android:title="Settings for Text Viewer" >
+            android:title="Settings for Text Viewer"
+            android:summary="Setting the display and operation of the Text Viewer when it starts." >
             <intent
                 android:targetClass="src.comitton.config.SetTextActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
+            android:key="EpubSet"
+            android:title="Settings for EPUB"
+            android:summary="Setting the display method for EPUB files." >
+            <intent
+                android:targetClass="src.comitton.config.SetEpubActivity"
+                android:targetPackage="@string/application_id" />
+        </PreferenceScreen>
+        <PreferenceScreen
             android:key="ImTxDetailSet"
-            android:title="Detail Settings for Image &amp; Text" >
+            android:title="Detail Settings for Image &amp; Text"
+            android:summary="Setting common parameters for Image/Text Viewer." >
             <intent
                 android:targetClass="src.comitton.config.SetImageTextDetailActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="ImageTextColor"
-            android:title="Color Settings for Image &amp; Text" >
+            android:title="Color Settings for Image &amp; Text"
+            android:summary="Setting the display color of the Image/Text Viewer." >
             <intent
                 android:targetClass="src.comitton.config.SetImageTextColorActivity"
                 android:targetPackage="@string/application_id" />
@@ -63,7 +80,8 @@
     <PreferenceCategory android:title="Common" >
         <PreferenceScreen
             android:key="CommOpeSet"
-            android:title="Settings for Common Operation" >
+            android:title="Settings for Common Operation"
+            android:summary="Setting common operations for each screen." >
             <intent
                 android:targetClass="src.comitton.config.SetCommonActivity"
                 android:targetPackage="@string/application_id" />
@@ -72,15 +90,16 @@
     <PreferenceCategory android:title="Other Settings" >
         <PreferenceScreen
             android:key="NoiseSet"
-            android:title="Settings for Noise Operation" >
+            android:title="Settings for Noise Operation"
+            android:summary="Set parameters such as recognition speed and detection level for Noise Operation." >
             <intent
                 android:targetClass="src.comitton.config.SetNoiseActivity"
                 android:targetPackage="@string/application_id" />
         </PreferenceScreen>
         <PreferenceScreen
             android:key="MemoryCache"
-            android:summary="Required Restart"
-            android:title="Settings for memory cache" >
+            android:title="Settings for memory cache"
+            android:summary="Set parameters for memory cache size and number of pages (Required Restart)." >
             <intent
                 android:targetClass="src.comitton.config.SetCacheActivity"
                 android:targetPackage="@string/application_id" />

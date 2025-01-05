@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.EventListener;
 
@@ -37,7 +38,7 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 
 	SearchListener mListener;
 
-	public EditServerDialog(Activity activity, @StyleRes int themeResId, @NonNull String name, @NonNull String host, @NonNull String user, @NonNull String pass, SearchListener listener) {
+	public EditServerDialog(AppCompatActivity activity, @StyleRes int themeResId, @NonNull String name, @NonNull String host, @NonNull String user, @NonNull String pass, SearchListener listener) {
 		super(activity, themeResId, true);
 
 		setCanceledOnTouchOutside(true);

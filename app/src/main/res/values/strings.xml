@@ -154,6 +154,7 @@
     <string name="marginH">Top/Bottom Margins(%)</string>
     <string name="delTitle"></string>
     <string name="delMsg">Are you sure to delete?</string>
+    <string name="delErrorMsg">The file could not be deleted.</string>
     <string name="downMsg1">Download to </string>
     <string name="downMsg2"></string>
     <string name="scTitle">Create Shortcut</string>
@@ -238,11 +239,11 @@
     <string name="ope04">Download</string>
     <string name="ope05">Expand File</string>
     <string name="ope06">Reading up here</string>
-    <string name="ope07">Show image viewer</string>
+    <string name="ope07">Show Image Viewer</string>
     <string name="ope08">Rename</string>
     <string name="ope09">Delete thumbnail cache</string>
     <string name="ope10">Open first page</string>
-    <string name="ope11">Show Epub viewer</string>
+    <string name="ope11">Show Text viewer</string>
     <string name="lmTitle">List Mode</string>
     <string name="listmode00">List View (Thumbnail ON)</string>
     <string name="listmode01">List View (Thumbnail OFF)</string>

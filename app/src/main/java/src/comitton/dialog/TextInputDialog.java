@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.EventListener;
 
@@ -37,7 +38,7 @@ public class TextInputDialog extends ImmersiveDialog implements OnClickListener,
 
 	SearchListener mListener;
 
-	public TextInputDialog(Activity activity, @StyleRes int themeResId, String title, String message, String notice, String edit, SearchListener listener) {
+	public TextInputDialog(AppCompatActivity activity, @StyleRes int themeResId, String title, String message, String notice, String edit, SearchListener listener) {
 		super(activity, themeResId, true);
 
 		setCanceledOnTouchOutside(true);

@@ -10,6 +10,7 @@ import jp.dip.muracoro.comittonx.R;
 
 import src.comitton.common.DEF;
 import src.comitton.config.SetCommonActivity;
+import src.comitton.config.SetEpubActivity;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.config.SetFileListActivity;
 import src.comitton.config.SetImageActivity;
@@ -39,7 +40,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -80,7 +81,6 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	private int mItemMargin;
 
 	private boolean mHidden;
-	private String mCharset;
 	private int mFileSort;
 	private boolean mShowExt;
 
@@ -113,7 +113,6 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	private Thread mZipThread;
 
 	private boolean mTerminate;
-//	private boolean mReadRunning; // 読み込み中フラグ
 
 	private ArrayList<FileData> mFileList;
 	private int mSelectIndex;
@@ -172,7 +171,6 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		mThumbMargin = SetFileListActivity.getThumbMargin(mSharedPreferences);
 
 		mFileSort = SetImageActivity.getFileSort(mSharedPreferences);
-		mCharset = DEF.CharsetList[SetCommonActivity.getCharset(mSharedPreferences)];
 		mHidden = SetCommonActivity.getHiddenFile(mSharedPreferences);
 		mShowExt = SetFileListActivity.getExtension(mSharedPreferences);
 
@@ -181,6 +179,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		mFontSub = DEF.calcFontPix(SetFileListActivity.getFontSub(mSharedPreferences), mDensity);
 		mItemMargin = DEF.calcSpToPix(SetFileListActivity.getItemMargin(mSharedPreferences), mDensity);
 		mListRota = SetFileListActivity.getListRota(mSharedPreferences);
+
 		DEF.setRotation(this, mListRota);
 
 		// Intentを取得する
@@ -260,9 +259,9 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 	public class ZipLoad implements Runnable {
 		private Handler handler;
-		private Activity mActivity;
+		private AppCompatActivity mActivity;
 
-		public ZipLoad(Handler handler, Activity activity) {
+		public ZipLoad(Handler handler, AppCompatActivity activity) {
 			super();
 			this.handler = handler;
 			this.mActivity = activity;
@@ -270,8 +269,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 		public void run() {
 			// ファイルリストの読み込み
-			mImageMgr = new ImageManager(this.mActivity, mUri + mPath, mFileName, mUser, mPass, mFileSort, handler, mCharset, mHidden, ImageManager.OPENMODE_LIST, 1);
-			mImageMgr.LoadImageList(0, 0, 0);
+			mImageMgr = new ImageManager(this.mActivity, mUri + mPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_LIST, 1);
+			//mImageMgr.LoadImageList(0, 0, 0);
 
 			// 終了通知
 			Message message = new Message();
@@ -291,10 +290,9 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		WindowManager windowmanager = (WindowManager)getSystemService(WINDOW_SERVICE);
-		Display disp = windowmanager.getDefaultDisplay();
-		float w = disp.getWidth();;
-		float h = disp.getHeight();
+		View mRootView = mActivity.getWindow().getDecorView().findViewById(android.R.id.content);
+		float w = mRootView.getWidth();
+		float h = mRootView.getHeight();
 		if (w == 0.0f || h == 0.0f) {
 			return;
 		}
@@ -351,8 +349,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				String lastfile = data.getExtras().getString("lastfile");
 
 				if (nextopen != CloseDialog.CLICK_CLOSE) {
-					Log.d("ExpandActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE. ビュアーから復帰しました.");
-					// ビュアーからの復帰
+					Log.d("ExpandActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE. ビュワーから復帰しました.");
+					// ビュワーからの復帰
 					Intent intent = new Intent();
 					intent.putExtra("nextopen", nextopen);
 					intent.putExtra("lastfile", lastfile);
@@ -368,7 +366,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		else if (requestCode == DEF.REQUEST_TEXT) {
 			Log.d("ExpandActivity", "onActivityResult: requestCode == DEF.REQUEST_TEXT");
 			if (resultCode == RESULT_OK && data != null) {
-				Log.d("ExpandActivity", "onActivityResult: resultCode == RESULT_OK. ビュアーから復帰しました.");
+				Log.d("ExpandActivity", "onActivityResult: resultCode == RESULT_OK. ビュワーから復帰しました.");
 				mOpenOperation = data.getExtras().getInt("nextopen", -1);
 				mOpenLastFile = data.getExtras().getString("lastfile");
 			}

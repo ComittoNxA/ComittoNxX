@@ -18,6 +18,7 @@ import android.widget.Toast;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class BookmarkDialog extends ImmersiveDialog implements OnClickListener {
@@ -32,7 +33,7 @@ public class BookmarkDialog extends ImmersiveDialog implements OnClickListener {
 
 	String mDefaultName;
 
-	public BookmarkDialog(Activity activity, @StyleRes int themeResId) {
+	public BookmarkDialog(AppCompatActivity activity, @StyleRes int themeResId) {
 		super(activity, themeResId);
 	}
 

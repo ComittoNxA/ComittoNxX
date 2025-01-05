@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
 	public static final int MSG_MESSAGE = 1;
@@ -50,7 +51,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 	private ProgressBar mProgress;
 	private Button mBtnCancel;
 
-	public DownloadDialog(Activity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, String local) {
+	public DownloadDialog(AppCompatActivity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, String local) {
 		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(false);
@@ -168,7 +169,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 					if (mBreak) {
 						// 中断
 						localFile = null;
-						FileAccess.delete(mLocal + path + item + "_dl", mUser, mPass);
+						FileAccess.delete(mActivity, mLocal + path + item + "_dl", mUser, mPass);
 						return false;
 					}
 					if (size <= 0) {
@@ -213,7 +214,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				}
 				if (!FileAccess.renameTo("", mLocal + path, item + "_dl", newFileName, mUser, mPass)) {
 					// リネーム失敗ならダウンロードしたファイルを削除
-					FileAccess.delete(mLocal + path + item + "_dl", mUser, mPass);
+					FileAccess.delete(mActivity, mLocal + path + item + "_dl", mUser, mPass);
 				}
 			}
 			catch (Exception e) {

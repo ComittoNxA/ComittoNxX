@@ -64,6 +64,11 @@
             android:key="SortByJapaneseVolumeName"
             android:summary="「上中下」や「前中後」の順に並べます。\n「完短外」はその次に並びます。"
             android:title="上中下巻で並べ替える" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="SortByFileType"
+            android:summary="ディレクトリよりファイルを優先します。\nイメージビュワーとサムネイルのみ有効です。"
+            android:title="ファイルを優先する" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="ソートの優先ワード" >

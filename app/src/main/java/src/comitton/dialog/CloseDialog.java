@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnDismissListener {
@@ -52,7 +53,7 @@ public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnD
 	String mTitle;
 	int mLayoutId;
 
-	public CloseDialog(Activity activity, @StyleRes int themeResId) {
+	public CloseDialog(AppCompatActivity activity, @StyleRes int themeResId) {
 		super(activity, themeResId);
 
 		// 外をタッチすると閉じる

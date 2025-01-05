@@ -6,6 +6,7 @@ import src.comitton.common.MODULE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -27,16 +28,16 @@ import jp.dip.muracoro.comittonx.R;
 public class Information implements DialogInterface.OnDismissListener {
 	// 表示中フラグ
 	public static boolean mIsOpened = false;
-	private Activity mContext;
+	private AppCompatActivity mActivity;
 	private Dialog mDialog;
 
-	public Information(Activity context) {
-		mContext = context;
+	public Information(AppCompatActivity activity) {
+		mActivity = activity;
 	}
 
 	public void showNotice() {
 		if (mIsOpened == false) {
-			mDialog = (Dialog)new NoticeDialog(mContext, R.style.MyDialog);
+			mDialog = (Dialog)new NoticeDialog(mActivity, R.style.MyDialog);
 
 			// ダイアログ終了通知を受け取る
 			mDialog.setOnDismissListener(this);
@@ -46,7 +47,7 @@ public class Information implements DialogInterface.OnDismissListener {
 
 	public void showAbout() {
 		if (mIsOpened == false) {
-			mDialog = (Dialog)new AboutDialog(mContext, R.style.MyDialog);
+			mDialog = (Dialog)new AboutDialog(mActivity, R.style.MyDialog);
 			// ダイアログ終了通知を受け取る
 			mDialog.setOnDismissListener(this);
 			mDialog.show();
@@ -73,7 +74,7 @@ public class Information implements DialogInterface.OnDismissListener {
 
 	public class NoticeDialog extends ImmersiveAlertDialog {
 
-		public NoticeDialog(Activity activity, int themeResId) {
+		public NoticeDialog(AppCompatActivity activity, int themeResId) {
 			super(activity, themeResId);
 			boolean debug = false;
 			if (debug) {Log.d("Information", "NoticeDialog: NoticeDialog: 開始します.");}
@@ -90,8 +91,8 @@ public class Information implements DialogInterface.OnDismissListener {
 			setIcon(BuildConfig.icon);
 			setTitle(R.string.noticeTitle);
 
-			WebView webView = new WebView(mContext);
-			Resources res = mContext.getResources();
+			WebView webView = new WebView(mActivity);
+			Resources res = mActivity.getResources();
 			String filename = res.getString(R.string.noticeText);
 			webView.loadUrl("file:///android_asset/" + filename);
 			webView.setBackgroundColor(Color.TRANSPARENT);
@@ -110,7 +111,7 @@ public class Information implements DialogInterface.OnDismissListener {
 	public class AboutDialog extends ImmersiveAlertDialog {
 
 		@SuppressWarnings("deprecation")
-		public AboutDialog(Activity activity, int themeResId) {
+		public AboutDialog(AppCompatActivity activity, int themeResId) {
 			super(activity, themeResId);
 			boolean debug = false;
 
@@ -123,10 +124,10 @@ public class Information implements DialogInterface.OnDismissListener {
 			dlgWindow.setBackgroundDrawableResource(R.drawable.dialogframe);
 
 			setIcon(BuildConfig.icon);
-			setTitle(MODULE.aboutTitle(mContext));
-			WebView webView = new WebView(mContext);
-			Resources res = mContext.getResources();
-			webView.loadDataWithBaseURL(null,MODULE.aboutText(mContext),"text/html", "utf-8", null);
+			setTitle(MODULE.aboutTitle(mActivity));
+			WebView webView = new WebView(mActivity);
+			Resources res = mActivity.getResources();
+			webView.loadDataWithBaseURL(null,MODULE.aboutText(mActivity),"text/html", "utf-8", null);
 			webView.setBackgroundColor(Color.TRANSPARENT);
 			webView.setWebViewClient(new WebViewClient() {
 				@Override
@@ -142,7 +143,7 @@ public class Information implements DialogInterface.OnDismissListener {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
 							// 寄付
-							MODULE.donate(mContext);
+							MODULE.donate(mActivity);
 						}
 					});
 			setButton(DialogInterface.BUTTON_NEUTRAL, res.getString(R.string.aboutSource),
@@ -151,7 +152,7 @@ public class Information implements DialogInterface.OnDismissListener {
 							// ソースダウンロード
 							Uri uri = Uri.parse(DEF.DOWNLOAD_URL);
 							Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-							mContext.startActivity(intent);
+							mActivity.startActivity(intent);
 						}
 					});
 			mIsOpened = true;

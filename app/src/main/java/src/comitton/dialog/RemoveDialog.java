@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.Display;
@@ -77,18 +78,15 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 		mItem = item;
 		mBreak = false;
 
-		mHandler = new Handler(this);
-		return;
+		mHandler = new Handler(Looper.getMainLooper());
 	}
 
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
-		// ディスプレイのインスタンス生成
-		Display disp = wm.getDefaultDisplay();
-		int cx = disp.getWidth();
-		int cy = disp.getHeight();
+		View mRootView = mActivity.getWindow().getDecorView().findViewById(android.R.id.content);
+		int cx = mRootView.getWidth();
+		int cy = mRootView.getHeight();
 		int width = Math.min(cx, cy);
 
 		setContentView(R.layout.removedialog);
@@ -151,7 +149,7 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 					}
 				}
 			}
-			FileAccess.delete(mFullPath + nextpath, mUser , mPass);
+			FileAccess.delete(mActivity, mFullPath + nextpath, mUser , mPass);
 		}
 		else {
 			// 削除ファイル表示
@@ -160,7 +158,7 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 			// ファイル削除
 			boolean exists = FileAccess.exists(mFullPath + nextpath, mUser , mPass);
 			if (exists) {
-				FileAccess.delete(mFullPath + nextpath, mUser , mPass);
+				FileAccess.delete(mActivity, mFullPath + nextpath, mUser , mPass);
 			}
 		}
 		return true;
@@ -168,7 +166,7 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 
 	public boolean smbRemoveFile(String path, String item) throws Exception {
 		String nextpath = path + item;
-		FileAccess.delete(mFullPath + nextpath, mUser , mPass);
+		FileAccess.delete(mActivity, mFullPath + nextpath, mUser , mPass);
 //		boolean isDirectory = FileAccess.isDirectory(mFullPath + nextpath, mUser , mPass);
 //		if (isDirectory) {
 //			// 再帰呼び出し

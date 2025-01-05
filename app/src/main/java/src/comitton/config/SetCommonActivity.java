@@ -220,6 +220,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 		DEF.SORT_BY_NATURAL_NUMBERS = sharedPreferences.getBoolean(DEF.KEY_SORT_BY_NATURAL_NUMBERS, true);
 		DEF.SORT_BY_KANJI_NUMERALS = sharedPreferences.getBoolean(DEF.KEY_SORT_BY_KANJI_NUMERALS, true);
 		DEF.SORT_BY_JAPANESE_VOLUME_NAME = sharedPreferences.getBoolean(DEF.KEY_SORT_BY_JAPANESE_VOLUME_NAME, true);
+		DEF.SORT_BY_FILE_TYPE = sharedPreferences.getBoolean(DEF.KEY_SORT_BY_FILE_TYPE, true);
 
 		ArrayList<String> priorityWords = new ArrayList<String>();
 		String word = "";

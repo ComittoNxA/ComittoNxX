@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("NewApi")
 public class CheckDialog extends ImmersiveDialog implements OnClickListener, OnDismissListener {
@@ -43,7 +44,7 @@ public class CheckDialog extends ImmersiveDialog implements OnClickListener, OnD
 
 	private ItemArrayAdapter mItemArrayAdapter;
 
-	public CheckDialog(Activity activity, @StyleRes int themeResId, String title, boolean states[], String[] items, CheckListener listener) {
+	public CheckDialog(AppCompatActivity activity, @StyleRes int themeResId, String title, boolean states[], String[] items, CheckListener listener) {
 		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(true);

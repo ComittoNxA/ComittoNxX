@@ -7,7 +7,9 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -184,7 +186,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 					R.string.ToolbarEditToolbar			// ツールバーを編集
 			};
 
-	public ToolbarEditDialog(Activity activity, @StyleRes int themeResId, int cx, int cy) {
+	public ToolbarEditDialog(AppCompatActivity activity, @StyleRes int themeResId, int cx, int cy) {
 		super(activity, themeResId);
 		setCanceledOnTouchOutside(true);
 

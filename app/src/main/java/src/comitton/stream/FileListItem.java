@@ -10,7 +10,6 @@ public class FileListItem {
 	public int orglen;
 	public int header;
 	public long dtime;
-//	public int bmpsize;
 	public int scale;		// 取り込み時の縮小倍率
 	public int o_width;		// 実画像幅
 	public int o_height;	// 実画像高さ
@@ -23,9 +22,6 @@ public class FileListItem {
 	public boolean error;
 	public byte version;	// バージョン(rarのみ使用)
 	public boolean nocomp;	// 無圧縮フラグ(rarのみ使用)
-	public int param1;		// num(PDF)
-	public int param2;		// gen(PDF)
-	public int param3;		// hascrypt(PDF)
 	public int params[];	// (PDF-CCITT)
 	public boolean sizefixed; // ZIPのcmplenを修正済みかどうか
 };

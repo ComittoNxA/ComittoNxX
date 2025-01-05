@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="Viewer Settings" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="epubViewer"
+            android:summary="Opens EPUB files in Image Viewer instead of Text Viewer."
+            android:title="Open in Image Viewer" />
+    </PreferenceCategory>
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="epubOrder"
+        android:summary="Follow the display order specified in the Epub file when opening the Epub file in the Imaeg Viewer."
+        android:title="Image Viewer Display Order" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="epubThumb"
+        android:summary="Use the cover image specified in the EPUB file as the thumbnail on the File List."
+        android:title="Use cover image as thumbnail" />
+</PreferenceScreen>

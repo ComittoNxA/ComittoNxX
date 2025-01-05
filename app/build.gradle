@@ -9,7 +9,7 @@ def applicationName = "ComittoNxX"
 
 def versionMajor = 2
 def versionMinor = 2
-def versionPatch = 5
+def versionPatch = 6
 
 // 画像フォーマットサポート設定
 def WITH_JPEG = "ON"
@@ -29,8 +29,8 @@ android {
 
     // 28にすると -lpthread が勝手に追加されてビルドできない時がある
     // C言語の書式バージョン問題でビルドエラーが発生する場合はndkバージョンを24まで下げること
-    //ndkVersion "28.0.12674087"
-    ndkVersion "27.0.12077973"
+    ndkVersion "28.0.12674087"
+    //ndkVersion "27.0.12077973"
     //ndkVersion "24.0.8215888"
 
 
@@ -112,7 +112,6 @@ android {
             ndk {
                 abiFilters "arm64-v8a"
             }
-            //versionNameSuffix "-debug"
             applicationIdSuffix ".debug"
             resValue("string", "app_name", "${applicationName}[debug]")
             resValue("string", "app_launch_name", "${applicationName}[debug]")
@@ -125,7 +124,6 @@ android {
             ndk {
                 abiFilters "armeabi-v7a"
             }
-            //versionNameSuffix "-debug"
             applicationIdSuffix ".debug"
             resValue("string", "app_name", "${applicationName}[debug]")
             resValue("string", "app_launch_name", "${applicationName}[debug]")
@@ -198,18 +196,17 @@ android {
     externalNativeBuild {
         cmake {
             path file('src/main/jni/CMakeLists.txt')
-            version '3.31.0'
-            //version '3.22.1'
+            version '3.31.3'
         }
     }
     productFlavors {
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_18
-        targetCompatibility JavaVersion.VERSION_18
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_18.toString()
+        jvmTarget = JavaVersion.VERSION_21.toString()
     }
     buildFeatures {
         buildConfig true
@@ -223,6 +220,8 @@ android {
 dependencies {
     implementation 'androidx.core:core:1.15.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.activity:activity:1.9.3'
+    implementation 'androidx.fragment:fragment:1.8.5'
     implementation "androidx.constraintlayout:constraintlayout:2.2.0"
     implementation 'com.google.android.material:material:1.12.0'
     implementation "androidx.viewpager2:viewpager2:1.1.0"

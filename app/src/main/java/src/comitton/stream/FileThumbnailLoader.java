@@ -21,6 +21,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.BufferedInputStream;
 
 public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
@@ -29,14 +31,14 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	private final int FILETYPE_RAR = 2;
 	private final int FILETYPE_PDF = 3;
 
-	private Activity mActivity;
+	private AppCompatActivity mActivity;
 
 	private String mUser;
 	private String mPass;
 	private int mFileSort;
-	private String mCharset;
 	private boolean mHidden;
 	private boolean mThumbSort;
+	private boolean mEpubThumb;
 
 	private ImageManager mImageMgr;
 	private Object mImageMgrLock;
@@ -45,17 +47,20 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	private boolean mOut_of_memory = false;
 
-	public FileThumbnailLoader(Activity activity, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int filesort, String charset, boolean hidden, boolean thumbsort, int crop, int margin) {
+	public FileThumbnailLoader(AppCompatActivity activity, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int filesort, boolean hidden, boolean thumbsort, int crop, int margin, boolean epubThumb) {
 		super(uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
+		boolean debug = false;
+		if (debug) {Log.d("FileThumbnailLoader", "FileThumbnailLoader: 開始します. epubThumb=" + epubThumb);}
+
 
 		mActivity = activity;
 
 		mUser = user;
 		mPass = pass;
 		mFileSort = filesort;
-		mCharset = charset;
 		mHidden = hidden;
 		mThumbSort = thumbsort;
+		mEpubThumb = epubThumb;
 
 		mImageMgrLock = new Object();
 
@@ -90,10 +95,6 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		if (mWaitFor != null) {
 			mWaitFor.interrupt();
 		}
-	}
-
-	public FileThumbnailLoader(String uri, String path, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int crop, int margin) {
-		super(uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
 	}
 
 	// スレッド開始
@@ -326,13 +327,11 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 		if (filename.equals("..")) {
 			// 対象外のファイル
-			//CallImgLibrary.ThumbnailSetNone(mID, index);
 			return false;
 		}
 		String ext = DEF.getExtension(filename);
 		if (FileData.isText(ext)) {
 			// 対象外のファイル
-			//CallImgLibrary.ThumbnailSetNone(mID, index);
 			return false;
 		}
 
@@ -422,7 +421,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		if (pathfile != null) {
 			int type = FILETYPE_IMG;
 			if (FileData.isPdf(ext)) {
-				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=zip");}
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=pdf");}
 				type = FILETYPE_PDF;
 			}
 			else if (FileData.isZip(ext)) {
@@ -448,12 +447,18 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				} else {
 					openmode = ImageManager.OPENMODE_THUMBNAIL;
 				}
-				mImageMgr = new ImageManager(mActivity, uripath, filename, mUser, mPass, mFileSort, mHandler, mCharset, mHidden, openmode, 1);
+				mImageMgr = new ImageManager(mActivity, uripath, filename, mUser, mPass, mFileSort, mHandler, mHidden, openmode, 1);
 				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得します.");}
-				mImageMgr.LoadImageList(0, 0, 0);
 				try {
-					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: LoadThumbnail を実行します. page=0, , width=" + mThumbSizeW + ", height=" + mThumbSizeH);}
-					bm = mImageMgr.LoadThumbnail(0, mThumbSizeW, mThumbSizeH);
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: mEpubThumb=" + mEpubThumb);}
+					if (mEpubThumb && FileData.isEpub(filename)) {
+						if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: LoadEpubThumbnail を実行します. width=" + mThumbSizeW + ", height=" + mThumbSizeH);}
+						bm = mImageMgr.LoadEpubThumbnail(mThumbSizeW, mThumbSizeH);
+					}
+					else {
+						if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: LoadThumbnail を実行します. page=0, width=" + mThumbSizeW + ", height=" + mThumbSizeH);}
+						bm = mImageMgr.LoadThumbnail(0, mThumbSizeW, mThumbSizeH);
+					}
 					if (bm != null) {
 						if (debug) {Log.d("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail() の実行に成功しました.");}
 					}

@@ -421,15 +421,15 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		if (pathfile != null) {
 			int type = FILETYPE_IMG;
 			if (FileData.isPdf(ext)) {
-				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=pdf");}
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 filename=" + filename + ", type=pdf");}
 				type = FILETYPE_PDF;
 			}
 			else if (FileData.isZip(ext)) {
-				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=zip");}
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 filename=" + filename + ", type=zip");}
 				type = FILETYPE_ZIP;
 			}
 			else if (FileData.isRar(ext)) {
-				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 Filename=" + filename + ", type=rar");}
+				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 filename=" + filename + ", type=rar");}
 				type = FILETYPE_RAR;
 			}
 			else if (FileData.isImage(ext)) {
@@ -450,7 +450,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				mImageMgr = new ImageManager(mActivity, uripath, filename, mUser, mPass, mFileSort, mHandler, mHidden, openmode, 1);
 				if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得します.");}
 				try {
-					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: mEpubThumb=" + mEpubThumb);}
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: mEpubThumb=" + mEpubThumb + ", filename=" + filename);}
 					if (mEpubThumb && FileData.isEpub(filename)) {
 						if (debug) {Log.d("FileThumbnailLoader", "index=" + index + "loadBitmap3: LoadEpubThumbnail を実行します. width=" + mThumbSizeW + ", height=" + mThumbSizeH);}
 						bm = mImageMgr.LoadEpubThumbnail(mThumbSizeW, mThumbSizeH);
@@ -460,13 +460,13 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 						bm = mImageMgr.LoadThumbnail(0, mThumbSizeW, mThumbSizeH);
 					}
 					if (bm != null) {
-						if (debug) {Log.d("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail() の実行に成功しました.");}
+						if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3: mImageMgr.LoadThumbnail() の実行に成功しました. , filename=" + filename);}
 					}
 					else {
-						Log.e("FileThumbnailLoader", "loadBitmap3: mImageMgr.LoadThumbnail の実行に失敗しました.");
+						Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3: mImageMgr.LoadThumbnail の実行に失敗しました. , filename=" + filename);
 					}
 				} catch (Exception e) {
-					Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得でエラーになりました.");
+					Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 サムネイル取得でエラーになりました. , filename=" + filename);
 					if (e != null && e.getMessage() != null) {
 						Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーメッセージ. " + e.getMessage());
 						return false;
@@ -478,11 +478,11 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				if (bm == null) {
 					// NoImageであればステータス設定
 					//CallImgLibrary.ThumbnailSetNone(mID, index);
-					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 取得できませんでした.");}
+					if (debug) {Log.d("FileThumbnailLoader", "index=" + index + " loadBitmap3 取得できませんでした. , filename=" + filename);}
 					return false;
 				}
 			} catch (Exception e) {
-				Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーが発生しました.");
+				Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーが発生しました. , filename=" + filename);
 				if (e != null && e.getMessage() != null) {
 					Log.e("FileThumbnailLoader", "index=" + index + " loadBitmap3 エラーメッセージ. " + e.getMessage());
 				}

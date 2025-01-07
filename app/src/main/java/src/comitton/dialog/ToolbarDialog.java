@@ -660,6 +660,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 
 	@Override
 	public void onDismiss(DialogInterface dialog) {
+		mListener.onSelectPageSelectDialog(DEF.TOOLBAR_DISMISS);
 	}
 
 }

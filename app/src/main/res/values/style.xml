@@ -62,17 +62,20 @@
 
     <!-- AlertDialogのボタンのスタイル -->
     <style name="MyPositiveButton" parent="@style/Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/blue1</item>
         <item name="android:layout_marginStart">20dp</item>
     </style>
 
     <!-- AlertDialogのボタンのスタイル -->
     <style name="MyNeutralButton" parent="@style/Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/blue1</item>
     </style>
 
     <!-- AlertDialogのボタンのスタイル -->
     <style name="MyNegativeButton" parent="@style/Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/blue1</item>
     </style>
 

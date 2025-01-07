@@ -3,12 +3,12 @@ package src.comitton.stream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -32,22 +31,12 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import jcifs.smb.SmbFile;
-import jp.dip.muracoro.comittonx.R;
-import src.comitton.activity.TextActivity;
 import src.comitton.common.DEF;
 import src.comitton.common.FileAccess;
 import src.comitton.data.FileData;
 import src.comitton.exception.FileAccessException;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -341,35 +330,32 @@ public class ImageManager extends InputStream implements Runnable {
 		if(debug) {Log.d("ImageManager", "LoadImageList: 終了します. ");}
 	}
 
+	public int mEpubMode = TextManager.EPUB_MODE_ALL_IMAGE;
+
 	private void epubFileList() throws IOException {
 		boolean debug = false;
 		if(debug) {Log.d("ImageManager", "epubFileList: 開始します.");}
 		int tmpOpenMode = mOpenMode;
+
+		// ファイル一覧を取得
 		mOpenMode = OPENMODE_TEXTVIEW;
 		fileAccessInit(mFilePath);
 		cmpFileList();
-		mTextManager = new TextManager(this, "META-INF/container.xml", mUser, mPass, mHandler, mActivity, FileData.FILETYPE_EPUB);
-		mTextManager.formatTextFile(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0);
-		FileListItem[] list = mTextManager.getEpubImageList();
-		if (list != null && list.length != 0) {
-			mFileList = list;
-		}
-		else {
-			ArrayList<FileListItem> fileListArray = new ArrayList<FileListItem>(0);
-			for (int i = 0; i < mFileList.length; ++i) {
-				if (mFileList[i].type == FileData.FILETYPE_IMG) {
-					fileListArray.add(mFileList[i]);
-				}
-			}
-			mFileList = fileListArray.toArray(new FileListItem[fileListArray.size()]);
-		}
 		mOpenMode = tmpOpenMode;
+
+		// EPUBファイルを解析
+		mTextManager = new TextManager(this, "META-INF/container.xml", mUser, mPass, mHandler, mActivity, FileData.FILETYPE_EPUB);
+		mTextManager.mEpubMode = mEpubMode;
+		mFileList = mTextManager.getEpubImageList();
+		mTextManager.release();
+		mTextManager = null;
 		if(debug) {Log.d("ImageManager", "epubFileList: 終了します.");}
 	}
 
 	private void cmpFileList() throws IOException {
 		boolean debug = false;
 		if(debug) {Log.d("ImageManager", "cmpFileList: 開始します.");}
+
 		// ZIPファイル読み込み
 		byte[] buf = new byte[SIZE_BUFFER];
 		int readSize = 0;
@@ -382,23 +368,46 @@ public class ImageManager extends InputStream implements Runnable {
 		List<FileListItem> list = new ArrayList<FileListItem>();
 		byte [] cdhBuf = null;
 		long fileLength = cmpDirectLength();
-		long cdhLength = 0;//central directory header length
+		long cdhLength = 0;		//central directory header length
 
 		boolean rar5 = false;
 
-		// ZIPかどうか判定
-		try {
-			headpos = zipSearchCentral();
-			// ZIP読み込み成功
+		sendProgress(0, count);
+
+		// ZIPかRARか判定
+		cmpDirectRead(buf, 0, SIZE_BUFFER);
+		if (buf[0] == 'P' && buf[1] == 'K'){
 			mFileType = FILETYPE_ZIP;
 			if(debug) {Log.d("ImageManager", "cmpFileList: ZIPファイルです.");}
 		}
-		catch (IOException e) {
-			// ZIP読み込み失敗
-			// シーク位置をリセットして、RARで解析する
-			cmpDirectSeek(0);
+		else if (buf[0] == 'R' && buf[1] == 'a' && buf[2] == 'r') {
 			mFileType = FILETYPE_RAR;
 			if(debug) {Log.d("ImageManager", "cmpFileList: RARファイルです.");}
+		}
+		else {
+			mFileList = new FileListItem[0];
+			return;
+		}
+		cmpDirectSeek(0);
+
+		// 処理前の時刻を取得
+		long startTime = System.currentTimeMillis();
+
+		if (mFileType == FILETYPE_ZIP) {
+			// 圧縮されたファイル情報取得
+			headpos = zipSearchCentral();
+			if (debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: ZIPセントラルディレクトリヘッダ位置: fileLength={0}, headpos={1}", new Object[]{fileLength, headpos}));}
+			if (headpos == 0) {
+				cmpDirectSeek(0);
+			} else {
+				//central directory headerが見つかった場合、一括でバッファに読み込む
+				// ZIPはファイル情報が1か所にまとめて格納されている
+				cdhLength = fileLength - headpos;
+				cdhBuf = new byte[(int) cdhLength];
+				cmpDirectRead(cdhBuf, 0, (int) cdhLength);
+				cmpDirectSeek(headpos);
+				if (debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: セントラルディレクトリヘッダをバッファに読み込みます: cdhLength={0}", new Object[]{cdhLength}));}
+			}
 		}
 
 		// 簡易的なRAR5判定
@@ -413,36 +422,31 @@ public class ImageManager extends InputStream implements Runnable {
 			else {
 				if(debug) {Log.d("ImageManager", "cmpFileList: RAR5ではありません.");}
 			}
-		}
-
-		if (headpos == 0) {
 			cmpDirectSeek(0);
-		}else{//central directory headerが見つかった場合、一括でバッファに読み込む
-			cdhLength = fileLength - headpos;
-			cdhBuf = new byte[(int)cdhLength];
-			cmpDirectRead(cdhBuf, 0, (int)cdhLength);
-			cmpDirectSeek(headpos);
 		}
 
 		FileListItem fl = null;
 		try {
 			while (true) {
+				if(debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: ループ実行: count={0}, fileLength={1}, headpos={2}", new Object[]{count, fileLength, headpos}));}
 				if(headpos != 0){
 					if(headpos < fileLength) {
 						readSize = (int) ((fileLength - headpos >= 1024) ? 1024 : fileLength - headpos);
 						int pos = (int) (cdhLength - (fileLength - headpos));
 						buf = Arrays.copyOfRange(cdhBuf, pos, readSize+pos);
+						if(debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: バッファをコピーします: count={0}, readSize={1}, pos={2}", new Object[]{count, readSize, pos}));}
 					}else
 						readSize = -1;
 				}else {
+					// RARはファイル情報とファイルデータが交互に格納されている
 					readSize = cmpDirectRead(buf, 0, SIZE_BUFFER);
+					if(debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: バッファを読み込みました: count={0}, readSize={1}", new Object[]{count, readSize}));}
 				}
 				if (readSize <= 0) {
 					// ファイル終了
 					break;
 				}
 
-				if(debug) {Log.d("ImageManager", "cmpFileList: STEP 1");}
 				if (mFileType == FILETYPE_ZIP) {
 					// 通常バージョンで読み込み
 					if (headpos == 0) {
@@ -469,7 +473,7 @@ public class ImageManager extends InputStream implements Runnable {
 				}
 
 				if (fl != null) {
-					if (debug) {Log.d("ImageManager", "cmpFileList: fl.name=" + fl.name);}
+					if (debug) {Log.d("ImageManager", "cmpFileList: count=" + count + ", fl.name=" + fl.name);}
 
 					// 対象ファイル判定
 					if (fl.name != null && fl.name.length() > 4 && fl.orglen > 0 && fl.cmplen > 0) {
@@ -545,9 +549,11 @@ public class ImageManager extends InputStream implements Runnable {
 						// 旧タイプのZIPの場合はセントラルヘッダをアクセス
 						headpos += fl.header;
 						cmpDirectSeek(headpos);
+						if(debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: シークします: count={0}, headpos={1}", new Object[]{count, headpos}));}
 					}
 					else {
 						cmpDirectSeek(cmppos);
+						if(debug) {Log.d("ImageManager", MessageFormat.format("cmpFileList: シークします: count={0}, cmppos={1}", new Object[]{count, cmppos}));}
 					}
 
 					count++;
@@ -557,19 +563,23 @@ public class ImageManager extends InputStream implements Runnable {
 					}
 				}
 				else {
-					if (debug) {Log.d("ImageManager", "cmpFileList: fl=null");}
+					Log.e("ImageManager", "cmpFileList: count=" + count + ", fl=null");
 					break;
 				}
 			}
 		} catch (Exception e) {
-			Log.e("ImageManager", "cmpFileList: 圧縮ファイルの解析でエラーになりました.");
+			Log.e("ImageManager", "cmpFileList: 圧縮ファイルの解析でエラーになりました. count=" + count);
 			if (e != null && e.getMessage() != null) {
 				Log.e("FileThumbnailLoader", "cmpFileList:  エラーメッセージ. " + e.getMessage());
 			}
 		}
 
+		// 処理後の時刻を取得
+		long endTime = System.currentTimeMillis();
+		if(debug) {Log.d("ImageManager", String.format("cmpFileList: ファイルリスト取得: 処理時間：%,dms", (endTime - startTime)));}
+
 		sort(list);
-		mFileList = list.toArray(new FileListItem[list.size()]);
+		mFileList = list.toArray(new FileListItem[0]);
 		// RARであればメモリ確保
 		if (mFileType == FILETYPE_RAR) {
 			int ret = CallJniLibrary.rarAlloc(maxcmplen, maxorglen);
@@ -579,6 +589,7 @@ public class ImageManager extends InputStream implements Runnable {
 		}
 		mMaxCmpLength = maxcmplen;
 		mMaxOrgLength = maxorglen;
+
 		if(debug) {Log.d("ImageManager", "cmpFileList: 終了します.");}
 	}
 
@@ -1192,76 +1203,13 @@ public class ImageManager extends InputStream implements Runnable {
 
 		if (mPdfRenderer == null) {
 			if(debug) {Log.d("ImageManager", "PdfFileList: PdfRendererを取得します.");}
-			ParcelFileDescriptor parcelFileDescriptor = null;
-			FileDescriptor fd = null;
-			File pdfFile = null;
-			if (mHostType == HOSTTYPE_SAMBA) {
-				if(debug) {Log.d("ImageManager", "PdfFileList: HOSTTYPE_SAMBA です.");}
-
-				Resources res = mActivity.getResources();
-				WorkStream ws;
-				BufferedInputStream bis;
-				BufferedOutputStream bos;
-
-				// ローカルディスクに一時ファイルを作成する
-				new File(DEF.getBaseDirectory()).mkdirs();
-				new File(DEF.getBaseDirectory() + "share/").mkdirs();
-				String tmpPath = DEF.getBaseDirectory() + "share/pdftmp";
-				File targetFile = new File(tmpPath);
-
-				try {
-					ws = new WorkStream(mFilePath, "", mUser, mPass, false);
-					bis = new BufferedInputStream(ws, 500 * 1024);
-					bos = new BufferedOutputStream(new FileOutputStream(targetFile), 500 * 1024);
-				} catch (FileNotFoundException e) {
-					Log.e("ImageManager", "PdfFileList: Stream取得中にエラーになりました. ");
-					if (e != null && e.getMessage() != null) {
-						Log.e("ImageManager", "PdfFileList: エラーメッセージ. " + e.getMessage());
-					}
-					return;
-				}
-
-				// SMBのファイルを一時ファイルにコピーする
-				byte buff[] = new byte[BIS_BUFFSIZE * 10];
-				long readtotal = 0;
-				long filesize = ws.length();
-				try {
-					while (mRunningFlag == true) {
-						if (mCloseFlag) {
-							break;
-						}
-						int readsize = bis.read(buff, 0, buff.length);
-						if (readsize <= 0) {
-							break;
-						}
-						bos.write(buff, 0, readsize);
-						readtotal += readsize;
-
-						// 読込通知
-						Message message = new Message();
-						message.what = DEF.HMSG_PROGRESS;
-						message.arg1 = 0;
-						message.arg2 = 3; // ダウンロード中
-						message.obj = String.format("%s\n%,d of %,d (%d%%)", res.getString(R.string.download), (readtotal/1024), (filesize/1024), (readtotal*100/filesize));
-						mHandler.sendMessage(message);
-					}
-					bos.flush();
-					bos.close();
-				} catch (IOException e) {
-					Log.e("ImageManager", "PdfFileList: ダウンロード中にエラーになりました. ");
-					if (e != null && e.getMessage() != null) {
-						Log.e("ImageManager", "PdfFileList: エラーメッセージ. " + e.getMessage());
-					}
-				}
-				pdfFile = targetFile;
-			}
-			else if (mHostType == HOSTTYPE_LOCAL) {
-				if(debug) {Log.d("ImageManager", "PdfFileList: HOSTTYPE_LOCAL です.");}
-				pdfFile = new File(mFilePath);
-			}
-
-			//表示するPDFファイルを指定し、ParcelFileDescriptorインスタンスを作成する。
-			parcelFileDescriptor = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY);
+            ParcelFileDescriptor parcelFileDescriptor = null;
+            try {
+				// ParcelFileDescriptorインスタンスを作成する。
+                parcelFileDescriptor = FileAccess.openProxyFileDescriptor(path, user, pass, mActivity, mHandler);
+            } catch (FileAccessException e) {
+				Log.e("ImageManager", "PdfFileList: ParcelFileDescriptorの取得に失敗しました.");
+            }
 			//ParcelFileDescriptorインスタンスを使用しPdfRendererをインスタンス化する。
 			mPdfRenderer = new PdfRenderer(parcelFileDescriptor);
 		}
@@ -3772,23 +3720,12 @@ public class ImageManager extends InputStream implements Runnable {
 		boolean debug = false;
 		if (debug) {Log.d("ImageManager", "LoadEpubThumbnail: 開始します. width=" + width + ", height=" + height);}
 		mEpubOrder = true;
+		mEpubMode = TextManager.EPUB_MODE_COVER;
 		LoadImageList(0, 0, 0);
-		String cover = mTextManager.getCover();
-		if (debug) {Log.d("ImageManager", "LoadEpubThumbnail: cover=" + cover);}
-		int page = -1;
-		for(int i = 0; i < mFileList.length; ++i) {
-			if (cover.equals(mFileList[i].name)) {
-				page = i;
-			}
+		if (mFileList != null || mFileList.length != 0) {
+			if (debug) {Log.d("ImageManager", "LoadEpubThumbnail: mFileList[0].name=" + mFileList[0].name);}
 		}
-		if (page == -1) {
-			for(int i = 0; i < mFileList.length; ++i) {
-				if (mFileList[i].type == FileData.FILETYPE_IMG) {
-					page = i;
-				}
-			}
-		}
-		return LoadThumbnail(page, width, height);
+		return LoadThumbnail(0, width, height);
 	}
 
 	// サムネイルに近い縮尺を求める

@@ -146,7 +146,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && (mUri + mPath).equals("/storage/")) {
 					// Get emulated/0, SD card paths
 					for (String _name: FileAccess.getExtSdCardPaths(mActivity)) {
-						_name = _name.substring(9);
+						_name = _name.substring("/storage/".length());
 						int index = _name.indexOf("/");
 						if (index > 0) {
 							_name = _name.substring(0, index);
@@ -155,12 +155,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 						if (len >= 1 && !_name.substring(len - 1).equals("/")) {
 							_name += "/";
 						}
-						FileData fileData = new FileData();
-						fileData.setType(FileData.FILETYPE_DIR);
-						fileData.setExtType(FileData.EXTTYPE_NONE);
-						fileData.setName(_name);
-						fileData.setSize(0);
-						fileData.setDate(0);
+						FileData fileData = new FileData(_name, 0l, 0l);
 						fileList.add(fileData);
 					}
 				}
@@ -180,10 +175,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				fileList = new ArrayList<FileData>();
 				if (!mPath.equals("/") && mParentMove) {
 					// 親フォルダを表示
-					FileData fileData = new FileData();
-					fileData.setName("..");
-					fileData.setType(FileData.FILETYPE_PARENT);
-					fileData.setState(0);
+					FileData fileData = new FileData("..", DEF.PAGENUMBER_NONE);
 					fileList.add(fileData);
 				}
 				// 初期フォルダより上のフォルダの場合
@@ -192,11 +184,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					String dir = mStaticRootDir.substring(mPath.length(), pos + 1);
 
 					//途中のフォルダを表示対象に追加
-					FileData fileData = new FileData();
-					fileData.setExtType(FileData.EXTTYPE_NONE);
-					fileData.setName(dir);
-					fileData.setType(FileData.FILETYPE_DIR);
-					fileData.setState(-1);
+					FileData fileData = new FileData(dir, DEF.PAGENUMBER_UNREAD);
 					fileList.add(fileData);
 				}
 				// 処理中断
@@ -207,10 +195,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 			if (!mPath.equals("/") && mParentMove) {
 				// 親フォルダを表示
-				FileData fileData = new FileData();
-				fileData.setName("..");
-				fileData.setType(FileData.FILETYPE_PARENT);
-				fileData.setState(0);
+				FileData fileData = new FileData("..", DEF.PAGENUMBER_NONE);
 				fileList.add(0, fileData);
 			}
 
@@ -241,7 +226,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					fileList.get(i).setState(state);
 				}
 				if (fileList.get(i).getType() == FileData.FILETYPE_IMG){
-					state = 0;
+					state = DEF.PAGENUMBER_NONE;
 					fileList.get(i).setState(state);
 				}
 
@@ -386,10 +371,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				if (result == false) {
 					mFileList = new ArrayList<FileData>();
 					if (mParentMove) {
-    					FileData fileData = new FileData();
-    					fileData.setName("..");
-    					fileData.setType(FileData.FILETYPE_PARENT);
-    					fileData.setState(0);
+    					FileData fileData = new FileData("..", DEF.PAGENUMBER_NONE);
     					mFileList.add(fileData);
 					}
 				}

@@ -600,7 +600,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 							break;
 						}
 						case OPERATE_READHERE: { // ここまで読んだ
-							int state = 0;
+							int state = DEF.PAGENUMBER_READING;
 							for (int i = 0 ; i <= datapos ; i ++) {
 								if (mFileList.get(i).getType() != FileData.FILETYPE_TXT) {
 									state ++;
@@ -962,7 +962,6 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 		int imageCnt = 0;
 		for (int i = 0; i < filenum; i++) {
-			FileData data = new FileData();
 			int state = DEF.PAGENUMBER_UNREAD;
 			if (files[i].type == FileData.FILETYPE_TXT) {
 				state = (int)mSharedPreferences.getFloat(DEF.createUrl(mUri + mPath + mFileName + files[i].name, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
@@ -981,12 +980,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				}
 			}
 
-			data.setName(files[i].name);
-			data.setSize(files[i].orglen);
-			data.setType(files[i].type);
-			data.setExtType(files[i].type);
-			data.setDate(files[i].dtime);
-			data.setState(state);
+			FileData data = new FileData(files[i].name, files[i].orglen, files[i].dtime, state);
 			mFileList.add(data);
 
 			if (files[i].type != FileData.FILETYPE_TXT) {

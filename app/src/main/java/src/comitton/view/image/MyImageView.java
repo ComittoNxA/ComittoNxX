@@ -2248,6 +2248,8 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 	// ズーム用のビットマップを作成
 	public void drawScaling(Canvas canvas, Rect rcDraw, int tch_x, int tch_y, int pinchsel2, boolean pseLand){
+		boolean debug = false;
+
 		// 拡大対象位置
 		int src1_cx = 0;	// 元画像でのサイズ
 		int src1_cy = 0;
@@ -2544,11 +2546,13 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					// 任意倍率は元画像の何倍なのか
-					float pscale_x = origWidth / prevImage.FitWidth / pinch_scale;
-					float pscale_y = origHeight / prevImage.FitHeight / pinch_scale;
-					rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
-
+					if (debug) {Log.d("MyImageView","drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", prevImage.FitWidth=" + prevImage.FitWidth + ", prevImage.FitWidth=" + prevImage.FitHeight);}
+					if (pinch_scale != 0 && prevImage.FitWidth != 0 && prevImage.FitHeight != 0) {
+						// 任意倍率は元画像の何倍なのか
+						float pscale_x = origWidth / prevImage.FitWidth / pinch_scale;
+						float pscale_y = origHeight / prevImage.FitHeight / pinch_scale;
+						rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
+					}
 					// 拡大描画処理
 					if (0 <= rectSrc.right && rectSrc.left < origWidth + offsetX && 0 <= rectSrc.bottom && rectSrc.top < origHeight) {
 						CallImgLibrary.ImageScaleDraw(prevImage.Page, mRotate
@@ -2596,11 +2600,13 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					// 任意倍率は元画像の何倍なのか
-					float pscale_x = origWidth / prev2Image.FitWidth / pinch_scale;
-					float pscale_y = origHeight / prev2Image.FitHeight / pinch_scale;
-					rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
-
+					if (debug) {Log.d("MyImageView","drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", prev2Image.FitWidth=" + prev2Image.FitWidth + ", prev2Image.FitWidth=" + prev2Image.FitHeight);}
+					if (pinch_scale != 0 && prev2Image.FitWidth != 0 && prev2Image.FitHeight != 0) {
+						// 任意倍率は元画像の何倍なのか
+						float pscale_x = origWidth / prev2Image.FitWidth / pinch_scale;
+						float pscale_y = origHeight / prev2Image.FitHeight / pinch_scale;
+						rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
+					}
 					// 拡大描画処理
 					if (0 <= rectSrc.right && rectSrc.left < origWidth + offsetX && 0 <= rectSrc.bottom && rectSrc.top < origHeight) {
 						CallImgLibrary.ImageScaleDraw(prev2Image.Page, mRotate
@@ -2647,11 +2653,13 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					// 任意倍率は元画像の何倍なのか
-					float pscale_x = origWidth / nextImage.FitWidth / pinch_scale;
-					float pscale_y = origHeight / nextImage.FitHeight / pinch_scale;
-					rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
-
+					if (debug) {Log.d("MyImageView","drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", nextImage.FitWidth=" + nextImage.FitWidth + ", nextImage.FitWidth=" + nextImage.FitHeight);}
+					if (pinch_scale != 0 && nextImage.FitWidth != 0 && nextImage.FitHeight != 0) {
+						// 任意倍率は元画像の何倍なのか
+						float pscale_x = origWidth / nextImage.FitWidth / pinch_scale;
+						float pscale_y = origHeight / nextImage.FitHeight / pinch_scale;
+						rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
+					}
 					// 拡大描画処理
 					if (0 <= rectSrc.right && rectSrc.left < origWidth + offsetX && 0 <= rectSrc.bottom && rectSrc.top < origHeight) {
 						CallImgLibrary.ImageScaleDraw(nextImage.Page, mRotate
@@ -2699,11 +2707,13 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					// 任意倍率は元画像の何倍なのか
-					float pscale_x = origWidth / next2Image.FitWidth / pinch_scale;
-					float pscale_y = origHeight / next2Image.FitHeight / pinch_scale;
-					rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
-
+					if (debug) {Log.d("MyImageView","drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", next2Image.FitWidth=" + next2Image.FitWidth + ", next2Image.FitWidth=" + next2Image.FitHeight);}
+					if (pinch_scale != 0 && next2Image.FitWidth != 0 && next2Image.FitHeight != 0) {
+						// 任意倍率は元画像の何倍なのか
+						float pscale_x = origWidth / next2Image.FitWidth / pinch_scale;
+						float pscale_y = origHeight / next2Image.FitHeight / pinch_scale;
+						rectSrc.offset(shiftx * pscale_x, shifty * pscale_y);
+					}
 					// 拡大描画処理
 					if (0 <= rectSrc.right && rectSrc.left < origWidth + offsetX && 0 <= rectSrc.bottom && rectSrc.top < origHeight) {
 						CallImgLibrary.ImageScaleDraw(next2Image.Page, mRotate

@@ -560,7 +560,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		if (permissions != null && permissions.size() > 0) {
 			//==== まとめて承認要求を行う ====//
-			ActivityCompat.requestPermissions(this, permissions.toArray(new String[permissions.size()]), REQUEST_CODE);
+			ActivityCompat.requestPermissions(this, permissions.toArray(new String[0]), REQUEST_CODE);
 		}
 
 		// 前回起動時のバージョン取得

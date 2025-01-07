@@ -171,6 +171,7 @@ public class DEF {
 	public static final int TOOLBAR_MENU = 1028;
 	public static final int TOOLBAR_CONFIG = 1029;
 	public static final int TOOLBAR_EDIT_TOOLBAR = 1030;
+	public static final int TOOLBAR_DISMISS = 1031;
 
 	public static final int SHARE_SINGLE = 2001;
 	public static final int SHARE_LR = 2002;
@@ -746,6 +747,8 @@ public class DEF {
 	public static final boolean TEXT_VIEWER = false;
 	public static final boolean IMAGE_VIEWER = true;
 
+	public static final int PAGENUMBER_NONE = 0;    // 未定
+	public static final int PAGENUMBER_READING = 0;    // 読書中
 	public static final int PAGENUMBER_UNREAD = -1;    // 未読
 	public static final int PAGENUMBER_READ = -2;        // 既読
 

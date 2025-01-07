@@ -257,12 +257,15 @@ int DrawBitmap(int page, int half, int x, int y, void *canvas, int width, int he
 
 int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, int d_x, int d_y, int d_cx, int d_cy, void *canvas, int width, int height, int stride, int psel, IMAGEDATA *pData, int cut_left, int cut_right, int cut_top, int cut_bottom)
 {
-	LOGD("DrawScaleBitmap: page=%d, rote=%d, s(x=%d, y=%d, cx=%d, cy=%d)-d(x=%d, y=%d, cx=%d, cy=%d) / (w=%d, h=%d, s=%d) / p=%d cut(l=%d, r=%d, t=%d, b=%d)"
+//#define DEBUG_DRAW_SCALE_BITMAP
+#ifdef DEBUG_DRAW_SCALE_BITMAP
+	LOGD("DrawScaleBitmap: start: page=%d, rote=%d, s(x=%d, y=%d, cx=%d, cy=%d)-d(x=%d, y=%d, cx=%d, cy=%d) / (w=%d, h=%d, s=%d) / p=%d cut(l=%d, r=%d, t=%d, b=%d)"
 			, page, rotate
 			, s_x, s_y, s_cx, s_cy
 			, d_x, d_y, d_cx, d_cy
 			, width, height, stride, psel
 			, cut_left, cut_right, cut_top, cut_bottom);
+#endif
 
 	WORD	*pixels = (WORD*)canvas;
 	int		image_width  = pData->OrgWidth;
@@ -409,6 +412,9 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 		}
 		free (ypos);
 	}
+#ifdef DEBUG_DRAW_SCALE_BITMAP
+    LOGD("DrawScaleBitmap: end:");
+#endif
 	return 0;
 }
 
@@ -851,7 +857,7 @@ int SetBitmap(int page, uint32_t width, uint32_t height, uint8_t *data, colorFor
     LOGD("SetBitmap: Start. page=%d, width=%d, height=%d, colorFormat=%d", page, width, height, colorFormat);
 
     if (canvas == NULL) {
-        LOGE("LoadImageAvif: canvas is null.");
+        LOGE("SetBitmap: canvas is null.");
         return -100;
     }
         // 画像バッファにデータを格納する処理

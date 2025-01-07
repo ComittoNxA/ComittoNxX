@@ -264,7 +264,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 		if (word.length() > 0) {
 			priorityWords.add(word);
 		}
-		DEF.PRIORITY_WORDS = priorityWords.toArray(new String[priorityWords.size()]);
+		DEF.PRIORITY_WORDS = priorityWords.toArray(new String[0]);
 
 		Log.d("SetCommonActivity", "loadSettings: DEF.PRIORITY_WORDS=" + Arrays.toString(DEF.PRIORITY_WORDS));
 	}

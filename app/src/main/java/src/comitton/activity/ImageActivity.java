@@ -379,7 +379,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	// 画面を構成する View の保持
 	private MyImageView mImageView = null;
 	private GuideView mGuideView = null;
-
+	private boolean mKeepGuide = false;
 	// フリック判定用
 	// private long mInTime1;
 	// private long mInTime2;
@@ -710,6 +710,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	/**
 	 * @Override アクティビティ一時停止時に呼び出される
 	 */
+	@Override
 	protected void onPause() {
 		super.onPause();
 		if (mFinishActivity == false && mSavePage == true && mReadBreak == false) {
@@ -723,6 +724,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	/**
 	 * @Override アクティビティ停止時に呼び出される
 	 */
+	@Override
 	protected void onStop() {
 		super.onStop();
 
@@ -738,6 +740,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	/**
 	 * @Override アクティビティ再開時に呼び出される
 	 */
+	@Override
 	public void onRestart(){
 		super.onRestart();
 		// IMM
@@ -780,7 +783,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 	}
 
-	// 終了処理
+	/**
+	 * @Override アクティビティ終了時に呼び出される
+	 */
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 
@@ -1416,17 +1422,18 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		return false;
 	}
 
+	/**
+	 * @Override アクティビティ初回起動時や再開時に画面が表示される時に呼び出される
+	 */
 	@Override
 	public void onResume() {
 		super.onResume();
 		if (mNoiseSwitch != null) {
 			mNoiseSwitch.recordPause(false);
 		}
-		// if (mImageView != null) {
-		// if (mImageView.update() == false) {
-		// mImageView.reupdate();
-		// }
-		// }
+		 if (mImageView != null) {
+			 mImageView.update(true);
+		 }
 	}
 
 	public void setBitmapImage() {
@@ -2455,6 +2462,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 								if (mPageSelect == PAGE_INPUT) {
 
+									// 文書情報を表示
+									mGuideView.setPageText(mImageMgr.createPageStr(mSelectPage));
+									mGuideView.setPageColor(0x80000000);
+
 									// ページ番号入力
 									if (PageSelectDialog.mIsOpened == false) {
 										PageSelectDialog pageDlg = new PageSelectDialog(this, R.style.MyDialog);
@@ -2466,6 +2477,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 									}
 								}
 								else if (mPageSelect == PAGE_THUMB) {
+
+									// 文書情報を表示
+									mGuideView.setPageText(mImageMgr.createPageStr(mSelectPage));
+									mGuideView.setPageColor(0x80000000);
 
 									// サムネイルページ選択
 									if (PageThumbnail.mIsOpened == false) {
@@ -3300,6 +3315,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			return;
 		}
 
+		// 文書情報を表示
+		mGuideView.setPageText(mImageMgr.createPageStr(mSelectPage));
+		mGuideView.setPageColor(0x80000000);
+
 		Resources res = getResources();
 		DirTreeDialog mMenuDialog = new DirTreeDialog(this, R.style.MyDialog, true, false, false, true, this);
 
@@ -3359,6 +3378,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	public void onCloseMenuDialog() {
 		// メニュー終了
 		mMenuDialog = null;
+		// 情報表示クリア
+		mGuideView.setPageText(null);
+		mGuideView.setPageColor(Color.argb(0, 0, 0, 0));
+		mGuideView.setGuideIndex(GuideView.GUIDE_NONE);
 	}
 
 	private void execCommand(int id) {
@@ -3709,12 +3732,27 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			if(debug) {Log.d("ImageActivity", "onSelectPage: STEP2");}
 			mNextPage = page;
 		}
+
+		// 文書情報を更新
+		mGuideView.setPageText(mImageMgr.createPageStr(mCurrentPage));
+
 		if(debug) {Log.d("ImageActivity", "onSelectPage: currentPage=" + mCurrentPage + ", nextPage=" + mNextPage);}
 	}
 
 	@Override
 	public void onSelectPageSelectDialog(int menuId) {
+
 		switch (menuId) {
+			case DEF.TOOLBAR_DISMISS: {
+				if (!mKeepGuide) {
+					// 情報表示クリア
+					mGuideView.setPageText(null);
+					mGuideView.setPageColor(Color.argb(0, 0, 0, 0));
+					mGuideView.setGuideIndex(GuideView.GUIDE_NONE);
+				}
+				mKeepGuide = false;
+				break;
+			}
 			case DEF.TOOLBAR_BOOK_LEFT: {
 				if (mPageWay == DEF.PAGEWAY_RIGHT) {
 					// 次巻(先頭ページ)
@@ -3770,6 +3808,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			case DEF.TOOLBAR_THUMB_SLIDER: {
 				// イメージビュワー専用
 
+				// ダイアログを閉じるときにガイド表示を消さない
+				mKeepGuide = true;
+
 				// 表示中の画像が1枚か2枚かを判定
 				ImageData bm[] = mImageView.getImageBitmap();
 				int shareType;
@@ -3819,6 +3860,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 			case DEF.TOOLBAR_DIR_TREE: {
 				// イメージビュワー専用
+
+				// ダイアログを閉じるときにガイド表示を消さない
+				mKeepGuide = true;
+
 				// ページ番号入力が開いていたら閉じる
 				if (PageSelectDialog.mIsOpened == true) {
 					mPageDlg.dismiss();

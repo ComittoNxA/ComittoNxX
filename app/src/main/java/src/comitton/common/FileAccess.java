@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -45,9 +47,10 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbRandomAccessFile;
 
-import src.comitton.activity.FileSelectActivity;
 import src.comitton.data.FileData;
 import src.comitton.exception.FileAccessException;
+import src.comitton.stream.SambaProxyFileCallback;
+import src.comitton.stream.StorageManagerCompat;
 
 public class FileAccess {
 //	public static final int TYPE_FILE = 0;
@@ -101,11 +104,18 @@ public class FileAccess {
 		SmbFile sfile = null;
 		NtlmPasswordAuthenticator smbAuth;
 		CIFSContext context = null;
+
+		String tmp = "";
 		String domain = "";
 		String host = "";
 		String share = "";
 		String path = "";
 		int idx;
+
+		long startTime, endTime;
+
+		// 処理前の時刻を取得
+		startTime = System.currentTimeMillis();
 
 		// SMBの基本設定
 		Properties prop = new Properties();
@@ -134,17 +144,19 @@ public class FileAccess {
 			if(debug) {Log.d("FileAccess", "jcifsFile: " + e.getMessage());}
 		}
 
-
-		host = url.substring(6);
-		idx = host.indexOf("/");
+		// URLをホスト、共有フォルダ、パスに分解する
+		tmp = url.substring("smb://".length());
+		idx = tmp.indexOf("/");
 		if (idx >= 0){
-			path = host.substring(idx + 1);
-			host = host.substring(0, idx);
+			// 最初の "/" より前をhost、後をpathに代入
+			host = tmp.substring(0, idx);
+			tmp = tmp.substring(idx + 1);
 		}
-		idx = path.indexOf("/", 1);
+		idx = tmp.indexOf("/", 1);
 		if (idx >= 0){
-			share = path.substring(0, idx);
-			path = path.substring(idx);
+			// 2番目の "/" より前をshare、後をpathに代入
+			share = tmp.substring(0, idx);
+			path = tmp.substring(idx + 1);
 		}
 
 		if (user != null && user.length() != 0) {
@@ -173,8 +185,78 @@ public class FileAccess {
 			context = SingletonContext.getInstance().withAnonymousCredentials();
 		}
 
+		// 処理後の時刻を取得
+		endTime = System.currentTimeMillis();
+		if(debug) {Log.d("FileAccess", String.format("jcifsFile: 処理時間：%,dms", (endTime - startTime)));}
+
 		sfile = new SmbFile(url, context);
 		return sfile;
+	}
+
+
+	public static ParcelFileDescriptor openProxyFileDescriptor(String url, String user, String pass, Context context, Handler handler) throws FileAccessException {
+		boolean debug = false;
+		if (debug) {Log.d("FileAccess", "getParcelFileDescriptor: url=" + url + ", user=" + user + ", pass=" + pass);}
+		boolean isLocal;
+
+		String tmp = "";
+		String host = "";
+		String share = "";
+		String path = "";
+		int idx = 0;
+
+		if (url.startsWith("/")) {
+			isLocal = true;
+		}
+		else {
+			isLocal = false;
+
+			// URLをホスト、共有フォルダ、パスに分解する
+			tmp = url.substring("smb://".length());
+			idx = tmp.indexOf("/");
+			if (idx >= 0){
+				// 最初の "/" より前をhost、後をpathに代入
+				host = tmp.substring(0, idx);
+				tmp = tmp.substring(idx + 1);
+			}
+			idx = tmp.indexOf("/", 1);
+			if (idx >= 0){
+				// 2番目の "/" より前をshare、後をpathに代入
+				share = tmp.substring(0, idx);
+				path = tmp.substring(idx + 1);
+			}
+		}
+		if(debug) {Log.d("FileAccess", "getParcelFileDescriptor: host=" + host + ", share=" + share + ", path=" + path);}
+
+		ParcelFileDescriptor parcelFileDescriptor = null;
+
+		if (isLocal) {
+			// ローカルの場合
+			if(debug) {Log.d("ImageManager", "getParcelFileDescriptor: ローカルファイルです.");}
+			File file = new File(url);
+			try {
+				parcelFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+			}
+			catch (FileNotFoundException e) {
+				throw new FileAccessException("FileAccess: getParcelFileDescriptor: Local File not found.");
+			}
+		}
+
+		else if (SMBLIB == SMBLIB_JCIFS) {
+			// jcifsの場合
+			if(debug) {Log.d("ImageManager", "getParcelFileDescriptor: SMBファイルです.");}
+			StorageManagerCompat storageManager = StorageManagerCompat.from(context);
+			try {
+				parcelFileDescriptor =
+						storageManager.openProxyFileDescriptor(
+								ParcelFileDescriptor.MODE_READ_ONLY,
+								new SambaProxyFileCallback(url, user, pass),
+								handler);
+			} catch (IOException e) {
+				throw new FileAccessException("FileAccess: getParcelFileDescriptor: SMB File not found.");
+			}
+		}
+		return parcelFileDescriptor;
 	}
 
 	// ユーザ認証付きSambaストリーム
@@ -383,10 +465,13 @@ public class FileAccess {
 		if(debug) {Log.d("FileAccess", "listFiles: url=" + url + ", user=" + user + ", pass=" + pass);}
 		boolean isLocal;
 
+		String tmp = "";
 		String host = "";
 		String share = "";
 		String path = "";
 		int idx = 0;
+
+		long startTime, endTime;
 
 		if (url.startsWith("/")) {
 			isLocal = true;
@@ -395,18 +480,21 @@ public class FileAccess {
 			isLocal = false;
 
 			// URLをホスト、共有フォルダ、パスに分解する
-			host = url.substring(6);
-			idx = host.indexOf("/");
+			tmp = url.substring("smb://".length());
+			idx = tmp.indexOf("/");
 			if (idx >= 0){
-				path = host.substring(idx + 1);
-				host = host.substring(0, idx);
+				// 最初の "/" より前をhost、後をpathに代入
+				host = tmp.substring(0, idx);
+				tmp = tmp.substring(idx + 1);
 			}
-			idx = path.indexOf("/", 1);
+			idx = tmp.indexOf("/", 1);
 			if (idx >= 0){
-				share = path.substring(0, idx);
-				path = path.substring(idx + 1);
+				// 2番目の "/" より前をshare、後をpathに代入
+				share = tmp.substring(0, idx);
+				path = tmp.substring(idx + 1);
 			}
 		}
+		if(debug) {Log.d("FileAccess", "listFiles: host=" + host + ", share=" + share + ", path=" + path);}
 
 		if(debug) {Log.d("FileAccess", "listFiles: isLocal=" + isLocal);}
 
@@ -419,23 +507,40 @@ public class FileAccess {
 		int length = 0;
 
 		if (isLocal) {
+			// 処理前の時刻を取得
+			startTime = System.currentTimeMillis();
+
 			// ローカルの場合のファイル一覧取得
 			lfiles = new File(url).listFiles();
 			if (lfiles == null || lfiles.length == 0) {
 				return fileList;
 			}
 			length = lfiles.length;
+
+			// 処理後の時刻を取得
+			endTime = System.currentTimeMillis();
+			if(debug) {Log.d("FileAccess", String.format("listFiles: ローカル: 処理時間：%,dms", (endTime - startTime)));}
 		}
 
 		else if (SMBLIB == SMBLIB_JCIFS) {
 			// jcifsの場合のファイル一覧取得
 			try {
+				// 処理前の時刻を取得
+				startTime = System.currentTimeMillis();
+
 				jcifsFile = FileAccess.jcifsFile(url, user, pass);
+
+				// 処理後の時刻を取得
+				endTime = System.currentTimeMillis();
+				if(debug) {Log.d("FileAccess", String.format("listFiles: SMB接続: 処理時間：%,dms", (endTime - startTime)));}
 			} catch (MalformedURLException e) {
 				return fileList;
 			}
 			try {
-				if ((url).indexOf("/", 6) == (url).length() - 1) {
+				// 処理前の時刻を取得
+				startTime = System.currentTimeMillis();
+
+				if (share.isEmpty()) {
 					// ホスト名までしか指定されていない場合
 					fnames = jcifsFile.list();
 					if (fnames == null || fnames.length == 0) {
@@ -451,15 +556,22 @@ public class FileAccess {
 					}
 					length = jcifsFiles.length;
 				}
+
+				// 処理後の時刻を取得
+				endTime = System.currentTimeMillis();
+				if(debug) {Log.d("FileAccess", String.format("listFiles: SMBリスト取得: 処理時間：%,dms", (endTime - startTime)));}
 			} catch (SmbException e) {
 				return fileList;
 			}
 		}
 
+		// 処理前の時刻を取得
+		startTime = System.currentTimeMillis();
+
 		if(debug) {Log.d("FileAccess", "listFiles: length=" + length);}
 
 		// FileData型のリストを作成
-		boolean flag = false;
+		boolean isDir = false;
 		String name = "";
 		long size = 0;
 		long date = 0;
@@ -468,115 +580,54 @@ public class FileAccess {
 
 		for (int i = 0; i < length; i++) {
 			if (isLocal) {
+				isDir = lfiles[i].isDirectory();
 				name = lfiles[i].getName();
-				flag = lfiles[i].isDirectory();
 				size = lfiles[i].length();
 				date = lfiles[i].lastModified();
 			}
 			else if (SMBLIB == SMBLIB_JCIFS) {
 				// jcifsの場合
-				if ((url).indexOf("/", 6) == (url).length() - 1) {
+				if (share.isEmpty()) {
 					// ホスト名までしか指定されていない場合
 					name = fnames[i];
 					// 全部フォルダ扱い
-					flag = true;
+					isDir = true;
 				}
 				else {
 					// 共有ポイントまで指定済みの場合
 					name = jcifsFiles[i].getName();
-					int len = name.length();
-					if (name != null && len >= 1 && name.substring(len - 1).equals("/")) {
-						flag = true;
+					if (name.endsWith("/")) {
+						isDir = true;
 					} else {
-						flag = false;
+						isDir = false;
 					}
 					size = jcifsFiles[i].length();
 					date = jcifsFiles[i].lastModified();
 				}
 			}
 
-			if (flag) {
+			if (isDir) {
 				// ディレクトリの場合
 				int len = name.length();
-				if (len >= 1 && !name.substring(len - 1).equals("/")) {
+				if (!name.endsWith("/")) {
 					name += "/";
-				}
-				type = FileData.FILETYPE_DIR;
-				exttype = FileData.EXTTYPE_NONE;
-			} else {
-				// 通常のファイル
-				int len = name.length();
-				if (len < 5) {
-					continue;
-				}
-				String ext = DEF.getFileExt(name);
-				if (FileData.isImage(ext)) {
-					type = FileData.FILETYPE_IMG;
-					if (DEF.WITH_JPEG && (ext.equals(".jpg") || ext.equals(".jpeg"))) {
-						exttype = FileData.EXTTYPE_JPG;
-					}
-					else if (DEF.WITH_PNG && ext.equals(".png")) {
-						exttype = FileData.EXTTYPE_PNG;
-					}
-					else if (DEF.WITH_GIF && ext.equals(".gif")) {
-						exttype = FileData.EXTTYPE_GIF;
-					}
-					else if (DEF.WITH_WEBP && ext.equals(".webp")) {
-						exttype = FileData.EXTTYPE_WEBP;
-					}
-					else if (DEF.WITH_AVIF && ext.equals(".avif")) {
-						exttype = FileData.EXTTYPE_AVIF;
-					}
-					else if (DEF.WITH_HEIF && (ext.equals(".heif") || ext.equals(".heic")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-						exttype = FileData.EXTTYPE_HEIF;
-					}
-					else if (DEF.WITH_JXL && ext.equals(".jxl")) {
-						exttype = FileData.EXTTYPE_GIF;
-					}
-					else {
-						exttype = FileData.EXTTYPE_GIF;
-					}
-				}
-				else if (FileData.isArchive(ext)) {
-					type = FileData.FILETYPE_ARC;
-					if (ext.equals(".zip") || ext.equals(".cbz") || ext.equals(".epub")) {
-						exttype = FileData.EXTTYPE_ZIP;
-					}
-					else if (ext.equals(".rar") || ext.equals(".cbr")) {
-						exttype = FileData.EXTTYPE_RAR;
-					}
-				}
-				else if (FileData.isPdf(ext)) {
-					type = FileData.FILETYPE_PDF;
-					exttype = FileData.EXTTYPE_PDF;
-				}
-				else if (FileData.isEpub(ext)) {
-					type = FileData.FILETYPE_EPUB;
-					exttype = FileData.EXTTYPE_EPUB;
-				}
-				else if (FileData.isText(ext)) {
-					type = FileData.FILETYPE_TXT;
-					exttype = FileData.EXTTYPE_TXT;
-				}
-				else {
-				type = FileData.FILETYPE_NONE;
-				exttype = FileData.EXTTYPE_NONE;
 				}
 			}
 
-			FileData fileData = new FileData();
-			//fileData.setType(type);
-			//fileData.setExtType(exttype);
-			fileData.setName(name);
-			fileData.setSize(size);
-			fileData.setDate(date);
-
+			FileData fileData = new FileData(name, size, date);
 			fileList.add(fileData);
+
+			if(debug) {Log.d("FileAccess", "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
 		}
 
 		if (fileList.size() > 0) {
 			Collections.sort(fileList, new FileDataComparator());
 		}
+
+		// 処理後の時刻を取得
+		endTime = System.currentTimeMillis();
+		if(debug) {Log.d("FileAccess", String.format("listFiles: リスト解析：%,dms", (endTime - startTime)));}
+
 		return fileList;
 	}
 
@@ -975,6 +1026,6 @@ public class FileAccess {
 
 			}
 		}
-		return paths.toArray(new String[paths.size()]);
+		return paths.toArray(new String[0]);
 	}
 }

@@ -47,8 +47,27 @@ public class FileData {
 	public FileData () {
 		;
 	}
+
 	public FileData (String name) {
 		setName(name);
+	}
+
+	public FileData (String name, long size, long date) {
+		setName(name);
+		setSize(size);
+		setDate(date);
+	}
+
+	public FileData (String name, long size, long date, int state) {
+		setName(name);
+		setSize(size);
+		setDate(date);
+		setState(state);
+	}
+
+	public FileData (String name, int state) {
+		setName(name);
+		setState(state);
 	}
 
 	public String getName() {
@@ -57,6 +76,7 @@ public class FileData {
 	public static String getName(String filepath) {
 		return filepath.substring(filepath.lastIndexOf("/") + 1);
 	}
+
 	public void setName(String name) {
 		this.name = name;
 		this.type = getType(name);

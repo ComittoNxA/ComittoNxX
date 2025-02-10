@@ -44,7 +44,6 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 	private final int SCALENAME_ORDER[] = { 0, 1, 6, 2, 3, 7, 4, 5 };
 
 	private ImageConfigListenerInterface mListener = null;
-	private AppCompatActivity mActivity;
 
 	private ListDialog mListDialog;
 
@@ -121,8 +120,6 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 
 	public ImageConfigDialog(AppCompatActivity activity, @StyleRes int themeResId, int command_id, boolean isclose, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId, isclose, false, false, true, listener);
-
-		mActivity = activity;
 
 		Resources res = activity.getResources();
 		mAutoStr = res.getString(R.string.auto);

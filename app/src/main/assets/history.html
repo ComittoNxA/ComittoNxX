@@ -35,7 +35,13 @@
           text-align: left;
           width: 98%;
         }
-
+        ul, ol {
+          padding-left: 1em;
+        }
+        li {
+          text-indent: -1em;
+          padding-left: 1em;
+        }
         -->
     </style>
 </head>
@@ -49,6 +55,12 @@
     JPEG, GIF, PNG, WebP, AVIF, HEIF (Android 8.0 or higher), JXL
     <li>Supported compressed file formats:</li>
     ZIP, RAR
+    <li>Supported shared online storage services</li>
+    <ul>
+        <li>Windows file sharing (SMB)</li>
+        <li>Access to shared online storage via external apps</li>
+        Storage Access Framework (SAF), File Picker
+    </ul>
     <li>Supports Windows file sharing (SMB)</li>
 </ul>
 </p>
@@ -57,8 +69,8 @@
 <p>
 <ul>
     <li>If you are using a 32-bit application or a 32-bit OS, please reduce the memory usage.</li>
-    <li>If you use a domain in the SMB connection information, the initial connection will be slower.</li>
-    <li>Analyzing the structure of RAR compressed files on SMB takes time. If you want to analyze file names when creating thumbnails, we recommend using ZIP compressed files.</li>
+    <li>If you use a domain in the SMB connection information, the initial connection may be slow.</li>
+    <li>Analyzing the structure of RAR compressed files on online storage takes time. If you want to analyze file names when creating thumbnails, we recommend using ZIP compressed files.</li>
 </ul>
 </p>
 

@@ -6,7 +6,7 @@
     android:padding="4dip"
     android:orientation="vertical" >
 
-	<src.comitton.view.image.ThumbnailScrollView
+	<src.comitton.imageview.ThumbnailScrollView
 	    xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:id="@+id/scrl_view"
 	    android:layout_width="match_parent"
@@ -17,12 +17,12 @@
 		android:color="#00000000"
 		android:background="#00000000" >
 
-	    <src.comitton.view.image.ThumbnailView
+	    <src.comitton.imageview.ThumbnailView
 		    android:id="@+id/thumb_view"
 		    android:layout_width="wrap_content"
 		    android:layout_height="220sp"
 		    android:background="#00000000" />
-	</src.comitton.view.image.ThumbnailScrollView>
+	</src.comitton.imageview.ThumbnailScrollView>
 
 	<SeekBar
 	    android:id="@+id/seek_page"

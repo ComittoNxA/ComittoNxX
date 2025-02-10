@@ -1,0 +1,1 @@
+curl -s https://api.github.com/repos/ComittoNxA/ComittonxX/releases | findstr "\"tag_name\" \"name\" \"download_count\""

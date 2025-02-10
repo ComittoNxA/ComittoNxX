@@ -6,40 +6,51 @@
 #include <stdio.h>
 #else
 #include <android/log.h>
+#include <mutex>
 #endif
 
 #include "Image.h"
 
-extern IMAGEDATA	*gImageData;
-extern char			*gLoadBuffer;
-extern WORD			**gLinesPtr;
-extern WORD			**gDsLinesPtr;	// 行のポインタ保持
-extern WORD			**gSclLinesPtr;
+#define synchronized(monitor) \
+  if (auto __lock = std::make_unique<std::lock_guard<std::mutex>>(monitor))
+std::mutex monitor_;
 
-extern long			gTotalPages;
-extern long			gLoadBuffSize;
+extern bool         gIsInit[];
+extern IMAGEDATA	*gImageData[];
+extern char			*gLoadBuffer[];
+extern WORD			**gLinesPtr[];
+/** 行のポインタ保持 */
+extern WORD			**gDsLinesPtr[];
+extern WORD			**gSclLinesPtr[];
 
-extern BUFFMNG		*gBuffMng;
-extern long			gBuffNum;
+extern long			gTotalPages[];
+extern long			gLoadBuffSize[];
 
-extern BUFFMNG		*gSclBuffMng;
-extern long			gSclBuffNum;
+extern BUFFMNG		*gBuffMng[];
+extern long			gBuffNum[];
 
-extern int			gCancel;
+extern BUFFMNG		*gSclBuffMng[];
+extern long			gSclBuffNum[];
+
+extern int			gCancel[];
 
 extern char gDitherX_3bit[8][8];
 extern char gDitherX_2bit[4][4];
 extern char gDitherY_3bit[8];
 extern char gDitherY_2bit[4];
 
-long long	*gSclLLongParam = NULL;
-int			*gSclIntParam1 = NULL;
-int			*gSclIntParam2 = NULL;
-int			*gSclIntParam3 = NULL;
-int			gMaxColumn = 0;
-int			gMaxLine = 0;
+/** サイズ変更時の画像補間計算に利用する領域 */
+long long	*gSclLLongParam[MAX_BUFFER_INDEX] = {nullptr};
+/** サイズ変更時の画像補間計算に利用する領域 */
+int			*gSclIntParam1[MAX_BUFFER_INDEX] = {nullptr};
+/** サイズ変更時の画像補間計算に利用する領域 */
+int			*gSclIntParam2[MAX_BUFFER_INDEX] = {nullptr};
+/** サイズ変更時の画像補間計算に利用する領域 */
+int			*gSclIntParam3[MAX_BUFFER_INDEX] = {nullptr};
+int			gMaxColumn[MAX_BUFFER_INDEX] = {0};
+int			gMaxLine[MAX_BUFFER_INDEX] = {0};
 
-int DrawBitmap(int page, int half, int x, int y, void *canvas, int width, int height, int stride, IMAGEDATA *pData)
+int DrawBitmap(int index, int page, int half, int x, int y, void *canvas, int width, int height, int stride, IMAGEDATA *pData)
 {
 	WORD	*pixels = (WORD*)canvas;
 	int		image_width;
@@ -97,20 +108,20 @@ int DrawBitmap(int page, int half, int x, int y, void *canvas, int width, int he
 	int buffindex = -1;
 	int buffpos = 0;
 	int linesize = image_width + HOKAN_DOTS;
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 
 	// バッファのスキップ
 	for (yy = 0 ; yy < ypos ; yy ++) {
 		if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-			for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-				if (gBuffMng[buffindex].Page == page && gBuffMng[buffindex].Type == 1 && gBuffMng[buffindex].Half == half) {
+			for (buffindex ++ ; buffindex < gBuffNum[index] ; buffindex ++) {
+				if (gBuffMng[index][buffindex].Page == page && gBuffMng[index][buffindex].Type == 1 && gBuffMng[index][buffindex].Half == half) {
 					break;
 				}
 			}
-			if (buffindex >= gBuffNum) {
+			if (buffindex >= gBuffNum[index]) {
 				// 領域不足
 				LOGE("DrawBitmap/1: Data Error page=%d, buffindex=%d", page, buffindex);
-				return -6;
+				return ERROR_CODE_CACHE_IS_FULL;
 			}
 			buffpos = 0;
 		}
@@ -120,20 +131,20 @@ int DrawBitmap(int page, int half, int x, int y, void *canvas, int width, int he
 
 	for (yy = 0 ; yy < lines ; yy++) {
 		if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-			for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-				if (gBuffMng[buffindex].Page == page && gBuffMng[buffindex].Type == 1 && gBuffMng[buffindex].Half == half) {
+			for (buffindex ++ ; buffindex < gBuffNum[index] ; buffindex ++) {
+				if (gBuffMng[index][buffindex].Page == page && gBuffMng[index][buffindex].Type == 1 && gBuffMng[index][buffindex].Half == half) {
 					break;
 				}
 			}
-			if (buffindex >= gBuffNum) {
+			if (buffindex >= gBuffNum[index]) {
 				// 領域不足
 				LOGE("DrawBitmap/2: Data Error page=%d, line=%d, buffindex=%d", page, yy, buffindex);
-				return -7;
+				return ERROR_CODE_CACHE_IS_FULL;
 			}
 			buffpos = 0;
 		}
 //		LOGD("DEBUG2:yy=%d, idx=%d, pos=%d, off=%d", yy, buffindex, buffpos, buffpos + xpos + HOKAN_DOTS / 2);
-		memcpy(pixels, &gBuffMng[buffindex].Buff[buffpos + xpos + HOKAN_DOTS / 2], dots * sizeof(WORD));
+		memcpy(pixels, &gBuffMng[index][buffindex].Buff[buffpos + xpos + HOKAN_DOTS / 2], dots * sizeof(WORD));
 
 		pixels = (WORD*)(((char*)pixels) + stride);
 		buffpos += linesize;
@@ -141,121 +152,7 @@ int DrawBitmap(int page, int half, int x, int y, void *canvas, int width, int he
 	return 0;
 }
 
-//// 90度回転用の描画
-//int DrawBitmapReg90(int page, int half, int x, int y, void *canvas, int width, int height, int stride, IMAGEDATA *pData)
-//{
-//	WORD	*pixels;
-//	int		image_width;
-//	int		image_height;
-//
-//	if (pData->SclFlag[half] == 0) {
-//		LOGE("DrawBitmapReg90/0 : SclFlag[%d] == 0", half);
-//		return -5;
-//	}
-//
-////	LOGD("DrawBitmapReg90 : x=%d, y=%d, w=%d, h=%d, s=%d", x, y, width, height, stride);
-//	image_width  = pData->SclWidth[half];
-//	image_height = pData->SclHeight[half];
-//	
-//	int image_dots  = image_width;	// 描画ドット数(横方向)
-//	int image_lines = image_height;	// 描画ライン数(縦方向)
-//	int xpos = 0;	// 描画を開始する横の位置(左部を描画する必要がない場合、1以上となる)
-//	int ypos = 0;	// 描画を開始する縦の位置(上部を描画する必要がない場合、1以上となる)
-//
-//	int draw_x = x;	// 描画先座標X
-//	int draw_y = y;	// 描画先座標Y
-//	// 90度回転なので縦横入れ替え
-//	int draw_width = height;	// 描画可能幅(回転後)
-//	int draw_height = width;	// 描画可能高さ(回転後)
-//
-//	// 縦位置判定
-//	if (draw_y > 0) {
-//		// 描画開始位置をずらす
-//		draw_height -= draw_y;	// ビットマップの描画可能ライン数を減らす
-//	}
-//	else if (draw_y < 0) {
-//		// ビットマップが領域の上にはみ出す場合
-//		ypos = -draw_y;	// 描画開始位置を下にずらす
-//		image_lines += draw_y;	// 描画ライン数を減らす
-//		draw_y = 0;
-//	}
-//
-//	if (draw_x > 0) {
-//		draw_width -= draw_x;	// ビットマップの描画ドット数を減らす
-//	}
-//	else if (draw_x < 0) {
-//		// ビットマップが領域の左にはみ出す場合
-//		xpos = -draw_x;	// 描画開始位置を右にずらす
-//		image_dots += draw_x;	// 描画ドット数を減らす
-//		draw_x = 0;
-//	}
-//
-//	// 90度回転なので縦横入れ替え
-//	int lines = (draw_height < image_lines) ? draw_height : image_lines;
-//	int dots  = (draw_width < image_dots) ? draw_width : image_dots;
-//
-//	if (lines < 0 || dots < 0) {
-//		// 描画不要
-//		return 1;
-//	}
-//
-////	LOGD("DrawBitmapReg90 : dx=%d, dy=%d, dw=%d, dh=%d, l=%d, d=%d, xp=%d, yp=%d", draw_x, draw_y, draw_width, draw_height, lines, dots, xpos, ypos);
-//
-//	int		xx, yy;
-//
-//	int buffindex = -1;
-//	int buffpos = 0;
-//	int linesize = image_width + HOKAN_DOTS;
-//	WORD *buffptr = NULL;
-//
-//	// バッファのスキップ
-//	for (yy = 0 ; yy < ypos ; yy ++) {
-//		if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-//			for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-//				if (gBuffMng[buffindex].Page == page && gBuffMng[buffindex].Type == 1 && gBuffMng[buffindex].Half == half) {
-//					break;
-//				}
-//			}
-//			if (buffindex >= gBuffNum) {
-//				// 領域不足
-//				LOGE("DrawBitmapReg90/1 : Data Error page=%d, buffindex=%d", page, buffindex);
-//				return -6;
-//			}
-//			buffpos = 0;
-//		}
-//		buffpos += linesize;
-////		LOGD("DEBUG1:yy=%d/%d, idx=%d, pos=%d", yy, ypos, buffindex, buffpos);
-//	}
-//
-//	for (yy = 0 ; yy < lines ; yy++) {
-//		if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-//			for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-//				if (gBuffMng[buffindex].Page == page && gBuffMng[buffindex].Type == 1 && gBuffMng[buffindex].Half == half) {
-//					break;
-//				}
-//			}
-//			if (buffindex >= gBuffNum) {
-//				// 領域不足
-//				LOGE("DrawBitmapReg90/2 : Data Error page=%d, line=%d, buffindex=%d", page, yy, buffindex);
-//				return -7;
-//			}
-//			buffpos = 0;
-//		}
-////		LOGD("DEBUG2:yy=%d, idx=%d, pos=%d, off=%d", yy, buffindex, buffpos, buffpos + xpos + HOKAN_DOTS / 2);
-//
-//		pixels = (WORD*)(((char*)canvas) + stride * draw_x);
-//		pixels += (draw_height - draw_y - yy);
-//		int xxx = buffpos + xpos + HOKAN_DOTS / 2;
-//		for (int xx = 0 ; xx < dots ; xx ++) {
-//			*pixels = gBuffMng[buffindex].Buff[xxx + xx];
-//			pixels = (WORD*)(((char*)pixels) + stride);
-//		}
-//		buffpos += linesize;
-//	}
-//	return 0;
-//}
-
-int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, int d_x, int d_y, int d_cx, int d_cy, void *canvas, int width, int height, int stride, int psel, IMAGEDATA *pData, int cut_left, int cut_right, int cut_top, int cut_bottom)
+int DrawScaleBitmap(int index, int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, int d_x, int d_y, int d_cx, int d_cy, void *canvas, int width, int height, int stride, int psel, IMAGEDATA *pData, int cut_left, int cut_right, int cut_top, int cut_bottom)
 {
 //#define DEBUG_DRAW_SCALE_BITMAP
 #ifdef DEBUG_DRAW_SCALE_BITMAP
@@ -266,6 +163,7 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 			, width, height, stride, psel
 			, cut_left, cut_right, cut_top, cut_bottom);
 #endif
+    int ret = 0;
 
 	WORD	*pixels = (WORD*)canvas;
 	int		image_width  = pData->OrgWidth;
@@ -281,32 +179,33 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 	int lineindex = 0;
 
 	// 領域確保
-	if (ScaleMemLine(pData->OrgHeight - cut_top - cut_bottom) < 0) {
-		return -6;
+    ret = ScaleMemLine(index, pData->OrgHeight - cut_top - cut_bottom);
+	if (ret < 0) {
+		return ret;
 	}
 
 	buffindex = -1;
 	for (lineindex = 0 ; lineindex < pData->OrgHeight - cut_bottom ; lineindex ++) {
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("DrawScaleBitmap : cancel.");
-			return -7;
+			return ERROR_CODE_USER_CANCELED;
 		}
 		if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-			for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-				if (gBuffMng[buffindex].Page == page && gBuffMng[buffindex].Type == 0) {
+			for (buffindex ++ ; buffindex < gBuffNum[index] ; buffindex ++) {
+				if (gBuffMng[index][buffindex].Page == page && gBuffMng[index][buffindex].Type == 0) {
 					break;
 				}
 			}
-			if (buffindex >= gBuffNum) {
+			if (buffindex >= gBuffNum[index]) {
 				// 領域不足
 				LOGE("DrawScaleBitmap: Data Error page=%d, lineindex=%d/%d", page, lineindex, (int)pData->OrgHeight);
-				return -8;
+				return ERROR_CODE_CACHE_IS_FULL;
 			}
 			buffpos = 0;
 		}
 //		LOGD("DrawScaleBitmap : lineindex=%d, buffindex=%d, buffpos=%d", lineindex, buffindex, buffpos);
         if (lineindex - cut_top >= 0) {
-    		gDsLinesPtr[lineindex - cut_top] = gBuffMng[buffindex].Buff + buffpos + cut_left + HOKAN_DOTS / 2;
+    		gDsLinesPtr[index][lineindex - cut_top] = gBuffMng[index][buffindex].Buff + buffpos + cut_left + HOKAN_DOTS / 2;
 		}
 		buffpos += linesize;
 	}
@@ -330,6 +229,10 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 		int		*xpos;
 
 		xpos = (int*)malloc(sizeof(int) * d_cx);
+        if (xpos == nullptr) {
+            LOGE("DrawScaleBitMap : malloc error. (xpos)");
+            return ERROR_CODE_MALLOC_FAILURE;
+        }
 		for (xx = 0 ; xx < d_cx ; xx ++) {
 			// ソースの座標計算
 			xpos[xx] = (s_x + (xx * s_cx / d_cx)) * (pData->OrgWidth - cut_left - cut_right) / pData->OrgWidth;
@@ -360,7 +263,7 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 							xi = OrgHeight - (ypos + 1);
 							yi = xpos[xx];
 						}
-						pixels[xx] = gDsLinesPtr[yi][xi];
+						pixels[xx] = gDsLinesPtr[index][yi][xi];
 					}
 				}
 			}
@@ -376,6 +279,10 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 		int		xpos;
 
 		ypos = (int*)malloc(sizeof(int) * d_cy);
+        if (ypos == nullptr) {
+            LOGE("DrawScaleBitMap : malloc error. (ypos)");
+            return ERROR_CODE_MALLOC_FAILURE;
+        }
 		for (yy = 0 ; yy < d_cy ; yy ++) {
 			// ソースの座標計算
 			ypos[yy] = (s_y + ((d_cy - yy - 1) * s_cy / d_cy)) * (pData->OrgHeight - cut_top - cut_bottom) / pData->OrgHeight;
@@ -404,7 +311,7 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 							xi = OrgHeight - (ypos[yy] + 1);
 							yi = xpos;
 						}
-						pixels[yy] = gDsLinesPtr[yi][xi];
+						pixels[yy] = gDsLinesPtr[index][yi][xi];
 					}
 				}
 			}
@@ -419,174 +326,197 @@ int DrawScaleBitmap(int page, int rotate, int s_x, int s_y, int s_cx, int s_cy, 
 }
 
 // メモリ確保
-int MemAlloc(int buffsize)
+int MemAlloc(int index, int buffsize)
 {
-	int buffnum = buffsize * 4;
-	int ret = 0;
+    int buffnum = buffsize * 4;
+    int ret = index;
 
-	gLoadBuffer = (char*)malloc(gLoadBuffSize);
-	if (gLoadBuffer == NULL) {
-		LOGE("Initialize: malloc error.(LoadBuff)");
-		ret = -1;
-		goto ERROREND;
-	}
+    gIsInit[index] = true;
 
-	gImageData = (IMAGEDATA*)malloc(sizeof(IMAGEDATA) * gTotalPages);
-	if (gImageData == NULL) {
-		LOGE("Initialize: malloc error.(ImageData)");
-		ret = -2;
-		goto ERROREND;
-	}
-	memset(gImageData, 0, sizeof(IMAGEDATA) * gTotalPages);
+    synchronized (monitor_) {
+        gLoadBuffer[index] = (char *) malloc(gLoadBuffSize[index]);
+        if (gLoadBuffer[index] == nullptr) {
+            LOGE("MemAlloc: malloc error.(LoadBuff)");
+            ret = ERROR_CODE_MALLOC_FAILURE;
+            goto ERROREND;
+        }
 
-	gBuffMng = (BUFFMNG*)malloc(sizeof(BUFFMNG) * buffnum);
-	if (gBuffMng == NULL) {
-		LOGE("Initialize: malloc error.(BuffMng)");
-		ret = -3;
-		goto ERROREND;
-	}
+        gImageData[index] = (IMAGEDATA *) malloc(sizeof(IMAGEDATA) * gTotalPages[index]);
+        if (gImageData[index] == nullptr) {
+            LOGE("MemAlloc: malloc error.(ImageData)");
+            ret = ERROR_CODE_MALLOC_FAILURE;
+            goto ERROREND;
+        }
+        memset(gImageData[index], 0, sizeof(IMAGEDATA) * gTotalPages[index]);
 
-	int		i;
-	for (i = 0 ; i < buffnum ; i ++) {
-		gBuffMng[i].Page = -1;	// 未使用状態に初期化
-		gBuffMng[i].Buff = (WORD*)malloc(BLOCKSIZE * sizeof(WORD));
-		if (gBuffMng[i].Buff == NULL) {
-			LOGE("Initialize: malloc error.(Buff / index=%d)", i);
-			break;
-		}
-		gBuffMng[i].Page = -1;
-	}
-	gBuffNum = i;
+        gBuffMng[index] = (BUFFMNG *) malloc(sizeof(BUFFMNG) * buffnum);
+        if (gBuffMng[index] == nullptr) {
+            LOGE("MemAlloc: malloc error.(BuffMng)");
+            ret = ERROR_CODE_MALLOC_FAILURE;
+            goto ERROREND;
+        }
 
-	// 拡大縮小画像領域確保
-	gSclBuffMng = (BUFFMNG*)malloc(sizeof(BUFFMNG) * SCLBUFFNUM);
-	if (gSclBuffMng == NULL) {
-		LOGE("Initialize: malloc error.(SclBuffMng)");
-		ret = -4;
-		goto ERROREND;
-	}
-	gSclBuffNum = 0;
+        int i;
+        for (i = 0; i < buffnum; i++) {
+            gBuffMng[index][i].Page = -1;    // 未使用状態に初期化
+            gBuffMng[index][i].Buff = (WORD *) malloc(BLOCKSIZE * sizeof(WORD));
+            if (gBuffMng[index][i].Buff == nullptr) {
+                LOGE("MemAlloc: malloc error.(Buff / index=%d)", i);
+                ret = ERROR_CODE_MALLOC_FAILURE;
+                goto ERROREND;
+            }
+            gBuffMng[index][i].Page = -1;
+        }
+        gBuffNum[index] = i;
 
-	// 保存先ラインポインタ確保
-	gSclLinesPtr = (WORD**)malloc(sizeof(WORD*) * MAX_LINES);
-	if (gSclLinesPtr == NULL) {
-		LOGE("Initialize: malloc error.(SclLineBuffPtr)");
-		ret = -5;
-		goto ERROREND;
-	}
-	return 0;
+        // 拡大縮小画像領域確保
+        gSclBuffMng[index] = (BUFFMNG *) malloc(sizeof(BUFFMNG) * SCLBUFFNUM);
+        if (gSclBuffMng[index] == nullptr) {
+            LOGE("MemAlloc: malloc error.(SclBuffMng)");
+            ret = ERROR_CODE_MALLOC_FAILURE;
+            goto ERROREND;
+        }
+        gSclBuffNum[index] = 0;
+
+        // 保存先ラインポインタ確保
+        gSclLinesPtr[index] = (WORD **) malloc(sizeof(WORD *) * MAX_LINES);
+        if (gSclLinesPtr[index] == nullptr) {
+            LOGE("MemAlloc: malloc error.(SclLineBuffPtr)");
+            ret = ERROR_CODE_MALLOC_FAILURE;
+            goto ERROREND;
+        }
+
+        return ret;
+    }
 
 ERROREND:
-	MemFree();
-	return ret;
+    MemFree(index);
+    return ret;
 }
 
 // メモリ解放
-void MemFree()
+void MemFree(int index)
 {
-	// 読み込みバッファの解放
-	if (gLoadBuffer != NULL) {
-		free( gLoadBuffer );
-		gLoadBuffer = NULL;
-	}
 
-	// イメージ管理バッファの解放
-	if (gBuffMng != NULL) {
-		for (int i = 0 ; i < gBuffNum ; i ++){
-			if (gBuffMng[i].Buff != NULL) {
-				free(gBuffMng[i].Buff);
-				gBuffMng[i].Buff = NULL;
-			}
-		}
-		free(gBuffMng);
-		gBuffMng = NULL;
-	}
-	gBuffNum = 0;
+    synchronized (monitor_) {
+        // 読み込みバッファの解放
+        if (gLoadBuffer[index] != nullptr) {
+            free(gLoadBuffer[index]);
+            gLoadBuffer[index] = nullptr;
+        }
 
-	// 拡大縮小画像領域解放
-	if (gSclBuffMng != NULL) {
-		for (int i = 0 ; i < gSclBuffNum ; i ++){
-			if (gSclBuffMng[i].Buff != NULL) {
-				free(gSclBuffMng[i].Buff);
-				gSclBuffMng[i].Buff = NULL;
-			}
-		}
-		free(gSclBuffMng);
-		gSclBuffMng = NULL;
-	}
-	gSclBuffNum = 0;
+        // イメージ管理バッファの解放
+        if (gBuffMng[index] != nullptr) {
+            for (int i = 0; i < gBuffNum[index]; i++) {
+                if (gBuffMng[index][i].Buff != nullptr) {
+                    free(gBuffMng[index][i].Buff);
+                    gBuffMng[index][i].Buff = nullptr;
+                }
+            }
+            free(gBuffMng[index]);
+            gBuffMng[index] = nullptr;
+        }
+        gBuffNum[index] = 0;
 
-	// 保存先ラインポインタ
-	if (gSclLinesPtr != NULL) {
-		free(gSclLinesPtr);
-		gSclLinesPtr = NULL;
-	}
+        // 拡大縮小画像領域解放
+        if (gSclBuffMng[index] != nullptr) {
+            for (int i = 0; i < gSclBuffNum[index]; i++) {
+                if (gSclBuffMng[index][i].Buff != nullptr) {
+                    free(gSclBuffMng[index][i].Buff);
+                    gSclBuffMng[index][i].Buff = nullptr;
+                }
+            }
+            free(gSclBuffMng[index]);
+            gSclBuffMng[index] = nullptr;
+        }
+        gSclBuffNum[index] = 0;
 
-	ScaleMemLineFree();
-	ScaleMemColumnFree();
-	return;
+        // 保存先ラインポインタ
+        if (gSclLinesPtr[index] != nullptr) {
+            free(gSclLinesPtr[index]);
+            gSclLinesPtr[index] = nullptr;
+        }
+
+        ScaleMemLineFree(index);
+        ScaleMemColumnFree(index);
+    }
+    gIsInit[index] = false;
 }
 
 // 拡大縮小用メモリ初期化
-int ScaleMemInit()
+int ScaleMemInit(int index)
 {
 	// 拡大縮小画像領域チェック
-	if (gSclBuffMng == NULL) {
+	if (gSclBuffMng[index] == nullptr) {
 		return -1;
 	}
 
 	int		i;
-	for (i = 0 ; i < gSclBuffNum ; i ++) {
-		gSclBuffMng[i].Page = -1;	// 未使用状態に初期化
-		gSclBuffMng[i].Index = -1;
+	for (i = 0 ; i < gSclBuffNum[index] ; i ++) {
+		gSclBuffMng[index][i].Page = -1;	// 未使用状態に初期化
+		gSclBuffMng[index][i].Count = -1;
 	}
 	return 0;
 }
 
-// 拡大縮小用メモリ獲得
-int ScaleMemAlloc(int linesize, int linenum)
+//*
+/**
+ * サイズ変更画像待避用領域確保
+ * @param index     作業領域のチャンネルを指定する番号
+ * @param linesize  1行の幅(+HOKAN_DOTS)
+ * @param linenum   行数(=高さ)
+ * @return          エラー発生時はマイナスの値
+ */
+int ScaleMemAlloc(int index, int linesize, int linenum)
 {
+    /** 1ブロックに何行分確保できるか */
 	int NumOfLines = (BLOCKSIZE / linesize);
+    /** 全部で何ブロック必要か */
 	int buffnum  = (linenum + NumOfLines - 1) / NumOfLines;
 	int ret = 0;
 
 #ifdef DEBUG
-	LOGD("ScaleMemAlloc : linesize=%d, linenum=%d / nol=%d, bn=%d"
-							, linesize, linenum, NumOfLines, buffnum);
+	LOGD("ScaleMemAlloc : 開始します. linesize=%d, linenum=%d / nol=%d, bn=%d", linesize, linenum, NumOfLines, buffnum);
 #endif
 
 	// 拡大縮小画像領域チェック
-	if (gSclBuffMng == NULL) {
+	if (gSclBuffMng[index] == nullptr) {
 		return -1;
 	}
 
 	int	i;
+    /** 未試用領域の数 */
 	int	count = 0;
-	for (i = 0 ; i < gSclBuffNum ; i ++) {
-		if (gSclBuffMng[i].Index == -1) {	// 未使用領域をカウント
+	for (i = 0 ; i < gSclBuffNum[index] ; i ++) {
+		if (gSclBuffMng[index][i].Count == -1) {	// 未使用領域をカウント
 			count ++;
 		}
 	}
 
 #ifdef DEBUG
-	LOGD("ScaleMemAlloc : sbn=%d, count=%d" , (int)gSclBuffNum, count);
+	LOGD("ScaleMemAlloc : sbn=%d, count=%d" , (int)gSclBuffNum[index], count);
 #endif
 
+    if (SCLBUFFNUM < gSclBuffNum[index] + (buffnum - count)) {
+        // 確保できなかった
+        return ERROR_CODE_CACHE_IS_FULL;
+    }
+
 	// 不足分を確保
-	for (i = gSclBuffNum ; i < SCLBUFFNUM && i < gSclBuffNum + (buffnum - count) ; i ++) {
-		gSclBuffMng[i].Buff = (WORD*)malloc(BLOCKSIZE * sizeof(WORD));
-		if (gSclBuffMng[i].Buff == NULL) {
+	for (i = gSclBuffNum[index] ; i < SCLBUFFNUM && i < gSclBuffNum[index] + (buffnum - count) ; i ++) {
+		gSclBuffMng[index][i].Buff = (WORD*)malloc(BLOCKSIZE * sizeof(WORD));
+		if (gSclBuffMng[index][i].Buff == nullptr) {
 			LOGE("Initialize: malloc error.(SclBuffMng / index=%d)", i);
-			gSclBuffNum = i;
-			return -3;
+			gSclBuffNum[index] = i;
+			return ERROR_CODE_MALLOC_FAILURE;
 		}
-		gSclBuffMng[i].Page = -1;	// 未使用状態に初期化
-		gSclBuffMng[i].Index = -1;
+		gSclBuffMng[index][i].Page = -1;	// 未使用状態に初期化
+		gSclBuffMng[index][i].Count = -1;
 	}
-	gSclBuffNum = i;
+	gSclBuffNum[index] = i;
 	if (i < (buffnum - count)) {
 		// 確保できなかった
-		return -2;
+		return ERROR_CODE_CACHE_IS_FULL;
 	}
 
 #ifdef DEBUG
@@ -595,134 +525,124 @@ int ScaleMemAlloc(int linesize, int linenum)
 	return ret;
 }
 
-int ScaleMemColumn(int SclWidth)
+/**
+ * サイズ変更時の画像補間計算に利用する領域を確保する
+ * @param index
+ * @param SclWidth
+ * @return
+ */
+int ScaleMemColumn(int index, int SclWidth)
 {
-	if (gMaxColumn < SclWidth) {
+	if (gMaxColumn[index] < SclWidth) {
 		// 幅が今まで使っていた物よりも大きければ再確保
-		ScaleMemColumnFree();
+		ScaleMemColumnFree(index);
 
-		gSclLLongParam = (long long*)malloc(sizeof(long long) * SclWidth);
-		gSclIntParam1  = (int*)malloc(sizeof(int) * SclWidth);
-		gSclIntParam2  = (int*)malloc(sizeof(int) * SclWidth);
-		gSclIntParam3  = (int*)malloc(sizeof(int) * SclWidth);
+		gSclLLongParam[index] = (long long*)malloc(sizeof(long long) * SclWidth);
+		gSclIntParam1[index]  = (int*)malloc(sizeof(int) * SclWidth);
+		gSclIntParam2[index]  = (int*)malloc(sizeof(int) * SclWidth);
+		gSclIntParam3[index]  = (int*)malloc(sizeof(int) * SclWidth);
 
-		if (gSclLLongParam == NULL || gSclIntParam1 == NULL || gSclIntParam2 == NULL || gSclIntParam3 == NULL) {
+		if (gSclLLongParam[index] == nullptr || gSclIntParam1[index] == nullptr || gSclIntParam2[index] == nullptr || gSclIntParam3[index] == nullptr) {
 			LOGE("ScaleMemColumn: MAlloc Error.");
-			gMaxColumn = 0;
-			ScaleMemColumnFree();
-			return -1;
+			gMaxColumn[index] = 0;
+			ScaleMemColumnFree(index);
+			return ERROR_CODE_MALLOC_FAILURE;
 		}
-		gMaxColumn = SclWidth;
+		gMaxColumn[index] = SclWidth;
 	}
 	return 0;
 }
 
-int ScaleMemLine(int SclHeight)
+int ScaleMemLine(int index, int SclHeight)
 {
 //	LOGD("ScaleMemLine : SclHeight=%d", SclHeight);
-	if (gMaxLine < SclHeight) {
+	if (gMaxLine[index] < SclHeight) {
 		// 高さが今まで使っていた物よりも大きければ再確保
-		ScaleMemLineFree();
+		ScaleMemLineFree(index);
 
-		gLinesPtr = (WORD**)malloc(sizeof(WORD*) * (SclHeight + HOKAN_DOTS));
-		gDsLinesPtr = (WORD**)malloc(sizeof(WORD*) * SclHeight);
+		gLinesPtr[index] = (WORD**)malloc(sizeof(WORD*) * (SclHeight + HOKAN_DOTS));
+		gDsLinesPtr[index] = (WORD**)malloc(sizeof(WORD*) * SclHeight);
 
-		if (gLinesPtr == NULL || gDsLinesPtr == NULL) {
+		if (gLinesPtr[index] == nullptr || gDsLinesPtr[index] == nullptr) {
 			LOGE("ScaleMemLine: MAlloc Error.");
-			gMaxLine = 0;
-			ScaleMemLineFree();
-			return -1;
+			gMaxLine[index] = 0;
+			ScaleMemLineFree(index);
+			return ERROR_CODE_MALLOC_FAILURE;
 		}
-		gMaxLine = SclHeight;
+		gMaxLine[index] = SclHeight;
 	}
 	return 0;
 }
 
-void ScaleMemColumnFree()
+void ScaleMemColumnFree(int index)
 {
-	gMaxColumn = 0;
-	if (gSclLLongParam != NULL) {
-		free(gSclLLongParam);
-		gSclLLongParam = NULL;
+	gMaxColumn[index] = 0;
+	if (gSclLLongParam[index] != nullptr) {
+		free(gSclLLongParam[index]);
+		gSclLLongParam[index] = nullptr;
 	}
-	if (gSclIntParam1 != NULL) {
-		free(gSclIntParam1);
-		gSclIntParam1 = NULL;
+	if (gSclIntParam1[index] != nullptr) {
+		free(gSclIntParam1[index]);
+		gSclIntParam1[index] = nullptr;
 	}
-	if (gSclIntParam2 != NULL) {
-		free(gSclIntParam2);
-		gSclIntParam2 = NULL;
+	if (gSclIntParam2[index] != nullptr) {
+		free(gSclIntParam2[index]);
+		gSclIntParam2[index] = nullptr;
 	}
-	if (gSclIntParam3 != NULL) {
-		free(gSclIntParam3);
-		gSclIntParam3 = NULL;
+	if (gSclIntParam3[index] != nullptr) {
+		free(gSclIntParam3[index]);
+		gSclIntParam3[index] = nullptr;
 	}
-	return;
 }
 
-void ScaleMemLineFree()
+void ScaleMemLineFree(int index)
 {
-	gMaxLine = 0;
-	if (gLinesPtr != NULL) {
-		free (gLinesPtr);
-		gLinesPtr = NULL;
+	gMaxLine[index] = 0;
+	if (gLinesPtr[index] != nullptr) {
+		free (gLinesPtr[index]);
+		gLinesPtr[index] = nullptr;
 	}
 
-	if (gDsLinesPtr != NULL) {
-		free (gDsLinesPtr);
-		gDsLinesPtr = NULL;
+	if (gDsLinesPtr[index] != nullptr) {
+		free (gDsLinesPtr[index]);
+		gDsLinesPtr[index] = nullptr;
 	}
-	return;
 }
 
-void CheckImageType(int *type)
+void CheckImageType(int index, int *type)
 {
-    if (strncmp(gLoadBuffer+6, "JFIF", 4)==0) {
-#ifdef HAVE_LIBJPEG
+    if (strncmp(gLoadBuffer[index]+6, "JFIF", 4)==0) {
         *type = IMAGETYPE_JPEG;
-#endif
     }
-    else if (strncmp(gLoadBuffer+1,"PNG",3)==0) {
-#ifdef HAVE_LIBPNG
+    else if (strncmp(gLoadBuffer[index]+1,"PNG",3)==0) {
         *type = IMAGETYPE_PNG;
-#endif
     }
-    else if (strncmp(gLoadBuffer,"GIF87a",6)==0 || strncmp(gLoadBuffer,"GIF89a",6)==0) {
-#ifdef HAVE_LIBGIF
+    else if (strncmp(gLoadBuffer[index],"GIF87a",6)==0 || strncmp(gLoadBuffer[index],"GIF89a",6)==0) {
         *type = IMAGETYPE_GIF;
-#endif
     }
-    else if (strncmp(gLoadBuffer,"RIFF",4)==0 && strncmp(gLoadBuffer+8,"WEBP",4)==0) {
-#ifdef HAVE_LIBWEBP
+    else if (strncmp(gLoadBuffer[index],"RIFF",4)==0 && strncmp(gLoadBuffer[index]+8,"WEBP",4)==0) {
         *type = IMAGETYPE_WEBP;
-#endif
     }
-    else if (strncmp(gLoadBuffer+4,"ftypavif",8)==0) {
-#ifdef HAVE_LIBAVIF
+    else if (strncmp(gLoadBuffer[index]+4,"ftypavif",8)==0) {
         *type = IMAGETYPE_AVIF;
-#endif
     }
     else if (
-        strncmp(gLoadBuffer+4,"ftypheic",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftypheix",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftyphevc",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftypheim",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftypheis",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftyphevm",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftypmif1",8)==0 ||
-        strncmp(gLoadBuffer+4,"ftypmsf1",8)==0
+        strncmp(gLoadBuffer[index]+4,"ftypheic",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftypheix",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftyphevc",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftypheim",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftypheis",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftyphevm",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftypmif1",8)==0 ||
+        strncmp(gLoadBuffer[index]+4,"ftypmsf1",8)==0
     ) {
-#ifdef HAVE_LIBHEIF
         *type = IMAGETYPE_HEIF;
-#endif
     }
     else if (
-        ((uint8_t)*gLoadBuffer == 0xFF && (uint8_t)*gLoadBuffer == 0x0A) ||
-        strncmp(gLoadBuffer+4,"JXL",3)==0
+        ((uint8_t)*gLoadBuffer[index] == 0xFF && (uint8_t)*gLoadBuffer[index] == 0x0A) ||
+        strncmp(gLoadBuffer[index]+4,"JXL",3)==0
     ) {
-#ifdef HAVE_LIBJXL
         *type = IMAGETYPE_JXL;
-#endif
     }
     else {
 //		LOGD("ImageConvert : Judge - ELSE(%d)", type);
@@ -730,7 +650,7 @@ void CheckImageType(int *type)
 }
 
 
-int SetBuff(int page, uint32_t width, uint32_t height, uint8_t *data, colorFormat colorFormat)
+int SetBuff(int index, int page, uint32_t width, uint32_t height, uint8_t *data, colorFormat colorFormat)
 {
     int returnCode = 0;
 
@@ -738,7 +658,7 @@ int SetBuff(int page, uint32_t width, uint32_t height, uint8_t *data, colorForma
     int buffpos = 0;
     int linesize = (width + HOKAN_DOTS);
     int ret = 0;
-    WORD *buffptr = NULL;
+    WORD *buffptr = nullptr;
 
     int yy, xx, yd3, yd2;
     int rr, gg, bb;
@@ -747,35 +667,35 @@ int SetBuff(int page, uint32_t width, uint32_t height, uint8_t *data, colorForma
     for(yy = 0; yy < height; yy++)
     {
         // キャンセルされたら終了する
-        if (gCancel) {
+        if (gCancel[index]) {
             LOGD("SetBuff: cancel.");
-            ReleaseBuff(page, -1, -1);
-            returnCode = -100;
+            ReleaseBuff(index, page, -1, -1);
+            returnCode = ERROR_CODE_USER_CANCELED;
             break;
         }
 
         // ライン毎のバッファの位置を保存
         if (buffindex < 0 || BLOCKSIZE - buffpos < linesize) {
-            for (buffindex++; buffindex < gBuffNum ; buffindex++) {
-                if (gBuffMng[buffindex].Page == -1) {
+            for (buffindex++; buffindex < gBuffNum[index] ; buffindex++) {
+                if (gBuffMng[index][buffindex].Page == -1) {
                     break;
                 }
             }
-            if (buffindex >= gBuffNum) {
+            if (buffindex >= gBuffNum[index]) {
                 LOGE("SetBuff: Out of memory.");
                 // 領域不足
-                returnCode = -101;
+                returnCode = ERROR_CODE_CACHE_IS_FULL;
                 break;
             }
             buffpos = 0;
-            gBuffMng[buffindex].Page = page;
-            gBuffMng[buffindex].Type = 0;
-            gBuffMng[buffindex].Half = 0;
-            gBuffMng[buffindex].Size = 0;
-            gBuffMng[buffindex].Index = 0;
+            gBuffMng[index][buffindex].Page = page;
+            gBuffMng[index][buffindex].Type = 0;
+            gBuffMng[index][buffindex].Half = 0;
+            gBuffMng[index][buffindex].Size = 0;
+            gBuffMng[index][buffindex].Count = 0;
         }
 
-        buffptr = gBuffMng[buffindex].Buff + buffpos + HOKAN_DOTS / 2;
+        buffptr = gBuffMng[index][buffindex].Buff + buffpos + HOKAN_DOTS / 2;
 
         // データセット
         yd3 = gDitherY_3bit[yy & 0x07];
@@ -836,12 +756,12 @@ int SetBuff(int page, uint32_t width, uint32_t height, uint8_t *data, colorForma
 
         // go to next line
         buffpos += linesize;
-        gBuffMng[buffindex].Size += linesize;
+        gBuffMng[index][buffindex].Size += linesize;
     }
     return returnCode;
 }
 
-int SetBitmap(int page, uint32_t width, uint32_t height, uint8_t *data, colorFormat colorFormat, WORD *canvas)
+int SetBitmap(int index, int page, uint32_t width, uint32_t height, uint8_t *data, colorFormat colorFormat, WORD *canvas)
 {
     int returnCode = 0;
 
@@ -849,14 +769,14 @@ int SetBitmap(int page, uint32_t width, uint32_t height, uint8_t *data, colorFor
     int buffpos = 0;
     int linesize = width;
     int ret = 0;
-    WORD *buffptr = NULL;
+    WORD *buffptr = nullptr;
 
     int yy, xx, yd3, yd2;
     int rr, gg, bb;
 
     LOGD("SetBitmap: Start. page=%d, width=%d, height=%d, colorFormat=%d", page, width, height, colorFormat);
 
-    if (canvas == NULL) {
+    if (canvas == nullptr) {
         LOGE("SetBitmap: canvas is null.");
         return -100;
     }
@@ -864,10 +784,10 @@ int SetBitmap(int page, uint32_t width, uint32_t height, uint8_t *data, colorFor
     for(yy = 0; yy < height; yy++)
     {
         // キャンセルされたら終了する
-        if (gCancel) {
+        if (gCancel[index]) {
             LOGD("SetBitmap: cancel.");
-            ReleaseBuff(page, -1, -1);
-            returnCode = -101;
+            ReleaseBuff(index, page, -1, -1);
+            returnCode = ERROR_CODE_USER_CANCELED;
             break;
         }
 
@@ -919,21 +839,21 @@ int SetBitmap(int page, uint32_t width, uint32_t height, uint8_t *data, colorFor
     return returnCode;
 }
 
-int ReleaseBuff(int page, int type, int half)
+int ReleaseBuff(int index, int page, int type, int half)
 {
 	// ページデータ解放
-	int		i;
-	for (i = 0 ; i < gBuffNum ; i ++) {
-		if (gBuffMng[i].Page == page || page == -1) {
-			if (gBuffMng[i].Type == type || type == -1) {
-				if (gBuffMng[i].Half == half || half == -1) {
+	int	i;
+	for (i = 0 ; i < gBuffNum[index] ; i ++) {
+		if (gBuffMng[index][i].Page == page || page == -1) {
+			if (gBuffMng[index][i].Type == type || type == -1) {
+				if (gBuffMng[index][i].Half == half || half == -1) {
 					// 使用状況設定
 //					LOGD("ReleaseBuff : index=%d, page=%d, type=%d, half=%d, size=%d",
-//							i, gBuffMng[i].Page, gBuffMng[i].Type, gBuffMng[i].Half, gBuffMng[i].Size );
-					gBuffMng[i].Page = -1;
-					gBuffMng[i].Type = 0;
-					gBuffMng[i].Half = 0;
-					gBuffMng[i].Size = 0;
+//							i, gBuffMng[index][i].Page, gBuffMng[index][i].Type, gBuffMng[index][i].Half, gBuffMng[index][i].Size );
+					gBuffMng[index][i].Page = -1;
+					gBuffMng[index][i].Type = 0;
+					gBuffMng[index][i].Half = 0;
+					gBuffMng[index][i].Size = 0;
 				}
 			}
 		}

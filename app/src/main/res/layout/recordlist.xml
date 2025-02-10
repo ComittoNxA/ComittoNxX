@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <src.comitton.view.TitleView
+    <src.comitton.fileview.view.TitleView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -17,7 +17,7 @@
         android:layout_weight="1"
         android:cacheColorHint="#00000000" />
 
-    <src.comitton.view.SelectorView
+    <src.comitton.fileview.view.SelectorView
         android:id="@+id/selector"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

@@ -9,19 +9,27 @@ import java.text.SimpleDateFormat;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.Semaphore;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.widget.Toast;
+
+import androidx.annotation.StringRes;
 
 import jp.dip.muracoro.comittonx.BuildConfig;
-import src.comitton.data.FileData;
+import src.comitton.fileaccess.FileAccess;
+import src.comitton.fileview.data.FileData;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
@@ -29,18 +37,11 @@ public class DEF {
 
 	public static final boolean DEBUG = BuildConfig.DEBUG;
 	public static final String BUILD_DATE = (new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())).format(BuildConfig.BUILD_DATE);
-	//public static final String BUILD_DATE = BuildConfig.BUILD_DATE;
 
-	// WITH_XXX は app/build.gradle 内で宣言している
-	public static final boolean WITH_JPEG = BuildConfig.WITH_JPEG.equals("ON");
-	public static final boolean WITH_PNG = BuildConfig.WITH_PNG.equals("ON");
-	public static final boolean WITH_GIF = BuildConfig.WITH_GIF.equals("ON");
-	public static final boolean WITH_WEBP = BuildConfig.WITH_WEBP.equals("ON");
-	public static final boolean WITH_AVIF = BuildConfig.WITH_AVIF.equals("ON");
-	public static final boolean WITH_HEIF = BuildConfig.WITH_HEIF.equals("ON");
-	public static final boolean WITH_JXL = BuildConfig.WITH_JXL.equals("ON");
+	public static final Semaphore sSemaphoe = new Semaphore(1);
 
 	public static final String DOWNLOAD_URL = "https://github.com/ComittoNxA/ComittoNxX";
+	public static final String API_RECENT_RELEASE = "https://api.github.com/repos/ComittoNxA/ComittoNxX/releases/latest";
 	public static final int MESSAGE_FILE_DELETE = 1000;
 	public static final int MESSAGE_RECORD_DELETE = 1001;
 	public static final int MESSAGE_LASTPAGE = 1002;
@@ -59,6 +60,17 @@ public class DEF {
 	public static final int MESSAGE_MOVE_PATH_EROOR = 1016;
 	public static final int MESSAGE_RESETLOCAL = 1017;
 
+	public static final int ERROR_CODE_MALLOC_FAILURE = -1001;
+	public static final int ERROR_CODE_CACHE_COUNT_LIMIT_EXCEEDED = -1002;
+	public static final int ERROR_CODE_CACHE_INDEX_OUT_OF_RANGE = -1003;
+	public static final int ERROR_CODE_CACHE_NOT_INITIALIZED = -1004;
+	public static final int  ERROR_CODE_CACHE_IS_FULL  = -1005;
+	public static final int  ERROR_CODE_IMAGE_TYPE_NOT_SUPPORT  = -1006;
+	public static final int  ERROR_CODE_USER_CANCELED  = -1007;
+
+	public static final int RETURN_CODE_ERROR_READ_DATA = -2001;
+	public static final int RETURN_CODE_TERMINATED = -2002;
+
 	public static final int HMSG_LOAD_END = 1;
 	public static final int HMSG_READ_END = 2;
 	public static final int HMSG_PROGRESS = 3;
@@ -75,6 +87,11 @@ public class DEF {
 	public static final int HMSG_TX_LAYOUT = 15;
 	public static final int HMSG_EPUB_PARSE = 16;
 	public static final int HMSG_HTML_PARSE = 17;
+	public static final int HMSG_RECENT_RELEASE = 18;
+	public static final int HMSG_TOAST = 19;
+	public static final int HMSG_WORKSTREAM = 20;
+	public static final int HMSG_SUB_MESSAGE = 21;
+	public static final int HMSG_ERROR_MALLOC = 22;
 
 	public static final int MENU_HELP = Menu.FIRST + 0;
 	public static final int MENU_SETTING = Menu.FIRST + 1;
@@ -177,6 +194,10 @@ public class DEF {
 	public static final int SHARE_LR = 2002;
 
 
+	public static final int READ_REQUEST_CODE = 42;
+	public static final int WRITE_REQUEST_CODE = 43;
+	public static final int OPEN_REQUEST_CODE = 44;
+	public static final int REQUEST_SDCARD_ACCESS = 45;
 	public static final int REQUEST_SETTING = 101;
 	public static final int REQUEST_FILE = 102;
 	public static final int REQUEST_HELP = 103;
@@ -187,7 +208,17 @@ public class DEF {
 	public static final int REQUEST_RECORD = 108;
 	public static final int REQUEST_LICENSE = 109;
 	public static final int REQUEST_EPUB = 110;
-	public static final int REQUEST_CROP = 1000;
+	public static final int REQUEST_CROP = 111;
+	public static final int APP_STORAGE_ACCESS_REQUEST_CODE = 501;
+	public static final int REQUEST_CODE_ACTION_OPEN_DOCUMENT = 502;
+	public static final int REQUEST_CODE_ACTION_OPEN_DOCUMENT_TREE = 503;
+
+	public static final int MAX_SERVER = 10;
+	public static final int INDEX_LOCAL = -1;
+	public static final int ACCESS_TYPE_LOCAL = -1;
+	public static final int ACCESS_TYPE_SMB = 0;
+	public static final int ACCESS_TYPE_SAF = 1;
+	public static final int ACCESS_TYPE_PICKER = 2;
 
 	public static final int VIEWPT_RIGHTTOP = 0;
 	public static final int VIEWPT_LEFTTOP = 1;
@@ -396,6 +427,7 @@ public class DEF {
 	public static final String KEY_SCRLWAY = "ScrlWay";
 	public static final String KEY_THUMBNAIL = "Thumbnail";
 	public static final String KEY_THUMBCACHE = "ThumbCache";
+	public static final String KEY_THUMBSORTTYPE = "ThumbSortType";
 	public static final String KEY_THUMBCROP = "ThumbCrop";
 	public static final String KEY_THUMBMARGIN = "ThumbMargin";
 	public static final String KEY_ROTATEBTN = "RotateBtn";
@@ -482,6 +514,10 @@ public class DEF {
 	public static final String KEY_MEMPREV = "MemPrev";
 
 	public static final String KEY_TOOLBAR_SIZE = "ToolbarSize";
+
+	public static final String KEY_LAST_VERSION = "LastVer";
+	public static final String KEY_CHECK_RELEASE = "CheckRelease";
+	public static final String KEY_TIME_CHECK_RELEASE = "TimeCheckRelease";
 
 	public static final int DEFAULT_INISCHALE = 5; //全体を表示(見開き対応)
 	public static final int DEFAULT_INITVIEW = 1; //見開き表示
@@ -2381,18 +2417,18 @@ public class DEF {
 		if (url.length() <= 6) {
 			return url;
 		}
-		if (!url.startsWith("smb://") || user == null || user.length() == 0) {
+		if (!url.startsWith("smb://") || user == null || user.isEmpty()) {
 			return url;
 		}
 		// サーバ名
 		String ret = "";
 		try {
 			ret = "smb://" + URLEncoder.encode(user, "UTF-8");
-			if (pass != null && pass.length() > 0) {
+			if (pass != null && !pass.isEmpty()) {
 				ret += ":" + URLEncoder.encode(pass, "UTF-8");
 			}
 		} catch (UnsupportedEncodingException e) {
-			Log.e("DEF", "createUrl: " + e.getMessage());
+			Log.e("DEF", "createUrl: " + e.getLocalizedMessage());
 		}
 		ret += "@" + url.substring(6);
 		return ret;
@@ -2519,6 +2555,77 @@ public class DEF {
 			encoding = charset;
 		}
 		return encoding;
+	}
+
+	// 相対パスを絶対パスに変換
+	public static String relativePath(Context context, String... path) {
+		if (path.length < 2) {
+			return path[0];
+		}
+		String result = path[path.length - 1];
+		for (int i = path.length - 1; i > 0; --i) {
+			result = FileAccess.relativePath(context, path[i - 1], result);
+		}
+		return result;
+	}
+
+
+	/** ハンドラにトーストメッセージを送る */
+	public static void sendMessage(Context context, @StringRes int resId, int duration, Handler handler) {
+		sendMessage(context.getString(resId), duration, handler);
+	}
+
+	/** ハンドラにトーストメッセージを送る */
+	public static void sendMessage(String string, int duration, Handler handler) {
+		if (handler != null) {
+			Message message = new Message();
+			message.what = HMSG_TOAST;
+			message.obj = string;
+			message.arg1 = duration;
+			handler.sendMessage(message);
+		}
+	}
+
+	/** ハンドラにメッセージを送る */
+	public static void sendMessage(Handler handler, int what, int arg1, int arg2, Object obj) {
+		if (handler != null) {
+			Message message = new Message();
+			message.what = what;
+			message.arg1 = arg1;
+			message.arg2 = arg2;
+			message.obj = obj;
+			handler.sendMessage(message);
+		}
+	}
+
+	/** ハンドラから受け取ったトーストメッセージを実行する */
+	public static boolean ToastMessage(Context context, Message msg) {
+		switch (msg.what) {
+			case HMSG_TOAST:
+				Toast.makeText(context, (String) msg.obj, msg.arg1).show();
+				return true;
+		}
+		return false;
+	}
+
+	/** プログレスダイアログに表示するメッセージを作成する */
+	public static String ProgressMessage(String message, String message2, String workMessage) {
+		if (message2.isEmpty()) {
+			if (workMessage.isEmpty()) {
+				return message;
+			}
+			else {
+				return message + " : " + workMessage;
+			}
+		}
+		else {
+			if (workMessage.isEmpty()) {
+				return message + "\n" + message2;
+			}
+			else {
+				return message + "\n" + message2 + " : " + workMessage;
+			}
+		}
 	}
 
 }

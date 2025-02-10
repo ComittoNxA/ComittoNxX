@@ -26,7 +26,7 @@ import java.util.Arrays;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
-import src.comitton.listener.PageSelectListener;
+import src.comitton.imageview.PageSelectListener;
 
 @SuppressLint("NewApi")
 public class ToolbarDialog extends ImmersiveDialog implements

@@ -10,9 +10,9 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
@@ -26,33 +26,34 @@ void *ImageRotate_ThreadFunc(void *param)
 	int OrgWidth   = range[4];
 	int OrgHeight  = range[5];
 	int RotateMode = range[6];
+    int index = range[7];
 
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 	WORD *orgbuff1;
 
 	int		xx;	// サイズ変更後のx座標
 	int		yy;	// サイズ変更後のy座標
 
 	for (yy = stindex ; yy < edindex ; yy ++) {
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("ImageRotate : cancel.");
 //			ReleaseBuff(Page, 1, Half);
-			return (void*)-10;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
 		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
+		buffptr = gSclLinesPtr[index][yy];
 //		LOGD("ImageRotate : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
 		if (RotateMode == 1) {
 			for (xx = 0 ; xx < RotWidth ; xx ++) {
 				// 元座標
-				orgbuff1 = gLinesPtr[(RotWidth - (xx + 1)) + HOKAN_DOTS / 2];
+				orgbuff1 = gLinesPtr[index][(RotWidth - (xx + 1)) + HOKAN_DOTS / 2];
 				buffptr[xx] = orgbuff1[yy + HOKAN_DOTS / 2];
 			}
 		}
 		else if (RotateMode == 2) {
-			orgbuff1 = gLinesPtr[(RotHeight - (yy + 1)) + HOKAN_DOTS / 2];
+			orgbuff1 = gLinesPtr[index][(RotHeight - (yy + 1)) + HOKAN_DOTS / 2];
 			for (xx = 0 ; xx < RotWidth ; xx ++) {
 				// 元座標
 				buffptr[xx] = orgbuff1[(RotWidth - (xx + 1)) + HOKAN_DOTS / 2];
@@ -61,7 +62,7 @@ void *ImageRotate_ThreadFunc(void *param)
 		else if (RotateMode == 3) {
 			for (xx = 0 ; xx < RotWidth ; xx ++) {
 				// 元座標
-				orgbuff1 = gLinesPtr[xx + HOKAN_DOTS / 2];
+				orgbuff1 = gLinesPtr[index][xx + HOKAN_DOTS / 2];
 				buffptr[xx] = orgbuff1[(RotHeight - (yy + 1)) + HOKAN_DOTS / 2];
 			}
 		}
@@ -72,10 +73,10 @@ void *ImageRotate_ThreadFunc(void *param)
 		buffptr[RotWidth + 0] = buffptr[RotWidth - 1];
 		buffptr[RotWidth + 1] = buffptr[RotWidth - 1];
 	}
-	return 0;
+	return nullptr;
 }
 
-int ImageRotate(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int RotateMode)
+int ImageRotate(int index, int Page, int Half, int Count, int OrgWidth, int OrgHeight, int RotateMode)
 {
 	int ret = 0;
 
@@ -104,18 +105,20 @@ int ImageRotate(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int 
 	linesize  = RotWidth + HOKAN_DOTS;
 
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, RotHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, RotHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, RotHeight, linesize) < 0) {
-		return -7;
+    ret = RefreshSclLinesPtr(index, Page, Half, Count, RotHeight, linesize);
+	if (ret < 0) {
+		return ret;
 	}
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][7];
+	int param[gMaxThreadNum][8];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -126,10 +129,11 @@ int ImageRotate(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int 
 		param[i][4] = OrgWidth;
 		param[i][5] = OrgHeight;
 		param[i][6] = RotateMode;
-		
+        param[i][7] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, ImageRotate_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, ImageRotate_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -144,9 +148,9 @@ int ImageRotate(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int 
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
+		if (status[i] != nullptr) {
 //			LOGD("CreateScaleCubic : cancel");
-			ret = -10;
+			ret = (long)status[i];
 		}
 	}
 	return ret;

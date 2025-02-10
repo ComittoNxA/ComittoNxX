@@ -79,35 +79,35 @@
             android:key="FileRenMenu"
             android:summary="dummy"
             android:title="Show Rename Menu" />
-        <src.comitton.config.FontTitleSeekbar
+        <src.comitton.config.seekbar.FontTitleSeekbar
             android:dialogMessage="Select font size of the title."
             android:dialogTitle="Title Font Size"
             android:key="FontTitleSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Title Font Size" />
-        <src.comitton.config.FontMainSeekbar
+        <src.comitton.config.seekbar.FontMainSeekbar
             android:dialogMessage="Select font size of the list."
             android:dialogTitle="Font Size"
             android:key="FontMainSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Font Size" />
-        <src.comitton.config.FontSubSeekbar
+        <src.comitton.config.seekbar.FontSubSeekbar
             android:dialogMessage="Select summary font size of the list."
             android:dialogTitle="Summary Font Size"
             android:key="FontSubSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Summary Font Size" />
-        <src.comitton.config.FontTileSeekbar
+        <src.comitton.config.seekbar.FontTileSeekbar
             android:dialogMessage="Select font size of the tile view."
             android:dialogTitle="Tile View Font Size"
             android:key="FontTileSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Font Size" />
-        <src.comitton.config.ItemMarginSeekbar
+        <src.comitton.config.seekbar.ItemMarginSeekbar
             android:dialogMessage="Select margin size of list item."
             android:dialogTitle="List Item Margin"
             android:key="ItemMarginSp"
@@ -124,7 +124,7 @@
             android:key="ToolbarName"
             android:summary="Show the toolbar icon name."
             android:title="Toolbar Icon Name" />
-        <src.comitton.config.ToolbarSeekbar
+        <src.comitton.config.seekbar.ToolbarSeekbar
             android:dialogMessage="Set the icon size of the toolbar."
             android:dialogTitle="Toolbar Size"
             android:key="ToolbarSeek"
@@ -138,7 +138,7 @@
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Thumbnail Size" />
-        <src.comitton.config.ListThumbSeekbar
+        <src.comitton.config.seekbar.ListThumbSeekbar
             android:dialogMessage="Set thumbnail size of the list."
             android:dialogTitle="List Thumbnail Size"
             android:key="ListThumbSeek"
@@ -156,8 +156,16 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="ThumbSort"
-            android:summary="To determine the first file name to see all the file name of the compressed file.(Very Slower)"
+            android:summary="To determine the first file name to see all the file name of the compressed file.(Very Slower for RAR file)"
             android:title="Create first name Thumbnail" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="Servertype for create first name Thumbnail"
+            android:entries="@array/ThumbSortType_name_list"
+            android:entryValues="@array/ThumbSortType_value_list"
+            android:key="ThumbSortType"
+            android:summary="dummy"
+            android:title="Servertype for create first name Thumbnail" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="ClearTop"
@@ -169,7 +177,7 @@
             android:defaultValue="true"
             android:key="ThumbnailTap"
             android:title="Thumbnail on Menu" />
-        <src.comitton.config.MenuLongTapSeekbar
+        <src.comitton.config.seekbar.MenuLongTapSeekbar
             android:dialogMessage="Select the long press hold time."
             android:dialogTitle="Long press time"
             android:key="MenuLongTap"

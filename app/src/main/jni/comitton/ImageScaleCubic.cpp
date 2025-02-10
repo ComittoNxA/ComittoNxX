@@ -10,14 +10,14 @@
 
 #include "Image.h"
 
-extern WORD	**gLinesPtr;
-extern WORD	**gSclLinesPtr;
-extern int	gCancel;
+extern WORD	**gLinesPtr[];
+extern WORD	**gSclLinesPtr[];
+extern int	gCancel[];
 
 extern int			gMaxThreadNum;
 
-extern int	*gSclIntParam1;
-extern int	*gSclIntParam2;
+extern int	*gSclIntParam1[];
+extern int	*gSclIntParam2[];
 
 extern char gDitherX_3bit[8][8];
 extern char gDitherX_2bit[4][4];
@@ -55,6 +55,7 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 	int SclHeight = range[3];
 	int OrgWidth  = range[4];
 	int OrgHeight = range[5];
+    int index = range[6];
 
 //	LOGD("CreateScaleCubic_ThreadFund : st=%d, ed=%d, sw=%d, sh=%d, ow=%d, oh=%d", stindex, edindex, SclWidth, SclHeight, OrgWidth, OrgHeight);
 
@@ -70,15 +71,15 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 	int		rr, gg, bb;
 	int		yd3, yd2;
 
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 
 	WORD *orgbuff1;
 	WORD *orgbuff2;
 	WORD *orgbuff3;
 	WORD *orgbuff4;
 
-	int *x_index = gSclIntParam1;
-	int *x_pos   = gSclIntParam2;
+	int *x_index = gSclIntParam1[index];
+	int *x_pos   = gSclIntParam2[index];
 
 	int		yi;
 	int		xi;
@@ -95,19 +96,19 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 		hy3 = gCubicSplines[yi].h3;
 		hy4 = gCubicSplines[yi].h4;
 
-		orgbuff1 = gLinesPtr[by - 1 + HOKAN_DOTS / 2];
-		orgbuff2 = gLinesPtr[by + 0 + HOKAN_DOTS / 2];
-		orgbuff3 = gLinesPtr[by + 1 + HOKAN_DOTS / 2];
-		orgbuff4 = gLinesPtr[by + 2 + HOKAN_DOTS / 2];
+		orgbuff1 = gLinesPtr[index][by - 1 + HOKAN_DOTS / 2];
+		orgbuff2 = gLinesPtr[index][by + 0 + HOKAN_DOTS / 2];
+		orgbuff3 = gLinesPtr[index][by + 1 + HOKAN_DOTS / 2];
+		orgbuff4 = gLinesPtr[index][by + 2 + HOKAN_DOTS / 2];
 
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("CreateScaleBQ : cancel.");
 //			ReleaseBuff(page, 1, half);
-			return (void*)-1;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
 		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
+		buffptr = gSclLinesPtr[index][yy];
 
 		yd3 = gDitherY_3bit[yy & 0x07];
 		yd2 = gDitherY_2bit[yy & 0x03];
@@ -166,12 +167,12 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 		buffptr[SclWidth + 1] = buffptr[SclWidth - 1];
 	}
 //	LOGD("CreateScaleCubic_ThreadFund : end");
-	return 0;
+	return nullptr;
 }
 
-int CreateScaleCubic(int Page, int Half, int Index, int SclWidth, int SclHeight, int OrgWidth, int OrgHeight)
+int CreateScaleCubic(int index, int Page, int Half, int Count, int SclWidth, int SclHeight, int OrgWidth, int OrgHeight)
 {
-//	LOGD("CreateScaleCubic : p=%d, h=%d, i=%d, sw=%d, sh=%d, ow=%d, oh=%d", Page, Half, Index, SclWidth, SclHeight, OrgWidth, OrgHeight);
+//	LOGD("CreateScaleCubic : p=%d, h=%d, c=%d, sw=%d, sh=%d, ow=%d, oh=%d", Page, Half, Count, SclWidth, SclHeight, OrgWidth, OrgHeight);
 	int linesize;
 	int ret = 0;
 
@@ -180,8 +181,12 @@ int CreateScaleCubic(int Page, int Half, int Index, int SclWidth, int SclHeight,
 	int		bx;
 	int		by;
 
-	if (gCubicSplines == NULL) {
+	if (gCubicSplines == nullptr) {
 		gCubicSplines = (CUBIC_SPLINE*)malloc(MAX_CUBIC_SPLINE * sizeof(CUBIC_SPLINE));
+        if (gCubicSplines == nullptr) {
+            LOGE("Initialize: malloc error. (gCubicSplines)");
+            return ERROR_CODE_MALLOC_FAILURE;
+        }
 
 		float	n1, n2, n3, n4;
 
@@ -204,22 +209,25 @@ int CreateScaleCubic(int Page, int Half, int Index, int SclWidth, int SclHeight,
 	linesize  = SclWidth + HOKAN_DOTS;
 
 	//  サイズ変更演算領域用領域確保
-	if (ScaleMemColumn(SclWidth) < 0) {
-		return -5;
+    ret = ScaleMemColumn(index, SclWidth);
+	if (ret < 0) {
+		return ret;
 	}
 
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, SclHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, SclHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, SclHeight, linesize) < 0) {
-		return -7;
+    ret = RefreshSclLinesPtr(index, Page, Half, Count, SclHeight, linesize);
+	if (ret < 0) {
+		return ret;
 	}
 
-	int *x_index = gSclIntParam1;
-	int *x_pos   = gSclIntParam2;
+	int *x_index = gSclIntParam1[index];
+	int *x_pos   = gSclIntParam2[index];
 
 	for (int xx = 0 ; xx < SclWidth ; xx++) {
 		// 元座標
@@ -233,7 +241,7 @@ int CreateScaleCubic(int Page, int Half, int Index, int SclWidth, int SclHeight,
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][6];
+	int param[gMaxThreadNum][7];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -243,10 +251,11 @@ int CreateScaleCubic(int Page, int Half, int Index, int SclWidth, int SclHeight,
 		param[i][3] = SclHeight;
 		param[i][4] = OrgWidth;
 		param[i][5] = OrgHeight;
-		
+        param[i][6] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, CreateScaleCubic_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, CreateScaleCubic_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -261,9 +270,9 @@ int CreateScaleCubic(int Page, int Half, int Index, int SclWidth, int SclHeight,
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
+		if (status[i] != nullptr) {
 //			LOGD("CreateScaleCubic : cancel");
-			ret = -10;
+			ret = (long)status[i];
 		}
 	}
 

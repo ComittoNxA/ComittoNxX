@@ -1,13 +1,22 @@
 package src.comitton.config;
 
-import src.comitton.activity.HelpActivity;
+import src.comitton.config.color.ColorCntSetting;
+import src.comitton.config.color.ColorGuiSetting;
+import src.comitton.config.color.ColorHitSetting;
+import src.comitton.config.color.ColorMgnSetting;
+import src.comitton.config.color.ColorTvbSetting;
+import src.comitton.config.color.ColorTvgSetting;
+import src.comitton.config.color.ColorTvtSetting;
+import src.comitton.config.color.ColorTxtCntSetting;
+import src.comitton.config.color.ColorTxtGuiSetting;
+import src.comitton.config.color.ColorTxtMgnSetting;
+import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;

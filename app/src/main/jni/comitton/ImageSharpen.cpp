@@ -10,9 +10,9 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
@@ -29,9 +29,9 @@ void *ImageSharpen_ThreadFunc(void *param)
 	int stindex   = range[0];
 	int edindex   = range[1];
 	int OrgWidth  = range[2];
-	int OrgHeight = range[3];
+    int index = range[3];
 
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 
 	// 使用するバッファを保持
 	WORD *orgbuff1;
@@ -45,20 +45,15 @@ void *ImageSharpen_ThreadFunc(void *param)
 	int		yd3, yd2;
 
 	for (yy = stindex ; yy < edindex ; yy ++) {
-//		LOGD("ImageSharpen : loop yy=%d", yy);
-		if (gCancel) {
+		if (gCancel[index]) {
 			LOGD("ImageSharpen : cancel.");
-//			ReleaseBuff(Page, 1, Half);
-			return (void*)-1;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
 		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
-//		LOGD("ImageRotate : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
-
-		orgbuff1 = gLinesPtr[yy + HOKAN_DOTS / 2 - 1];
-		orgbuff2 = gLinesPtr[yy + HOKAN_DOTS / 2 + 0];
-		orgbuff3 = gLinesPtr[yy + HOKAN_DOTS / 2 + 1];
+		orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2 - 1];
+		orgbuff2 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 0];
+		orgbuff3 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 1];
 
 		yd3 = gDitherY_3bit[yy & 0x07];
 		yd2 = gDitherY_2bit[yy & 0x03];
@@ -113,43 +108,30 @@ void *ImageSharpen_ThreadFunc(void *param)
 				bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
 			}
 
-			buffptr[xx] = MAKE565(rr, gg, bb);
+            orgbuff2[xx] = MAKE565(rr, gg, bb);
 		}
 
 		// 補完用の余裕
-		buffptr[-2] = buffptr[0];
-		buffptr[-1] = buffptr[0];
-		buffptr[OrgWidth + 0] = buffptr[OrgWidth - 1];
-		buffptr[OrgWidth + 1] = buffptr[OrgWidth - 1];
+        orgbuff2[-2] = orgbuff2[0];
+        orgbuff2[-1] = orgbuff2[0];
+        orgbuff2[OrgWidth + 0] = orgbuff2[OrgWidth - 1];
+        orgbuff2[OrgWidth + 1] = orgbuff2[OrgWidth - 1];
 	}
-	return 0;
+	return nullptr;
 }
 
 // Margin     : 画像の何%まで余白チェックするか(0～20%)
 // pOrgWidth  : 余白カット後の幅を返す
 // pOrgHeight : 余白カット後の高さを返す
-int ImageSharpen(int Page, int Sharpen, int Half, int Index, int OrgWidth, int OrgHeight)
+int ImageSharpen(int index, int Page, int Sharpen, int Half, int Count, int OrgWidth, int OrgHeight)
 {
-	LOGD("ImageSharpen : Page=%d, Sharpen=%d, Half=%d, Index=%d, OrgWidth=%d, OrgHeight=%d", Page, Sharpen, Half, Index, OrgWidth, OrgHeight);
+//#ifdef DEBUG
+	LOGD("ImageSharpen : index=%d, Page=%d, Sharpen=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", index, Page, Sharpen, Half, Count, OrgWidth, OrgHeight);
+//#endif
 
 	int ret = 0;
 
-	int linesize;
-
     mAmount = Sharpen;
-
-	// ラインサイズ
-	linesize  = OrgWidth + HOKAN_DOTS;
-
-	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, OrgHeight) < 0) {
-		return -6;
-	}
-
-	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, OrgHeight, linesize) < 0) {
-		return -7;
-	}
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
@@ -160,11 +142,11 @@ int ImageSharpen(int Page, int Sharpen, int Half, int Index, int OrgWidth, int O
 		param[i][0] = start;
 		param[i][1] = start = OrgHeight * (i + 1)  / gMaxThreadNum;
 		param[i][2] = OrgWidth;
-		param[i][3] = OrgHeight;
-		
+        param[i][3] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, ImageSharpen_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, ImageSharpen_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -179,9 +161,8 @@ int ImageSharpen(int Page, int Sharpen, int Half, int Index, int OrgWidth, int O
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
-//			LOGD("CreateScaleCubic : cancel");
-			ret = -10;
+		if (status[i] != nullptr) {
+			ret = (long)status[i];
 		}
 	}
 //	LOGD("ImageSharpen : complete");

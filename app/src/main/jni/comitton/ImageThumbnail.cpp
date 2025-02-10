@@ -25,9 +25,9 @@ typedef short THUMBBLOCK;
 // サムネイル管理
 long long	gThumbnailId = 0;
 
-THUMBBLOCK	*gThBlockMng = NULL;
+THUMBBLOCK	*gThBlockMng = nullptr;
 
-BYTE		**gThPageBuff = NULL;	// 領域のアドレス
+BYTE		**gThPageBuff = nullptr;	// 領域のアドレス
 
 int			gThPageNum = 0;	// ページ数
 int			gThPageBlockNum = 0;	// ページあたりのブロック数
@@ -37,7 +37,7 @@ int			gThUseBlockNum = 0;	// 使用中ブロック数
 int			gThPageSize = 0;	// ページのメモリサイズ
 int			gThImageNum = 0;	// 表示するイメージの数
 
-THUMBINFO	*gThImageMng = NULL;	// イメージ管理(最大イメージ数分)
+THUMBINFO	*gThImageMng = nullptr;	// イメージ管理(最大イメージ数分)
 
 bool gThMutexInit = false;
 pthread_mutex_t gThMutex;  // Mutex
@@ -92,9 +92,9 @@ int ThumbnailAlloc(long long id, int pagesize, int pagenum, int imagenum)
 
 		// 保存領域確保(1ページ4MBでページ数分取得)
 		gThPageBuff = (BYTE**)malloc(sizeof(BYTE**) * gThPageNum);
-		if (gThPageBuff == NULL) {
+		if (gThPageBuff == nullptr) {
 			LOGE("ThumbnailInitialize : pages array alloc = null");
-			ret = -2;
+			ret = ERROR_CODE_MALLOC_FAILURE;
 			goto ERROREND;
 		}
 		// ポインタ配列初期化
@@ -103,17 +103,17 @@ int ThumbnailAlloc(long long id, int pagesize, int pagenum, int imagenum)
 		// ページごとの領域獲得
 		for (int i = 0 ; i < gThPageNum ; i ++) {
 			gThPageBuff[i] = (BYTE*)malloc(gThPageSize);
-			if (gThPageBuff[i] == NULL) {
+			if (gThPageBuff[i] == nullptr) {
 				LOGE("ThumbnailInitialize : page alloc = null");
-				ret = -3;
+				ret = ERROR_CODE_MALLOC_FAILURE;
 				goto ERROREND;
 			}
 		}	
 
 		gThBlockMng = (THUMBBLOCK*)malloc(sizeof(THUMBBLOCK) * gThBlockNum);
-		if (gThBlockMng == NULL) {
+		if (gThBlockMng == nullptr) {
 			LOGE("ThumbnailInitialize : blocks alloc = null");
-			ret = -4;
+			ret = ERROR_CODE_MALLOC_FAILURE;
 			goto ERROREND;
 		}
 	}
@@ -130,14 +130,14 @@ int ThumbnailAlloc(long long id, int pagesize, int pagenum, int imagenum)
 		// 新しい個数
 		gThImageNum = imagenum;
 		// 管理領域獲得
-		if (gThImageMng != NULL) {
+		if (gThImageMng != nullptr) {
 			// 既存領域は開放
 			free(gThImageMng);
 		}
 		gThImageMng = (THUMBINFO*)malloc(sizeof(THUMBINFO) * gThImageNum);
-		if (gThImageMng == NULL) {
+		if (gThImageMng == nullptr) {
 			LOGE("ThumbnailInitialize : manage alloc = null");
-			ret = -5;
+			ret = ERROR_CODE_MALLOC_FAILURE;
 			goto ERROREND;
 		}
 	}
@@ -168,7 +168,7 @@ int ThumbnailCheck(long long id, int index)
 //		LOGD("ThumbnailCheck : Illegal thumbnail ID(id=%lld)", id);
 		return -1;
 	}
-	if (gThImageMng == NULL) {
+	if (gThImageMng == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailCheck : Memory Not Alloced");
 		return -2;
@@ -192,7 +192,7 @@ int ThumbnailSetNone(long long id, int index)
 //		LOGD("ThumbnailSetNone : Illegal thumbnail ID(id=%lld)", id);
 		return -1;
 	}
-	if (gThImageMng == NULL) {
+	if (gThImageMng == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailSetNone : Memory Not Alloced");
 		return -2;
@@ -211,7 +211,7 @@ int ThumbnailCheckAll(long long id)
 //		LOGD("ThumbnailCheckAll : Illegal thumbnail ID(id=%lld)", id);
 		return -1;
 	}
-	if (gThImageMng == NULL) {
+	if (gThImageMng == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailCheckAll : Memory Not Alloced");
 		return -2;
@@ -237,7 +237,7 @@ int ThumbnailMemorySizeCheck(long long id, int bmp_width, int bmp_height)
 //		LOGD("ThumbnailMemorySizeCheck: Illegal thumbnail ID(id=%lld)", id);
 		return -1;
 	}
-	if (gThPageBuff == NULL) {
+	if (gThPageBuff == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailMemorySizeCheck: Memory Not Alloced");
 		return -2;
@@ -265,7 +265,7 @@ int ThumbnailImageAlloc(long long id, int blocks, int index)
 //		LOGD("ThumbnailImageAlloc : Illegal thumbnail ID(id=%lld)", id);
 		return -1;
 	}
-	if (gThPageBuff == NULL) {
+	if (gThPageBuff == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailImageAlloc : Pages Not Alloced");
 		return -2;
@@ -365,7 +365,7 @@ int ThumbnailSave(long long id, int index, int bmp_width, int bmp_height, int bm
 		ret = -1;
 		goto ERROREND;
 	}
-	if (gThPageBuff == NULL || gThImageMng == NULL) {
+	if (gThPageBuff == nullptr || gThImageMng == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailSave : Pages Not Alloced");
 		ret = -2;
@@ -461,7 +461,7 @@ int ThumbnailImageSize(long long id, int index)
         // 初期化したIDと異なる
         return -1;
     }
-    if (gThPageBuff == NULL || gThImageMng == NULL) {
+    if (gThPageBuff == nullptr || gThImageMng == nullptr) {
         // 獲得されていない
         return -2;
     }
@@ -505,7 +505,7 @@ int ThumbnailDraw(long long id, int index, int bmp_width, int bmp_height, int bm
 		ret = -1;
 		goto ERROREND;
 	}
-	if (gThPageBuff == NULL || gThImageMng == NULL) {
+	if (gThPageBuff == nullptr || gThImageMng == nullptr) {
 		// 獲得されていない
 		ret = -2;
 		goto ERROREND;
@@ -624,12 +624,6 @@ void ThumbnailFree(long long id)
 	}
 	gThImageNum = 0;
 
-//	if (gThMutexInit) {
-		// mutex 開放
-//		pthread_mutex_destroy(&gThMutex);
-//		gThMutexInit = false;
-//	}
-
 #ifdef DEBUG
 	LOGD("ThumbnailFree : End");
 #endif
@@ -640,42 +634,3 @@ ERROREND:
 //	LOGD("ThumbnailFree : Mutex Unlock/Aft");
 	return;
 }
-
-//// 空き領域の数を数えてログ出力
-//void CountLog(const char *label)
-//{
-//	// カウンタ
-//	int imfree = 0;
-//	int imnone = 0;
-//	int imuse = 0;
-//
-//	int use = 0;
-//	int free = 0;
-//	int term = 0;
-//
-//	for (int i = 0 ; i < gThImageNum ; i ++) {
-//		if (gThImageMng[i].BlockIndex == -1) {
-//			imfree ++;
-//		}
-//		else if (gThImageMng[i].BlockIndex == -2) {
-//			imnone ++;
-//		}
-//		else {
-//			imuse ++;
-//		}
-//	}
-//
-//	for (int i = 0 ; i < gThBlockNum ; i ++) {
-//		if (gThBlockMng[i] == -1) {
-//			free ++;
-//		}
-//		else {
-//			use ++;
-//			if (gThBlockMng[i] == -2) {
-//				term ++;
-//			}
-//		}
-//	}
-//	LOGD("ThumbnailCount:%s-image(u=%d,n=%d,f=%d)/block(u=%d,f=%d,t=%d/u=%d,a=%d)", label, imuse, imnone, imfree, use, free, term, gThUseBlockNum, gThBlockNum);
-//	return;
-//}

@@ -5,10 +5,13 @@
 #include <android/log.h>
 #include <stdio.h>
 #include <unrar/rar.hpp>
+#include "common.h"
 
-byte *ToBuff = NULL;
-byte *FromBuff = NULL;
-byte *Window = NULL;
+#define ERROR_CODE_MALLOC_FAILURE -1001
+
+byte *ToBuff = nullptr;
+byte *FromBuff = nullptr;
+byte *Window = nullptr;
 int		FromPos = 0;
 int		ToPos = 0;
 
@@ -20,7 +23,7 @@ int		RarVersion = 0;
 bool	NoCompress = false;
 
 ComprDataIO	DataIO;
-Unpack		*Unp = NULL;
+Unpack		*Unp = nullptr;
 
 extern "C" {
 /*
@@ -28,12 +31,12 @@ extern "C" {
  * Method:    rarAlloc
  * Signature: (I[II)V
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarAlloc(JNIEnv *env, jclass obj, jint cmplen, jint orglen)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallJniLibrary_rarAlloc(JNIEnv *env, jclass obj, jint cmplen, jint orglen)
 {
-	if (FromBuff != NULL) {
+	if (FromBuff != nullptr) {
 		free(FromBuff);
 	}
-	if (ToBuff != NULL) {
+	if (ToBuff != nullptr) {
 		free(ToBuff);
 	}
 #if 0	// COMITTONxT_MOD
@@ -67,16 +70,16 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarAlloc(JNIEnv *
 		return -1;
 	}
 #else
-	if (FromBuff == NULL || ToBuff == NULL) {
-		if (FromBuff != NULL) {
+	if (FromBuff == nullptr || ToBuff == nullptr) {
+		if (FromBuff != nullptr) {
 			free(FromBuff);
-			FromBuff = NULL;
+			FromBuff = nullptr;
 		}
-		if (ToBuff != NULL) {
+		if (ToBuff != nullptr) {
 			free(ToBuff);
-			ToBuff = NULL;
+			ToBuff = nullptr;
 		}
-		return -1;
+		return ERROR_CODE_MALLOC_FAILURE;
 	}
 #endif
 	if (Unp == NULL) {
@@ -96,7 +99,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarAlloc(JNIEnv *
  * Method:    rarInit
  * Signature: (I[II)V
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarInit(JNIEnv *env, jclass obj, jint cmplen, jint orglen, jint rarver, jboolean nocomp)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallJniLibrary_rarInit(JNIEnv *env, jclass obj, jint cmplen, jint orglen, jint rarver, jboolean nocomp)
 {
 #ifdef DEBUG
 	LOGD("rarInit : cl=%d, ol=%d, rv=%d, nc=%d", cmplen, orglen, rarver, (int)nocomp);
@@ -126,7 +129,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarInit(JNIEnv *e
  * Method:    rarWrite
  * Signature: ([BI)I
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarWrite(JNIEnv *env, jclass obj, jbyteArray cmpArray, jint offset, jint size)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallJniLibrary_rarWrite(JNIEnv *env, jclass obj, jbyteArray cmpArray, jint offset, jint size)
 {
 	if (FromBuff == NULL) {
 		return -1;
@@ -151,7 +154,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarWrite(JNIEnv *
  * Method:    rarDecomp
  * Signature: ()V
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarDecomp(JNIEnv *env, jclass obj)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallJniLibrary_rarDecomp(JNIEnv *env, jclass obj)
 {
 #ifdef DEBUG
 	LOGD("rarDecomp : NoCompress=%d", (int)NoCompress);
@@ -195,7 +198,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarDecomp(JNIEnv 
  * Method:    rarRead
  * Signature: ([BI)I
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarRead(JNIEnv *env, jclass obj, jbyteArray orgArray, jint offset, jint size)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallJniLibrary_rarRead(JNIEnv *env, jclass obj, jbyteArray orgArray, jint offset, jint size)
 {
 	if (ToBuff == NULL) {
 		return -1;
@@ -220,7 +223,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarRead(JNIEnv *e
  * Method:    rarInitSeek
  * Signature: (I[II)V
  */
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarInitSeek(JNIEnv *env, jclass obj)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallJniLibrary_rarInitSeek(JNIEnv *env, jclass obj)
 {
 	if (ToBuff == NULL) {
 		return -1;
@@ -235,7 +238,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallJniLibrary_rarInitSeek(JNIEn
  * Method:    rarClose
  * Signature: ([BI)I
  */
-JNIEXPORT void JNICALL Java_src_comitton_stream_CallJniLibrary_rarClose(JNIEnv *env, jclass obj)
+JNIEXPORT void JNICALL Java_src_comitton_jni_CallJniLibrary_rarClose(JNIEnv *env, jclass obj)
 {
 	if (ToBuff != NULL) {
 		free(ToBuff);

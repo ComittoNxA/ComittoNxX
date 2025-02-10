@@ -11,9 +11,9 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
@@ -31,10 +31,11 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 	int SclHeight = range[3];
 	int OrgWidth  = range[4];
 	int OrgHeight = range[5];
+    int index = range[6];
 
 //	LOGD("CreateScaleHalf_ThreadFund : st=%d, ed=%d, sw=%d, sh=%d, ow=%d, oh=%d", stindex, edindex, SclWidth, SclHeight, OrgWidth, OrgHeight);
 
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 	WORD *orgbuff1;
 	WORD *orgbuff2;
 
@@ -46,10 +47,10 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 	int		rr, gg, bb;
 
 	for (yy = stindex; yy < edindex ; yy ++) {
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("CreateScaleBQ : cancel.");
 //			ReleaseBuff(Page, 1, half);
-			return (void*)-1;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
 		// 元座標
@@ -58,11 +59,11 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 		int yd3 = gDitherY_3bit[yy & 0x07];
 		int yd2 = gDitherY_2bit[yy & 0x03];
 
-		orgbuff1 = gLinesPtr[sy + 0 + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
-		orgbuff2 = gLinesPtr[sy + 1 + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
+		orgbuff1 = gLinesPtr[index][sy + 0 + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
+		orgbuff2 = gLinesPtr[index][sy + 1 + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
 
 		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
+		buffptr = gSclLinesPtr[index][yy];
 //		LOGD("CreateScale : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
 		for (xx = 0 ; xx < SclWidth ; xx ++) {
@@ -109,10 +110,10 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 		buffptr[SclWidth + 1] = buffptr[SclWidth - 1];
 	}
 //	LOGD("CreateScaleHalf_ThreadFund : end");
-	return 0;
+	return nullptr;
 }
 
-int CreateScaleHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
+int CreateScaleHalf(int index, int Page, int Half, int Count, int OrgWidth, int OrgHeight)
 {
 	int ret = 0;
 
@@ -122,18 +123,20 @@ int CreateScaleHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 	int linesize = SclWidth + HOKAN_DOTS;
 
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, SclHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, SclHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, SclHeight, linesize) < 0) {
-		return -7;
+    ret = RefreshSclLinesPtr(index, Page, Half, Count, SclHeight, linesize);
+	if (ret < 0) {
+		return ret;
 	}
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][6];
+	int param[gMaxThreadNum][7];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -143,10 +146,11 @@ int CreateScaleHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 		param[i][3] = SclHeight;
 		param[i][4] = OrgWidth;
 		param[i][5] = OrgHeight;
-		
+        param[i][6] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, CreateScaleHalf_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, CreateScaleHalf_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}

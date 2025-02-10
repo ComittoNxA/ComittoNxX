@@ -285,8 +285,8 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 				}
 				catch (Exception e) {
 					Log.e("ToolbarEditDialog", "loadToolbarState: ループ1でエラーが発生しました.");
-					if (e != null && e.getMessage() != null) {
-						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
+					if (e.getLocalizedMessage() != null) {
+						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
 					}
 					Log.e("ToolbarEditDialog", "loadToolbarState: i=" + i);
 					Log.e("ToolbarEditDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
@@ -308,8 +308,8 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 				}
 				catch (Exception e) {
 					Log.e("ToolbarEditDialog", "loadToolbarState: ループ2でエラーが発生しました.");
-					if (e != null && e.getMessage() != null) {
-						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
+					if (e.getLocalizedMessage() != null) {
+						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
 					}
 					Log.e("ToolbarEditDialog", "loadToolbarState: i=" + i);
 					Log.e("ToolbarEditDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
@@ -321,8 +321,8 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 		}
 		catch (Exception e) {
 			Log.e("ToolbarEditDialog", "loadToolbarState: エラーが発生しました.");
-			if (e != null && e.getMessage() != null) {
-				Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getMessage());
+			if (e.getLocalizedMessage() != null) {
+				Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
 			}
 		}
 		if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 終了します.");}
@@ -342,8 +342,8 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 			}
 			catch (Exception e) {
 				Log.e("ToolbarEditDialog", "saveToolbarState: エラーが発生しました.");
-				if (e != null && e.getMessage() != null) {
-					Log.e("ToolbarEditDialog", "saveToolbarState: エラーメッセージ. " + e.getMessage());
+				if (e.getLocalizedMessage() != null) {
+					Log.e("ToolbarEditDialog", "saveToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
 				}
 			}
 		}

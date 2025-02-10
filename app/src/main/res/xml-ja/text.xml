@@ -68,14 +68,14 @@
             android:key="txEffect"
             android:summary="ページめくりのエフェクトを有効にする"
             android:title="ページめくりのエフェクト" />
-        <src.comitton.config.TextScrlRngWSeekbar
+        <src.comitton.config.seekbar.TextScrlRngWSeekbar
             android:dialogMessage="音量キー等でのスクロール量(幅)"
             android:dialogTitle="スクロール量(幅)"
             android:key="txScrlRngW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="音量キーでのスクロール量(幅)" />
-        <src.comitton.config.TextScrlRngHSeekbar
+        <src.comitton.config.seekbar.TextScrlRngHSeekbar
             android:dialogMessage="音量キー等でのスクロール量(高さ)"
             android:dialogTitle="スクロール量(高さ)"
             android:key="txScrlRngH"
@@ -187,56 +187,56 @@
             android:key="txFontName"
             android:summary="dummy"
             android:title="フォント選択 ([sdcard]/comittona/font/から選択)" />
-        <src.comitton.config.TextFontTopSeekbar
+        <src.comitton.config.seekbar.TextFontTopSeekbar
             android:dialogMessage="見出しのフォントサイズを選択"
             android:dialogTitle="見出しのフォントサイズ"
             android:key="txFontTopSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="見出しのフォントサイズ" />
-        <src.comitton.config.TextFontBodySeekbar
+        <src.comitton.config.seekbar.TextFontBodySeekbar
             android:dialogMessage="本文のフォントサイズを選択"
             android:dialogTitle="本文のフォントサイズ"
             android:key="txFontBodySp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="本文のフォントサイズ" />
-        <src.comitton.config.TextFontRubiSeekbar
+        <src.comitton.config.seekbar.TextFontRubiSeekbar
             android:dialogMessage="ルビのフォントサイズを選択"
             android:dialogTitle="ルビのフォントサイズ"
             android:key="txFontRubiSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="ルビのフォントサイズ" />
-        <src.comitton.config.TextFontInfoSeekbar
+        <src.comitton.config.seekbar.TextFontInfoSeekbar
             android:dialogMessage="ヘッダ/フッタのフォントサイズを選択"
             android:dialogTitle="ヘッダ/フッタのフォントサイズ"
             android:key="txFontInfoSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="ヘッダ/フッタのフォントサイズ" />
-        <src.comitton.config.TextSpaceWSeekbar
+        <src.comitton.config.seekbar.TextSpaceWSeekbar
             android:dialogMessage="行間のサイズを選択"
             android:dialogTitle="行間のサイズ"
             android:key="txSpaceW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="行間のサイズ" />
-        <src.comitton.config.TextSpaceHSeekbar
+        <src.comitton.config.seekbar.TextSpaceHSeekbar
             android:dialogMessage="文字間のサイズを選択"
             android:dialogTitle="文字間のサイズ"
             android:key="txSpaceH"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="文字間のサイズ" />
-        <src.comitton.config.TextMarginWSeekbar
+        <src.comitton.config.seekbar.TextMarginWSeekbar
             android:dialogMessage="左右の余白サイズを選択"
             android:dialogTitle="左右の余白サイズ"
             android:key="txMarginW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="左右の余白サイズ" />
-        <src.comitton.config.TextMarginHSeekbar
+        <src.comitton.config.seekbar.TextMarginHSeekbar
             android:dialogMessage="上下の余白サイズを選択"
             android:dialogTitle="上下の余白サイズ"
             android:key="txMarginH"

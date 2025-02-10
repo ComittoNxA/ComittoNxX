@@ -8,7 +8,6 @@ import src.comitton.dialog.ListDialog.ListSelectListener;
 import jp.dip.muracoro.comittonx.R;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
@@ -16,7 +15,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -27,7 +25,6 @@ import android.view.View.OnClickListener;
 
 import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 
 @SuppressLint("NewApi")
 public class TextConfigDialog extends TabDialogFragment implements OnClickListener, OnDismissListener, OnSeekBarChangeListener {
@@ -39,7 +36,6 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 	private final int SELLIST_ASCMODE = 1;
 
 	private TextConfigListenerInterface mListener = null;
-	private AppCompatActivity mActivity;
 
 	private ListDialog mListDialog;
 
@@ -110,8 +106,6 @@ public class TextConfigDialog extends TabDialogFragment implements OnClickListen
 
 	public TextConfigDialog(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
 		super(activity, themeResId, isclose, false, false, true, listener);
-
-		mActivity = activity;
 
 		Resources res = mActivity.getResources();
 		mDefaultStr = res.getString(R.string.auto);

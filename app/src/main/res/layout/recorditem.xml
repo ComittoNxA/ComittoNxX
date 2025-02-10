@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="0px" >
 
-    <src.comitton.view.RecordItemView
+    <src.comitton.fileview.view.RecordItemView
         android:id="@+id/bookmarkitem"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

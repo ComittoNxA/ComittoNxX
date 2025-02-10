@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="イメージ表示の設定" >
-        <src.comitton.config.ColorMgnSetting
+        <src.comitton.config.color.ColorMgnSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="周囲の余白の色"
             android:key="MgnRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="周囲の余白の色" />
-        <src.comitton.config.ColorCntSetting
+        <src.comitton.config.color.ColorCntSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="中央の余白の色"
             android:key="CntRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="中央の余白の色" />
-        <src.comitton.config.ColorGuiSetting
+        <src.comitton.config.color.ColorGuiSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="情報表示の背景色"
             android:key="GuiRGB"
@@ -24,42 +24,42 @@
             android:title="情報表示の背景色" />
     </PreferenceCategory>
     <PreferenceCategory android:title="テキスト表示の設定" >
-        <src.comitton.config.ColorTxtMgnSetting
+        <src.comitton.config.color.ColorTxtMgnSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="周囲の余白の色"
             android:key="txMgnRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="周囲の余白の色" />
-        <src.comitton.config.ColorTxtCntSetting
+        <src.comitton.config.color.ColorTxtCntSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="中央の余白の色"
             android:key="txCntRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="中央の余白の色" />
-        <src.comitton.config.ColorTxtGuiSetting
+        <src.comitton.config.color.ColorTxtGuiSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="情報表示の背景色"
             android:key="txGuiRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="情報表示の背景色" />
-        <src.comitton.config.ColorTvtSetting
+        <src.comitton.config.color.ColorTvtSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="テキストの色"
             android:key="txTvtRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="テキストの色" />
-        <src.comitton.config.ColorTvbSetting
+        <src.comitton.config.color.ColorTvbSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="背景の色"
             android:key="txTvbRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="背景の色" />
-        <src.comitton.config.ColorTvgSetting
+        <src.comitton.config.color.ColorTvgSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="背景の色(グラデーション用)"
             android:key="txTvgRGB"
@@ -74,7 +74,7 @@
             android:key="txGradation"
             android:summary="dummy"
             android:title="グラデーション設定" />
-        <src.comitton.config.ColorHitSetting
+        <src.comitton.config.color.ColorHitSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="検索ヒットの色"
             android:key="txHitRGB"

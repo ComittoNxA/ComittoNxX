@@ -2,7 +2,17 @@ package src.comitton.config;
 
 import java.io.File;
 
-import src.comitton.activity.HelpActivity;
+import src.comitton.config.seekbar.TextFontBodySeekbar;
+import src.comitton.config.seekbar.TextFontInfoSeekbar;
+import src.comitton.config.seekbar.TextFontRubiSeekbar;
+import src.comitton.config.seekbar.TextFontTopSeekbar;
+import src.comitton.config.seekbar.TextMarginHSeekbar;
+import src.comitton.config.seekbar.TextMarginWSeekbar;
+import src.comitton.config.seekbar.TextScrlRngHSeekbar;
+import src.comitton.config.seekbar.TextScrlRngWSeekbar;
+import src.comitton.config.seekbar.TextSpaceHSeekbar;
+import src.comitton.config.seekbar.TextSpaceWSeekbar;
+import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 
 import jp.dip.muracoro.comittonx.R;
@@ -19,17 +29,17 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 
 public class SetTextActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-	private TextFontTopSeekbar	mFontTop;
-	private TextFontBodySeekbar	mFontBody;
-	private TextFontRubiSeekbar	mFontRubi;
-	private TextFontInfoSeekbar	mFontInfo;
-	private TextSpaceWSeekbar	mSpaceW;
-	private TextSpaceHSeekbar	mSpaceH;
-	private TextMarginWSeekbar	mMarginW;
-	private TextMarginHSeekbar	mMarginH;
+	private TextFontTopSeekbar mFontTop;
+	private TextFontBodySeekbar mFontBody;
+	private TextFontRubiSeekbar mFontRubi;
+	private TextFontInfoSeekbar mFontInfo;
+	private TextSpaceWSeekbar mSpaceW;
+	private TextSpaceHSeekbar mSpaceH;
+	private TextMarginWSeekbar mMarginW;
+	private TextMarginHSeekbar mMarginH;
 
-	private TextScrlRngWSeekbar   mScrlRngW;
-	private TextScrlRngHSeekbar   mScrlRngH;
+	private TextScrlRngWSeekbar mScrlRngW;
+	private TextScrlRngHSeekbar mScrlRngH;
 
 	private ListPreference mViewRota;
 	private ListPreference mIniScale;

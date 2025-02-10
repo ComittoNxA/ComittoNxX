@@ -6,12 +6,12 @@
 
 //#define DEBUG
 
-extern char	*gLoadBuffer;
-extern long	gLoadFileSize;
+extern char	*gLoadBuffer[];
+extern long	gLoadFileSize[];
 extern int gMaxThreadNum;
 
 // 画像をBitmapに変換してバッファに入れる
-int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
+int LoadImageAvif(int index, int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
 {
 
     int returnCode = 0;         // この関数のリターンコード
@@ -24,16 +24,11 @@ int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *
 #ifdef DEBUG
     LOGD("LoadImageAvif: Start. loadCommand=%d, page=%d, scale=%d", loadCommand, page, scale);
 #endif
-    if (gLoadBuffer == NULL) {
-        LOGE("LoadImageAvif: gLoadBuffer is null");
-        returnCode = -1;
-        goto cleanup;
-    }
 
     ///////////////////////////////////////////////
     // avifのデコーダ
     decoder = avifDecoderCreate();
-    if (decoder == NULL) {
+    if (decoder == nullptr) {
         LOGE("LoadImageAvif: avifDecoderCreate() failed.");
         returnCode = -2;
         goto cleanup;
@@ -41,7 +36,7 @@ int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *
 
     ///////////////////////////////////////////////
     // バッファを取り込む
-    result = avifDecoderSetIOMemory(decoder, (uint8_t *)gLoadBuffer, gLoadFileSize);
+    result = avifDecoderSetIOMemory(decoder, (uint8_t *)gLoadBuffer[index], gLoadFileSize[index]);
     if (result != AVIF_RESULT_OK) {
         LOGE("LoadImageAvif: avifDecoderSetIOMemory() failed. %s", avifResultToString(result));
         returnCode = -3;
@@ -116,11 +111,10 @@ int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *
     }
 
     if (loadCommand == SET_BUFFER) {
-        LOGD("LoadImageAvif: SetBuff() Start. page=%d, width=%d, height=%d", page, width, height);
-        returnCode = SetBuff(page, width, height, rgb.pixels, COLOR_FORMAT_RGB);
+        //LOGD("LoadImageAvif: SetBuff() Start. page=%d, width=%d, height=%d", page, width, height);
+        returnCode = SetBuff(index, page, width, height, rgb.pixels, COLOR_FORMAT_RGB);
         if (returnCode < 0) {
             LOGE("LoadImageAvif: SetBuff() failed. return=%d", returnCode);
-            returnCode = -9;
             goto cleanup;
         }
         pData->UseFlag = 1;
@@ -131,10 +125,9 @@ int LoadImageAvif(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *
 #ifdef DEBUG
         LOGD("LoadImageAvif: SetBitmap() Start. page=%d, width=%d, height=%d", page, width, height);
 #endif
-        returnCode = SetBitmap(page, width, height, rgb.pixels, COLOR_FORMAT_RGB, canvas);
+        returnCode = SetBitmap(index, page, width, height, rgb.pixels, COLOR_FORMAT_RGB, canvas);
         if (returnCode < 0) {
             LOGE("LoadImageAvif: SetBitmap() failed. return=%d", returnCode);
-            returnCode = -10;
             goto cleanup;
         }
     }
@@ -149,27 +142,27 @@ cleanup:
 }
 
 // 画像の幅と高さを返す
-int ImageGetSizeAvif(int type, jint *width, jint *height)
+int ImageGetSizeAvif(int index, int type, jint *width, jint *height)
 {
 
-    int returnCode = 0;         // この関数のリターンコード
+    int returnCode = 0;                   // この関数のリターンコード
 
-    avifDecoder *decoder;       // avifデコーダーへのポインタ
-    avifResult result;          // avif関数のリターンコード
+    avifDecoder *decoder = nullptr;       // avifデコーダーへのポインタ
+    avifResult result;                    // avif関数のリターンコード
 #ifdef DEBUG
     LOGD("ImageGetSizeAvif: Start.");
 #endif
-    if (gLoadBuffer == NULL) {
+    if (gLoadBuffer[index] == nullptr) {
         LOGE("ImageGetSizeAvif: [error] gLoadBuffer is null");
-        returnCode = -1;
+        returnCode = ERROR_CODE_CACHE_NOT_INITIALIZED;
         goto cleanup;
     }
-    if (width == NULL) {
+    if (width == nullptr) {
         LOGE("ImageGetSizeAvif: [error] width is null");
         returnCode = -1;
         goto cleanup;
     }
-    if (height == NULL) {
+    if (height == nullptr) {
         LOGE("ImageGetSizeAvif: [error] height is null");
         returnCode = -1;
         goto cleanup;
@@ -178,7 +171,7 @@ int ImageGetSizeAvif(int type, jint *width, jint *height)
     ///////////////////////////////////////////////
     // avifのデコーダ
     decoder = avifDecoderCreate();
-    if (decoder == NULL) {
+    if (decoder == nullptr) {
         LOGE("ImageGetSizeAvif: [error] Memory allocation failure");
         returnCode = -2;
         goto cleanup;
@@ -186,7 +179,7 @@ int ImageGetSizeAvif(int type, jint *width, jint *height)
 
     ///////////////////////////////////////////////
     // バッファを取り込む
-    result = avifDecoderSetIOMemory(decoder, (uint8_t *)gLoadBuffer, gLoadFileSize);
+    result = avifDecoderSetIOMemory(decoder, (uint8_t *)gLoadBuffer[index], gLoadFileSize[index]);
     if (result != AVIF_RESULT_OK) {
         LOGE("ImageGetSizeAvif: [error] Cannot set IO on avifDecoder");
         returnCode = -3;

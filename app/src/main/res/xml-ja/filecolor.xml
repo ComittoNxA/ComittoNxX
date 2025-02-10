@@ -16,98 +16,98 @@
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="カスタム設定" >
-        <src.comitton.config.ColorTxtSetting
+        <src.comitton.config.color.ColorTxtSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="サーバ選択のテキスト色"
             android:key="TxtRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="サーバ選択のテキスト色" />
-        <src.comitton.config.ColorDirSetting
+        <src.comitton.config.color.ColorDirSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="ディレクトリの色"
             android:key="DirRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="ディレクトリの色" />
-        <src.comitton.config.ColorBefSetting
+        <src.comitton.config.color.ColorBefSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="未読ファイルの色"
             android:key="BefRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="未読ファイルの色" />
-        <src.comitton.config.ColorNowSetting
+        <src.comitton.config.color.ColorNowSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="読みかけファイルの色"
             android:key="NowRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="読みかけファイルの色" />
-        <src.comitton.config.ColorAftSetting
+        <src.comitton.config.color.ColorAftSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="既読ファイルの色"
             android:key="AftRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="既読ファイルの色" />
-        <src.comitton.config.ColorImgSetting
+        <src.comitton.config.color.ColorImgSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="イメージファイルの色"
             android:key="ImgRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="イメージファイルの色" />
-        <src.comitton.config.ColorInfSetting
+        <src.comitton.config.color.ColorInfSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="ファイル情報の色"
             android:key="InfRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="ファイル情報の色" />
-        <src.comitton.config.ColorMrkSetting
+        <src.comitton.config.color.ColorMrkSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="マーカーの色"
             android:key="MrkRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="マーカーの色" />
-        <src.comitton.config.ColorBakSetting
+        <src.comitton.config.color.ColorBakSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="リストの背景色"
             android:key="BakRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="リストの背景色" />
-        <src.comitton.config.ColorCurSetting
+        <src.comitton.config.color.ColorCurSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="選択時の色"
             android:key="CurRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="選択時の色" />
-        <src.comitton.config.ColorTitSetting
+        <src.comitton.config.color.ColorTitSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="タイトルのテキスト色"
             android:key="TitRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="タイトルのテキスト色" />
-        <src.comitton.config.ColorTibSetting
+        <src.comitton.config.color.ColorTibSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="タイトルの背景色"
             android:key="TibRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="タイトルの背景色" />
-        <src.comitton.config.ColorTldSetting
+        <src.comitton.config.color.ColorTldSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="ツールバーの描画色"
             android:key="TldRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="ツールバーの描画色" />
-        <src.comitton.config.ColorTlbSetting
+        <src.comitton.config.color.ColorTlbSetting
             android:dialogMessage="色を設定してください。"
             android:dialogTitle="ツールバーのボタン色"
             android:key="TlbRGB"

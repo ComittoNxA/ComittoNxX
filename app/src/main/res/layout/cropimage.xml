@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <src.comitton.view.image.CropImageView
+    <src.comitton.cropimageview.CropImageView
         android:id="@+id/cropImageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -18,7 +18,7 @@ int			gTextImageSize = 0;
 
 extern "C" {
 // イメージ保存
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_SetTextImage (JNIEnv *env, jclass obj, jobject bitmap, jint page, jint current_page)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallTxtLibrary_SetTextImage (JNIEnv *env, jclass obj, jobject bitmap, jint page, jint current_page)
 {
 //	LOGD("SetTextImage : pg=%d, cp=%d", page, current_page);
 
@@ -74,7 +74,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_SetTextImage (JNI
 }
 
 // イメージ取得
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_GetTextImage(JNIEnv *env, jclass obj, jobject bitmap, jint page)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallTxtLibrary_GetTextImage(JNIEnv *env, jclass obj, jobject bitmap, jint page)
 {
 //	LOGD("GetTextImage : pg=%d", page);
     // メモリ獲得
@@ -114,7 +114,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_GetTextImage(JNIE
 }
 
 // イメージ存在チェック
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_CheckTextImage(JNIEnv *env, jclass obj, jint page)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallTxtLibrary_CheckTextImage(JNIEnv *env, jclass obj, jint page)
 {
 //	LOGD("CheckTextImage : pg=%d", page);
     // メモリ獲得
@@ -131,7 +131,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_CheckTextImage(JN
 }
 
 // イメージ解放
-JNIEXPORT jint JNICALL Java_src_comitton_stream_CallTxtLibrary_FreeTextImage(JNIEnv *env, jclass obj)
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallTxtLibrary_FreeTextImage(JNIEnv *env, jclass obj)
 {
 //	LOGD("FreeTextImage");
 	TextImagesFree();

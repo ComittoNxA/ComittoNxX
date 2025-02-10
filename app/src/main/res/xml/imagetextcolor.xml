@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="Image Viewer Settings" >
-        <src.comitton.config.ColorMgnSetting
+        <src.comitton.config.color.ColorMgnSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Margin Color"
             android:key="MgnRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Margin Color" />
-        <src.comitton.config.ColorCntSetting
+        <src.comitton.config.color.ColorCntSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Center Mrgin Color"
             android:key="CntRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Center Mrgin Color" />
-        <src.comitton.config.ColorGuiSetting
+        <src.comitton.config.color.ColorGuiSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Guide Color"
             android:key="GuiRGB"
@@ -24,42 +24,42 @@
             android:title="Guide Color" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Text Viewer Settings" >
-        <src.comitton.config.ColorTxtMgnSetting
+        <src.comitton.config.color.ColorTxtMgnSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Margin Color"
             android:key="txMgnRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Margin Color" />
-        <src.comitton.config.ColorTxtCntSetting
+        <src.comitton.config.color.ColorTxtCntSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Center Mrgin Color"
             android:key="txCntRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Center Mrgin Color" />
-        <src.comitton.config.ColorTxtGuiSetting
+        <src.comitton.config.color.ColorTxtGuiSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Guide Color"
             android:key="txGuiRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Guide Color" />
-        <src.comitton.config.ColorTvtSetting
+        <src.comitton.config.color.ColorTvtSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Text Color"
             android:key="txTvtRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Text Color" />
-        <src.comitton.config.ColorTvbSetting
+        <src.comitton.config.color.ColorTvbSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Background Color"
             android:key="txTvbRGB"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Background Color" />
-        <src.comitton.config.ColorTvgSetting
+        <src.comitton.config.color.ColorTvgSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Background Color for Gradation"
             android:key="txTvgRGB"
@@ -74,7 +74,7 @@
             android:key="txGradation"
             android:summary="dummy"
             android:title="Gradation Settings" />
-        <src.comitton.config.ColorHitSetting
+        <src.comitton.config.color.ColorHitSetting
             android:dialogMessage="Please Select Color."
             android:dialogTitle="Search Hit Color"
             android:key="txHitRGB"

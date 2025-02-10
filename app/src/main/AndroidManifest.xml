@@ -14,7 +14,7 @@
         <meta-data android:name="android.max_aspect" android:value="3.0" />
 
         <activity
-            android:name="src.comitton.activity.FileSelectActivity"
+            android:name="src.comitton.fileview.FileSelectActivity"
             android:label="@string/app_launch_name"
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true"
@@ -47,32 +47,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="src.comitton.activity.ImageActivity"
+            android:name="src.comitton.imageview.ImageActivity"
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true"
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
             android:exported="true" >
         </activity>
         <activity
-            android:name="src.comitton.activity.TextActivity"
+            android:name="src.comitton.textview.TextActivity"
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true"
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
             android:exported="true" >
         </activity>
         <activity
-            android:name="src.comitton.activity.ExpandActivity"
+            android:name="src.comitton.expandview.ExpandActivity"
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize|screenLayout"
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true" >
         </activity>
         <activity
-            android:name="src.comitton.activity.HelpActivity"
+            android:name="src.comitton.helpview.HelpActivity"
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true" >
         </activity>
         <activity
-            android:name="src.comitton.activity.CropImageActivity"
+            android:name="src.comitton.cropimageview.CropImageActivity"
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true" >
         </activity>
@@ -157,6 +157,8 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION" />
+    <uses-permission android:name="android.permission.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_MEDIA"/>
     <uses-permission android:name="android.permission.VIBRATE" />

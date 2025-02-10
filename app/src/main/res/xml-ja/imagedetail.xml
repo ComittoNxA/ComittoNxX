@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="表示関連の設定" >
-        <src.comitton.config.WAdjustSeekbar
+        <src.comitton.config.seekbar.WAdjustSeekbar
             android:dialogMessage="横持ちの状態での画面縦に対する横の比率を設定"
             android:dialogTitle="画面縦横比率の調整"
             android:key="WAdjust"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="画面縦横比率の調整" />
-        <src.comitton.config.WScalingSeekbar
+        <src.comitton.config.seekbar.WScalingSeekbar
             android:dialogMessage="イメージの幅を指定のサイズに拡大/縮小する"
             android:dialogTitle="イメージの幅の調整"
             android:key="WScaling"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="イメージ幅の調整" />
-        <src.comitton.config.ScalingSeekbar
+        <src.comitton.config.seekbar.ScalingSeekbar
             android:dialogMessage="イメージを指定のサイズに拡大/縮小する"
             android:dialogTitle="イメージの拡大縮小"
             android:key="Scaling"
@@ -29,7 +29,7 @@
             android:title="ファイルアクセス状態を表示" />
     </PreferenceCategory>
     <PreferenceCategory android:title="操作関連の設定" >
-        <src.comitton.config.LongTapSeekbar
+        <src.comitton.config.seekbar.LongTapSeekbar
             android:dialogMessage="ルーペを表示する長押しの時間を選択"
             android:dialogTitle="ルーペ表示までの長押し時間"
             android:key="LongTap"
@@ -44,21 +44,21 @@
             android:key="LoupeSize"
             android:summary="dummy"
             android:title="ルーペサイズ" />
-        <src.comitton.config.ScrlRngWSeekbar
+        <src.comitton.config.seekbar.ScrlRngWSeekbar
             android:dialogMessage="音量キー等でのスクロール量(幅)"
             android:dialogTitle="スクロール量(幅)"
             android:key="ScrlRngW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="音量キーでのスクロール量(幅)" />
-        <src.comitton.config.ScrlRngHSeekbar
+        <src.comitton.config.seekbar.ScrlRngHSeekbar
             android:dialogMessage="音量キー等でのスクロール量(高さ)"
             android:dialogTitle="スクロール量(高さ)"
             android:key="ScrlRngH"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="音量キー等でのスクロール量(高さ)" />
-        <src.comitton.config.AutoPlaySeekbar
+        <src.comitton.config.seekbar.AutoPlaySeekbar
             android:dialogMessage="自動再生時の間隔"
             android:dialogTitle="自動再生速度"
             android:key="AutoPlayInt"

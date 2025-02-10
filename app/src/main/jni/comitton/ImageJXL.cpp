@@ -11,17 +11,17 @@
 
 //#define DEBUG
 
-extern char	*gLoadBuffer;
-extern long	gLoadFileSize;
+extern char	*gLoadBuffer[];
+extern long	gLoadFileSize[];
 extern int gMaxThreadNum;
 
 // 画像をBitmapに変換してバッファに入れる
-int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
+int LoadImageJxl(int index, int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *canvas)
 {
     int returnCode = 0;         // この関数のリターンコード
     uint32_t width;             // 画像の幅
     uint32_t height;            // 画像の高さ
-    uint8_t *buffer = NULL;
+    uint8_t *buffer = nullptr;
 
     JxlDecoderStatus status;
     JxlBasicInfo jxl_info;
@@ -34,9 +34,9 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
     auto runner = JxlResizableParallelRunnerMake(nullptr);      // マルチスレッド実行用
     auto decoder = JxlDecoderMake(nullptr);
 
-    if (gLoadBuffer == NULL) {
+    if (gLoadBuffer[index] == nullptr) {
         LOGE("LoadImageJxl: [error] gLoadBuffer is null");
-        returnCode = -1;
+        returnCode = ERROR_CODE_CACHE_NOT_INITIALIZED;
         goto cleanup;
     }
 
@@ -57,7 +57,7 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
         goto cleanup;
     }
 
-    JxlDecoderSetInput(decoder.get(), (uint8_t *)gLoadBuffer, gLoadFileSize);
+    JxlDecoderSetInput(decoder.get(), (uint8_t *)gLoadBuffer[index], gLoadFileSize[index]);
     JxlDecoderCloseInput(decoder.get());
     for (;;) {
 
@@ -94,9 +94,9 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
             LOGD("LoadImageJxl: buffer_size=%d", buffer_size);
 #endif
             buffer = (uint8_t *)malloc(buffer_size);
-            if (buffer == (unsigned char *) NULL)
+            if (buffer == (unsigned char *) nullptr)
             {
-                returnCode = -8;
+                returnCode = ERROR_CODE_MALLOC_FAILURE;
                 goto cleanup;
             }
 
@@ -114,7 +114,7 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
 #ifdef DEBUG
             LOGD("LoadImageJxl: status == JXL_DEC_FULL_IMAGE");
 #endif
-            if (buffer == (unsigned char *) NULL)
+            if (buffer == (unsigned char *) nullptr)
             {
                 LOGE("LoadImageJxl: UnableToReadImageData");
                 returnCode = -10;
@@ -122,8 +122,10 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
             }
 
             if (loadCommand == SET_BUFFER) {
+#ifdef DEBUG
                 LOGD("LoadImageJxl: SetBuff() Start. page=%d, width=%d, height=%d", page, width, height);
-                returnCode = SetBuff(page, width, height, buffer, COLOR_FORMAT_RGB);
+#endif
+                returnCode = SetBuff(index, page, width, height, buffer, COLOR_FORMAT_RGB);
                 if (returnCode < 0) {
                     LOGE("LoadImageJxl: SetBuff() failed. return=%d", returnCode);
                     returnCode = -10;
@@ -137,10 +139,9 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
 #ifdef DEBUG
                 LOGD("LoadImageJxl: SetBitmap() Start. page=%d, width=%d, height=%d", page, width, height);
 #endif
-                returnCode = SetBitmap(page, width, height, buffer, COLOR_FORMAT_RGB, canvas);
+                returnCode = SetBitmap(index, page, width, height, buffer, COLOR_FORMAT_RGB, canvas);
                 if (returnCode < 0) {
                     LOGE("LoadImageJxl: SetBitmap() failed. return=%d", returnCode);
-                    returnCode = -11;
                     goto cleanup;
                 }
             }
@@ -151,7 +152,7 @@ int LoadImageJxl(int loadCommand, IMAGEDATA *pData, int page, int scale, WORD *c
 cleanup:
     // cleanup
     JxlDecoderReleaseInput(decoder.get());
-    if (buffer == (unsigned char *) NULL)
+    if (buffer == (unsigned char *) nullptr)
     {
         free(buffer);
     }
@@ -163,7 +164,7 @@ cleanup:
 }
 
 // 画像の幅と高さを返す
-int ImageGetSizeJxl(int type, jint *width, jint *height)
+int ImageGetSizeJxl(int index, int type, jint *width, jint *height)
 {
     int returnCode = 0;         // この関数のリターンコード
 
@@ -176,17 +177,17 @@ int ImageGetSizeJxl(int type, jint *width, jint *height)
 
     auto decoder = JxlDecoderMake(nullptr);
 
-    if (gLoadBuffer == NULL) {
+    if (gLoadBuffer[index] == nullptr) {
         LOGE("ImageGetSizeJxl: [error] gLoadBuffer is null");
-        returnCode = -1;
+        returnCode = ERROR_CODE_CACHE_NOT_INITIALIZED;
         goto cleanup;
     }
-    if (width == NULL) {
+    if (width == nullptr) {
         LOGE("ImageGetSizeJxl: [error] width is null");
         returnCode = -1;
         goto cleanup;
     }
-    if (height == NULL) {
+    if (height == nullptr) {
         LOGE("ImageGetSizeJxl: [error] height is null");
         returnCode = -1;
         goto cleanup;
@@ -201,7 +202,7 @@ int ImageGetSizeJxl(int type, jint *width, jint *height)
         goto cleanup;
     }
 
-    JxlDecoderSetInput(decoder.get(), (uint8_t *)gLoadBuffer, gLoadFileSize);
+    JxlDecoderSetInput(decoder.get(), (uint8_t *)gLoadBuffer[index], gLoadFileSize[index]);
     JxlDecoderCloseInput(decoder.get());
     status = JxlDecoderProcessInput(decoder.get());
 

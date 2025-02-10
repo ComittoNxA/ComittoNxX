@@ -1,6 +1,14 @@
 package src.comitton.config;
 
-import src.comitton.activity.HelpActivity;
+import src.comitton.config.seekbar.FontMainSeekbar;
+import src.comitton.config.seekbar.FontSubSeekbar;
+import src.comitton.config.seekbar.FontTileSeekbar;
+import src.comitton.config.seekbar.FontTitleSeekbar;
+import src.comitton.config.seekbar.ItemMarginSeekbar;
+import src.comitton.config.seekbar.ListThumbSeekbar;
+import src.comitton.config.seekbar.MenuLongTapSeekbar;
+import src.comitton.config.seekbar.ToolbarSeekbar;
+import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Intent;
@@ -8,7 +16,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -25,14 +32,15 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 	private ListPreference mFileDelMenu;
 	private ListPreference mFileRenMenu;
 
-	private FontTitleSeekbar  mFontTitle;
-	private FontMainSeekbar   mFontMain;
-	private FontSubSeekbar    mFontSub;
-	private FontTileSeekbar   mFontTile;
+	private FontTitleSeekbar mFontTitle;
+	private FontMainSeekbar mFontMain;
+	private FontSubSeekbar mFontSub;
+	private FontTileSeekbar mFontTile;
 	private ItemMarginSeekbar mItemMrgn;
 	private MenuLongTapSeekbar mMenuLongTap;
 
 	private ListPreference mThumbCache;
+	private ListPreference mThumbSortType;
 	private ListPreference mThumbCrop;
 	private ListPreference mThumbMargin;
 
@@ -72,6 +80,11 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		, R.string.thumbcache02		// 500まで
 		, R.string.thumbcache03		// 1000まで
 		, R.string.thumbcache04 };	// 手動で削除
+	public static final int ThumSortTypeName[] =
+		{ R.string.thumbsorttype00		// なし
+		, R.string.thumbsorttype01		// ローカル
+		, R.string.thumbsorttype02		// ローカルとSMB
+		, R.string.thumbsorttype03 };	// すべて
 	public static final int ThumCropName[] =
 			{ R.string.thumbcrop00		// 中央
 			, R.string.thumbcrop01		// 左
@@ -105,6 +118,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		mItemMrgn  = (ItemMarginSeekbar)getPreferenceScreen().findPreference(DEF.KEY_ITEMMRGN);
 		mThumbnail = (ThumbnailPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBSEEK);
 		mThumbCache = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBCACHE);
+		mThumbSortType = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBSORTTYPE);
 		mThumbCrop = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBCROP);
 		mThumbMargin = (ListPreference)getPreferenceScreen().findPreference(DEF.KEY_THUMBMARGIN);
 		mToolbarSeek = (ToolbarSeekbar)getPreferenceScreen().findPreference(DEF.KEY_TOOLBARSEEK);
@@ -148,6 +162,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		mItemMrgn.setSummary(getItemMarginSummary(sharedPreferences));	// 余白サイズ
 		mThumbnail.setSummary(getThumbnailSummary(sharedPreferences));	// サムネイルサイズ
 		mThumbCache.setSummary(getThumbCacheSummary(sharedPreferences));	// サムネイルキャッシュ保持数
+		mThumbSortType.setSummary(getThumbSortTypeSummary(sharedPreferences));	// RARファイルの先頭ファイル名のサムネイル作成条件
 		mThumbCrop.setSummary(getThumbCropSummary(sharedPreferences));	// サムネイルキャッシュ保持数
 		mThumbMargin.setSummary(getThumbMarginSummary(sharedPreferences));	// サムネイルキャッシュ保持数
 		mToolbarSeek.setSummary(getToolbarSeekSummary(sharedPreferences));		// ツールバー表示
@@ -203,6 +218,10 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		else if(key.equals(DEF.KEY_THUMBCACHE)){
 			//
 			mThumbCache.setSummary(getThumbCacheSummary(sharedPreferences));
+		}
+		else if(key.equals(DEF.KEY_THUMBSORTTYPE)){
+			//
+			mThumbSortType.setSummary(getThumbSortTypeSummary(sharedPreferences));
 		}
 		else if(key.equals(DEF.KEY_THUMBCROP)){
 			//
@@ -397,6 +416,14 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		return val;
 	}
 
+	public static int getThumbSortType(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences, DEF.KEY_THUMBSORTTYPE, "2");
+		if (val < 0 || val >= ThumSortTypeName.length){
+			val = 2;
+		}
+		return val;
+	}
+
 	public static int getThumbCrop(SharedPreferences sharedPreferences){
 		int val = DEF.getInt(sharedPreferences, DEF.KEY_THUMBCROP, "0");
 		if (val < 0 || val >= ThumCropName.length){
@@ -475,6 +502,12 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 	public static boolean getThumbnailSort(SharedPreferences sharedPreferences){
 		boolean flag;
 		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_THUMBSORT, false);
+		return flag;
+	}
+
+	public static int getThumbnailSortType(SharedPreferences sharedPreferences){
+		int flag;
+		flag =  DEF.getInt(sharedPreferences, DEF.KEY_THUMBSORTTYPE, 2);
 		return flag;
 	}
 
@@ -617,6 +650,12 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		int val = getThumbCache(sharedPreferences);
 		Resources res = getResources();
 		return res.getString(ThumCacheName[val]);
+	}
+
+	private String getThumbSortTypeSummary(SharedPreferences sharedPreferences){
+		int val = getThumbSortType(sharedPreferences);
+		Resources res = getResources();
+		return res.getString(ThumSortTypeName[val]);
 	}
 
 	private String getThumbCropSummary(SharedPreferences sharedPreferences){

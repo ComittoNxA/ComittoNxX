@@ -8,17 +8,8 @@ def packageName = "jp.dip.muracoro.comittonx"
 def applicationName = "ComittoNxX"
 
 def versionMajor = 2
-def versionMinor = 2
-def versionPatch = 10
-
-// 画像フォーマットサポート設定
-def WITH_JPEG = "ON"
-def WITH_PNG = "ON"
-def WITH_GIF = "ON"
-def WITH_WEBP = "ON"
-def WITH_AVIF = "ON"
-def WITH_HEIF = "ON"
-def WITH_JXL = "ON"
+def versionMinor = 3
+def versionPatch = 0
 
 // アプリに署名するため以下のファイルを作成して signingConfig の設定を記述してください
 apply from:'../signingConfigs/release.gradle', to: android
@@ -50,28 +41,13 @@ android {
             }
         }
 
-        // BuildConfig.java に値を定義する
-        buildConfigField("String", "WITH_JPEG", "\"" + WITH_JPEG + "\"")
-        buildConfigField("String", "WITH_PNG", "\"" + WITH_PNG + "\"")
-        buildConfigField("String", "WITH_GIF", "\"" + WITH_GIF + "\"")
-        buildConfigField("String", "WITH_WEBP", "\"" + WITH_WEBP + "\"")
-        buildConfigField("String", "WITH_AVIF", "\"" + WITH_AVIF + "\"")
-        buildConfigField("String", "WITH_HEIF", "\"" + WITH_HEIF + "\"")
-        buildConfigField("String", "WITH_JXL", "\"" + WITH_JXL + "\"")
         // ビルド日時を 参照できるようにする
         buildConfigField("long", "BUILD_DATE", System.currentTimeMillis().toString())
 
         // CmakeLists.txt にオプションを定義する
         externalNativeBuild {
             cmake {
-                arguments \
-                    "-DWITH_JPEG=" + WITH_JPEG,\
-                    "-DWITH_PNG=" + WITH_PNG,\
-                    "-DWITH_GIF=" + WITH_GIF,\
-                    "-DWITH_WEBP=" + WITH_WEBP,\
-                    "-DWITH_AVIF=" + WITH_AVIF,\
-                    "-DWITH_HEIF=" +WITH_HEIF,\
-                    "-DWITH_JXL=" + WITH_JXL
+                arguments ""
             }
         }
 
@@ -227,6 +203,7 @@ dependencies {
     implementation "androidx.viewpager2:viewpager2:1.1.0"
     implementation "androidx.preference:preference:1.2.1"
     implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
+    implementation "androidx.documentfile:documentfile:1.1.0-alpha01"
 
     // SMB接続用ライブラリjcifs(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
     implementation 'org.codelibs:jcifs:2.1.39'

@@ -1,10 +1,13 @@
 //#define DEBUG
 #include <jni.h>
+#include "common.h"
 
 #define  LOG_TAG    "comitton_img"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+
+#define MAX_BUFFER_INDEX 20
 
 #define IMAGETYPE_NONE 0
 #define IMAGETYPE_PDF 3;
@@ -84,17 +87,11 @@ typedef enum {
 
 typedef struct imagedata {
 	short		UseFlag;
-	long		OrgWidth;
-	long		OrgHeight;
+	int		OrgWidth;
+	int		OrgHeight;
 	short		SclFlag[3];
-	long		SclWidth[3];
-	long		SclHeight[3];
-//	short		DotBytes;
-//	long		LoadSize;
-//	long		LoadPos;
-//	JSAMPLE		*OrgLines[MAX_LINES - 1];
-//	JSAMPLE		*OrgBuff;
-//	WORD		*SclBuff;
+	int		SclWidth[3];
+	int		SclHeight[3];
 } IMAGEDATA;
 
 typedef struct buff_manage {
@@ -102,7 +99,8 @@ typedef struct buff_manage {
 	char		Type;
 	char		Half;
 	long		Size;
-	long		Index;	// Scaleの時のみ使用
+    /** Scale変更をした回数 */
+	long		Count;
 	WORD		*Buff;
 } BUFFMNG;
 
@@ -111,6 +109,17 @@ typedef struct buff_manage {
 
 #define QUALITY_LOW		0
 #define QUALITY_HIGH	1
+
+#define BMPMARGIN_NONE      0
+#define BMPMARGIN_WEAK      1
+#define BMPMARGIN_MEDIUM    2
+#define BMPMARGIN_STRONG    3
+#define BMPMARGIN_SPECIAL   4
+#define BMPMARGIN_OVERKILL  5
+#define BMPMARGIN_IGNORE_ASPECT_RATIO  6
+
+#define MARGIN_COLOR_WHITE_AND_BLACK	0
+#define MARGIN_COLOR_ALL_COLORS     	1
 
 #define PARAM_SHARPEN	0x0001
 #define PARAM_INVERT	0x0002
@@ -130,68 +139,48 @@ int ThumbnailImageSize(long long, int);
 int ThumbnailDraw(long long, int, int, int, int, BYTE*);
 void ThumbnailFree(long long);
 
-void CheckImageType(int *);
-int SetBuff(int, uint32_t, uint32_t, uint8_t*, colorFormat);
-int SetBitmap(int, uint32_t, uint32_t, uint8_t*, colorFormat, WORD *);
-int ReleaseBuff(int, int, int);
-int MemAlloc(int);
-void MemFree(void);
-int ScaleMemLine(int);
-int ScaleMemColumn(int);
-void ScaleMemLineFree(void);
-void ScaleMemColumnFree(void);
+void CheckImageType(int, int *);
+int SetBuff(int, int, uint32_t, uint32_t, uint8_t*, colorFormat);
+int SetBitmap(int, int, uint32_t, uint32_t, uint8_t*, colorFormat, WORD *);
+int ReleaseBuff(int, int, int, int);
+int MemAlloc(int, int);
+void MemFree(int);
+int ScaleMemLine(int, int);
+int ScaleMemColumn(int, int);
+void ScaleMemLineFree(int);
+void ScaleMemColumnFree(int);
 
-int ScaleMemInit(void);
-int ScaleMemAlloc(int, int);
+int ScaleMemInit(int);
+int ScaleMemAlloc(int, int, int);
 
-int DrawScaleBitmap(int, int, int, int, int, int, int, int, int, int, void *, int, int, int, int, IMAGEDATA *, int, int, int, int);
-int DrawBitmap(int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
-// int DrawBitmapReg90(int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
+int DrawScaleBitmap(int, int, int, int, int, int, int, int, int, int, int, void *, int, int, int, int, IMAGEDATA *, int, int, int, int);
+int DrawBitmap(int, int, int half, int x, int y, void *, int, int, int, IMAGEDATA *);
 
-int CreateScale(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, jint*);
+int CreateScale(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, jint*);
 
-int SetLinesPtr(int, int, int, int, int);
-int NextSclBuff(int, int, int, int*, int*, int);
-int EraseSclBuffMng(int index);
-int CopySclBuffMngToBuffMng(void);
-int RefreshSclLinesPtr(int, int, int, int, int);
+int SetLinesPtr(int, int, int, int, int, int);
+int NextSclBuff(int, int, int, int, int*, int*, int);
+int EraseSclBuffMng(int, int);
+int CopySclBuffMngToBuffMng(int);
+int RefreshSclLinesPtr(int, int, int, int, int, int);
 
-int ImageRotate(int, int, int, int, int, int);
-int GetMarginSize(int, int, int, int, int, int, int, int*, int*, int*, int*);
-int ImageMarginCut(int, int, int, int, int, int, int, int, int, int, int, int*, int*);
-int ImageHalf(int, int, int, int, int);
-int ImageSharpen(int, int, int, int, int, int);
-int ImageBlur(int, int, int, int, int, int);
-int ImageInvert(int, int, int, int, int);
-int ImageGray(int, int, int, int, int);
-int ImageBright(int, int, int, int, int, int, int);
+int ImageRotate(int, int, int, int, int, int, int);
+int GetMarginSize(int, int, int, int, int, int, int*, int*, int*, int*);
+int ImageMarginCut(int, int, int, int, int, int, int, int, int, int, int*, int*);
+int ImageHalf(int, int, int, int, int, int);
+int ImageSharpen(int, int, int, int, int, int, int);
+int ImageBlur(int, int, int, int, int, int, int);
+int ImageInvert(int, int, int, int, int, int);
+int ImageGray(int, int, int, int, int, int);
+int ImageBright(int, int, int, int, int, int, int, int);
 
-int CreateScaleNear(int, int, int, int, int, int, int);
-int CreateScaleLinear(int, int, int, int, int, int, int);
-int CreateScaleCubic(int, int, int, int, int, int, int);
-int CreateScaleHalf(int, int, int, int, int);
+int CreateScaleNear(int, int, int, int, int, int, int, int);
+int CreateScaleLinear(int, int, int, int, int, int, int, int);
+int CreateScaleCubic(int, int, int, int, int, int, int, int);
+int CreateScaleHalf(int, int, int, int, int, int);
 
-#ifdef HAVE_LIBJPEG
-int LoadImageJpeg(int, IMAGEDATA *, int, int, WORD *);
-#endif
-#ifdef HAVE_LIBPNG
-int LoadImagePng(int, IMAGEDATA *, int, int, WORD *);
-#endif
-#ifdef HAVE_LIBGIF
-int LoadImageGif(int, IMAGEDATA *, int, int, WORD *);
-#endif
-#ifdef HAVE_LIBWEBP
-int LoadImageWebp(int, IMAGEDATA *, int, int, WORD *);
-#endif
-#ifdef HAVE_LIBAVIF
-int ImageGetSizeAvif(int, int *, int *);
-int LoadImageAvif(int, IMAGEDATA *, int, int, WORD *);
-#endif
-#ifdef HAVE_LIBHEIF
-int ImageGetSizeHeif(int, int *, int *);
-int LoadImageHeif(int, IMAGEDATA *, int, int, WORD *);
-#endif
-#ifdef HAVE_LIBJXL
-int ImageGetSizeJxl(int, int *, int *);
-int LoadImageJxl(int, IMAGEDATA *, int, int, WORD *);
-#endif
+int ImageGetSizeAvif(int, int, int *, int *);
+int LoadImageAvif(int, int, IMAGEDATA *, int, int, WORD *);
+
+int ImageGetSizeJxl(int, int, int *, int *);
+int LoadImageJxl(int, int, IMAGEDATA *, int, int, WORD *);

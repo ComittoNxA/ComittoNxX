@@ -1,7 +1,6 @@
 package src.comitton.dialog;
 
 import android.app.Dialog;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -16,12 +15,11 @@ import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.adapter.FragmentViewHolder;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -30,7 +28,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.ArrayList;
 
 import jp.dip.muracoro.comittonx.R;
-import src.comitton.view.MenuItemView;
+import src.comitton.fileview.view.MenuItemView;
 
 public class TabDialogFragment extends ImmersiveDialogFragment implements View.OnTouchListener {
 
@@ -41,7 +39,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     protected LinearLayout mFooter;
 
     private MenuDialog.MenuSelectListener mListener = null;
-    private FragmentActivity mActivity;
+    protected AppCompatActivity mActivity;
     protected @StyleRes int mThemeResId;
 
     protected ArrayList<String> mTitleArray = new ArrayList<String>(0);
@@ -72,27 +70,27 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     private static int separater_bakcolor = 0xBBFFFFFF;
     private int item_txtsize;
 
-    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
+    public TabDialogFragment(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
         mThemeResId = themeResId;
         TabDialogFragmentProc(activity, isclose, false, false, false, listener);
     }
 
-    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
+    public TabDialogFragment(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, MenuDialog.MenuSelectListener listener) {
         mThemeResId = themeResId;
         TabDialogFragmentProc(activity, isclose, halfview, false, false, listener);
     }
 
-    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
+    public TabDialogFragment(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, MenuDialog.MenuSelectListener listener) {
         mThemeResId = themeResId;
         TabDialogFragmentProc(activity, isclose, halfview, top, false, listener);
     }
 
-    public TabDialogFragment(FragmentActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+    public TabDialogFragment(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
         mThemeResId = themeResId;
         TabDialogFragmentProc(activity, isclose, halfview, top, wide, listener);
     }
 
-    private void TabDialogFragmentProc(FragmentActivity activity, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
+    private void TabDialogFragmentProc(AppCompatActivity activity, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
         boolean debug = false;
         if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: isclose=" + isclose + ", halfview=" + halfview + ", top=" + top + ", wide=" + wide);}
 

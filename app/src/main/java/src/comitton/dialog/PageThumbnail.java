@@ -1,10 +1,9 @@
 package src.comitton.dialog;
 
-import src.comitton.stream.ImageManager;
-import src.comitton.view.image.ThumbnailView;
+import src.comitton.imageview.ImageManager;
+import src.comitton.imageview.ThumbnailView;
 import jp.dip.muracoro.comittonx.R;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;

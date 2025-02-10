@@ -4,12 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <src.comitton.view.TitleView
+    <src.comitton.fileview.view.TitleView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <src.comitton.view.ToolbarView
+    <src.comitton.fileview.view.ToolbarView
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -20,25 +20,25 @@
         android:layout_height="0dp"
         android:layout_weight="1" >
 
-        <src.comitton.view.TileScrollView
+        <src.comitton.fileview.view.TileScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
-            <src.comitton.view.TileView
+            <src.comitton.fileview.view.TileView
                 android:id="@+id/tile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-        </src.comitton.view.TileScrollView>
+        </src.comitton.fileview.view.TileScrollView>
 
-        <src.comitton.view.ScrollerView
+        <src.comitton.fileview.view.ScrollerView
             android:id="@+id/scroller"
             android:layout_width="20dp"
             android:layout_height="match_parent"
             android:layout_gravity="right" />
     </FrameLayout>
 
-    <src.comitton.view.SelectorView
+    <src.comitton.fileview.view.SelectorView
         android:id="@+id/selector"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

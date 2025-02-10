@@ -66,7 +66,7 @@
     <string name="fileNextMark">次のファイル(しおり位置)</string>
     <string name="filePrevMark">前のファイル(しおり位置)</string>
     <string name="loading">Loading</string>
-    <string name="reading">ファイルリスト読込中</string>
+    <string name="reading">ファイルリスト解析中</string>
     <string name="epubParsing">EPUB解析中</string>
     <string name="htmlParsing">HTML解析中</string>
     <string name="textParsing">テキスト解析中</string>
@@ -74,6 +74,7 @@
     <string name="readxref">XREF読込中</string>
     <string name="readpage">Page構造読込中</string>
     <string name="download">ダウンロード中</string>
+    <string name="imageParsing">画像解析中</string>
     <string name="loaderr">画像の読込みに失敗しました</string>
     <string name="localStrage">ローカル</string>
     <string name="undefine">＊ 未定義 ＊</string>
@@ -175,10 +176,13 @@
     <string name="svHostTitle">ホスト情報 （サーバ/共有フォルダ）</string>
     <string name="svUserTitle">アカウント名（匿名は空欄、ゲストはguest）</string>
     <string name="svPassTitle">パスワード</string>
+    <string name="svProviderTitle">URL</string>
     <string name="svNameHist">Comics Server</string>
     <string name="svHostHist">192.168.1.120/comics (例)</string>
-    <string name="svUserHist">domain;user</string>
-    <string name="svPassHist"></string>
+    <string name="svUserHist">Domain;User</string>
+    <string name="svPassHist">Password</string>
+    <string name="svProviderUnselected">選択してください</string>
+    <string name="svProviderSelected">選択済</string>
     <string name="svNotFound">指定されたサーバは登録されていません。</string>
     <string name="resetLocal">保存済みのフォルダの場所をリセットします。</string>
     <string name="psAdd100">+100</string>
@@ -327,6 +331,10 @@
     <string name="thumbcache02">最大500ファイル</string>
     <string name="thumbcache03">最大1000ファイル</string>
     <string name="thumbcache04">削除しない(手動削除)</string>
+    <string name="thumbsorttype00">なし</string>
+    <string name="thumbsorttype01">ローカル</string>
+    <string name="thumbsorttype02">ローカルとSMB</string>
+    <string name="thumbsorttype03">すべて</string>
     <string name="thumbcrop00">中央</string>
     <string name="thumbcrop01">左</string>
     <string name="thumbcrop02">右</string>
@@ -537,5 +545,24 @@
 
     <string name="imgConfFilter">フィルター</string>
     <string name="imgConfOther">その他</string>
+
+    <string name="serverType">アクセスタイプ</string>
+    <string name="serverTypeSMB">SMB</string>
+    <string name="serverTypeSAF">ストレージ アクセス フレームワーク</string>
+    <string name="serverTypePicker">ファイル ピッカー</string>
+    <string name="SafChooseTitle">フォルダを選択してください.</string>
+    <string name="permissionDenied">権限がありません.</string>
+    <string name="noResponseProvider">コンテンツプロバイダからの応答がありません.</string>
+    <string name="SmbAccessError">SMBアクセスでエラーが発生しました</string>
+
+    <string name="releaseMessage">新しいバージョンがリリースされています.</string>
+    <string name="releasePositive">ダウンロード</string>
+    <string name="releaseNegative">後で</string>
+    <string name="releaseNeutral">通知OFF</string>
+
+    <string name="MallocFailure">メモリの確保に失敗しました</string>
+    <string name="CacheLimitExceeded">キャッシュの作成数が多すぎます</string>
+    <string name="CacheIndexOutOfRange">キャッシュのインデックスが間違っています</string>
+    <string name="CacheNotInitialized">キャッシュが初期化されていません</string>
 
 </resources>

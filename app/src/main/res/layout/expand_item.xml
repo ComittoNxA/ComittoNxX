@@ -29,7 +29,7 @@
                 android:background="@android:color/transparent"
                 app:srcCompat="@drawable/expand_line_white" />
 
-            <src.comitton.view.list.PageTextView
+            <src.comitton.fileview.view.list.PageTextView
                 android:id="@+id/title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
                 android:background="@android:color/transparent"
                 android:padding="10dp" />
 
-            <src.comitton.view.list.PageTextView
+            <src.comitton.fileview.view.list.PageTextView
                 android:id="@+id/page"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

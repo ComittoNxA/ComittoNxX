@@ -11,9 +11,9 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
@@ -26,10 +26,11 @@ void *CreateScaleNear_ThreadFunc(void *param)
 	int SclHeight = range[3];
 	int OrgWidth  = range[4];
 	int OrgHeight = range[5];
+    int index = range[6];
 
 //	LOGD("CreateScaleNear_ThreadFund : st=%d, ed=%d, sw=%d, sh=%d, ow=%d, oh=%d", stindex, edindex, SclWidth, SclHeight, OrgWidth, OrgHeight);
 
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 	WORD *orgbuff1;
 
 	int		sx;	// 元画像の参照x座標
@@ -41,16 +42,16 @@ void *CreateScaleNear_ThreadFunc(void *param)
 		// 元座標
 		sy = yy * OrgHeight / SclHeight;
 
-		orgbuff1 = gLinesPtr[sy + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
+		orgbuff1 = gLinesPtr[index][sy + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
 
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("CreateScaleBQ : cancel.");
 //			ReleaseBuff(Page, 1, half);
-			return (void*)-1;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
 		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
+		buffptr = gSclLinesPtr[index][yy];
 //		LOGD("CreateScale : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
 		for (xx = 0 ; xx < SclWidth ; xx ++) {
@@ -66,10 +67,10 @@ void *CreateScaleNear_ThreadFunc(void *param)
 		buffptr[SclWidth + 1] = buffptr[SclWidth - 1];
 	}
 //	LOGD("CreateScaleNear_ThreadFund : end");
-	return 0;
+	return nullptr;
 }
 
-int CreateScaleNear(int Page, int Half, int Index, int SclWidth, int SclHeight, int OrgWidth, int OrgHeight)
+int CreateScaleNear(int index, int Page, int Half, int Count, int SclWidth, int SclHeight, int OrgWidth, int OrgHeight)
 {
 	int ret = 0;
 
@@ -78,18 +79,20 @@ int CreateScaleNear(int Page, int Half, int Index, int SclWidth, int SclHeight, 
 	linesize  = SclWidth + HOKAN_DOTS;
 
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, SclHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, SclHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, SclHeight, linesize) < 0) {
-		return -7;
+    ret = RefreshSclLinesPtr(index, Page, Half, Count, SclHeight, linesize);
+	if (ret < 0) {
+		return ret;
 	}
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][6];
+	int param[gMaxThreadNum][7];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -99,10 +102,11 @@ int CreateScaleNear(int Page, int Half, int Index, int SclWidth, int SclHeight, 
 		param[i][3] = SclHeight;
 		param[i][4] = OrgWidth;
 		param[i][5] = OrgHeight;
-		
+        param[i][6] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, CreateScaleNear_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, CreateScaleNear_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -117,8 +121,8 @@ int CreateScaleNear(int Page, int Half, int Index, int SclWidth, int SclHeight, 
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
-			ret = -10;
+		if (status[i] != nullptr) {
+			ret = (long)status[i];
 		}
 	}
 

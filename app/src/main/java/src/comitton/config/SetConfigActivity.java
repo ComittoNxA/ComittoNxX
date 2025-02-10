@@ -1,6 +1,6 @@
 package src.comitton.config;
 
-import src.comitton.activity.HelpActivity;
+import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Intent;

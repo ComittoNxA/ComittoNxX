@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="音操作の設定" >
-        <src.comitton.config.NoiseScrlSeekbar
+        <src.comitton.config.seekbar.NoiseScrlSeekbar
             android:dialogMessage="長い音でスクロールする際の速度"
             android:dialogTitle="スクロール速度"
             android:key="NoiseScrlSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="スクロール速度" />
-        <src.comitton.config.NoiseOverSeekbar
+        <src.comitton.config.seekbar.NoiseOverSeekbar
             android:dialogMessage="このレベル以上の音量を音ありとして判断します"
             android:dialogTitle="音ありと判断するレベル"
             android:key="NoiseOver"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="音ありと判断するレベル" />
-        <src.comitton.config.NoiseUnderSeekbar
+        <src.comitton.config.seekbar.NoiseUnderSeekbar
             android:dialogMessage="このレベル未満の音量を無音として判断します"
             android:dialogTitle="無音と判断するレベル"
             android:key="NoiseUnder"

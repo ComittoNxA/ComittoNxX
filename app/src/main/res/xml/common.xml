@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="Common Settings" >
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="CheckRelease"
+            android:summary="Check regularly to see if new versions have been released."
+            android:title="Check the release" />
+        <CheckBoxPreference
             android:defaultValue="0"
             android:key="HiddenFile"
             android:summary="Do not show files that start with dot."

@@ -1,13 +1,19 @@
 package src.comitton.config;
 
-import src.comitton.activity.HelpActivity;
+import src.comitton.config.seekbar.AutoPlaySeekbar;
+import src.comitton.config.seekbar.LongTapSeekbar;
+import src.comitton.config.seekbar.ScalingSeekbar;
+import src.comitton.config.seekbar.ScrlRngHSeekbar;
+import src.comitton.config.seekbar.ScrlRngWSeekbar;
+import src.comitton.config.seekbar.WAdjustSeekbar;
+import src.comitton.config.seekbar.WScalingSeekbar;
+import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;

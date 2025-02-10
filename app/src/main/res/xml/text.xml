@@ -68,14 +68,14 @@
             android:key="txEffect"
             android:summary="When you scroll through page turns"
             android:title="Page turning effect" />
-        <src.comitton.config.TextScrlRngWSeekbar
+        <src.comitton.config.seekbar.TextScrlRngWSeekbar
             android:dialogMessage="Scroll Width of Vol-Button, etc."
             android:dialogTitle="Scroll Range (Width)"
             android:key="txScrlRngW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scroll Range (Width)" />
-        <src.comitton.config.TextScrlRngHSeekbar
+        <src.comitton.config.seekbar.TextScrlRngHSeekbar
             android:dialogMessage="Scroll Height of Vol-Button, etc."
             android:dialogTitle="Scroll Range (Height)"
             android:key="txScrlRngH"
@@ -187,56 +187,56 @@
             android:key="txFontName"
             android:summary="dummy"
             android:title="Select Font (Select from [sdcard]/comittona/font/)" />
-        <src.comitton.config.TextFontTopSeekbar
+        <src.comitton.config.seekbar.TextFontTopSeekbar
             android:dialogMessage="Select font size of head."
             android:dialogTitle="Head Font Size"
             android:key="txFontTopSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Head Font Size" />
-        <src.comitton.config.TextFontBodySeekbar
+        <src.comitton.config.seekbar.TextFontBodySeekbar
             android:dialogMessage="Select font size of body."
             android:dialogTitle="Body Font Size"
             android:key="txFontBodySp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Body Font Size" />
-        <src.comitton.config.TextFontRubiSeekbar
+        <src.comitton.config.seekbar.TextFontRubiSeekbar
             android:dialogMessage="Select font size of Rubi."
             android:dialogTitle="Rubi Font Size"
             android:key="txFontRubiSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Rubi Font Size" />
-        <src.comitton.config.TextFontInfoSeekbar
+        <src.comitton.config.seekbar.TextFontInfoSeekbar
             android:dialogMessage="Select font size of Information."
             android:dialogTitle="Information Font Size"
             android:key="txFontInfoSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Information Font Size" />
-        <src.comitton.config.TextSpaceWSeekbar
+        <src.comitton.config.seekbar.TextSpaceWSeekbar
             android:dialogMessage="Select size of Lines between."
             android:dialogTitle="Lines between Size"
             android:key="txSpaceW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Lines between Size" />
-        <src.comitton.config.TextSpaceHSeekbar
+        <src.comitton.config.seekbar.TextSpaceHSeekbar
             android:dialogMessage="Select size of Characters between."
             android:dialogTitle="Characters between Size"
             android:key="txSpaceH"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Characters between Size" />
-        <src.comitton.config.TextMarginWSeekbar
+        <src.comitton.config.seekbar.TextMarginWSeekbar
             android:dialogMessage="Select size of Left and Right Margins."
             android:dialogTitle="Left and Right Margins Size"
             android:key="txMarginW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Left and Right Margins Size" />
-        <src.comitton.config.TextMarginHSeekbar
+        <src.comitton.config.seekbar.TextMarginHSeekbar
             android:dialogMessage="Select size of Top and Bottom Margins."
             android:dialogTitle="Top and Bottom Margins Size"
             android:key="txMarginH"

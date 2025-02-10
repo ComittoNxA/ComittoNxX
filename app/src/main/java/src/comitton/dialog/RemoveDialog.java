@@ -3,22 +3,20 @@ package src.comitton.dialog;
 import java.util.ArrayList;
 import java.util.EventListener;
 
-import src.comitton.activity.FileSelectActivity;
-import src.comitton.common.FileAccess;
+import src.comitton.fileview.FileSelectActivity;
+import src.comitton.fileaccess.FileAccess;
 
 import jp.dip.muracoro.comittonx.R;
-import src.comitton.data.FileData;
+import src.comitton.fileview.data.FileData;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -47,7 +45,6 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 
 	private TextView mMsgText;
 	private Button mBtnCancel;
-	private boolean mIsLocal;
 
 	public RemoveDialog(FileSelectActivity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, RemoveListener removeListener) {
 		super(activity, themeResId);
@@ -66,16 +63,9 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 
 		mListener = removeListener;
 
-		if (uri == null || uri.length() == 0) {
-			mIsLocal = true;
-		}
-		else {
-			mIsLocal = false;
-		}
 		mFullPath = uri + path;
 		mUser = user;
 		mPass = pass;
-		mItem = item;
 		mBreak = false;
 
 		mHandler = new Handler(Looper.getMainLooper());
@@ -105,17 +95,12 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 	public void run() {
 		// コピー開始
 		try {
-			if (mIsLocal == true) {
-				localRemoveFile("", mItem);
-			}
-			else {
-				smbRemoveFile("", mItem);
-			}
+			removeFile(mItem, "");
 		}
 		catch (Exception e) {
 			String msg;
-			if (e != null && e.getMessage() != null) {
-				msg = e.getMessage();
+			if (e.getLocalizedMessage() != null) {
+				msg = e.getLocalizedMessage();
 			}
 			else {
 				msg = "File Access Error.";
@@ -126,80 +111,35 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 		this.dismiss();
 	}
 
-	public boolean localRemoveFile(String path, String item) throws Exception {
-		String nextpath = path + item;
-		boolean isDirectory = FileAccess.isDirectory(mFullPath + nextpath, mUser , mPass);
+	public boolean removeFile(String path, String item) throws Exception {
+		boolean isDirectory = FileAccess.isDirectory(mActivity, path, mUser, mPass);
 		if (isDirectory) {
 			// 再帰呼び出し
-			ArrayList<FileData> lfiles = FileAccess.listFiles(mFullPath + nextpath, mUser, mPass);
+			ArrayList<FileData> lfiles = FileAccess.listFiles(mActivity, path, mUser, mPass, mHandler);
 
 			int filenum = lfiles.size();
-			if (lfiles != null && filenum > 0) {
+			if (filenum > 0) {
 				// ファイルあり
 				// ディレクトリ内のファイル
 				for (int i = 0; i < filenum; i++) {
-					String name = lfiles.get(i).getName();
-					if (name.equals("..")) {
+					if (lfiles.get(i).getName().equals("..")) {
 						continue;
 					}
-					localRemoveFile(nextpath, name);
+					removeFile(lfiles.get(i).getURI(), item + lfiles.get(i).getName());
 					if (mBreak) {
 						// 中断
 						break;
 					}
 				}
 			}
-			FileAccess.delete(mActivity, mFullPath + nextpath, mUser , mPass);
+			FileAccess.delete(mActivity, path, mUser , mPass);
 		}
 		else {
 			// 削除ファイル表示
-			sendMessage(MSG_MESSAGE, path + item, 0, 0);
+			sendMessage(MSG_MESSAGE, item, 0, 0);
 
-			// ファイル削除
-			boolean exists = FileAccess.exists(mFullPath + nextpath, mUser , mPass);
-			if (exists) {
-				FileAccess.delete(mActivity, mFullPath + nextpath, mUser , mPass);
-			}
+			FileAccess.delete(mActivity, path, mUser , mPass);
 		}
-		return true;
-	}
-
-	public boolean smbRemoveFile(String path, String item) throws Exception {
-		String nextpath = path + item;
-		FileAccess.delete(mActivity, mFullPath + nextpath, mUser , mPass);
-//		boolean isDirectory = FileAccess.isDirectory(mFullPath + nextpath, mUser , mPass);
-//		if (isDirectory) {
-//			// 再帰呼び出し
-//			ArrayList<FileData> sfiles = FileAccess.listFiles(mFullPath + nextpath, mUser, mPass);
-//
-//			int filenum = sfiles.size();
-//			if (sfiles != null && filenum > 0) {
-//				// ファイルあり
-//				// ディレクトリ内のファイル
-//				for (int i = 0; i < filenum; i++) {
-//					String name = sfiles.get(i).getName();
-//					if (name.equals("..")) {
-//						continue;
-//					}
-//					smbRemoveFile(nextpath, name);
-//					if (mBreak) {
-//						// 中断
-//						break;
-//					}
-//				}
-//			}
-//			FileAccess.delete(mFullPath + nextpath, mUser , mPass);
-//		}
-//		else {
-//			// 削除ファイル表示
-//			sendMessage(MSG_MESSAGE, path + item, 0, 0);
-//
-//			// ファイル削除
-//			boolean exists = FileAccess.exists(mFullPath + nextpath, mUser , mPass);
-//			if (exists) {
-//				FileAccess.delete(mFullPath + nextpath, mUser , mPass);
-//			}
-//		}
 		return true;
 	}
 

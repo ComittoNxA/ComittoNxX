@@ -237,19 +237,19 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 			new File(path).mkdirs();
 		}
 		catch (Exception e) {
-			Log.e("ExportSettings", e.getMessage());
+			Log.e("ExportSettings", e.getLocalizedMessage());
 		}
 		return path;
 	}
 
 	private void errorToast(String msg, Exception e) {
 		// 書き込みエラー
-		String errmsg = e.getMessage();
-		if (e.getMessage() == null) {
+		String errmsg = e.getLocalizedMessage();
+		if (e.getLocalizedMessage() == null) {
 			errmsg = msg;
 		}
 		else {
-			errmsg = msg + "(" + e.getMessage() + ")";
+			errmsg = msg + "(" + e.getLocalizedMessage() + ")";
 		}
 		Toast.makeText(mContext, errmsg, Toast.LENGTH_SHORT).show();
 	}

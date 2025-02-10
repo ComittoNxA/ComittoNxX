@@ -4,6 +4,11 @@
     <PreferenceCategory android:title="共通設定" >
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="CheckRelease"
+            android:summary="定期的に新しいバージョンがリリースされていないか確認する."
+            android:title="リリースを確認する" />
+        <CheckBoxPreference
+            android:defaultValue="true"
             android:key="HiddenFile"
             android:summary="Mac OS Xで作成される変なファイルを非表示にします。"
             android:title=".で始まるファイルを表示しない" />

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="View Settings" >
-        <src.comitton.config.MarginSeekbar
+        <src.comitton.config.seekbar.MarginSeekbar
             android:dialogMessage="Select end of scroll margin size."
             android:dialogTitle="Margin Size"
             android:key="Mergin"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Margin Size" />
-        <src.comitton.config.CenterSeekbar
+        <src.comitton.config.seekbar.CenterSeekbar
             android:dialogMessage="Margin width in the middle of Dual View."
             android:dialogTitle="Center Margin Width"
             android:key="Center"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Center Margin Width" />
-        <src.comitton.config.GradationSeekbar
+        <src.comitton.config.seekbar.GradationSeekbar
             android:dialogMessage="Percentage of Shadows width in the single page."
             android:dialogTitle="Shadow Width"
             android:key="Gradation"
@@ -34,49 +34,49 @@
             android:title="Old type on the top menu." />
     </PreferenceCategory>
     <PreferenceCategory android:title="Operation Settings" >
-        <src.comitton.config.EffectTimeSeekbar
+        <src.comitton.config.seekbar.EffectTimeSeekbar
             android:dialogMessage="Effect time at turning page"
             android:dialogTitle="Effect Time"
             android:key="EffectTime"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Effect Time" />
-        <src.comitton.config.ScrollSeekbar
+        <src.comitton.config.seekbar.ScrollSeekbar
             android:dialogMessage="To drag ratio of the amount of scrolling."
             android:dialogTitle="Image Scroll Speed"
             android:key="Scroll"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scrolling Speed" />
-        <src.comitton.config.ClickAreaSeekbar
+        <src.comitton.config.seekbar.ClickAreaSeekbar
             android:dialogMessage="Set the scaling size for the operation area."
             android:dialogTitle="Operation Area Size"
             android:key="ClickAreaSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Operation Area Size" />
-        <src.comitton.config.PageRangeSeekbar
+        <src.comitton.config.seekbar.PageRangeSeekbar
             android:dialogMessage="Page selection sensitivity at the bottom of the screen."
             android:dialogTitle="Page Change Sensitivity"
             android:key="PageRangeSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Page Selection Sensitivity" />
-        <src.comitton.config.TapRangeSeekbar
+        <src.comitton.config.seekbar.TapRangeSeekbar
             android:dialogMessage="The sensitivity of the scroll by dragging the start."
             android:dialogTitle="Scroll Start Sensitivity"
             android:key="TapRangeSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scroll Start Sensitivity" />
-        <src.comitton.config.VolScrlSeekbar
+        <src.comitton.config.seekbar.VolScrlSeekbar
             android:dialogMessage="Scroll Speed of Vol-Button or Noise Operation."
             android:dialogTitle="Scroll Speed"
             android:key="VolScrlSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scroll Speed" />
-        <src.comitton.config.MomentModeSeekbar
+        <src.comitton.config.seekbar.MomentModeSeekbar
             android:dialogMessage="Immediately stop the smaller."
             android:dialogTitle="Slowdown Amount"
             android:key="MomentMode"

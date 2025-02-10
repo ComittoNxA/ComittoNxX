@@ -19,9 +19,9 @@ int TextImagesAlloc(int size) {
 	// イメージバッファ獲得
 	for (int i = 0 ; i < MAX_TEXTPAGE ; i ++) {
 		gTextImages[i] = (BYTE*)malloc(size);
-		if (gTextImages[i] == NULL) {
+		if (gTextImages[i] == nullptr) {
 			TextImagesFree();
-			return -1;
+			return ERROR_CODE_MALLOC_FAILURE;
 		}
 	}
 	gTextImageSize = size;

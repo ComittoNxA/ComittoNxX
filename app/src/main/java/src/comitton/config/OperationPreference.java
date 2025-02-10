@@ -1,7 +1,7 @@
 package src.comitton.config;
 
 import src.comitton.common.DEF;
-import src.comitton.view.SelectIconView;
+import src.comitton.fileview.view.SelectIconView;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Context;
 import android.content.SharedPreferences;

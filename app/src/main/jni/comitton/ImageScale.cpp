@@ -13,80 +13,88 @@
 
 //#define DEBUG
 
-extern IMAGEDATA	*gImageData;
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
+extern IMAGEDATA	*gImageData[];
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
 
-extern BUFFMNG		*gBuffMng;
-extern long			gBuffNum;
+extern BUFFMNG		*gBuffMng[];
+extern long			gBuffNum[];
 
-extern BUFFMNG		*gSclBuffMng;
-extern long			gSclBuffNum;
+extern BUFFMNG		*gSclBuffMng[];
+extern long			gSclBuffNum[];
 
-extern int			gCancel;
+extern int			gCancel[];
 
 // RetSize 返却用ポインタ
 // RetSize[0] 完成サイズ(幅)
 // RetSize[1] 完成サイズ(高さ)
-int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int algorithm, int Rotate, int Margin, int MarginColor, int Sharpen, int Bright, int Gamma, int Param, jint *RetSize)
+int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int algorithm, int Rotate, int Margin, int MarginColor, int Sharpen, int Bright, int Gamma, int Param, jint *RetSize)
 {
+//#define DEBUG_CREATESCALE
     int Invert   = (Param & PARAM_INVERT) != 0 ? 1 : 0;;
 	int Gray     = (Param & PARAM_GRAY) != 0 ? 1 : 0;
 	int Moire    = (Param & PARAM_MOIRE) != 0 ? 1 : 0;
 	int Pseland  = (Param & PARAM_PSELAND) != 0 ? 1 : 0;
-#ifdef DEBUG
-    LOGD("CreateScale: Page=%d, Half=%d, SclWidth=%d, SclHeight=%d, left=%d, right=%d, top=%d, bottom=%d, algorithm=%d, Rotate=%d, Margin=%d, MarginColor=%d, Sharpen=%d, Bright=%d, Gamma=%d", Page, Half, SclWidth, SclHeight, left, right, top, bottom, algorithm, Rotate, Margin, MarginColor, Sharpen, Bright, Gamma);
+#ifdef DEBUG_CREATESCALE
+    LOGD("CreateScale: index=%d, Page=%d, Half=%d, SclWidth=%d, SclHeight=%d, left=%d, right=%d, top=%d, bottom=%d, algorithm=%d, Rotate=%d, Margin=%d, MarginColor=%d, Sharpen=%d, Bright=%d, Gamma=%d", index, Page, Half, SclWidth, SclHeight, left, right, top, bottom, algorithm, Rotate, Margin, MarginColor, Sharpen, Bright, Gamma);
     LOGD("CreateScale: Param[Invert=%d, Gray=%d, Moire=%d, Pseland=%d]", Invert, Gray, Moire, Pseland);
 #endif
-    IMAGEDATA *pData = &gImageData[Page];
+    IMAGEDATA *pData = &gImageData[index][Page];
 	
 	pData->SclFlag[Half] = 0;
 
 	int ret = 0;
 
-	int Index     = 0;
+	int Count     = 0;
 	int OrgWidth  = pData->OrgWidth;
 	int OrgHeight = pData->OrgHeight;
 	int scl_w = SclWidth;
 	int scl_h = SclHeight;
 
 	// 拡大縮小用メモリ初期化
-	ScaleMemInit();
+	ScaleMemInit(index);
 
-	if (Margin > 0) {
+    if (Margin > 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Margin START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+		ret = SetLinesPtr(index, Page, Half, Count, OrgWidth, OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}
 
-		// 余白カット
-		ret = ImageMarginCut(Page, Half, Index, SclWidth, SclHeight, left, right, top, bottom, Margin, MarginColor, &OrgWidth, &OrgHeight);
+        // 余白カット
+		ret = ImageMarginCut(index, Page, Half, Count, left, right, top, bottom, Margin, MarginColor, &OrgWidth, &OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}
-		else if(ret > 0) {
-			//LOGD("CreateScale: Page=%d, Half=%d, 強制カット Index=%d, SclWidth=%d, SclHeight=%d, RetWidth=%d, RetHeight=%d", Page, Half, Index, scl_w, scl_h, OrgWidth, OrgHeight);
-			// 余白カットあり
-			Index ++;
-		}
+        // 古いワークデータは削除
+        EraseSclBuffMng(index, Count);
+        Count ++;
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Margin   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
 	if (Rotate != 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Rotate START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+		ret = SetLinesPtr(index, Page, Half, Count, OrgWidth, OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// 回転
-		ret = ImageRotate(Page, Half, Index, OrgWidth, OrgHeight, Rotate);
+		ret = ImageRotate(index, Page, Half, Count, OrgWidth, OrgHeight, Rotate);
 		if (ret < 0) {
 			return ret;
 		}
 		// 古いワークデータは削除
-		EraseSclBuffMng(Index);
-		Index ++;
+		EraseSclBuffMng(index, Count);
+        Count ++;
 
 		if (Rotate == 1 || Rotate == 3) {
 			// 元画像の幅と高さを入れ替え
@@ -94,32 +102,44 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 			OrgWidth  = OrgHeight;
 			OrgHeight = workWidth;
 		}
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Rotate   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
 	if (Half != 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Half START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+		ret = SetLinesPtr(index, Page, Half, Count, OrgWidth, OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}
 
-		ret = ImageHalf(Page, Half, Index, OrgWidth, OrgHeight);
+		ret = ImageHalf(index, Page, Half, Count, OrgWidth, OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}
 		// 古いワークデータは削除
-		EraseSclBuffMng(Index);
-		Index ++;
+		EraseSclBuffMng(index, Count);
+        Count ++;
 
 		// 元画像の幅を半分に
 		OrgWidth  = (OrgWidth + 1) / 2;
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Half   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
-	int NowWidth;
-	int NowHeight;
+	int NowWidth = 0;
+	int NowHeight = 0;
 
 	// 縮小時のモアレ軽減モード
-	if (Moire) {
+	if (Moire > 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Moire START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 50%以下にする場合は半分に落とす
 		while (scl_w <= OrgWidth / 2 && scl_h <= OrgHeight / 2) {
 			// 50%以下の縮小
@@ -127,20 +147,20 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 			NowHeight = OrgHeight / 2;
 	
 			// 元データ配列化
-			ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+			ret = SetLinesPtr(index, Page, Half, Count, OrgWidth, OrgHeight);
 			if (ret < 0) {
 				return ret;
 			}
 	
 			// 50%の圧縮
-			ret = CreateScaleHalf(Page, Half, Index, OrgWidth, OrgHeight);
+			ret = CreateScaleHalf(index, Page, Half, Count, OrgWidth, OrgHeight);
 			if (ret < 0) {
 				return ret;
 			}
 
 			// 古いワークデータは削除
-			EraseSclBuffMng(Index);
-			Index ++;
+			EraseSclBuffMng(index, Count);
+            Count ++;
 	
 			OrgWidth = NowWidth;
 			OrgHeight = NowHeight;
@@ -151,24 +171,32 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 		int zh = scl_h * 100 /  OrgHeight;
 		if (zw < 100 && zh < 100) {
 			// 元データ配列化
-			ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+			ret = SetLinesPtr(index, Page, Half, Count, OrgWidth, OrgHeight);
 			if (ret < 0) {
 				return ret;
 			}
 	
 			// ぼかし化
-			ret = ImageBlur(Page, Half, Index, OrgWidth, OrgHeight, zw > zh ? zw : zh);
+			ret = ImageBlur(index, Page, Half, Count, OrgWidth, OrgHeight, zw > zh ? zw : zh);
 			if (ret < 0) {
 				return ret;
 			}
 
 //			// 古いワークデータは削除
-//			EraseSclBuffMng(Index);
-//			Index ++;
+//			EraseSclBuffMng(index, Count);
+//			Count ++;
 		}
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Moire   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
-	// 拡大縮小
+
+#ifdef DEBUG_CREATESCALE
+    LOGD("ImageScale : Scale - BEFORE: page=%d, half=%d / ow=%d, oh=%d, nw=%d, nh=%d, alg=%d", Page, Half, OrgWidth, OrgHeight, NowWidth, NowHeight, algorithm);
+#endif
+
+    // 拡大縮小
 	int loopMax;
 
 	double scale_x = exp(log((double)scl_w / (double)OrgWidth) / 2.0);
@@ -188,6 +216,10 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 		loopMax = 1;
 	}
 
+#ifdef DEBUG_CREATESCALE
+    LOGD("ImageScale : Scale -  AFTER: page=%d, half=%d / ow=%d, oh=%d, nw=%d, nh=%d, alg=%d", Page, Half, OrgWidth, OrgHeight, NowWidth, NowHeight, algorithm);
+#endif
+
 	for (int i = 0 ; i < loopMax ; i ++) {
 		if (i == 1) {
 			// 2ループ目
@@ -197,13 +229,8 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 			NowHeight = scl_h;
 		}
 
-#ifdef DEBUG
-		LOGD("ImageScale : Scale - page=%d, half=%d / ow=%d, oh=%d, nw=%d, nh=%d, alg=%d"
-						, Page, Half, OrgWidth, OrgHeight, NowWidth, NowHeight, algorithm);
-#endif
-
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+		ret = SetLinesPtr(index, Page, Half, Count, OrgWidth, OrgHeight);
 		if (ret < 0) {
 			return ret;
 		}
@@ -211,14 +238,23 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 		switch (algorithm) {
 			case 1:
 			case 2:
-				ret = CreateScaleLinear(Page, Half, Index, NowWidth, NowHeight, OrgWidth, OrgHeight);
+#ifdef DEBUG_CREATESCALE
+                LOGD("CreateScale: Linear Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
+				ret = CreateScaleLinear(index, Page, Half, Count, NowWidth, NowHeight, OrgWidth, OrgHeight);
 				break;
 			case 3:
 			case 4:
-				ret = CreateScaleCubic(Page, Half, Index, NowWidth, NowHeight, OrgWidth, OrgHeight);
+#ifdef DEBUG_CREATESCALE
+                LOGD("CreateScale: Cubic Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
+				ret = CreateScaleCubic(index, Page, Half, Count, NowWidth, NowHeight, OrgWidth, OrgHeight);
 				break;
 			default:
-				ret = CreateScaleNear(Page, Half, Index, NowWidth, NowHeight, OrgWidth, OrgHeight);
+#ifdef DEBUG_CREATESCALE
+                LOGD("CreateScale: Near Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
+				ret = CreateScaleNear(index, Page, Half, Count, NowWidth, NowHeight, OrgWidth, OrgHeight);
 				break;
 		}
 		if (ret < 0) {
@@ -226,95 +262,125 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 			return ret;
 		}
 		// 古いワークデータは削除
-		EraseSclBuffMng(Index);
-		Index ++;
+		EraseSclBuffMng(index, Count);
+        Count ++;
 	}
 
 	if (Pseland != 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Pseland START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, scl_w, scl_h);
+		ret = SetLinesPtr(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// 90°回転
-		ret = ImageRotate(Page, Half, Index, scl_w, scl_h, 1);
+		ret = ImageRotate(index, Page, Half, Count, scl_w, scl_h, 1);
 		if (ret < 0) {
 			return ret;
 		}
 		// 古いワークデータは削除
-		EraseSclBuffMng(Index);
-		Index ++;
+		EraseSclBuffMng(index, Count);
+        Count ++;
 
 		// 元画像の幅と高さを入れ替え
 		int workWidth = scl_w;
 		scl_w  = scl_h;
 		scl_h = workWidth;
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Pseland   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
 	if (Sharpen > 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Sharpen START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, scl_w, scl_h);
+		ret = SetLinesPtr(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// シャープ化
-		ret = ImageSharpen(Page, Sharpen, Half, Index, scl_w, scl_h);
+		ret = ImageSharpen(index, Page, Sharpen, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 		// 古いワークデータは削除
-		EraseSclBuffMng(Index);
-		Index ++;
+		EraseSclBuffMng(index, Count);
+        Count ++;
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Sharpen   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
 	if (Gray > 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Gray START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, scl_w, scl_h);
+		ret = SetLinesPtr(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// グレースケール化
-		ret = ImageGray(Page, Half, Index, scl_w, scl_h);
+		ret = ImageGray(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 		// 色の変化だけなのでワークデータは作成されない
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Gray   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
 	if (Invert > 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Invert START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, scl_w, scl_h);
+		ret = SetLinesPtr(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// 色の反転
-		ret = ImageInvert(Page, Half, Index, scl_w, scl_h);
+		ret = ImageInvert(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 		// 反転だけなのでワークデータは作成されない
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Invert   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
 	if (Bright != 0 || Gamma != 0) {
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Bright || Gamma START: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 		// 元データ配列化
-		ret = SetLinesPtr(Page, Half, Index, scl_w, scl_h);
+		ret = SetLinesPtr(index, Page, Half, Count, scl_w, scl_h);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// 明るさの調整
-		ret = ImageBright(Page, Half, Index, scl_w, scl_h, Bright, Gamma);
+		ret = ImageBright(index, Page, Half, Count, scl_w, scl_h, Bright, Gamma);
 		if (ret < 0) {
 			return ret;
 		}
 		// 色の調整だけなのでワークデータは作成されない
+#ifdef DEBUG_CREATESCALE
+        LOGD("CreateScale: Bright || Gamma   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
+#endif
 	}
 
-	CopySclBuffMngToBuffMng();
+	CopySclBuffMngToBuffMng(index);
 	pData->SclFlag[Half] = 1;
 	pData->SclWidth[Half] = scl_w;
 	pData->SclHeight[Half] = scl_h;
@@ -324,9 +390,11 @@ int CreateScale(int Page, int Half, int SclWidth, int SclHeight, int left, int r
 	return 0;
 }
 
-int SetLinesPtr(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
+int SetLinesPtr(int index, int Page, int Half, int Count, int OrgWidth, int OrgHeight)
 {
-	IMAGEDATA *pData = &gImageData[Page];
+	IMAGEDATA *pData = &gImageData[index][Page];
+
+    int ret = 0;
 
 	BUFFMNG		*pMngptr;
 	int			nMngnum;
@@ -338,21 +406,22 @@ int SetLinesPtr(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 	linesize = OrgWidth + HOKAN_DOTS;
 	linenum  = OrgHeight;
 
-	if (Index == 0) {
-		pMngptr = gBuffMng;
-		nMngnum = gBuffNum;
+	if (Count == 0) {
+		pMngptr = gBuffMng[index];
+		nMngnum = gBuffNum[index];
 		Type = 0;
 		Half = 0;
 	}
 	else {
-		pMngptr = gSclBuffMng;
-		nMngnum = gSclBuffNum;
+		pMngptr = gSclBuffMng[index];
+		nMngnum = gSclBuffNum[index];
 		Type = 1;
 	}
 
 	// 領域確保
-	if (ScaleMemLine(linenum) < 0) {
-		return -1;
+    ret = ScaleMemLine(index, linenum);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// 領域確保
@@ -361,9 +430,9 @@ int SetLinesPtr(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 	int lineindex;
 
 	for (lineindex = 0 ; lineindex < linenum ; lineindex ++) {
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("CreateScale : cancel.");
-			return -10;
+			return ERROR_CODE_USER_CANCELED;
 		}
 		if (buffindex < 0 || BLOCKSIZE - buffpos < linesize ) {
 			for (buffindex ++ ; buffindex < nMngnum ; buffindex ++) {
@@ -378,123 +447,138 @@ int SetLinesPtr(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 			}
 			buffpos = 0;
 		}
-//		LOGD("SetLinesPtr: lineindex=%d, buffindex=%d, buffpos=%d", lineindex + HOKAN_DOTS/2, buffindex, buffpos);
-//		gLinesPtr[lineindex + HOKAN_DOTS/2] = pMngptr[buffindex].Buff + buffpos + HOKAN_DOTS/2;
-		gLinesPtr[lineindex + HOKAN_DOTS/2] = pMngptr[buffindex].Buff + buffpos;
+//		LOGD("SetLinesPtr: lineindex=%d, buffindex=%d, buffpos=%d", lineindex + HOKAN_DOTS / 2, buffindex, buffpos);
+//		gLinesPtr[index][lineindex + HOKAN_DOTS / 2] = pMngptr[buffindex].Buff + buffpos + HOKAN_DOTS / 2;
+		gLinesPtr[index][lineindex + HOKAN_DOTS / 2] = pMngptr[buffindex].Buff + buffpos;
 		buffpos += linesize;
 	}
 
-//	LOGD("Set gLinesPtr : %d, %d", lineindex, HOKAN_DOTS/2);
-	gLinesPtr[0] = gLinesPtr[HOKAN_DOTS/2];
-	gLinesPtr[1] = gLinesPtr[HOKAN_DOTS/2];
-	gLinesPtr[lineindex + HOKAN_DOTS/2 + 0] = gLinesPtr[lineindex + HOKAN_DOTS/2 - 1];
-	gLinesPtr[lineindex + HOKAN_DOTS/2 + 1] = gLinesPtr[lineindex + HOKAN_DOTS/2 - 1];
+//	LOGD("Set gLinesPtr : %d, %d", lineindex, HOKAN_DOTS / 2);
+	gLinesPtr[index][0] = gLinesPtr[index][HOKAN_DOTS / 2];
+	gLinesPtr[index][1] = gLinesPtr[index][HOKAN_DOTS / 2];
+	gLinesPtr[index][lineindex + HOKAN_DOTS/2 + 0] = gLinesPtr[index][lineindex + HOKAN_DOTS / 2 - 1];
+	gLinesPtr[index][lineindex + HOKAN_DOTS/2 + 1] = gLinesPtr[index][lineindex + HOKAN_DOTS / 2 - 1];
 	return 0;
 }
 
-int NextSclBuff(int Page, int Half, int Index, int *pBuffIndex, int *pBuffPos, int LineSize)
+/**
+ * サイズ変更時ピクセルデータの一時保存先バッファーを1ライン分設定する\n
+ * 使用するバッファの位置を<code>gSclBuffMng</code>と<code>pBuffPos</code>に入れて返す
+ * @param [in] index        バッファ番号 ImageManagerのインスタンス毎に払い出される
+ * @param Page              ページ番号 画像ファイルを特定する番号
+ * @param Half              画像を左右で分割した場合の左右のどちらかを指定
+ * @param Count
+ * @param [out] pBuffIndex  バッファの番号 gSclBuffMng[index][<code>pBuffIndex</code>]
+ * @param pBuffPos          バッファー内の位置 gSclBuffMng[index][<code>pBuffIndex</code>].Buff + <code>pBuffPos</code>
+ * @param [in] LineSize     1ラインのサイズ
+ * @return                  エラーコード
+ */
+int NextSclBuff(int index, int Page, int Half, int Count, int *pBuffIndex, int *pBuffPos, int LineSize)
 {
 	int buffindex = *pBuffIndex;
 
+#ifdef DEBUG
+    LOGD("NextSclBuff : 開始します. index=%d, Page=%d, Half=%d, Count=%d, LineSize=%d", index, Page, Half, Count, LineSize);
+#endif
 	if (buffindex < 0 || BLOCKSIZE - *pBuffPos < LineSize) {
-		for (buffindex ++ ; buffindex < gSclBuffNum ; buffindex ++) {
-			if (gSclBuffMng[buffindex].Page == -1) {
+		for (buffindex ++ ; buffindex < gSclBuffNum[index] ; buffindex ++) {
+			if (gSclBuffMng[index][buffindex].Page == -1) {
 				break;
 			}
 		}
-		if (buffindex >= gSclBuffNum) {
+		if (buffindex >= gSclBuffNum[index]) {
 			// 領域不足
-			LOGE("NextSclBuff : Data Error page=%d, buffindex=%d/%d (Scale)", Page, buffindex, (int)gSclBuffNum);
-			return -6;
+			LOGE("NextSclBuff : Data Error page=%d, buffindex=%d/%d (Scale)", Page, buffindex, (int)gSclBuffNum[index]);
+			return ERROR_CODE_CACHE_IS_FULL;
 		}
-		gSclBuffMng[buffindex].Page = Page;
-		gSclBuffMng[buffindex].Size = 0;
-		gSclBuffMng[buffindex].Type = 1;
-		gSclBuffMng[buffindex].Half = Half;
-		gSclBuffMng[buffindex].Index = Index;
+		gSclBuffMng[index][buffindex].Page = Page;
+		gSclBuffMng[index][buffindex].Size = 0;
+		gSclBuffMng[index][buffindex].Type = 1;
+		gSclBuffMng[index][buffindex].Half = Half;
+		gSclBuffMng[index][buffindex].Count = Count;
 		*pBuffPos = 0;
 		*pBuffIndex = buffindex;
 	}
+
 	return 0;
 }
 
-int EraseSclBuffMng(int index)
+/**
+ * gSclBuffMng[index].CountがCountと不一致のものを未使用にする
+ * @param index
+ * @param Count
+ * @return
+ */
+int EraseSclBuffMng(int index, int Count)
 {
-	for (int i = 0 ; i < gSclBuffNum ; i ++) {
-		if (gSclBuffMng[i].Page != -1 && gSclBuffMng[i].Index != index) {
-//			LOGD("EraseSclBuffMng : %d/%d, %d, %d, %d, %d, %d, %d, %d, %d", i, gSclBuffNum
-//				, (int)gSclBuffMng[i].Buff[0]
-//				, (int)gSclBuffMng[i].Buff[1]
-//				, (int)gSclBuffMng[i].Buff[2]
-//				, (int)gSclBuffMng[i].Buff[3]
-//				, (int)gSclBuffMng[i].Buff[4]
-//				, (int)gSclBuffMng[i].Buff[5]
-//				, (int)gSclBuffMng[i].Buff[6]
-//				, (int)gSclBuffMng[i].Buff[7] );
-			// 使用中でindex一致の場合は消す
-			gSclBuffMng[i].Page = -1;
-			gSclBuffMng[i].Type = 0;
-			gSclBuffMng[i].Half = 0;
-			gSclBuffMng[i].Size = 0;
-			gSclBuffMng[i].Index = 0;
+	for (int i = 0 ; i < gSclBuffNum[index] ; i ++) {
+		if (gSclBuffMng[index][i].Page != -1 && gSclBuffMng[index][i].Count != Count) {
+			// 使用中でindex不一致の場合は消す
+			gSclBuffMng[index][i].Page = -1;
+			gSclBuffMng[index][i].Type = 0;
+			gSclBuffMng[index][i].Half = 0;
+			gSclBuffMng[index][i].Size = 0;
+			gSclBuffMng[index][i].Count = 0;
 		}
 	}
 	return 0;
 }
 
-int CopySclBuffMngToBuffMng()
+int CopySclBuffMngToBuffMng(int index)
 {
 	int buffindex = -1;
 
-	for (int i = 0 ; i < gSclBuffNum ; i ++) {
-		if (gSclBuffMng[i].Page != -1) {
+	for (int i = 0 ; i < gSclBuffNum[index] ; i ++) {
+		if (gSclBuffMng[index][i].Page != -1) {
 			// コピー先を探す
-			for (buffindex ++ ; buffindex < gBuffNum ; buffindex ++) {
-				if (gBuffMng[buffindex].Page == -1) {
+			for (buffindex ++ ; buffindex < gBuffNum[index] ; buffindex ++) {
+				if (gBuffMng[index][buffindex].Page == -1) {
 					// 見つけた
 					break;
 				}
 			}
-			if (buffindex >= gBuffNum) {
+			if (buffindex >= gBuffNum[index]) {
 				// 領域不足
-				LOGE("CopySclBuffMngToBuffMng : Data Error buffindex=%d/%d", buffindex, (int)gBuffNum);
+				LOGE("CopySclBuffMngToBuffMng : Data Error buffindex=%d/%d", buffindex, (int)gBuffNum[index]);
 				return -1;
 			}
 			// メモリコピー
-//			LOGD("CopySclBuffMngToBuffMng St : %d/%d -> %d/%d", i, gSclBuffNum, buffindex, gBuffNum);
+//			LOGD("CopySclBuffMngToBuffMng St : %d/%d -> %d/%d", i, gSclBuffNum[index], buffindex, gBuffNum[index]);
 
-			gBuffMng[buffindex].Page = gSclBuffMng[i].Page;
-			gBuffMng[buffindex].Type = gSclBuffMng[i].Type;
-			gBuffMng[buffindex].Half = gSclBuffMng[i].Half;
-			gBuffMng[buffindex].Size = gSclBuffMng[i].Size;
-			gBuffMng[buffindex].Index = 0;
-			memcpy(gBuffMng[buffindex].Buff, gSclBuffMng[i].Buff, BLOCKSIZE * sizeof(WORD));
-//			LOGD("CopySclBuffMngToBuffMng Ed : %d/%d -> %d/%d", i, gSclBuffNum, buffindex, gBuffNum);
+			gBuffMng[index][buffindex].Page = gSclBuffMng[index][i].Page;
+			gBuffMng[index][buffindex].Type = gSclBuffMng[index][i].Type;
+			gBuffMng[index][buffindex].Half = gSclBuffMng[index][i].Half;
+			gBuffMng[index][buffindex].Size = gSclBuffMng[index][i].Size;
+			gBuffMng[index][buffindex].Count = 0;
+			memcpy(gBuffMng[index][buffindex].Buff, gSclBuffMng[index][i].Buff, BLOCKSIZE * sizeof(WORD));
+//			LOGD("CopySclBuffMngToBuffMng Ed : %d/%d -> %d/%d", i, gSclBuffNum[index], buffindex, gBuffNum[index]);
 		}
 	}
 	return 0;
 }
 
 // 出力先ラインポインタ配列を設定
-int RefreshSclLinesPtr(int Page, int Half, int Index, int Height, int LineSize)
+int RefreshSclLinesPtr(int index, int Page, int Half, int Count, int Height, int LineSize)
 {
 	int buffpos = 0;
 	int buffindex = -1;
 	int ret;
 
-//	LOGD("RefreshSclLinePtr : start page=%d, half=%d, idx=%d, h=%d, l=%d", Page, Half, Index, Height, LineSize);
+#ifdef DEBUG
+	LOGD("RefreshSclLinePtr : 開始します. index=%d, page=%d, half=%d, Count=%d, h=%d, l=%d", index, Page, Half, Count, Height, LineSize);
+#endif
 	for (int yy = 0 ; yy < Height ; yy ++) {
-		ret = NextSclBuff(Page, Half, Index, &buffindex, &buffpos, LineSize);
+		ret = NextSclBuff(index, Page, Half, Count, &buffindex, &buffpos, LineSize);
 //		LOGD("RefreshSclLinePtr : buffindex=%d, buffpos=%d, LineSize=%d", buffindex, buffpos, LineSize);
 		if (ret < 0) {
 			LOGE("RefreshSclLinePtr : NextSclBuff error=%d", ret);
 			return ret;
 		}
 
-		gSclLinesPtr[yy] = gSclBuffMng[buffindex].Buff + buffpos + HOKAN_DOTS / 2;
-		gSclBuffMng[buffindex].Size += LineSize;
+		gSclLinesPtr[index][yy] = gSclBuffMng[index][buffindex].Buff + buffpos + HOKAN_DOTS / 2;
+		gSclBuffMng[index][buffindex].Size += LineSize;
 		buffpos += LineSize;
 	}
-//	LOGD("RefreshSclLinePtr : end page=%d, half=%d, idx=%d, h=%d, l=%d", Page, Half, Index, Height, LineSize);
+//	LOGD("RefreshSclLinePtr : end page=%d, half=%d, Count=%d, h=%d, l=%d", Page, Half, Count, Height, LineSize);
 	return 0;
 }

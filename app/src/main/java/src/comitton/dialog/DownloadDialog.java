@@ -1,15 +1,14 @@
 package src.comitton.dialog;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
 import jp.dip.muracoro.comittonx.R;
-import src.comitton.common.FileAccess;
-import src.comitton.data.FileData;
-import src.comitton.stream.WorkStream;
+import src.comitton.common.DEF;
+import src.comitton.fileaccess.FileAccess;
+import src.comitton.fileview.data.FileData;
+import src.comitton.fileaccess.WorkStream;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -19,7 +18,6 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -31,12 +29,14 @@ import androidx.annotation.StyleRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler.Callback, OnClickListener, OnDismissListener {
+	private static final String TAG = "DownloadDialog";
+
 	public static final int MSG_MESSAGE = 1;
 	public static final int MSG_SETMAX = 2;
 	public static final int MSG_PROGRESS = 3;
 	public static final int MSG_ERRMSG = 4;
 
-	private String mUri;
+	private String mURI;
 	private String mPath;
 	private String mUser;
 	private String mPass;
@@ -57,7 +57,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		setCanceledOnTouchOutside(false);
 		setOnDismissListener(this);
 
-		mUri = uri;
+		mURI = uri;
 		mPath = path;
 		mUser = user;
 		mPass = pass;
@@ -102,7 +102,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 			downloadFile("", mItem);
 		}
 		catch (Exception e) {
-			String msg = e.getMessage();
+			String msg = e.getLocalizedMessage();
 			if (msg == null) {
 				msg = "Download Error.";
 			}
@@ -112,28 +112,38 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		this.dismiss();
 	}
 
+	// path = ローカルのパス
+	// name = リモートのファイル名
 	public boolean downloadFile(String path, String item) throws Exception {
-		boolean isDirectory = FileAccess.isDirectory(mUri + mPath + path + item, mUser, mPass);
+
+		String ServerFileUri = DEF.relativePath(mActivity, mURI, mPath + path + item);
+		boolean exists = FileAccess.exists(mActivity, ServerFileUri, mUser, mPass);
+		if (!exists) {
+			// リモートのファイルが存在しない
+			throw new Exception("File not found.");
+		}
+
+		boolean isDirectory = FileAccess.isDirectory(mActivity, ServerFileUri, mUser, mPass);
 		if (isDirectory) {
 			// ローカルにディレクトリ作成
-			boolean ret = FileAccess.mkdir(mLocal + path, item, mUser, mPass);
+			boolean ret = FileAccess.mkdir(mActivity, DEF.relativePath(mActivity, mLocal, path), item, mUser, mPass);
 			if (ret == false) {
+				// ディレクトリ作成に失敗
 				return false;
 			}
 
 			// 再帰呼び出し
-			String nextpath = path + item;
-			ArrayList<FileData> sfiles = FileAccess.listFiles(mUri + mPath + nextpath, mUser, mPass);
+			String childpath = path + item;
+			ArrayList<FileData> sfiles = FileAccess.listFiles(mActivity, DEF.relativePath(mActivity, mURI, mPath, childpath), mUser, mPass, mHandler);
 
 			int filenum = sfiles.size();
-			if (sfiles == null || filenum <= 0) {
+			if (filenum <= 0) {
 				// ファイルなし
 				return true;
 			}
 			// ディレクトリ内のファイル
 			for (int i = 0; i < filenum; i++) {
-				String name = sfiles.get(i).getName();
-				downloadFile(nextpath, name);
+				downloadFile(childpath, sfiles.get(i).getName());
 				if (mBreak) {
 					// 中断
 					break;
@@ -143,12 +153,10 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		else {
 			// ダウンロード実行
 			try {
-				OutputStream localFile = FileAccess.localOutputStream(mLocal + path + item + "_dl");
-				Boolean exists = FileAccess.exists(mUri + mPath + path + item, mUser, mPass);
-				if (!exists) {
-					throw new Exception("File not found.");
-				}
-				WorkStream workStream = new WorkStream(mUri, mPath + path + item, mUser, mPass, false);
+				String tmpfile = item + "_dl";
+				String tmpFileUri = DEF.relativePath(mActivity, mLocal, path, tmpfile);
+				OutputStream localFile = FileAccess.getOutputStream(mActivity, tmpFileUri, "", "");
+				WorkStream workStream = new WorkStream(mActivity, ServerFileUri, mUser, mPass, mHandler);
 
 				// ファイルサイズ取得
 				long fileSize = workStream.length();
@@ -169,7 +177,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 					if (mBreak) {
 						// 中断
 						localFile = null;
-						FileAccess.delete(mActivity, mLocal + path + item + "_dl", mUser, mPass);
+						FileAccess.delete(mActivity, tmpFileUri, mUser, mPass);
 						return false;
 					}
 					if (size <= 0) {
@@ -180,8 +188,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 						localFile.write(buff, 0, size);
 					}
 					catch (Exception e) {
-						Log.e("DownloadDialog", "downloadFile " + e.getMessage());
-						e.printStackTrace();
+						Log.e(TAG, "downloadFile " + e.getLocalizedMessage());
 					}
 					total += size;
 					sendMessage(MSG_PROGRESS, null, (int)total, (int)fileSize);
@@ -193,28 +200,26 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				workStream = null;
 
 				// リネーム
-				File renameFrom = new File(mLocal + path + item + "_dl");
-				File renameTo = null;
-				String newFileName = null;
+				String dstfile = null;
 				int idx = item.lastIndexOf(".");
 				String filename = item.substring(0, idx);
 				String extname = item.substring(idx);
 
 				for (int i = 0; i < 10; i++) {
 					if (i == 0) {
-						newFileName = item;
+						dstfile = item;
 					}
 					else {
-						newFileName = filename + "(" + i + ")" + extname;
+						dstfile = filename + "(" + i + ")" + extname;
 					}
-					exists = FileAccess.exists(mLocal + path + newFileName, mUser, mPass);
+					exists = FileAccess.exists(mActivity, DEF.relativePath(mActivity, mLocal, path, dstfile), mUser, mPass);
 					if (!exists) {
 						break;
 					}
 				}
-				if (!FileAccess.renameTo("", mLocal + path, item + "_dl", newFileName, mUser, mPass)) {
+				if (!FileAccess.renameTo(mActivity, DEF.relativePath(mActivity, mLocal, path), tmpfile, dstfile, mUser, mPass)) {
 					// リネーム失敗ならダウンロードしたファイルを削除
-					FileAccess.delete(mActivity, mLocal + path + item + "_dl", mUser, mPass);
+					FileAccess.delete(mActivity, tmpFileUri, mUser, mPass);
 				}
 			}
 			catch (Exception e) {
@@ -265,4 +270,5 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		mBreak = true;
 	}
+
 }

@@ -10,8 +10,8 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
@@ -22,6 +22,7 @@ void *ImageGray_ThreadFunc(void *param)
 	int edindex   = range[1];
 	int OrgWidth  = range[2];
 	int OrgHeight = range[3];
+    int index = range[4];
 
 	// 使用するバッファを保持
 	WORD *orgbuff;
@@ -51,13 +52,13 @@ void *ImageGray_ThreadFunc(void *param)
 	// ライン数
 	for (yy = stindex ; yy < edindex ; yy ++) {
 //		LOGD("ImageGray : loop yy=%d", yy);
-		if (gCancel) {
+		if (gCancel[index]) {
 			LOGD("ImageGray : cancel.");
 //			ReleaseBuff(Page, 1, Half);
-			return (void*)-1;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
-		orgbuff = gLinesPtr[yy + HOKAN_DOTS / 2];
+		orgbuff = gLinesPtr[index][yy + HOKAN_DOTS / 2];
 
 		for (xx =  0 ; xx < OrgWidth + HOKAN_DOTS ; xx++) {
 			// 反転
@@ -75,18 +76,18 @@ void *ImageGray_ThreadFunc(void *param)
 		orgbuff[OrgWidth + 0] = orgbuff[OrgWidth - 1];
 		orgbuff[OrgWidth + 1] = orgbuff[OrgWidth - 1];
 	}
-	return 0;
+	return nullptr;
 }
 
 // グレースケール化
-int ImageGray(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
+int ImageGray(int index, int Page, int Half, int Count, int OrgWidth, int OrgHeight)
 {
-//	LOGD("ImageGray : p=%d, h=%d, i=%d, ow=%d, oh=%d", Page, Half, Index, OrgWidth, OrgHeight);
+//	LOGD("ImageGray : p=%d, h=%d, c=%d, ow=%d, oh=%d", Page, Half, Count, OrgWidth, OrgHeight);
 	int ret = 0;
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][4];
+	int param[gMaxThreadNum][5];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -94,10 +95,11 @@ int ImageGray(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 		param[i][1] = start = OrgHeight * (i + 1)  / gMaxThreadNum;
 		param[i][2] = OrgWidth;
 		param[i][3] = OrgHeight;
-		
+        param[i][4] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, ImageGray_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, ImageGray_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -112,9 +114,9 @@ int ImageGray(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
+		if (status[i] != nullptr) {
 //			LOGD("CreateScaleCubic : cancel");
-			ret = -10;
+			ret = (long)status[i];
 		}
 	}
 //	LOGD("ImageGray : complete");

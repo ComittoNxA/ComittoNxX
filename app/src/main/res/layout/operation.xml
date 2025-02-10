@@ -20,12 +20,12 @@
 	    android:padding="4dip"
 	    android:orientation="horizontal" >
 
-	    <src.comitton.view.SelectIconView
+	    <src.comitton.fileview.view.SelectIconView
 	        android:id="@+id/icon_00"
 	        android:layout_width="40sp"
 	        android:layout_height="40sp" />
 
-	    <src.comitton.view.SelectIconView
+	    <src.comitton.fileview.view.SelectIconView
 	        android:id="@+id/icon_01"
 	        android:layout_width="40sp"
 	        android:layout_height="40sp" />
@@ -40,12 +40,12 @@
 	    android:padding="4dip"
 	    android:orientation="horizontal" >
 
-	    <src.comitton.view.SelectIconView
+	    <src.comitton.fileview.view.SelectIconView
 	        android:id="@+id/icon_02"
 	        android:layout_width="40sp"
 	        android:layout_height="40sp" />
 
-	    <src.comitton.view.SelectIconView
+	    <src.comitton.fileview.view.SelectIconView
 	        android:id="@+id/icon_03"
 	        android:layout_width="40sp"
 	        android:layout_height="40sp" />

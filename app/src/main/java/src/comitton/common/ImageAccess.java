@@ -15,7 +15,6 @@ import android.util.Log;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
@@ -24,8 +23,6 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-
-import src.comitton.data.FileData;
 
 
 public class ImageAccess {
@@ -46,6 +43,9 @@ public class ImageAccess {
 	public static final int BMPMARGIN_SPECIAL = 4;
 	public static final int BMPMARGIN_OVERKILL = 5;
 	public static final int BMPMARGIN_IGNORE_ASPECT_RATIO = 6;
+
+	public static final int MARGIN_COLOR_WHITE_AND_BLACK = 0;
+	public static final int MARGIN_COLOR_ALL_COLORS = 1;
 
 	private static boolean COLOR_CHECK(int rgb1, int rgb2, int mask) {
 		int red1 = ((rgb1>>16) & 0x00FF);
@@ -83,39 +83,52 @@ public class ImageAccess {
 		if (margin != 0) {
 			// 余白を削除する
 
+			/** 違う色の出現回数の許容する割合(単位0.1%)\n
+			 *  違う色の回数がこの数値を超えると余白でないと判定する
+			 */
 			int limit;
+			/** 余白判定された幅のうち画像から削除する割合(単位1%)\n
+			 *  100%からこの値を引いた割合に応じて画像の縁に余白を残す
+			 */
 			int space;
+			/** 余白判定を行う範囲(単位1%)\n
+			 *  画像のほとんどが余白のときカットする量を制限する
+			 */
 			int range;
+			/** 余白判定を開始するまでの無視区間(単位0.1%)\n
+			 *  画面端にノイズがあっても余白削除を失敗させない
+			 */
 			int start;
+			/** 色判定時のビットマスク深度\n
+			 *  RGBすべてが上位ビットからこのビット数一致すれば同じ色と判定する
+			 */
 			int bitmask;
 
-			// パラメタ設定 limit=白黒以外の色の許容×0.1％ 、space=余白のカット％ 、range=余白を探す範囲％
-			// start=余白判定を開始するまでの無視区間x0.1%、bitmask=色判定時のビットマスク深度
 			switch (margin) {
-				case 0:		// なし
+				case BMPMARGIN_NONE:		// なし
 					return null;
-				case 1:		// 弱
+				case BMPMARGIN_WEAK:		// 弱
 					limit = 5;
 					space = 60;
 					range = 25;
 					start = 1;
 					bitmask = 4;
 					break;
-				case 2:		// 中
+				case BMPMARGIN_MEDIUM:		// 中
 					limit = 6;
 					space = 80;
 					range = 30;
 					start = 2;
 					bitmask = 4;
 					break;
-				case 3:		// 強
+				case BMPMARGIN_STRONG:		// 強
 					limit = 8;
 					space = 90;
 					range = 45;
 					start = 3;
 					bitmask = 3;
 					break;
-				case 4:		// 特上
+				case BMPMARGIN_SPECIAL:		// 特上
 					limit = 20;
 					space = 95;
 					range = 50;
@@ -151,7 +164,7 @@ public class ImageAccess {
 					mask = 0x00E0E0E0;  // 上位3ビット
 					break;
 				case 4:
-					mask = 0xF79D;  // 上位4ビット
+					mask = 0x00F0F0F0;  // 上位4ビット
 					break;
 				default:
 					mask = 0x00F0F0F0;  // 上位4ビット
@@ -169,10 +182,10 @@ public class ImageAccess {
 			int ColorT = 0;
 			int ColorB = 0;
 
-			int ColorArrayL[] = new int[src_cy];
-			int ColorArrayR[] = new int[src_cy];
-			int ColorArrayT[] = new int[src_cx];
-			int ColorArrayB[] = new int[src_cx];
+			int[] ColorArrayL = new int[src_cy];
+			int[] ColorArrayR = new int[src_cy];
+			int[] ColorArrayT = new int[src_cx];
+			int[] ColorArrayB = new int[src_cx];
 
 			int CheckCX = src_cx * range / 100;
 			int CheckCY = src_cy * range / 100;
@@ -183,12 +196,12 @@ public class ImageAccess {
 			// 上下左右の端のラインの色の最頻値を調べる
 			// 配列に左右端のラインの色を代入
 			for (yy = 0; yy < src_cy; yy++) {
-				ColorArrayL[yy] = bm.getPixel(0 + startW, yy);
+				ColorArrayL[yy] = bm.getPixel(startW, yy);
 				ColorArrayR[yy] = bm.getPixel(src_cx - startW - 1, yy);
 			}
 			// 配列に上下端のラインの色を代入
 			for (xx = 0; xx < src_cx; xx++) {
-				ColorArrayT[xx] = bm.getPixel(xx, 0 + startH);
+				ColorArrayT[xx] = bm.getPixel(xx, startH);
 				ColorArrayB[xx] = bm.getPixel(xx, src_cy - startH - 1);
 			}
 			// 昇順ソート
@@ -314,7 +327,7 @@ public class ImageAccess {
 			ColorB = modeB;
 
 			// 上の余白チェック
-			for (yy = startH + 0; yy < CheckCY; yy++) {
+			for (yy = startH; yy < CheckCY; yy++) {
 				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
 				overcnt = 0;    // 余白でないカウンタ
 				CutT = yy;
@@ -346,7 +359,7 @@ public class ImageAccess {
 				}
 			}
 			// 左の余白チェック
-			for (xx = startW + 0; xx < CheckCX; xx++) {
+			for (xx = startW; xx < CheckCX; xx++) {
 				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
 				overcnt = 0;    // 余白でないカウンタ
 				CutL = xx;
@@ -432,7 +445,7 @@ public class ImageAccess {
 		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 縮小サイズを計算します.  x=" + x + ", y=" + y + ", src_cx=" + src_cx + ", src_cy=" + src_cy);}
 		int dst_cx;
 		int dst_cy;
-		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: src_cx/src_cx=" + ((float)src_cx / (float)src_cx) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));}
+		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: src_cx/src_cy=" + ((float)src_cx / (float)src_cy) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));}
 		if (crop == BMPCROP_FIT_SCREEN) {
 			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: BMPCROP_FIT_SCREEN です. src_cx/src_cy=" + ((float)src_cx / (float)src_cy) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));}
 			if ((float)src_cx / src_cy > (float)thum_cx / thum_cy) {
@@ -481,8 +494,8 @@ public class ImageAccess {
 		catch (Exception e) {
 			// 異常なサイズのときに落ちる不具合のため
 			Log.e("ImageAccess", "resizeTumbnailBitmap: リサイズでエラーになりました.");
-			if (e != null && e.getMessage() != null) {
-				Log.e("ImageAccess", "resizeTumbnailBitmap エラーメッセージ. " + e.getMessage());
+			if (e.getLocalizedMessage() != null) {
+				Log.e("ImageAccess", "resizeTumbnailBitmap エラーメッセージ. " + e.getLocalizedMessage());
 			}
 			return null;
 		}
@@ -527,7 +540,7 @@ public class ImageAccess {
 				else {
 					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 中央左を表示します.");}
 					// 中央左（背表紙を避ける）
-					x = (int) ((bmp_cx / 2) - (thum_cx * 1.05));
+					x = (int) ((bmp_cx / 2d) - (thum_cx * 1.05));
 					if (x < 0) {
 						// 左側
 						x = 0;
@@ -540,8 +553,8 @@ public class ImageAccess {
 				}
 				catch (Exception e) {
 					Log.e("ImageAccess", "resizeTumbnailBitmap: ビットマップの切り取りでエラーになりました.");
-					if (e != null && e.getMessage() != null) {
-						Log.e("ImageAccess", "resizeTumbnailBitmap エラーメッセージ. " + e.getMessage());
+					if (e.getLocalizedMessage() != null) {
+						Log.e("ImageAccess", "resizeTumbnailBitmap エラーメッセージ. " + e.getLocalizedMessage());
 					}
 					return null;
 				}
@@ -586,8 +599,8 @@ public class ImageAccess {
 		catch (Exception e) {
 			// 読み込み失敗
 			Log.e("ImageAccess", "createIcon: ビットマップの作成でエラーになりました.");
-			if (e != null && e.getMessage() != null) {
-				Log.e("ImageAccess", "createIcon: error message. " + e.getMessage());
+			if (e.getLocalizedMessage() != null) {
+				Log.e("ImageAccess", "createIcon: error message. " + e.getLocalizedMessage());
 				return null;
 			}
 		}
@@ -621,8 +634,8 @@ public class ImageAccess {
 		}
 		catch (Exception e) {
 			Log.e("ImageAccess", "setColor: 色の変更でエラーになりました.");
-			if (e != null && e.getMessage() != null) {
-				Log.e("ImageAccess", "createIcon: error message. " + e.getMessage());
+			if (e.getLocalizedMessage() != null) {
+				Log.e("ImageAccess", "createIcon: error message. " + e.getLocalizedMessage());
 				return null;
 			}
 		}

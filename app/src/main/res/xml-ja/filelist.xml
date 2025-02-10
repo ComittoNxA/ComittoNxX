@@ -80,35 +80,35 @@
             android:key="FileRenMenu"
             android:summary="dummy"
             android:title="名前変更メニューの表示" />
-        <src.comitton.config.FontTitleSeekbar
+        <src.comitton.config.seekbar.FontTitleSeekbar
             android:dialogMessage="タイトルのフォントサイズを選択"
             android:dialogTitle="タイトルのフォントサイズ"
             android:key="FontTitleSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="タイトルのフォントサイズ" />
-        <src.comitton.config.FontMainSeekbar
+        <src.comitton.config.seekbar.FontMainSeekbar
             android:dialogMessage="ファイル名等のフォントサイズを選択"
             android:dialogTitle="フォントサイズ"
             android:key="FontMainSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="ファイル名等のフォントサイズ" />
-        <src.comitton.config.FontSubSeekbar
+        <src.comitton.config.seekbar.FontSubSeekbar
             android:dialogMessage="サマリのフォントサイズを選択"
             android:dialogTitle="サマリのフォントサイズ"
             android:key="FontSubSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="サマリのフォントサイズ" />
-        <src.comitton.config.FontTileSeekbar
+        <src.comitton.config.seekbar.FontTileSeekbar
             android:dialogMessage="タイル表示のフォントサイズを選択"
             android:dialogTitle="タイル表示のフォントサイズ"
             android:key="FontTileSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="タイル用フォントサイズ" />
-        <src.comitton.config.ItemMarginSeekbar
+        <src.comitton.config.seekbar.ItemMarginSeekbar
             android:dialogMessage="リスト項目の余白サイズを選択"
             android:dialogTitle="項目の余白サイズ"
             android:key="ItemMarginSp"
@@ -125,7 +125,7 @@
             android:key="ToolbarName"
             android:summary="ツールバーのアイコン名を表示する"
             android:title="ツールバーのアイコン名" />
-        <src.comitton.config.ToolbarSeekbar
+        <src.comitton.config.seekbar.ToolbarSeekbar
             android:dialogMessage="ツールバーのアイコンサイズを設定"
             android:dialogTitle="ツールバーのサイズ"
             android:key="ToolbarSeek"
@@ -139,7 +139,7 @@
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="サムネイルのサイズ" />
-        <src.comitton.config.ListThumbSeekbar
+        <src.comitton.config.seekbar.ListThumbSeekbar
             android:dialogMessage="リスト表示のサムネイルサイズを設定"
             android:dialogTitle="リスト表示のサムネイルサイズ"
             android:key="ListThumbSeek"
@@ -157,8 +157,16 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="ThumbSort"
-            android:summary="圧縮ファイル中の全ファイル名を解析して先頭ファイルを求める(かなり遅くなります)"
+            android:summary="圧縮ファイル中の全ファイル名を解析して先頭ファイルを求める(RARファイルはかなり遅くなります)"
             android:title="先頭ファイル名のサムネイル作成" />
+        <ListPreference
+            android:defaultValue="2"
+            android:dialogTitle="先頭ファイル名のサムネイル作成条件(サーバ種別)"
+            android:entries="@array/ThumbSortType_name_list"
+            android:entryValues="@array/ThumbSortType_value_list"
+            android:key="ThumbSortType"
+            android:summary="dummy"
+            android:title="先頭ファイル名のサムネイル作成条件(サーバ種別)" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="ClearTop"
@@ -171,7 +179,7 @@
             android:key="ThumbnailTap"
             android:summary="サムネイルON時にリスト表示ではサムネイル、タイル表示ではファイル名をタップすると長押しメニューを出せる"
             android:title="サムネイルONで長押しメニューを有効" />
-        <src.comitton.config.MenuLongTapSeekbar
+        <src.comitton.config.seekbar.MenuLongTapSeekbar
             android:dialogMessage="長押しの時間を選択"
             android:dialogTitle="長押し操作の時間"
             android:key="MenuLongTap"

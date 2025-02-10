@@ -66,7 +66,7 @@
     <string name="fileNextMark">Next File(Marked Page)</string>
     <string name="filePrevMark">Prev File(Marked Page)</string>
     <string name="loading">Loading</string>
-    <string name="reading">Loading File List</string>
+    <string name="reading">File List Parsing</string>
     <string name="epubParsing">EPUB Parsing</string>
     <string name="htmlParsing">HTML Parsing</string>
     <string name="textParsing">Text Parsing</string>
@@ -74,6 +74,7 @@
     <string name="readxref">Loading XRef</string>
     <string name="readpage">Loading Page Object</string>
     <string name="download">Downloading File</string>
+    <string name="imageParsing">Image Parsing</string>
     <string name="loaderr">Image Load Error.</string>
     <string name="localStrage">Local Storage</string>
     <string name="undefine">Undefined</string>
@@ -175,10 +176,13 @@
     <string name="svHostTitle">Host (Server/Shared Folder)</string>
     <string name="svUserTitle">Account Name (Anonymous is blank, guest is guest)</string>
     <string name="svPassTitle">Password</string>
+    <string name="svProviderTitle">URL</string>
     <string name="svNameHist">Comics Server</string>
     <string name="svHostHist">192.168.1.120/comics (Example)</string>
-    <string name="svUserHist">domain;user</string>
-    <string name="svPassHist"></string>
+    <string name="svUserHist">Domain;User</string>
+    <string name="svPassHist">Password</string>
+    <string name="svProviderUnselected">Please select</string>
+    <string name="svProviderSelected">Selected</string>
     <string name="svNotFound">The specified server is not registered.</string>
     <string name="resetLocal">Resets the saved folder location.</string>
     <string name="psAdd100">+100</string>
@@ -327,6 +331,10 @@
     <string name="thumbcache02">Max 500 files</string>
     <string name="thumbcache03">Max 1000 files</string>
     <string name="thumbcache04">Delete manually</string>
+    <string name="thumbsorttype00">NONE</string>
+    <string name="thumbsorttype01">LOCAL</string>
+    <string name="thumbsorttype02">LOCAL and SMB</string>
+    <string name="thumbsorttype03">ALL</string>
     <string name="thumbcrop00">Center</string>
     <string name="thumbcrop01">Left</string>
     <string name="thumbcrop02">Right</string>
@@ -537,5 +545,25 @@
 
     <string name="imgConfFilter">Filter</string>
     <string name="imgConfOther">Others</string>
+
+    <string name="serverType">Access Type</string>
+    <string name="serverTypeSMB">SMB</string>
+    <string name="serverTypeSAF">Storage Access Framework</string>
+    <string name="serverTypePicker">File Picker</string>
+    <string name="SafChooseTitle">Select a folder.</string>
+    <string name="permissionDenied">Permission denied.</string>
+    <string name="noResponseProvider">No response from content provider.</string>
+    <string name="SmbAccessError">SMB access error</string>
+
+
+    <string name="releaseMessage">A new version has been released.</string>
+    <string name="releasePositive">DOWNLOAD</string>
+    <string name="releaseNegative">LATER</string>
+    <string name="releaseNeutral">TURN OFF</string>
+
+    <string name="MallocFailure">Failed to allocate memory.</string>
+    <string name="CacheLimitExceeded">Too many caches created</string>
+    <string name="CacheIndexOutOfRange">Cache index is wrong</string>
+    <string name="CacheNotInitialized">The cache has not been initialized</string>
 
 </resources>

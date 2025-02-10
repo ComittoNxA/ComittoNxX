@@ -9,25 +9,25 @@
 
 #include "Image.h"
 
-extern IMAGEDATA	*gImageData;
-extern WORD			**gLinesPtr;
+extern IMAGEDATA	*gImageData[];
+extern WORD			**gLinesPtr[];
 
-extern BUFFMNG		*gBuffMng;
-extern long			gBuffNum;
+extern BUFFMNG		*gBuffMng[];
+extern long			gBuffNum[];
 
-extern BUFFMNG		*gSclBuffMng;
-extern long			gSclBuffNum;
+extern BUFFMNG		*gSclBuffMng[];
+extern long			gSclBuffNum[];
 
-extern int			gCancel;
+extern int			gCancel[];
 
-int ImageHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
+int ImageHalf(int index, int Page, int Half, int Count, int OrgWidth, int OrgHeight)
 {
 	int ret = 0;
 
 	int buffindex;
 	int buffpos = 0;
 	int linesize;
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 
 	// 使用するバッファを保持
 	int StartX;
@@ -53,8 +53,9 @@ int ImageHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 	linesize  = HalfWidth + HOKAN_DOTS;
 
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, OrgHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, OrgHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	buffindex = -1;
@@ -63,21 +64,21 @@ int ImageHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 //	LOGD("ImageHalf : half=%d, sx=%d, hw=%d, ow=%d, oh=%d", Half, StartX, HalfWidth, OrgWidth, OrgHeight);
 
 	for (yy = 0; yy < OrgHeight ; yy ++) {
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("ImageRotate : cancel.");
 //			ReleaseBuff(Page, 1, Half);
-			return -10;
+			return ERROR_CODE_USER_CANCELED;
 		}
 
-		orgbuff1 = gLinesPtr[yy + HOKAN_DOTS / 2];
+		orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2];
 
-		ret = NextSclBuff(Page, Half, Index, &buffindex, &buffpos, linesize);
+		ret = NextSclBuff(index, Page, Half, Count, &buffindex, &buffpos, linesize);
 		if (ret < 0) {
 			return ret;
 		}
 
 		// バッファ位置
-		buffptr = gSclBuffMng[buffindex].Buff + buffpos + HOKAN_DOTS / 2;
+		buffptr = gSclBuffMng[index][buffindex].Buff + buffpos + HOKAN_DOTS / 2;
 //		LOGD("ImageHalf : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
 		for (xx = 0 ; xx < HalfWidth ; xx ++) {
@@ -92,7 +93,7 @@ int ImageHalf(int Page, int Half, int Index, int OrgWidth, int OrgHeight)
 		buffptr[HalfWidth + 1] = buffptr[HalfWidth - 1];
 
 		buffpos += linesize;
-		gSclBuffMng[buffindex].Size += linesize;
+		gSclBuffMng[index][buffindex].Size += linesize;
 	}
 	return 0;
 }

@@ -10,9 +10,9 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
@@ -29,6 +29,7 @@ void *ImageBlur_ThreadFunc(void *param)
 	int Width   = range[2];
 	int Height  = range[3];
 	int Zoom    = range[4];
+    int index    = range[5];
 
 //	LOGD("ImageBlur_ThreadFund : st=%d, ed=%d, w=%d, h=%d, z=%d", stindex, edindex, Width, Height, Zoom);
 
@@ -52,16 +53,13 @@ void *ImageBlur_ThreadFunc(void *param)
 
 	for (int yy = stindex ; yy < edindex ; yy ++) {
 //		LOGD("ImageBlur : loop yy=%d", yy);
-		if (gCancel) {
-//			LOGD("ImageBlur_ThreadFund : cancel.(gCancel=%d)", gCancel);
-			return (void*)-1;
+		if (gCancel[index]) {
+//			LOGD("ImageBlur_ThreadFund : cancel.(gCancel[index]=%d)", gCancel[index]);
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
-		// バッファ位置
-//		buffptr = gSclLinesPtr[yy];
-
-		orgbuff1 = gLinesPtr[yy + HOKAN_DOTS / 2 + 0];
-		orgbuff2 = gLinesPtr[yy + HOKAN_DOTS / 2 + 1];
+		orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 0];
+		orgbuff2 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 1];
 
 		yd3 = gDitherY_3bit[yy & 0x07];
 		yd2 = gDitherY_2bit[yy & 0x03];
@@ -116,9 +114,9 @@ void *ImageBlur_ThreadFunc(void *param)
 // pOrgWidth  : 幅を指定
 // pOrgHeight : 高さを指定
 // Zoom       : 倍率（0%～100%→0～100で表す）
-int ImageBlur(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int Zoom)
+int ImageBlur(int index, int Page, int Half, int Count, int OrgWidth, int OrgHeight, int Zoom)
 {
-//	LOGD("ImageBlur : p=%d, h=%d, i=%d, ow=%d, oh=%d, zm=%d", Page, Half, Index, OrgWidth, OrgHeight, Zoom);
+//	LOGD("ImageBlur : p=%d, h=%d, c=%d, ow=%d, oh=%d, zm=%d", Page, Half, Count, OrgWidth, OrgHeight, Zoom);
 
 //	int linesize;
 	int ret = 0;
@@ -131,22 +129,9 @@ int ImageBlur(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int Zo
 		Zoom = 50;
 	}
 
-	// ラインサイズ
-//	linesize  = OrgWidth + HOKAN_DOTS;
-
-//	//  サイズ変更画像待避用領域確保
-//	if (ScaleMemAlloc(linesize, OrgHeight) < 0) {
-//		return -6;
-//	}
-
-//	// データの格納先ポインタリストを更新
-//	if (RefreshSclLinesPtr(Page, Half, Index, OrgHeight, linesize) < 0) {
-//		return -7;
-//	}
-
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][5];
+	int param[gMaxThreadNum][6];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -155,10 +140,11 @@ int ImageBlur(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int Zo
 		param[i][2] = OrgWidth;
 		param[i][3] = OrgHeight;
 		param[i][4] = Zoom;
-		
+        param[i][5] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, ImageBlur_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, ImageBlur_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -173,9 +159,9 @@ int ImageBlur(int Page, int Half, int Index, int OrgWidth, int OrgHeight, int Zo
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
+		if (status[i] != nullptr) {
 //			LOGD("ImageBlur : cancel");
-			ret = -10;
+			ret = (long)status[i];
 		}
 	}
 

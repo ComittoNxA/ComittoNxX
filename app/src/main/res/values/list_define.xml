@@ -97,6 +97,18 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+    <string-array name="ThumbSortType_name_list">
+        <item>NONE</item>
+        <item>LOCAL</item>
+        <item>LOCAL and SMB</item>
+        <item>ALL</item>
+    </string-array>
+    <string-array name="ThumbSortType_value_list">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
     <string-array name="thumcrop_name_list">
         <item>Center</item>
         <item>Left</item>

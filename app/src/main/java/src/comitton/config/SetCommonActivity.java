@@ -1,6 +1,6 @@
 package src.comitton.config;
 
-import src.comitton.activity.HelpActivity;
+import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
 
@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -26,6 +25,7 @@ import java.util.Arrays;
 
 
 public class SetCommonActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+	private static final String TAG = "SetCommonActivity";
 
 
 	public class SetCommonFragment extends PreferenceHeaderFragmentCompat implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -211,6 +211,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 	}
 
 	public static void loadSettings(SharedPreferences sharedPreferences) {
+		boolean debug = false;
 		DEF.CHAR_DETECT = sharedPreferences.getBoolean(DEF.KEY_CHAR_DETECT, true);
 		DEF.CHARSET = getCharsetSummary(sharedPreferences);
 
@@ -266,7 +267,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 		}
 		DEF.PRIORITY_WORDS = priorityWords.toArray(new String[0]);
 
-		Log.d("SetCommonActivity", "loadSettings: DEF.PRIORITY_WORDS=" + Arrays.toString(DEF.PRIORITY_WORDS));
+		if (debug) {Log.d(TAG, "loadSettings: DEF.PRIORITY_WORDS=" + Arrays.toString(DEF.PRIORITY_WORDS));}
 	}
 	// 終了処理
 	protected void onDestroy() {

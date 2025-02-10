@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="View Settings" >
-        <src.comitton.config.WAdjustSeekbar
+        <src.comitton.config.seekbar.WAdjustSeekbar
             android:dialogMessage="Adjust the display&apos;s aspect ratio when the landscape."
             android:dialogTitle="Aspect Ratio"
             android:key="WAdjust"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Aspect Ratie" />
-        <src.comitton.config.WScalingSeekbar
+        <src.comitton.config.seekbar.WScalingSeekbar
             android:dialogMessage="Adjust the width of the iamge."
             android:dialogTitle="Image Width"
             android:key="WScaling"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Image Width" />
-        <src.comitton.config.ScalingSeekbar
+        <src.comitton.config.seekbar.ScalingSeekbar
             android:dialogMessage="Scale image to specified size"
             android:dialogTitle="Image scaling"
             android:key="Scaling"
@@ -29,7 +29,7 @@
             android:title="View the status file reading" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Operation Settings" >
-        <src.comitton.config.LongTapSeekbar
+        <src.comitton.config.seekbar.LongTapSeekbar
             android:dialogMessage="Time to select the Loupe view in the long tap."
             android:dialogTitle="Time to Loupe view"
             android:key="LongTap"
@@ -44,21 +44,21 @@
             android:key="LoupeSize"
             android:summary="dummy"
             android:title="Size of Loupe view" />
-        <src.comitton.config.ScrlRngWSeekbar
+        <src.comitton.config.seekbar.ScrlRngWSeekbar
             android:dialogMessage="Scroll Width of Vol-Button, etc."
             android:dialogTitle="Scroll Range (Width)"
             android:key="ScrlRngW"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scroll Range (Width)" />
-        <src.comitton.config.ScrlRngHSeekbar
+        <src.comitton.config.seekbar.ScrlRngHSeekbar
             android:dialogMessage="Scroll Height of Vol-Button, etc."
             android:dialogTitle="Scroll Range (Height)"
             android:key="ScrlRngH"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scroll Range (Height)" />
-        <src.comitton.config.AutoPlaySeekbar
+        <src.comitton.config.seekbar.AutoPlaySeekbar
             android:dialogMessage="Interval to play automatically."
             android:dialogTitle="Auto Play Interval"
             android:key="AutoPlayInt"

@@ -8,73 +8,70 @@
 #else
 #include <android/log.h>
 #endif
-//#include <unistd.h>
 #include "Image.h"
 #include <unistd.h>
 
 //#define DEBUG
 
-extern IMAGEDATA	*gImageData;
+extern IMAGEDATA	*gImageData[];
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
 void *ImageMarginCut_ThreadFunc(void *param)
 {
-	int *range = (int*)param;
-	int stindex   = range[0];
-	int edindex   = range[1];
-	int SclWidth  = range[2];
-	int SclHeight = range[3];
-	int OrgWidth  = range[4];
-	int OrgHeight = range[5];
-	int CutT      = range[6];
-	int CutL      = range[7];
+    int *range = (int*)param;
+    int index     = range[0];
+    int stindex   = range[1];
+    int edindex   = range[2];
+    int ReturnWidth  = range[3];
+    int CutT      = range[4];
+    int CutL      = range[5];
 
-	WORD *orgbuff1;
-	WORD *buffptr;
+    WORD *orgbuff1;
+    WORD *buffptr;
 
-	int		xx;	// サイズ変更後のx座標
-	int		yy;	// サイズ変更後のy座標
+    int		xx;	// サイズ変更後のx座標
+    int		yy;	// サイズ変更後のy座標
 
-	for (yy = stindex ; yy < edindex ; yy ++) {
+    for (yy = stindex ; yy < edindex ; yy ++) {
 //		LOGD("ImageMarginCut : loop yy=%d", yy);
-		if (gCancel) {
+        if (gCancel[index]) {
 //			LOGD("ImageRotate : cancel.");
 //			ReleaseBuff(Page, 1, Half);
-			return (void*)-1;
-		}
+            return (void*)ERROR_CODE_USER_CANCELED;
+        }
 
-		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
+        // バッファ位置
+        buffptr = gSclLinesPtr[index][yy];
 //		LOGD("ImageRotate : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
-		orgbuff1 = gLinesPtr[yy + CutT + HOKAN_DOTS / 2];
-		memcpy(buffptr, &orgbuff1[CutL + HOKAN_DOTS / 2], SclWidth * sizeof(WORD));
+        orgbuff1 = gLinesPtr[index][yy + CutT + HOKAN_DOTS / 2];
+        memcpy(buffptr, &orgbuff1[CutL + HOKAN_DOTS / 2], ReturnWidth * sizeof(WORD));
 
-		// 補完用の余裕
-		buffptr[-2] = buffptr[0];
-		buffptr[-1] = buffptr[0];
-		buffptr[SclWidth + 0] = buffptr[SclWidth - 1];
-		buffptr[SclWidth + 1] = buffptr[SclWidth - 1];
-	}
-	return 0;
+        // 補完用の余裕
+        buffptr[-2] = buffptr[0];
+        buffptr[-1] = buffptr[0];
+        buffptr[ReturnWidth + 0] = buffptr[ReturnWidth - 1];
+        buffptr[ReturnWidth + 1] = buffptr[ReturnWidth - 1];
+    }
+    return nullptr;
 }
 
 // 上下左右の端のラインの色の最頻値を調べる
-int GetModeColor(int Page, int Half, int Index, int SclWidth, int SclHeight, int StartH, int StartW, WORD *ColorL, WORD *ColorR, WORD *ColorT, WORD *ColorB) {
+int GetModeColor(int index, int Page, int Half, int Index, int StartH, int StartW, WORD *ColorL, WORD *ColorR, WORD *ColorT, WORD *ColorB) {
 
-    IMAGEDATA *pData = &gImageData[Page];
+    IMAGEDATA *pData = &gImageData[index][Page];
     const int OrgWidth  = pData->OrgWidth;
     const int OrgHeight = pData->OrgHeight;
 
     int ret = 0;
 
     // 元データ配列化
-    ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+    ret = SetLinesPtr(index, Page, Half, Index, OrgWidth, OrgHeight);
     if (ret < 0) {
         LOGE("GetModeColor 元データ配列化に失敗しました. return=%d", ret);
         return ret;
@@ -82,7 +79,7 @@ int GetModeColor(int Page, int Half, int Index, int SclWidth, int SclHeight, int
 #ifdef DEBUG
     LOGD("getModeColor Page=%d, Half=%d, 配列化成功", Page, Half);
 #endif
-    WORD *buffptr = NULL;
+    WORD *buffptr = nullptr;
     WORD *orgbuff1;
 
     int		xx;	// サイズ変更後のx座標
@@ -93,17 +90,20 @@ int GetModeColor(int Page, int Half, int Index, int SclWidth, int SclHeight, int
     std::vector<WORD> ColorVectorT(OrgWidth);
     std::vector<WORD> ColorVectorB(OrgWidth);
 
+#ifdef DEBUG
+    LOGD("getModeColor Page=%d, Half=%d, index=%d, gLinesPtr[%d]=%ld, sizeof(gLinesPtr[%d])=%ld", Page, Half, index, index, (long)(gLinesPtr[index]), index, sizeof(gLinesPtr[index]));
+#endif
     // 上下左右の端のラインの色の最頻値を調べる
     // 配列に左右端のラインの色を代入
     for (yy = 0 ; yy < OrgHeight ; yy++) {
-        orgbuff1 = gLinesPtr[yy + HOKAN_DOTS / 2];
+        orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2];
         ColorVectorL[yy] = orgbuff1[0 + StartW + HOKAN_DOTS / 2];
         ColorVectorR[yy] = orgbuff1[OrgWidth - StartW - 1 + HOKAN_DOTS / 2];
     }
     // 配列に上下端のラインの色を代入
     for (xx = 0 ; xx < OrgWidth ; xx++) {
-        ColorVectorT[xx] = gLinesPtr[0 + StartH + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2];
-        ColorVectorB[xx] = gLinesPtr[OrgHeight - StartH - 1 + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2];
+        ColorVectorT[xx] = gLinesPtr[index][0 + StartH + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2];
+        ColorVectorB[xx] = gLinesPtr[index][OrgHeight - StartH - 1 + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2];
     }
     // 昇順ソート
     sort(ColorVectorL.begin(), ColorVectorL.end());
@@ -238,14 +238,14 @@ int GetModeColor(int Page, int Half, int Index, int SclWidth, int SclHeight, int
 
 // Margin     : 画像の何%まで余白チェックするか(0～20%)
 // *pLeft, *pRight, *pTop, *pBottom  : 余白カット量を返す
-int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, int Margin, int MarginColor, int *pLeft, int *pRight, int *pTop, int *pBottom)
+int GetMarginSize(int index, int Page, int Half, int Index, int Margin, int MarginColor, int *pLeft, int *pRight, int *pTop, int *pBottom)
 {
 
-    IMAGEDATA *pData = &gImageData[Page];
+    IMAGEDATA *pData = &gImageData[index][Page];
     int OrgWidth  = pData->OrgWidth;
     int OrgHeight = pData->OrgHeight;
 #ifdef DEBUG
-    LOGD("GetMarginSize Page=%d, Half=%d, 元サイズ Index=%d, OrgWidth=%d, OrgHeight=%d, SclWidth=%d, SclHeight=%d, Margin=%d, MarginColor=%d", Page, Half, Index, OrgWidth, OrgHeight, SclWidth, SclHeight, Margin, MarginColor);
+    LOGD("GetMarginSize Page=%d, Half=%d, 元サイズ Index=%d, OrgWidth=%d, OrgHeight=%d, Margin=%d, MarginColor=%d", Page, Half, Index, OrgWidth, OrgHeight, Margin, MarginColor);
 #endif
     int ret = 0;
 
@@ -260,39 +260,52 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
     int top = 0;
     int bottom = 0;
 
+    /** 違う色の出現回数の許容する割合(単位0.1%)\n
+     *  違う色の回数がこの数値を超えると余白でないと判定する
+     */
     int limit;
+    /** 余白判定された幅のうち画像から削除する割合(単位1%)\n
+     *  100%からこの値を引いた割合に応じて画像の縁に余白を残す
+     */
     int space;
+    /** 余白判定を行う範囲(単位1%)\n
+     *  画像のほとんどが余白のときカットする量を制限する
+     */
     int range;
+    /** 余白判定を開始するまでの無視区間(単位0.1%)\n
+     *  画面端にノイズがあっても余白削除を失敗させない
+     */
     int start;
+    /** 色判定時のビットマスク深度\n
+     *  RGBすべてが上位ビットからこのビット数一致すれば同じ色と判定する
+     */
     int bitmask;
 
-    // パラメタ設定 limit=白黒以外の色の出現率の許容×0.1％ 、space=余白のカット％ 、range=余白を探す範囲％
-    // start=余白判定を開始するまでの無視区間x0.1%、bitmask=色判定時のビットマスク深度
     switch (Margin) {
-        case 0:		// なし
+        case BMPMARGIN_NONE:		// なし
             return 0;
-        case 1:		// 弱
+        case BMPMARGIN_WEAK:		// 弱
             limit = 5;
             space = 60;
             range = 25;
             start = 1;
             bitmask = 4;
             break;
-        case 2:		// 中
+        case BMPMARGIN_MEDIUM:		// 中
             limit = 6;
             space = 80;
             range = 30;
             start = 2;
             bitmask = 4;
             break;
-        case 3:		// 強
+        case BMPMARGIN_STRONG:		// 強
             limit = 8;
             space = 90;
             range = 45;
             start = 3;
             bitmask = 3;
             break;
-        case 4:		// 特上
+        case BMPMARGIN_SPECIAL:		// 特上
             limit = 20;
             space = 95;
             range = 50;
@@ -334,12 +347,12 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
     }
 
     // 上下左右の端のラインの色の最頻値を調べる
-    if (MarginColor == 1) {
+    if (MarginColor == MARGIN_COLOR_ALL_COLORS) {
 #ifdef DEBUG
         LOGD("GetMarginSize 色の最頻値を余白とします.");
         LOGD("GetMarginSize 色の最頻値を取得します.");
 #endif
-        ret = GetModeColor(Page, Half, Index, SclWidth, SclHeight, startH, startW, &ColorL, &ColorR, &ColorT, &ColorB);
+        ret = GetModeColor(index, Page, Half, Index, startH, startW, &ColorL, &ColorR, &ColorT, &ColorB);
         if (ret < 0) {
             LOGE("GetMarginSize 色の最頻値取得に失敗しました. return=%d", ret);
             return ret;
@@ -361,7 +374,7 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
 #endif
     if (Margin > 0) {
         // 元データ配列化
-        ret = SetLinesPtr(Page, Half, Index, OrgWidth, OrgHeight);
+        ret = SetLinesPtr(index, Page, Half, Index, OrgWidth, OrgHeight);
         if (ret < 0) {
             return ret;
         }
@@ -369,7 +382,7 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
 #ifdef DEBUG
     LOGD("GetMarginSize Page=%d, Half=%d, 配列化成功", Page, Half);
 #endif
-    WORD *buffptr = NULL;
+    WORD *buffptr = nullptr;
     WORD *orgbuff1;
 
     int		xx;	// サイズ変更後のx座標
@@ -377,14 +390,24 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
 
     int CheckCX = OrgWidth * range / 100;
     int CheckCY = OrgHeight * range / 100;
-    bool MODE_WHITE, MODE_BLACK;
-    int whitecnt, blackcnt, colorcnt;
+    /** 行または列内で白の出現回数がlimitに達していないときtrue */
+    bool MODE_WHITE;
+    /** 行または列内で黒の出現回数がlimitに達していないときtrue */
+    bool MODE_BLACK;
+    /** 行または列内の白以外の出現回数 */
+    int whitecnt;
+    /** 行または列内の黒以外の出現回数 */
+    int blackcnt;
+    /** 行または列内の最頻色以外の出現回数 */
+    int colorcnt;
 
 #ifdef DEBUG
     LOGD("GetMarginSize Page=%d, Half=%d, 余白調査範囲 CheckCX=%d, CheckCY=%d", Page, Half, CheckCX, CheckCY);
 #endif
+
+    bool breakflag = false;
     for (yy = startH + 0; yy < CheckCY ; yy ++) {
-        orgbuff1 = gLinesPtr[yy + HOKAN_DOTS / 2];
+        orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2];
         MODE_WHITE = true;
         MODE_BLACK = true;
         whitecnt = 0;	// 白でないカウンタ
@@ -392,58 +415,52 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
         colorcnt = 0;	// 最頻色でないカウンタ
         top = yy;
         for (xx = 0 ; xx < OrgWidth ; xx ++) {
-            if (MarginColor == 0) {
+            if (MarginColor == MARGIN_COLOR_WHITE_AND_BLACK) {
                 // 白チェック
                 if (MODE_WHITE) {
                     if (!WHITE_CHECK(orgbuff1[xx + HOKAN_DOTS / 2], mask)) {
                         whitecnt++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (whitecnt >= OrgWidth * limit / 1000) {
+                            MODE_WHITE = false;
+                        }
                     }
                 }
                 // 黒チェック
                 if (MODE_BLACK) {
                     if (!BLACK_CHECK(orgbuff1[xx + HOKAN_DOTS / 2], mask)) {
                         blackcnt++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (blackcnt >= OrgWidth * limit / 1000) {
+                            MODE_BLACK = false;
+                        }
                     }
+                }
+                if (!MODE_WHITE && !MODE_BLACK) {
+                    breakflag = true;
+                    break;
                 }
             }
             else {
                 // 最頻色チェック
                 if (!COLOR_CHECK(orgbuff1[xx + HOKAN_DOTS / 2], ColorT, mask)) {
                     colorcnt++;
+                    // (limit/10)%をオーバーしたら余白ではないとする
+                    if (colorcnt >= OrgWidth * limit / 1000) {
+                        breakflag = true;
+                        break;
+                    }
                 }
             }
         }
-
-        if (MarginColor == 0) {
-            // 白チェック
-            if (MODE_WHITE) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (whitecnt >= OrgWidth * limit / 1000) {
-                    MODE_WHITE = false;
-                }
-            }
-            // 黒チェック
-            if (MODE_BLACK) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (blackcnt >= OrgWidth * limit / 1000) {
-                    MODE_BLACK = false;
-                }
-            }
-            if (!MODE_WHITE && !MODE_BLACK) {
-                break;
-            }
-        }
-        else {
-            // 最頻色チェック
-            // (limit/10)%以上がオーバーしたら余白ではないとする
-            if (colorcnt >= OrgWidth * limit / 1000) {
-                break;
-            }
+        if (breakflag) {
+            break;
         }
     }
-    
+
+    breakflag = false;
     for (int yy = OrgHeight - startH - 1 ; yy >= OrgHeight - CheckCY ; yy --) {
-        orgbuff1 = gLinesPtr[yy + HOKAN_DOTS / 2];
+        orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2];
         MODE_WHITE = true;
         MODE_BLACK = true;
         whitecnt = 0;	// 白でないカウンタ
@@ -451,58 +468,55 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
         colorcnt = 0;	// 最頻色でないカウンタ
         bottom = OrgHeight - 1 - yy;
         for (xx = 0 ; xx < OrgWidth ; xx ++) {
-            if (MarginColor == 0) {
+            if (MarginColor == MARGIN_COLOR_WHITE_AND_BLACK) {
                 // 白チェック
                 if (MODE_WHITE) {
                     if (!WHITE_CHECK(orgbuff1[xx + HOKAN_DOTS / 2], mask)) {
                         whitecnt ++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (whitecnt >= OrgWidth * limit / 1000) {
+                            MODE_WHITE = false;
+                        }
                     }
                 }
                 // 黒チェック
                 if (MODE_BLACK) {
                     if (!BLACK_CHECK(orgbuff1[xx + HOKAN_DOTS / 2], mask)) {
                         blackcnt ++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (blackcnt >= OrgWidth * limit / 1000) {
+                            MODE_BLACK = false;
+                        }
                     }
+                }
+                if (!MODE_WHITE && !MODE_BLACK) {
+                    breakflag = true;
+                    break;
                 }
             }
             else {
                 // 最頻色チェック
                 if (!COLOR_CHECK(orgbuff1[xx + HOKAN_DOTS / 2], ColorB, mask)) {
                     colorcnt++;
+                    // (limit/10)%をオーバーしたら余白ではないとする
+                    if (colorcnt >= OrgWidth * limit / 1000) {
+                        breakflag = true;
+                        break;
+                    }
                 }
             }
+        }
+        if (breakflag) {
+            break;
         }
 
-        if (MarginColor == 0) {
-            // 白チェック
-            if (MODE_WHITE) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (whitecnt >= OrgWidth * limit / 1000) {
-                    MODE_WHITE = false;
-                }
-            }
-            // 黒チェック
-            if (MODE_BLACK) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (blackcnt >= OrgWidth * limit / 1000) {
-                    MODE_BLACK = false;
-                }
-            }
-            if (!MODE_WHITE && !MODE_BLACK) {
-                break;
-            }
-        }
-        else {
-            // 最頻色チェック
-            // (limit/10)%以上がオーバーしたら余白ではないとする
-            if (colorcnt >= OrgWidth * limit / 1000) {
-                break;
-            }
-        }
     }
+
 #ifdef DEBUG
     LOGD("GetMarginSize Page=%d, Half=%d, 縦カット値 上=%d, 下=%d", Page, Half, top, bottom);
 #endif
+
+    breakflag = false;
     for (xx = startW + 0; xx < CheckCX ; xx ++) {
         MODE_WHITE = true;
         MODE_BLACK = true;
@@ -511,118 +525,104 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
         colorcnt = 0;	// 最頻色でないカウンタ
         left = xx;
         for (yy = top + 1 ; yy < OrgHeight - bottom ; yy ++) {
-            if (MarginColor == 0) {
+            if (MarginColor == MARGIN_COLOR_WHITE_AND_BLACK) {
                 // 白チェック
                 if (MODE_WHITE) {
-                    if (!WHITE_CHECK(gLinesPtr[yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
+                    if (!WHITE_CHECK(gLinesPtr[index][yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
                         whitecnt++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (whitecnt >= (OrgHeight - top - bottom) * limit / 1000) {
+                            MODE_WHITE = false;
+                        }
                     }
                 }
                 // 黒チェック
                 if (MODE_BLACK) {
-                    if (!BLACK_CHECK(gLinesPtr[yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
+                    if (!BLACK_CHECK(gLinesPtr[index][yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
                         blackcnt++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (blackcnt >= (OrgHeight - top - bottom) * limit / 1000) {
+                            MODE_BLACK = false;
+                        }
                     }
+                }
+                if (!MODE_WHITE && !MODE_BLACK) {
+                    breakflag = true;
+                    break;
                 }
             }
             else {
                 // 最頻色チェック
-                if (!COLOR_CHECK(gLinesPtr[yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], ColorL, mask)) {
+                if (!COLOR_CHECK(gLinesPtr[index][yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], ColorL, mask)) {
                     colorcnt++;
+                    // (limit/10)%をオーバーしたら余白ではないとする
+                    if (colorcnt >= (OrgHeight - top - bottom) * limit / 1000) {
+                        breakflag = true;
+                        break;
+                    }
                 }
             }
         }
-
-        if (MarginColor == 0) {
-            // 白チェック
-            if (MODE_WHITE) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (whitecnt >= (OrgHeight - top - bottom) * limit / 1000) {
-                    MODE_WHITE = false;
-                }
-            }
-            // 黒チェック
-            if (MODE_BLACK) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (blackcnt >= (OrgHeight - top - bottom) * limit / 1000) {
-                    MODE_BLACK = false;
-                }
-            }
-            if (!MODE_WHITE && !MODE_BLACK) {
-                break;
-            }
-        }
-        else {
-            // 最頻色チェック
-            // (limit/10)%以上がオーバーしたら余白ではないとする
-            if (colorcnt >= (OrgHeight - top - bottom) * limit / 1000) {
-                break;
-            }
+        if (breakflag) {
+            break;
         }
     }
 
+    breakflag = false;
     for (int xx = OrgWidth - startW - 1 ; xx >= OrgWidth - CheckCX ; xx --) {
         MODE_WHITE = true;
         MODE_BLACK = true;
-        whitecnt = 0;	// 白でないカウンタ
-        blackcnt = 0;	// 黒でないカウンタ
-        colorcnt = 0;	// 最頻色でないカウンタ
+        whitecnt = 0;    // 白でないカウンタ
+        blackcnt = 0;    // 黒でないカウンタ
+        colorcnt = 0;    // 最頻色でないカウンタ
         right = OrgWidth - 1 - xx;
-        for (yy = top + 1 ; yy < OrgHeight - bottom ; yy ++) {
-            if (MarginColor == 0) {
+        for (yy = top + 1; yy < OrgHeight - bottom; yy++) {
+            if (MarginColor == MARGIN_COLOR_WHITE_AND_BLACK) {
                 // 白チェック
                 if (MODE_WHITE) {
-                    if (!WHITE_CHECK(gLinesPtr[yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
+                    if (!WHITE_CHECK(gLinesPtr[index][yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
                         whitecnt++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (whitecnt >= (OrgHeight - top - bottom) * limit / 1000) {
+                            MODE_WHITE = false;
+                        }
                     }
                 }
                 // 黒チェック
                 if (MODE_BLACK) {
-                    if (!BLACK_CHECK(gLinesPtr[yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
+                    if (!BLACK_CHECK(gLinesPtr[index][yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], mask)) {
                         blackcnt++;
+                        // (limit/10)%をオーバーしたら余白ではないとする
+                        if (blackcnt >= (OrgHeight - top - bottom) * limit / 1000) {
+                            MODE_BLACK = false;
+                        }
                     }
+                }
+                if (!MODE_WHITE && !MODE_BLACK) {
+                    breakflag = true;
+                    break;
                 }
             } else {
                 // 最頻色チェック
-                if (!COLOR_CHECK(gLinesPtr[yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], ColorR, mask)) {
+                if (!COLOR_CHECK(gLinesPtr[index][yy + HOKAN_DOTS / 2][xx + HOKAN_DOTS / 2], ColorR, mask)) {
                     colorcnt++;
+                    // (limit/10)%をオーバーしたら余白ではないとする
+                    if (colorcnt >= (OrgHeight - top - bottom) * limit / 1000) {
+                        breakflag = true;
+                        break;
+                    }
                 }
             }
         }
-
-        if (MarginColor == 0) {
-            // 白チェック
-            if (MODE_WHITE) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (whitecnt >= (OrgHeight - top - bottom) * limit / 1000) {
-                    MODE_WHITE = false;
-                }
-            }
-            // 黒チェック
-            if (MODE_BLACK) {
-                // (limit/10)%以上がオーバーしたら余白ではないとする
-                if (blackcnt >= (OrgHeight - top - bottom) * limit / 1000) {
-                    MODE_BLACK = false;
-                }
-            }
-            if (!MODE_WHITE && !MODE_BLACK) {
-                break;
-            }
-        }
-        else {
-#ifdef DEBUG
-            LOGD("GetMarginSize colorcnt=%d, (OrgHeight - top - bottom)=%d, limit=%d", colorcnt, (OrgHeight - top - bottom), limit);
-#endif
-            // 最頻色チェック
-            // (limit/10)%以上がオーバーしたら余白ではないとする
-            if (colorcnt >= (OrgHeight - top - bottom) * limit / 1000) {
-                break;
-            }
+        if (breakflag) {
+            break;
         }
     }
+
 #ifdef DEBUG
     LOGD("GetMarginSize Page=%d, Half=%d, 横カット値 左=%d, 右=%d", Page, Half, left, right);
 #endif
+
     if(left <= startW){left = 0;}
     if(right <= startW){right = 0;}
     if(top <= startH){top = 0;}
@@ -650,81 +650,82 @@ int GetMarginSize(int Page, int Half, int Index, int SclWidth, int SclHeight, in
 // Margin     : 画像の何%まで余白チェックするか(0～20%)
 // pReturnWidth  : 余白カット後の幅を返す
 // pReturnHeight : 余白カット後の高さを返す
-int ImageMarginCut(int Page, int Half, int Index, int SclWidth, int SclHeight, int left, int right, int top, int bottom, int Margin, int MarginColor, int *pReturnWidth, int *pReturnHeight)
+int ImageMarginCut(int index, int Page, int Half, int Count, int left, int right, int top, int bottom, int Margin, int MarginColor, int *pReturnWidth, int *pReturnHeight)
 {
 
-    IMAGEDATA *pData = &gImageData[Page];
-    int OrgWidth  = pData->OrgWidth;
-    int OrgHeight = pData->OrgHeight;
+    int OrgWidth  = *pReturnWidth;
+    int OrgHeight = *pReturnHeight;
+
 #ifdef DEBUG
-    LOGD("ImageMarginCut Page=%d, Half=%d, 元サイズ Index=%d, OrgWidth=%d, OrgHeight=%d, left=%d, right=%d, top=%d, bottom=%d, SclWidth=%d, SclHeight=%d, Margin=%d, MarginColor=%d", Page, Half, Index, OrgWidth, OrgHeight, SclWidth, SclHeight, left, right, top, bottom, Margin, MarginColor);
+    LOGD("ImageMarginCut : index=%d, Page=%d, Half=%d, 開始します. Count=%d, OrgWidth=%d, OrgHeight=%d, left=%d, right=%d, top=%d, bottom=%d, Margin=%d, MarginColor=%d", index, Page, Half, Count, OrgWidth, OrgHeight, left, right, top, bottom, Margin, MarginColor);
 #endif
     int ret = 0;
 
     // 使用するバッファを保持
-    int ReturnWidth = 0;
-    int ReturnHeight = 0;
+    int ReturnWidth = OrgWidth - left - right;
+    int ReturnHeight = OrgHeight - top - bottom;
 
-    ReturnWidth  = OrgWidth - left - right;
-    ReturnHeight = OrgHeight - top - bottom;
 #ifdef DEBUG
-    LOGD("ImageMarginCut Page=%d, Half=%d, 出力サイズ ReturnWidth=%d, ReturnHeight=%d", Page, Half, ReturnWidth, ReturnHeight);
+    LOGD("ImageMarginCut : index=%d, Page=%d, Half=%d, 出力サイズ ReturnWidth=%d, ReturnHeight=%d", index, Page, Half, ReturnWidth, ReturnHeight);
 #endif
 		// 縮小画像から取得
 	int linesize  = ReturnWidth + HOKAN_DOTS;
 
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, ReturnHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, ReturnHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, ReturnHeight, linesize) < 0) {
-		return -7;
+    ret = RefreshSclLinesPtr(index, Page, Half, Count, ReturnHeight, linesize);
+	if (ret < 0) {
+		return ret;
 	}
 
-	ret = 1;
+    ret = 1;
 
-	pthread_t thread[gMaxThreadNum];
-	int start = 0;
-	int param[gMaxThreadNum][8];
-	void *status[gMaxThreadNum];
+    pthread_t thread[gMaxThreadNum];
+    int start = 0;
+    int param[gMaxThreadNum][6];
+    void *status[gMaxThreadNum];
 
-	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
-		param[i][0] = start;
-		param[i][1] = start = ReturnHeight * (i + 1)  / gMaxThreadNum;
-		param[i][2] = ReturnWidth;
-		param[i][3] = ReturnHeight;
-		param[i][4] = OrgWidth;
-		param[i][5] = OrgHeight;
-		param[i][6] = top;
-		param[i][7] = left;
-		
-		if (i < gMaxThreadNum - 1) {
-			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, ImageMarginCut_ThreadFunc, (void*)param[i]) != 0) {
-				LOGE("pthread_create()");
-			}
-		}
-		else {
-			// ループの最後は直接実行
-			status[i] = ImageMarginCut_ThreadFunc((void*)param[i]);
-		}
-	}
+    for (int i = 0 ; i < gMaxThreadNum ; i ++) {
+        param[i][0] = index;
+        param[i][1] = start;
+        param[i][2] = start = ReturnHeight * (i + 1)  / gMaxThreadNum;
+        param[i][3] = ReturnWidth;
+        param[i][4] = top;
+        param[i][5] = left;
 
-	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
-		/*thread_func()スレッドが終了するのを待機する。thread_func()スレッドが終了していたら、この関数はすぐに戻る*/
-		if (i < gMaxThreadNum - 1) {
-			pthread_join(thread[i], &status[i]);
-		}
-		if (status[i] != 0) {
-//			LOGD("CreateScaleCubic : cancel");
-			ret = -10;
-		}
-	}
-	*pReturnWidth = ReturnWidth;
-	*pReturnHeight = ReturnHeight;
+        if (i < gMaxThreadNum - 1) {
+            /* スレッド起動 */
+            if (pthread_create(&thread[i], nullptr, ImageMarginCut_ThreadFunc, (void*)param[i]) != 0) {
+                LOGE("pthread_create()");
+            }
+        }
+        else {
+            // ループの最後は直接実行
+            status[i] = ImageMarginCut_ThreadFunc((void*)param[i]);
+        }
+    }
 
-	//LOGD("ImageMarginCut : complete");
+    for (int i = 0 ; i < gMaxThreadNum ; i ++) {
+        /*thread_func()スレッドが終了するのを待機する。thread_func()スレッドが終了していたら、この関数はすぐに戻る*/
+        if (i < gMaxThreadNum - 1) {
+            pthread_join(thread[i], &status[i]);
+        }
+        if (status[i] != nullptr) {
+            ret = (long)status[i];
+        }
+    }
+
+    *pReturnWidth = ReturnWidth;
+    *pReturnHeight = ReturnHeight;
+
+#ifdef DEBUG
+    LOGD("ImageMarginCut : index=%d, Page=%d, Half=%d, 終了します. *pReturnWidth=%d, *pReturnHeight=%d", index, Page, Half, *pReturnWidth, *pReturnHeight);
+#endif
 	return ret;
 }
+

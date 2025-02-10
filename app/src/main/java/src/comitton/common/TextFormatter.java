@@ -68,20 +68,20 @@ public class TextFormatter {
 	}
 
 	public static String[] getShortening(String str, int cx, Paint text) {
-		if (str == null || str.length() == 0) {
+		if (str == null || str.isEmpty()) {
 			return new String[0];
 		}
 
-		String strSep[] = new String[1];
+		String[] strSep = new String[1];
 		strSep[0] = getShorteningSingle(str, cx, text, false);
 		return strSep;
 	}
 
 	public static String getShorteningSingle(String str, int cx, Paint text, boolean direction) {
-		if (str == null || str.length() == 0) {
+		if (str == null || str.isEmpty()) {
 			return "";
 		}
-		float result[] = new float[str.length()];
+		float[] result = new float[str.length()];
 		text.getTextWidths(str, result);
 
 		int i;

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="Noise Operation Settings" >
-        <src.comitton.config.NoiseScrlSeekbar
+        <src.comitton.config.seekbar.NoiseScrlSeekbar
             android:dialogMessage="Scroll speed by during the operation of the long noise."
             android:dialogTitle="Scrolling Speed"
             android:key="NoiseScrlSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Scrolling Speed" />
-        <src.comitton.config.NoiseOverSeekbar
+        <src.comitton.config.seekbar.NoiseOverSeekbar
             android:dialogMessage="Microphone input level determined to silence."
             android:dialogTitle="Level determined to noise"
             android:key="NoiseOver"
             android:negativeButtonText="@null"
             android:summary="dummy"
             android:title="Level determined to noise" />
-        <src.comitton.config.NoiseUnderSeekbar
+        <src.comitton.config.seekbar.NoiseUnderSeekbar
             android:dialogMessage="Microphone input level determined to silence."
             android:dialogTitle="Level determined to silence"
             android:key="NoiseUnder"

@@ -11,16 +11,16 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr;
-extern WORD			**gSclLinesPtr;
-extern int			gCancel;
+extern WORD			**gLinesPtr[];
+extern WORD			**gSclLinesPtr[];
+extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
-extern long long	*gSclLLongParam;
-extern int			*gSclIntParam1;
-extern int			*gSclIntParam2;
-extern int			*gSclIntParam3;
+extern long long	*gSclLLongParam[];
+extern int			*gSclIntParam1[];
+extern int			*gSclIntParam2[];
+extern int			*gSclIntParam3[];
 
 extern char gDitherX_3bit[8][8];
 extern char gDitherX_2bit[4][4];
@@ -36,14 +36,15 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 	int SclHeight = range[3];
 	int OrgWidth  = range[4];
 	int OrgHeight = range[5];
+    int index = range[6];
 
 //	LOGD("CreateScaleLinear_ThreadFund : st=%d, ed=%d, sw=%d, sh=%d, ow=%d, oh=%d", stindex, edindex, SclWidth, SclHeight, OrgWidth, OrgHeight);
 
-	int *orgx = gSclIntParam1;
-	int *d1   = gSclIntParam2;
-	int *d2   = gSclIntParam3;
+	int *orgx = gSclIntParam1[index];
+	int *d1   = gSclIntParam2[index];
+	int *d2   = gSclIntParam3[index];
 
-	WORD *buffptr = NULL;
+	WORD *buffptr = nullptr;
 
 	WORD *orgbuff1;
 	WORD *orgbuff2;
@@ -62,10 +63,10 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 	int wkxx;
 
 	for (yy = stindex ; yy < edindex ; yy ++) {
-		if (gCancel) {
+		if (gCancel[index]) {
 //			LOGD("CreateScale : cancel.");
 //			ReleaseBuff(page, 1, half);
-			return (void*)-1;
+			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
 		syy = (int)(((long long)yy * 256 * OrgHeight) / SclHeight);
@@ -73,11 +74,11 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 		d4 = (int)(syy % 256) + 1;
 		d3 = 256 - d4;
 
-		orgbuff1 = gLinesPtr[orgy + HOKAN_DOTS / 2];
-		orgbuff2 = gLinesPtr[orgy + HOKAN_DOTS / 2 + 1];
+		orgbuff1 = gLinesPtr[index][orgy + HOKAN_DOTS / 2];
+		orgbuff2 = gLinesPtr[index][orgy + HOKAN_DOTS / 2 + 1];
 
 		// バッファ位置
-		buffptr = gSclLinesPtr[yy];
+		buffptr = gSclLinesPtr[index][yy];
 //		LOGD("CreateScale : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
 		yd3 = gDitherY_3bit[yy & 0x07];
@@ -130,10 +131,10 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 		buffptr[SclWidth + 0] = buffptr[SclWidth - 1];
 		buffptr[SclWidth + 1] = buffptr[SclWidth - 1];
 	}
-	return 0;
+	return nullptr;
 }
 
-int CreateScaleLinear(int Page, int Half, int Index, int SclWidth, int SclHeight, int OrgWidth, int OrgHeight)
+int CreateScaleLinear(int index, int Page, int Half, int Count, int SclWidth, int SclHeight, int OrgWidth, int OrgHeight)
 {
 #ifdef DEBUG
 	LOGD("CreateScaleLinear : p=%d, h=%d, i=%d, sw=%d, sh=%d, ow=%d, oh=%d", Page, Half, Index, SclWidth, SclHeight, OrgWidth, OrgHeight);
@@ -146,23 +147,26 @@ int CreateScaleLinear(int Page, int Half, int Index, int SclWidth, int SclHeight
 	linesize  = SclWidth + HOKAN_DOTS;
 
 	//  サイズ変更演算領域用領域確保
-	if (ScaleMemColumn(SclWidth) < 0) {
-		return -5;
+    ret = ScaleMemColumn(index, SclWidth);
+	if (ret < 0) {
+		return ret;
 	}
 	//  サイズ変更画像待避用領域確保
-	if (ScaleMemAlloc(linesize, SclHeight) < 0) {
-		return -6;
+    ret = ScaleMemAlloc(index, linesize, SclHeight);
+	if (ret < 0) {
+		return ret;
 	}
 
 	// データの格納先ポインタリストを更新
-	if (RefreshSclLinesPtr(Page, Half, Index, SclHeight, linesize) < 0) {
-		return -7;
+    ret = RefreshSclLinesPtr(index, Page, Half, Count, SclHeight, linesize);
+	if (ret < 0) {
+		return ret;
 	}
 
-	long long *sxx  = gSclLLongParam;
-	int *orgx = gSclIntParam1;
-	int *d1   = gSclIntParam2;
-	int *d2   = gSclIntParam3;
+	long long *sxx  = gSclLLongParam[index];
+	int *orgx = gSclIntParam1[index];
+	int *d1   = gSclIntParam2[index];
+	int *d2   = gSclIntParam3[index];
 
 	for (int xx = 0 ; xx < SclWidth ; xx++) {
 		sxx[xx] = ((long long)xx) * 256 * ((long long)OrgWidth) / ((long long)SclWidth);
@@ -174,7 +178,7 @@ int CreateScaleLinear(int Page, int Half, int Index, int SclWidth, int SclHeight
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;
-	int param[gMaxThreadNum][6];
+	int param[gMaxThreadNum][7];
 	void *status[gMaxThreadNum];
 
 	for (int i = 0 ; i < gMaxThreadNum ; i ++) {
@@ -184,10 +188,11 @@ int CreateScaleLinear(int Page, int Half, int Index, int SclWidth, int SclHeight
 		param[i][3] = SclHeight;
 		param[i][4] = OrgWidth;
 		param[i][5] = OrgHeight;
-		
+        param[i][6] = index;
+
 		if (i < gMaxThreadNum - 1) {
 			/* スレッド起動 */
-			if (pthread_create(&thread[i], NULL, CreateScaleLinear_ThreadFunc, (void*)param[i]) != 0) {
+			if (pthread_create(&thread[i], nullptr, CreateScaleLinear_ThreadFunc, (void*)param[i]) != 0) {
 				LOGE("pthread_create()");
 			}
 		}
@@ -202,9 +207,9 @@ int CreateScaleLinear(int Page, int Half, int Index, int SclWidth, int SclHeight
 		if (i < gMaxThreadNum - 1) {
 			pthread_join(thread[i], &status[i]);
 		}
-		if (status[i] != 0) {
+		if (status[i] != nullptr) {
 //			LOGD("CreateScaleCubic : cancel");
-			ret = -10;
+			ret = (long)status[i];
 		}
 	}
 

@@ -47,7 +47,7 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
         mCropPath = intent.getStringExtra("uri");   // 画像を切り取るファイル名
         if(mCropPath == null) {
             mURI = intent.getStringExtra("Uri");    // ベースディレクトリのURI
-            mPath = intent.getStringExtra("Path");  // ベースURIからの相対パス名 (SAFの場合はURIの絶対パス)
+            mPath = intent.getStringExtra("Path");  // ベースURIからの相対パス名
             mFile = intent.getStringExtra("File");  // ZIPファイル名
             mUser = intent.getStringExtra("User");  // SMB認証用
             mPass = intent.getStringExtra("Pass");  // SMB認証用

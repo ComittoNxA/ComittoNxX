@@ -347,7 +347,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private String mURI = "";
 	private String mUser = "";
 	private String mPass = "";
-	/** ベースURIからの相対パス名 (SAFの場合はURIの絶対パス) */
+	/** ベースURIからの相対パス名 */
 	private String mPath = "";
 	/** ZIP指定時 */
 	private String mFileName = "";
@@ -604,7 +604,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		mServer = intent.getIntExtra("Server", -1);	// サーバ選択番号
 		//mHost = intent.getStringExtra("Uri");
 		mURI = intent.getStringExtra("Uri");					// ベースディレクトリのuri
-		mPath = intent.getStringExtra("Path");				// ベースURIからの相対パス名 (SAFの場合はURIの絶対パス)
+		mPath = intent.getStringExtra("Path");				// ベースURIからの相対パス名
 		mUser = intent.getStringExtra("User");				// SMB認証用
 		mPass = intent.getStringExtra("Pass");				// SMB認証用
 		mFileName = intent.getStringExtra("File");			// ZIP指定時
@@ -4509,7 +4509,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			if (debug) {Log.d(TAG, "onAddBookmark: 画像ファイル指定.");}
 				// 画像ファイル直接指定
 			RecordList.add(RecordList.TYPE_BOOKMARK, RecordItem.TYPE_IMAGEDIRECT, mServer, mPath, mFileName
-					, new Date().getTime(), mImageMgr.mFileList[mCurrentPage].name, DEF.PAGENUMBER_UNREAD, name);
+					, new Date().getTime(), mImageMgr.mFileList[mCurrentPage].name, mCurrentPage, name);
 		}
 		else {
 			if (debug) {Log.d(TAG, "onAddBookmark: ディレクトリまたは圧縮ファイル.");}
@@ -4686,7 +4686,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				// 画像ファイル直接指定
 				RecordList.add(RecordList.TYPE_HISTORY, RecordItem.TYPE_IMAGEDIRECT
 						, mServer, mPath, mFileName, new Date().getTime()
-						, mImageMgr.mFileList[mCurrentPage].name, DEF.PAGENUMBER_UNREAD, null);
+						, mImageMgr.mFileList[mCurrentPage].name, mCurrentPage, null);
 			}
 			else {
 				if (debug) {Log.d(TAG, "saveHistory: ディレクトリまたは圧縮ファイル.");}

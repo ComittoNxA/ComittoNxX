@@ -522,7 +522,7 @@ public class SmbFileAccess {
 				}
 			}
 
-			FileData fileData = new FileData(activity, name, size, date, relativePath(uri, name));
+			FileData fileData = new FileData(activity, name, size, date);
 			fileList.add(fileData);
 
 			if(debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}

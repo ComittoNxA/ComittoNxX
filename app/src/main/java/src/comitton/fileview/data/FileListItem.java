@@ -2,7 +2,6 @@ package src.comitton.fileview.data;
 
 public class FileListItem {
 	public String name;
-	public String uri;
 	public short type;
 	public short exttype;
 	public long cmppos;

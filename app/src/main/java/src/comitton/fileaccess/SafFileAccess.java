@@ -369,21 +369,21 @@ public class SafFileAccess {
 
 			while (cursor.moveToNext()) {
 				docId = cursor.getString(0);
-				childUri = DocumentsContractCompat.buildDocumentUriUsingTree(rootUri, docId).toString();
-				parseUri = Uri.parse(childUri);
+				//childUri = DocumentsContractCompat.buildDocumentUriUsingTree(rootUri, docId).toString();
+				//parseUri = Uri.parse(childUri);
 				name = cursor.getString(1);
 				size = cursor.getLong(2);
 				date = cursor.getLong(3);
 				mime = cursor.getString(4);
-				if(debug) {Log.d(TAG, MessageFormat.format("listFiles: name={0}, size={1}, date={2}, mime={3}, dicId={4}, childUri={5}, parseUri={6}", new Object[]{name, size, date, mime, docId, childUri, parseUri}));}
+				if(debug) {Log.d(TAG, MessageFormat.format("listFiles: name={0}, size={1}, date={2}, mime={3}, dicId={4}", new Object[]{name, size, date, mime, docId}));}
 
 				FileData fileData;
 				if(DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)) {
 					// ディレクトリの場合
-					fileData = new FileData(activity, name + "/", size, date, childUri);
+					fileData = new FileData(activity, name + "/", size, date);
 				}
 				else {
-					fileData = new FileData(activity, name, size, date, childUri);
+					fileData = new FileData(activity, name, size, date);
 				}
 
 				fileList.add(fileData);

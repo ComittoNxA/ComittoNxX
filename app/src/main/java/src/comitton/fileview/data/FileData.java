@@ -57,25 +57,19 @@ public class FileData {
 		setName(context, name);
 	}
 
-	public FileData (Context context, String name, String uri) {
-		this(context, name);
-		setURI(uri);
-	}
-
-	public FileData (Context context, String name, long size, long date, String uri) {
+	public FileData (Context context, String name, long size, long date) {
 		this(context, name);
 		setSize(size);
 		setDate(date);
-		setURI(uri);
 	}
 
-	public FileData (Context context, String name, String uri, int state) {
-		this(context, name, uri);
+	public FileData (Context context, String name, int state) {
+		this(context, name);
 		setState(state);
 	}
 
-	public FileData (Context context, String name, long size, long date, String uri, int state) {
-		this(context, name, size, date, uri);
+	public FileData (Context context, String name, long size, long date, int state) {
+		this(context, name, size, date);
 		setState(state);
 	}
 
@@ -90,14 +84,6 @@ public class FileData {
 		this.name = name;
 		setType(context, name);
 		setExtType(context, name);
-	}
-
-	public String getURI() {
-		return uri;
-	}
-
-	public void setURI(String uri) {
-		this.uri = uri;
 	}
 
 	public int getState() {

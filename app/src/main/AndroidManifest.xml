@@ -19,6 +19,7 @@
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true"
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
+            android:launchMode="singleTop"
             android:exported="true" >
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />

@@ -149,7 +149,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 				if (!uri.isEmpty() && mParentMove) {
 					// 親フォルダを表示
-					fileData = new FileData(mActivity, "..", uri, DEF.PAGENUMBER_NONE);
+					fileData = new FileData(mActivity, "..", DEF.PAGENUMBER_NONE);
 					fileList.add(fileData);
 				}
 
@@ -160,7 +160,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					String dir = mStaticRootDir.substring(mPath.length(), pos + 1);
 
 					//途中のフォルダを表示対象に追加
-					fileData = new FileData(mActivity, dir, DEF.relativePath(mActivity, mURI, dir), DEF.PAGENUMBER_UNREAD);
+					fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
 					fileList.add(fileData);
 				}
 
@@ -172,14 +172,14 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 			String uri = FileAccess.parent(mActivity, mPath);
 			if (!uri.isEmpty() && mParentMove) {
-				FileData fileData = new FileData(mActivity, "..", uri, DEF.PAGENUMBER_NONE);
+				FileData fileData = new FileData(mActivity, "..", DEF.PAGENUMBER_NONE);
 				fileList.add(0, fileData);
 			}
 
 			for (int i = fileList.size() - 1; i >= 0; i--) {
 
 				name = fileList.get(i).getName();
-				uri = fileList.get(i).getURI();
+				uri = DEF.relativePath(mActivity, currentPath, fileList.get(i).getName());
 
 				if (fileList.get(i).getType() == FileData.FILETYPE_ARC
 						|| fileList.get(i).getType() == FileData.FILETYPE_PDF
@@ -343,7 +343,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					mFileList = new ArrayList<FileData>();
 					if (mParentMove) {
 						String uri = FileAccess.parent(mActivity, mPath);
-    					FileData fileData = new FileData(mActivity, "..", uri, DEF.PAGENUMBER_NONE);
+    					FileData fileData = new FileData(mActivity, "..", DEF.PAGENUMBER_NONE);
     					mFileList.add(fileData);
 					}
 				}

@@ -3,6 +3,7 @@ package src.comitton.dialog;
 import java.util.ArrayList;
 import java.util.EventListener;
 
+import src.comitton.common.DEF;
 import src.comitton.fileview.FileSelectActivity;
 import src.comitton.fileaccess.FileAccess;
 
@@ -125,7 +126,7 @@ public class RemoveDialog extends ImmersiveDialog implements Runnable, Handler.C
 					if (lfiles.get(i).getName().equals("..")) {
 						continue;
 					}
-					removeFile(lfiles.get(i).getURI(), item + lfiles.get(i).getName());
+					removeFile(DEF.relativePath(mActivity, path, lfiles.get(i).getName()), item + lfiles.get(i).getName());
 					if (mBreak) {
 						// 中断
 						break;

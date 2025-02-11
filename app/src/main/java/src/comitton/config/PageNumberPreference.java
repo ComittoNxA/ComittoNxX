@@ -82,7 +82,7 @@ public class PageNumberPreference extends DialogPreference implements SeekBar.On
 		ed.putInt(DEF.KEY_PNUMPOS, pos);
 		ed.putInt(DEF.KEY_PNUMSIZE, size);
 		ed.putInt(DEF.KEY_PNUMCOLOR, color);
-		ed.commit();
+		ed.apply();
 	}
 
 	private boolean getDispValue() {

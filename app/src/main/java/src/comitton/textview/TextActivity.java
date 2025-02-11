@@ -223,7 +223,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private String mURI;
 	private String mUser;
 	private String mPass;
-	/** ベースURIからの相対パス名 (SAFの場合はURIの絶対パス) */
+	/** ベースURIからの相対パス名 */
 	private String mPath;
 	/** パスとファイル(URI含まず) */
 	private String mLocalFileName;
@@ -434,7 +434,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		// Intentに保存されたデータを取り出す
 		mServer = intent.getIntExtra("Server", -1);		// サーバ選択番号
 		mURI = intent.getStringExtra("Uri");						// ベースディレクトリのuri
-		mPath = intent.getStringExtra("Path");					// ベースURIからの相対パス名 (SAFの場合はURIの絶対パス)
+		mPath = intent.getStringExtra("Path");					// ベースURIからの相対パス名
 		mUser = intent.getStringExtra("User");					// SMB認証用
 		mPass = intent.getStringExtra("Pass");					// SMB認証用
 		mFileName = intent.getStringExtra("File");				// ZIP指定時
@@ -466,7 +466,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 		else {
 			// 圧縮ファイルなら中身のファイル名を連結する
-			mUriTextPath = mUriPath + mTextName;
+			mUriTextPath = DEF.relativePath(mActivity, mUriPath, mFileName) + mTextName;
 		}
 		// 続きから開く設定を記録
 		saveLastFile();
@@ -1120,7 +1120,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		float y;
 		int cx;
 		int cy;
-		if (mPseLand == false) {
+		if (!mPseLand) {
 			x = event.getX();
 			y = event.getY();
 			cx = mTextView.getWidth();
@@ -1266,7 +1266,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					mImmCancel = true;
 				}
 			}
-			if (mImmCancel == true) {
+			if (mImmCancel) {
 				// ImmerModeの場合は上下端のタッチを無視する
 				if (action == MotionEvent.ACTION_UP) {
 					// UPイベントで解除
@@ -1346,7 +1346,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 						int sel = GuideView.GUIDE_NOSEL;
 						if (y >= cy - mClickArea) {
 							// 操作エリアから出て戻ったらそこを基準にする
-							if (mPageModeIn == false) {
+							if (!mPageModeIn) {
 								// 指定のページを基準とした位置を設定
 								mTouchBeginX = x - calcPageSelectRange(mSelectPage);
 							}
@@ -1414,7 +1414,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 						mTextView.scrollStart(mTouchBeginX, mTouchBeginY, RANGE_FLICK, mScroll);
 					}
 
-					if (this.mTouchFirst == false) {
+					if (!this.mTouchFirst) {
 							// スクロールモード
 							long now = SystemClock.uptimeMillis();
 							mTextView.scrollMoveAmount(x - mTouchPoint[0].x, y - mTouchPoint[0].y, mScroll, true);
@@ -2935,11 +2935,11 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 	private void finishActivity(int select, boolean resume, boolean mark) {
 		// 続きから読み込みの設定
-		if (resume == false) {
+		if (!resume) {
 			removeLastFile();
 		}
 
-		if (mark == true) {
+		if (mark) {
 			// しおりを保存する
 			saveCurrentPage();
 		}
@@ -2973,6 +2973,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 
 	private void saveCurrentPage() {
+		boolean debug = false;
+		if(debug) {Log.d(TAG, "saveCurrentPage: 開始します.");}
 		mCurrentPage = mTextView.getPage();
 
 		// 現在ページ情報を保存
@@ -2997,7 +2999,9 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 		ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
 		ed.putFloat(DEF.createUrl(mUriTextPath, mUser, mPass) + "#pageRate", savePageRate);
-		ed.commit();
+		ed.apply();
+		if(debug) {Log.d(TAG, "saveCurrentPage: url=" + DEF.createUrl(mUriTextPath, mUser, mPass) + ", savePage=" + savePage + ", savePageRate=" + savePageRate);}
+
 	}
 
 	// 起動時のページ情報に戻す
@@ -3017,13 +3021,13 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			else {
 				ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), mRestorePage);
 			}
-			ed.commit();
+			ed.apply();
 		}
 	}
 
 	// 起動時のページ情報に戻す
 	private void saveHistory(boolean isSavePage) {
-		if (mReadBreak == false && mTextMgr != null && mTextView != null) {
+		if (!mReadBreak && mTextMgr != null && mTextView != null) {
 			int type = (mFileName == null || mFileName.isEmpty()) ? RecordItem.TYPE_TEXT : RecordItem.TYPE_COMPTEXT;
 			mCurrentPage = mTextView.getPage();
 			mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();

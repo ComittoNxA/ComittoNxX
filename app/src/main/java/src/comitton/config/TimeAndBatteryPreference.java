@@ -83,7 +83,7 @@ public class TimeAndBatteryPreference extends DialogPreference implements SeekBa
 		ed.putInt(DEF.KEY_TIMEPOS, pos);
 		ed.putInt(DEF.KEY_TIMESIZE, size);
 		ed.putInt(DEF.KEY_TIMECOLOR, color);
-		ed.commit();
+		ed.apply();
 	}
 
 	private boolean getDispValue() {

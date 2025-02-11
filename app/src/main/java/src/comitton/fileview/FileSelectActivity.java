@@ -422,11 +422,13 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			path = savedInstanceState.getString("Path");
 			server = savedInstanceState.getString("Server");
 			serverSelect = savedInstanceState.getInt("ServerSelect", -2);
+			if (debug) {Log.d(TAG, "onCreate: レジューム復帰. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
 		} else {
 			// ショートカットから起動
 			path = intent.getStringExtra("Path");
 			server = intent.getStringExtra("Server");
 			serverSelect = intent.getIntExtra("ServerSelect", -2);
+			if (debug) {Log.d(TAG, "onCreate: ショートカットから起動. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
 		}
 
 		// レジューム起動チェック
@@ -596,11 +598,13 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	@Override
 	protected void onNewIntent(Intent intent) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "onNewIntent: 開始します");}
 		super.onNewIntent(intent);
 		String path = intent.getStringExtra("Path");
 		String server = intent.getStringExtra("Server");
 		int serverSelect = intent.getIntExtra("ServerSelect", -2);
-		Log.d("onNewIntent", "path:" + path + ", server:" + server);
+		if (debug) {Log.d(TAG, "onNewIntent: path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
 
 		if (path == null || !path.isEmpty()) {
 			mPath = path;
@@ -608,12 +612,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		// サーバパス
 		if (serverSelect != -2) {
-			if (mServer.select(serverSelect) == true) {
+			if (mServer.select(serverSelect)) {
 				mURI = mServer.getURI();
 			}
 		}
-		else if (server != null && !"".equals(server)) {
-			if (mServer.select(server) == true) {
+		else if (server != null && !server.isEmpty()) {
+			if (mServer.select(server)) {
 				mURI = mServer.getURI();
 			}
 			else {
@@ -798,7 +802,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 				// 画面遷移によって設定反映
 				if (checkConfigChange()) {
-					Log.d(TAG, "onActivityResult: checkConfigChange() == true");
+					if (debug) {Log.d(TAG, "onActivityResult: checkConfigChange() == true");}
 					// 変更されている
 					// 設定の読込
 					// スクロール位置は最初に戻る
@@ -806,7 +810,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					refreshFileSelect();
 				}
 				else {
-					Log.d(TAG, "onActivityResult: checkConfigChange() == false");
+					if (debug) {Log.d(TAG, "onActivityResult: checkConfigChange() == false");}
 					// 設定は変更されていない
 					updateListView();
 					loadThumbnail();
@@ -848,8 +852,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 		if (bm != null) {
 			ThumbnailLoader loader = new ThumbnailLoader(mActivity, "", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, mThumbCrop, mThumbMargin);
-			loader.deleteThumbnailCache(mFileData.getURI(), thumW, thumH);
-			loader.setThumbnailCache(mFileData.getURI(), bm);
+			loader.deleteThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), thumW, thumH);
+			loader.setThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), bm);
 			Toast.makeText(this, R.string.ThumbConfigured, Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -869,8 +873,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					Editor ed = mSharedPreferences.edit();
 					String user = mServer.getUser();
 					String pass = mServer.getPass();
-					ed.remove(DEF.createUrl(mFileData.getURI(), user, pass) + "#pageRate");
-					ed.remove(DEF.createUrl(mFileData.getURI(), user, pass));
+					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass) + "#pageRate");
+					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass));
 					ed.apply();
 					break;
 				}
@@ -879,8 +883,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					Editor ed = mSharedPreferences.edit();
 					String user = mServer.getUser();
 					String pass = mServer.getPass();
-					ed.putFloat(DEF.createUrl(mFileData.getURI(), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
-					ed.putInt(DEF.createUrl(mFileData.getURI(), user, pass), DEF.PAGENUMBER_READ);
+					ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+					ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass), DEF.PAGENUMBER_READ);
 					ed.apply();
 					updateListView();
 					break;
@@ -1339,7 +1343,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							// ファイル単体の場合はそのまま消す
 							if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除します。");}
 							try {
-								boolean isDeleted = FileAccess.delete(mActivity, mFileData.getURI(), user, pass);
+								boolean isDeleted = FileAccess.delete(mActivity, DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass);
 								if (isDeleted) {
 									if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除できました。");}
 									// 削除できていたら画面から消す
@@ -1364,7 +1368,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								try {
 									String user = mServer.getUser();
 									String pass = mServer.getPass();
-									boolean isExist = FileAccess.exists(mActivity, mFileData.getURI(), user, pass);
+									boolean isExist = FileAccess.exists(mActivity, DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass);
 									if (!isExist) {
 										// 削除されていたら消す
 										mListScreenView.removeFileList(mFileData);
@@ -2067,8 +2071,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			ArrayList<FileData> list = mFileList.getFileList();
 
 			if (list != null) {
-				FileData fd = new FileData();
-				fd.setName(mActivity, mLoadListCursor);
+				FileData fd = new FileData(mActivity, mLoadListCursor);
 				i = list.indexOf(fd);
 				if (0 <= i && i < list.size()) {
 					// タイル表示
@@ -2691,12 +2694,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
 						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.TEXT_VIEWER == mEpubViewer) {
-							ed.remove(DEF.createUrl(mFileData.getURI() + "META-INF/container.xml", user, pass));
-							ed.remove(DEF.createUrl(mFileData.getURI() + "META-INF/container.xml", user, pass) + "#pageRate");
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass));
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass) + "#pageRate");
 						}
 						else {
-							ed.remove(DEF.createUrl(mFileData.getURI(), user, pass));
-							ed.remove(DEF.createUrl(mFileData.getURI(), user, pass) + "#pageRate");
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass));
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass) + "#pageRate");
 						}
 						ed.apply();
 						updateListView();
@@ -2730,12 +2733,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
 						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.TEXT_VIEWER == mEpubViewer) {
-							ed.putInt(DEF.createUrl(mFileData.getURI() + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_READ);
-							ed.putFloat(DEF.createUrl(mFileData.getURI() + "META-INF/container.xml", user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_READ);
+							ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
 						}
 						else {
-							ed.putInt(DEF.createUrl(mFileData.getURI(), user, pass), DEF.PAGENUMBER_READ);
-							ed.putFloat(DEF.createUrl(mFileData.getURI(), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass), DEF.PAGENUMBER_READ);
+							ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
 						}
 						ed.apply();
 						updateListView();
@@ -2759,10 +2762,10 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						showDialog(DEF.MESSAGE_FILE_RENAME);
 						break;
 					case OPERATE_DELCACHE: // サムネイルキャッシュ削除
-						ThumbnailLoader.deleteThumbnailCache(mFileData.getURI(), mThumbSizeW, mThumbSizeH);
+						ThumbnailLoader.deleteThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), mThumbSizeW, mThumbSizeH);
 						break;
 					case OPERATE_SETTHUMBASDIR: { // 親ディレクトリのサムネイルとして設定
-						mThumbnailLoader.setThumbnailCache(mFileData.getURI(), DEF.relativePath(mActivity, mURI, mPath));
+						mThumbnailLoader.setThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), DEF.relativePath(mActivity, mURI, mPath));
 						break;
 					}
 					case OPERATE_SETTHUMBCROPPED: { // クロップしてサムネイルに設定
@@ -2978,7 +2981,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							FileData data = files.get(i);
 							if (data.getType() == FileData.FILETYPE_ARC || data.getType() == FileData.FILETYPE_TXT || data.getType() == FileData.FILETYPE_DIR) {
 								// .zip又はディレクトリのしおり削除
-								String uri = DEF.createUrl(data.getURI(), user, pass);
+								String uri = DEF.createUrl(DEF.relativePath(mActivity, mUriPath, data.getName()), user, pass);
 								ed.remove(uri);
 							}
 						}
@@ -3462,7 +3465,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		intent = new Intent(FileSelectActivity.this, ImageActivity.class);
 		intent.putExtra("Server", mServer.getSelect());	// サーバ選択番号
 		intent.putExtra("Uri", mURI);						// ベースディレクトリのuri
-		intent.putExtra("Path", mPath);					// ベースURIからの相対パス名 (SAFの場合はURIの絶対パス)
+		intent.putExtra("Path", mPath);					// ベースURIからの相対パス名
 		intent.putExtra("User", mServer.getUser());		// SMB認証用
 		intent.putExtra("Pass", mServer.getPass());		// SMB認証用
 		intent.putExtra("File", name);					// ZIPファイル名
@@ -3599,12 +3602,13 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	}
 
 	public FileData searchNextFile(ArrayList<FileData> files, String file, int nextopen) {
+		boolean debug = false;
+		if(debug) {Log.d(TAG, "searchNextFile: 開始します. file=" + file + ", nextopen=" + nextopen);}
 		if (files == null || file == null || file.isEmpty()) {
 			return null;
 		}
 		// 検索対象
-		FileData searchfd = new FileData();
-		searchfd.setName(mActivity, file);
+		FileData searchfd = new FileData(mActivity, file);
 
 		FileData nextfile = null;
 		if (nextopen == CloseDialog.CLICK_THIS) {

@@ -61,6 +61,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ExpandActivity extends AppCompatActivity implements Handler.Callback, OnScrollListener {
+	private static final String TAG = "ExpandActivity";
+
 	private static final int OPERATE_NONREAD = 0;
 	private static final int OPERATE_READ = 1;
 	private static final int OPERATE_READHERE = 2;
@@ -335,16 +337,16 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d("ExpandActivity", "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);
+		Log.d(TAG, "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);
 		if (requestCode == DEF.REQUEST_IMAGE) {
-			Log.d("ExpandActivity", "onActivityResult: requestCode == DEF.REQUEST_IMAGE");
+			Log.d(TAG, "onActivityResult: requestCode == DEF.REQUEST_IMAGE");
 			if (resultCode == RESULT_OK && data != null) {
-				Log.d("ExpandActivity", "onActivityResult: resultCode == RESULT_OK");
+				Log.d(TAG, "onActivityResult: resultCode == RESULT_OK");
 				int nextopen = data.getExtras().getInt("NextOpen", -1);
 				String lastfile = data.getExtras().getString("LastFile");
 
 				if (nextopen != CloseDialog.CLICK_CLOSE) {
-					Log.d("ExpandActivity", "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE. ビュワーから復帰しました.");
+					Log.d(TAG, "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE. ビュワーから復帰しました.");
 					// ビュワーからの復帰
 					Intent intent = new Intent();
 					intent.putExtra("NextOpen", nextopen);
@@ -354,19 +356,19 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 					return;
 				}
 				else {
-					Log.d("ExpandActivity", "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");
+					Log.d(TAG, "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");
 				}
 			}
 		}
 		else if (requestCode == DEF.REQUEST_TEXT) {
-			Log.d("ExpandActivity", "onActivityResult: requestCode == DEF.REQUEST_TEXT");
+			Log.d(TAG, "onActivityResult: requestCode == DEF.REQUEST_TEXT");
 			if (resultCode == RESULT_OK && data != null) {
-				Log.d("ExpandActivity", "onActivityResult: resultCode == RESULT_OK. ビュワーから復帰しました.");
+				Log.d(TAG, "onActivityResult: resultCode == RESULT_OK. ビュワーから復帰しました.");
 				mOpenOperation = data.getExtras().getInt("NextOpen", -1);
 				mOpenLastFile = data.getExtras().getString("LastFile");
 			}
 			else {
-				Log.d("ExpandActivity", "onActivityResult: resultCode != RESULT_OK");
+				Log.d(TAG, "onActivityResult: resultCode != RESULT_OK");
 				mOpenOperation = CloseDialog.CLICK_CLOSE;
 				mOpenLastFile = null;
 			}
@@ -374,7 +376,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 		// 他画面から戻ったときは設定＆リスト更新
 		loadListView();
-		Log.d("ExpandActivity", "onActivityResult: 終了します");
+		Log.d(TAG, "onActivityResult: 終了します");
 	}
 
 	@Override
@@ -831,7 +833,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				return true;
 			}
 			case DEF.HMSG_READ_END: {
-				if(debug) {Log.d("ExpandActivity", "handleMessage: DEF.HMSG_READ_END. ImageManager の読み込みが終了しました.");}
+				if(debug) {Log.d(TAG, "handleMessage: DEF.HMSG_READ_END. ImageManager の読み込みが終了しました.");}
 				// 読込中の表示
 				if (mReadDialog != null) {
 					mReadDialog.dismiss();
@@ -852,7 +854,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 					mText = null;
 				}
 				else if (mOpenOperation != CloseDialog.CLICK_CLOSE) {
-					if(debug) {Log.d("ExpandActivity", "handleMessage: mOpenOperation != CloseDialog.CLICK_CLOSE");}
+					if(debug) {Log.d(TAG, "handleMessage: mOpenOperation != CloseDialog.CLICK_CLOSE");}
 					// 次のファイル検索
 					FileData nextfile = searchNextFile(mFileList, mOpenLastFile, mOpenOperation);
 					if (nextfile != null && !nextfile.getName().isEmpty()) {
@@ -878,7 +880,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
                     }
 				}
 				else {
-					if(debug) {Log.d("ExpandActivity", "handleMessage: mOpenOperation == CloseDialog.CLICK_CLOSE");}
+					if(debug) {Log.d(TAG, "handleMessage: mOpenOperation == CloseDialog.CLICK_CLOSE");}
 					// 初回表示またはビュワー終了
 					if (mThumbnail) {
 						// 表示モードがサムネイルありならサムネイル読み込み
@@ -911,7 +913,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 	private void loadListView() {
 		boolean debug = false;
-		if(debug) {Log.d("ExpandActivity", "loadListView 開始します.");}
+		if(debug) {Log.d(TAG, "loadListView 開始します.");}
 		Resources res = getResources();
 		mReadingMsg = new String[1];
 		mReadingMsg[0] = res.getString(R.string.reading);
@@ -936,12 +938,15 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		mZipLoad = new ZipLoad(mHandler, this);
 		mZipThread = new Thread(mZipLoad);
 		mZipThread.start();
-		if(debug) {Log.d("ExpandActivity", "loadListView: 終了します.");}
+		if(debug) {Log.d(TAG, "loadListView: 終了します.");}
 	}
 
 	private void loadListViewAfter() {
+		boolean debug = false;
+		if(debug) {Log.d(TAG, "loadListViewAfter: 開始します.");}
 		// しおり情報取得
-		mCurrentPage = mSharedPreferences.getInt(DEF.createUrl(mURI, mUser, mPass), 0);
+		mCurrentPage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity,mURI, mPath, mFileName), mUser, mPass), 0);
+		if(debug) {Log.d(TAG, "loadListViewAfter: mCurrentPage=" + mCurrentPage);}
 
 		// ファイルリスト
 		FileListItem[] files = mImageMgr.getList();
@@ -955,9 +960,10 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		for (int i = 0; i < filenum; i++) {
 			int state = DEF.PAGENUMBER_UNREAD;
 			if (files[i].type == FileData.FILETYPE_TXT) {
-				state = (int)mSharedPreferences.getFloat(DEF.createUrl(mURI + files[i].name, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
+				if(debug) {Log.d(TAG, "loadListViewAfter: FILETYPE_TXT url=" + DEF.relativePath(mActivity,mURI, mPath, mFileName) + files[i].name);}
+				state = (int)mSharedPreferences.getFloat(DEF.createUrl(DEF.relativePath(mActivity,mURI, mPath, mFileName) + files[i].name, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
 				if (state == DEF.PAGENUMBER_UNREAD) {
-					state = mSharedPreferences.getInt(DEF.createUrl(mURI + files[i].name, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+					state = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity,mURI, mPath, mFileName) + files[i].name, mUser, mPass), DEF.PAGENUMBER_UNREAD);
 				}
 			}
 			else {
@@ -971,7 +977,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				}
 			}
 
-			FileData data = new FileData(mActivity, files[i].name, files[i].orglen, files[i].dtime, files[i].uri, state);
+			if(debug) {Log.d(TAG, "loadListViewAfter: name=" + files[i].name + ", state=" + state);}
+			FileData data = new FileData(mActivity, files[i].name, files[i].orglen, files[i].dtime, state);
 			mFileList.add(data);
 
 			if (files[i].type != FileData.FILETYPE_TXT) {
@@ -1091,8 +1098,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		Collections.sort(sortfiles, new FilenameComparator());
 
 		// ソート後に現在ファイルを探す
-		FileData fd = new FileData();
-		fd.setName(mActivity, file);
+		FileData fd = new FileData(mActivity, file);
 		int index = sortfiles.indexOf(fd);
 		if (index >= 0) {
 			// 見つかった場合

@@ -310,8 +310,8 @@ int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int 
 			return ret;
 		}
 		// 古いワークデータは削除
-		EraseSclBuffMng(index, Count);
-        Count ++;
+		//EraseSclBuffMng(index, Count);
+        //Count ++;
 #ifdef DEBUG_CREATESCALE
         LOGD("CreateScale: Sharpen   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
 #endif

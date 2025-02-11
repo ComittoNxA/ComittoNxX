@@ -273,7 +273,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		}
 		FileData file = mFiles.get(index);
 		String filename = file.getName();
-		String uri = file.getURI();
+		String uri = DEF.relativePath(mActivity,mURI, mPath, filename);
 		int fileType = FileData.getType(mActivity, filename);
 		String pathcode = DEF.makeCode(uri, thum_cx, thum_cy);
 		if (debug) {Log.d(TAG,"index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap filename=" + filename);}
@@ -381,7 +381,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				}
 				FileData file = infile.get(i);
 				String inFilename = file.getName();
-				String inUri = file.getURI();
+				String inUri = DEF.relativePath(mActivity, uri, inFilename);
 				int inFileType = FileData.getType(mActivity, inFilename);
 				if (inFileType == FileData.FILETYPE_DIR) {
 					if (debug) {Log.d(TAG,"index=" + index + " " + (firstloop ? 1 : 2) + "周目 loadBitmap2 ディレクトリの中にディレクトリがあります. infilename=" + infile.get(i).getName());}

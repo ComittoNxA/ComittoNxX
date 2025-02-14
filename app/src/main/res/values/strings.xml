@@ -158,6 +158,7 @@
     <string name="delTitle"></string>
     <string name="delMsg">Are you sure to delete?</string>
     <string name="delErrorMsg">The file could not be deleted.</string>
+    <string name="renameErrorMsg">The file could not be renamed.</string>
     <string name="downMsg1">Download to </string>
     <string name="downMsg2"></string>
     <string name="scTitle">Create Shortcut</string>

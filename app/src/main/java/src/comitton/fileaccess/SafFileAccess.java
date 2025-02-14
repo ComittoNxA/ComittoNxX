@@ -431,11 +431,12 @@ public class SafFileAccess {
 		boolean result = false;
 		try {
 			final ContentResolver contentResolver = context.getContentResolver();
+			if (debug) {Log.d(TAG, "renameTo: fromUri=" + relativePath(context, rootUri, fromfile) + ", tofile=" + tofile);}
 			result = (DocumentsContractCompat.renameDocument(contentResolver, Uri.parse(relativePath(context, rootUri, fromfile)), tofile) != null);
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "renameTo: エラーが発生しました. uri=" + uri);
+			Log.e(TAG, "renameTo: エラーが発生しました. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
 			if (e.getLocalizedMessage() != null) {
 				Log.e(TAG, "renameTo: エラーメッセージ. " + e.getLocalizedMessage());
 			}

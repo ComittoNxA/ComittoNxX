@@ -2244,31 +2244,31 @@ public class ImageManager extends InputStream implements Runnable {
 	@Override
 	public void close() throws IOException {
 		boolean debug = false;
-
 		if (debug) {Log.d(TAG, "close: 開始します. mCloseFlag=" + mCloseFlag);}
+
 		mRunningFlag = false;
-		synchronized (mLock) {
-			if (!mCloseFlag) {
-				mCloseFlag = true;
-				if (mThread != null) {
-					mThread.interrupt();
-					// スレッドの終了待ち
-					for (int i = 0; i < 10 && !mTerminate; i++) {
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException ignored) {
+		if (!mCloseFlag) {
+			mCloseFlag = true;
+			if (mThread != null) {
+				mThread.interrupt();
+				// スレッドの終了待ち
+				for (int i = 0; i < 10 && !mTerminate; i++) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException ignored) {
 
-						}
 					}
-				} else {
-					mTerminate = true;
 				}
+			} else {
+				mTerminate = true;
+			}
 
+			// ■■■ ここで固まる ■■■
+			//synchronized (mLock) {
 				cheClose();
 				cmpClose();
 				dirClose();
 
-				// ■■■ ここで固まる ■■■ → FileAccess.close()を非同期にしたので解消するはず
 				if (mRarStream != null) {
 					mRarStream.close();
 					mRarStream = null;
@@ -2278,7 +2278,7 @@ public class ImageManager extends InputStream implements Runnable {
 					mPdfRenderer = null;
 				}
 				CallImgLibrary.ImageTerminate(mActivity, mHandler, mCacheIndex);
-			}
+			//}
 
 			if (debug) {Log.d(TAG, "close: 終了します. mCloseFlag=" + mCloseFlag);}
 		}

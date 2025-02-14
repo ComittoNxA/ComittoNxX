@@ -200,7 +200,7 @@ public class CallImgLibrary {
 				break;
 
 			case DEF.ERROR_CODE_CACHE_NOT_INITIALIZED:
-				DEF.sendMessage(context, R.string.CacheNotInitialized, Toast.LENGTH_LONG, handler);
+				//DEF.sendMessage(context, R.string.CacheNotInitialized, Toast.LENGTH_LONG, handler);
 				Log.e(TAG, context.getString(R.string.CacheNotInitialized));
 				break;
 

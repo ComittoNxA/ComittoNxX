@@ -162,7 +162,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	private String mURI = "";
 	private String mPath = "";
-	private String mUriPath = "";
 	private ServerSelect mServer;
 	private int mSortMode;
 	private int mFontTitle;
@@ -278,7 +277,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				// あとで起動処理が正常に終了したら回数をリセットする
 				ed.putInt("Initialize", mInitialize + 1);
 			}
-			ed.commit();
+			ed.apply();
 		}
 		catch (Exception e){
 			Log.d("FileSelectAvtivity", e.getLocalizedMessage());
@@ -351,61 +350,42 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_VIEW.equals(action)) {
 				// 他のアプリから呼び出された場合
 
-				String path = null;
 				if (Intent.ACTION_SEND.equals(action)) {
+					if (debug) {Log.d(TAG, "onCreate: Intent.ACTION_SEND");}
 					contentUri = (Uri) intent.getExtras().get(Intent.EXTRA_STREAM);
-					if (debug) {Log.d(TAG, "onCreate: Intent解析中. Intent.ACTION_SEND contentUri=" + contentUri.getPath());}
+					if (contentUri != null) {
+						if (debug) {Log.d(TAG, "onCreate: contentUri=" + contentUri.getPath());}
+					}
 				} else if (Intent.ACTION_VIEW.equals(action)) {
+					if (debug) {Log.d(TAG, "onCreate: Intent.ACTION_VIEW");}
 					contentUri = intent.getData();
-					if (debug) {Log.d(TAG, "onCreate: Intent解析中. Intent.ACTION_VIEW contentUri=" + contentUri.getPath());}
-				}
-
-				/*
-				path = contentUri.getPath();
-				if (contentUri != null && "content".equals(contentUri.getScheme())) {
-					Cursor cursor = null;
-					cursor = this.getContentResolver().query(contentUri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null);
-					cursor.moveToFirst();
-					if (cursor.getColumnCount() != 0) {
-						path = cursor.getString(0);
-					}
-					cursor.close();
-				} else {
-					path = contentUri.getPath();
-				}
-				if (debug) {Log.d(TAG, "onCreate: Intent解析中. path=" + path);}
-				*/
-
-				/*
-				// 先頭"file://"を削除
-				if (path != null) {
-					if (path.startsWith("file://")) {
-						path = path.substring(7);
-					}
-					if (path.startsWith("/root/")) {
-						path = path.substring(5);
+					if (contentUri != null) {
+						if (debug) {Log.d(TAG, "onCreate: contentUri=" + contentUri.getPath());}
 					}
 				}
-				 */
 
 				// 起動処理終了を保存
 				if (mInitialize != 0) {
 					ed.putInt("Initialize", 0);
-					ed.commit();
+					ed.apply();
 					mInitialize = 0;
 				}
 
-				intent.putExtra("Uri", mURI);
-				intent.putExtra("Path", mPath);
-				mServer = new ServerSelect(mSharedPreferences, this);
-				mServer.select(DEF.INDEX_LOCAL);
-				mURI = mServer.getURI();
-				mPath = path.substring(0, path.lastIndexOf('/') + 1);
-				mUriPath = DEF.relativePath(mActivity, mURI, mPath);
-				FileData fileData = new FileData(mActivity, path.substring(path.lastIndexOf('/') + 1));
-				if (debug) {Log.d(TAG, "onCreate: Intent解析中. mPath=" + mPath + ", name=" + fileData.getName());}
+				if (contentUri != null) {
+					String path = contentUri.getPath();
+					intent.putExtra("Uri", mURI);
+					intent.putExtra("Path", mPath);
+					mServer = new ServerSelect(mSharedPreferences, this);
+					mServer.select(DEF.INDEX_LOCAL);
+					mURI = mServer.getURI();
+					mPath = path.substring(0, path.lastIndexOf('/') + 1);
+					FileData fileData = new FileData(mActivity, path.substring(path.lastIndexOf('/') + 1));
+					if (debug) {
+						Log.d(TAG, "onCreate: Intent解析中. mPath=" + mPath + ", name=" + fileData.getName());
+					}
 
-				openFile(fileData, "", (float)DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD, mEpubViewer);
+					openFile(fileData, "", (float) DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD, mEpubViewer);
+				}
 			}
 
 		} catch (Exception e) {
@@ -413,7 +393,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		}
 
 		String path = "";
-		String uri = "";
 		String server = "";
 		int serverSelect;
 		// ローカルパス取得
@@ -423,12 +402,20 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			server = savedInstanceState.getString("Server");
 			serverSelect = savedInstanceState.getInt("ServerSelect", -2);
 			if (debug) {Log.d(TAG, "onCreate: レジューム復帰. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
-		} else {
+		}
+		else {
 			// ショートカットから起動
 			path = intent.getStringExtra("Path");
 			server = intent.getStringExtra("Server");
 			serverSelect = intent.getIntExtra("ServerSelect", -2);
 			if (debug) {Log.d(TAG, "onCreate: ショートカットから起動. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
+
+			// 起動処理終了を保存
+			if (mInitialize != 0) {
+				ed.putInt("Initialize", 0);
+				ed.apply();
+				mInitialize = 0;
+			}
 		}
 
 		// レジューム起動チェック
@@ -445,7 +432,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		if (path != null && !path.isEmpty()) {
 			mPath = path;
-			mUriPath = DEF.relativePath(mActivity, mURI, mPath);
 		}
 
 		// サーバパス
@@ -458,7 +444,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				mURI = mServer.getURI();
 			} else {
 				mPath = "";
-				mUriPath = DEF.relativePath(mActivity, mURI, mPath);
 				Resources res = getResources();
 				Toast.makeText(this, res.getString(R.string.svNotFound), Toast.LENGTH_LONG).show();
 			}
@@ -484,7 +469,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			mServer.select(DEF.INDEX_LOCAL);
 			mURI = mServer.getURI();
 			mPath = mServer.getPath();
-			mUriPath = DEF.relativePath(mActivity, mURI, mPath);
 		}
 
 		if (mServer.getSelect() == DEF.INDEX_LOCAL && "/".equals(mPath)) {
@@ -493,7 +477,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if (!current_dir.canRead()) {
 				// 読み取り権限がない
 				mPath = Environment.getExternalStorageDirectory().getAbsolutePath() + '/';
-				mUriPath = DEF.relativePath(mActivity, mURI, mPath);
 			}
 		}
 
@@ -685,7 +668,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 					mURI = uri.toString();
 					mPath = "";
-					mUriPath = mURI;
 					FileData fileData = new FileData(mActivity, mURI);
 
 					if (debug) {Log.d(TAG, "onActivityResult: ファイルをオープンします. mURI=" + mURI + ", name=" + fileData.getName());}
@@ -852,8 +834,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
 		if (bm != null) {
 			ThumbnailLoader loader = new ThumbnailLoader(mActivity, "", "", null, thumbID, new ArrayList<FileData>(), thumW, thumH, 0, mThumbCrop, mThumbMargin);
-			loader.deleteThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), thumW, thumH);
-			loader.setThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), bm);
+			loader.deleteThumbnailCache(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), thumW, thumH);
+			loader.setThumbnailCache(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), bm);
 			Toast.makeText(this, R.string.ThumbConfigured, Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -864,6 +846,10 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		if(debug) {Log.d(TAG, "nextFileOpen: 開始します. nextopen=" + nextopen + ", path=" + path + ", file=" + file + ", image=" + image + ", pagerate=" + pagerate + ", page=" + page);}
 		// 次のファイル検索
 		FileData nextfile = searchNextFile(mFileList.getFileList(), file, nextopen);
+
+		String user = mServer.getUser();
+		String pass = mServer.getPass();
+
 		if (nextfile != null && !nextfile.getName().isEmpty()) {
 			if(debug) {Log.d(TAG, "nextFileOpen: nextfile != null");}
 
@@ -871,34 +857,45 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				case CloseDialog.CLICK_PREVTOP:
 				case CloseDialog.CLICK_NEXTTOP: {
 					Editor ed = mSharedPreferences.edit();
-					String user = mServer.getUser();
-					String pass = mServer.getPass();
-					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass) + "#pageRate");
-					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass));
+					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#pageRate");
+					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass));
 					ed.apply();
 					break;
 				}
 				case CloseDialog.CLICK_PREVLAST:
 				case CloseDialog.CLICK_NEXTLAST: {
 					Editor ed = mSharedPreferences.edit();
-					String user = mServer.getUser();
-					String pass = mServer.getPass();
-					ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
-					ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, nextfile.getName()), user, pass), DEF.PAGENUMBER_READ);
+					ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+					ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), DEF.PAGENUMBER_READ);
 					ed.apply();
 					updateListView();
 					break;
 				}
 			}
+
+			if (nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE) {
+				if(debug) {Log.d(TAG, "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");}
+
+				if (openFile(nextfile, image, pagerate, page, mEpubViewer)) {
+					// サムネイル解放
+					releaseThumbnail();
+					return true;
+				}
+			}
 		}
+		else {
+			if(debug) {Log.d(TAG, "nextFileOpen: nextfile == null");}
+			if (file !=null && !file.isEmpty() && FileAccess.isDirectory(mActivity, DEF.relativePath(mActivity, path, file), user, pass)) {
+				if(debug) {Log.d(TAG, "nextFileOpen: IS DIRECTORY: " + file);}
+				if (nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE) {
+					if (debug) {Log.d(TAG, "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");}
 
-		if (nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE) {
-			if(debug) {Log.d(TAG, "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");}
-
-			if (openFile(nextfile, image, pagerate, page, mEpubViewer)) {
-				// サムネイル解放
-				releaseThumbnail();
-				return true;
+					if (openFile(nextfile, image, pagerate, page, mEpubViewer)) {
+						// サムネイル解放
+						releaseThumbnail();
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -1341,9 +1338,9 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						String pass = mServer.getPass();
 						if (mFileData.getType() != FileData.FILETYPE_DIR) {
 							// ファイル単体の場合はそのまま消す
-							if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除します。");}
+							if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除します: " + DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()));}
 							try {
-								boolean isDeleted = FileAccess.delete(mActivity, DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass);
+								boolean isDeleted = FileAccess.delete(mActivity, DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass);
 								if (isDeleted) {
 									if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除できました。");}
 									// 削除できていたら画面から消す
@@ -1351,7 +1348,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								}
 								else {
 									Log.e(TAG, "onCreateDialog: " + getResources().getString(R.string.delErrorMsg));
-									Toast.makeText(mActivity, R.string.delErrorMsg, Toast.LENGTH_LONG).show();
+									Toast.makeText(mActivity, R.string.delErrorMsg + "\n" + DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), Toast.LENGTH_LONG).show();
 								}
 							} catch (FileAccessException e) {
 								Toast.makeText(mActivity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
@@ -1360,7 +1357,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						}
 						else {
 							// ディレクトリの場合は中身を順番に消す
-							Log.d(TAG, "onCreateDialog: ディレクトリを削除します。");
+							if (debug) {Log.d(TAG, "onCreateDialog: ディレクトリを削除します: " + DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()));}
 							RemoveDialog dlg = new RemoveDialog(mActivity, R.style.MyDialog, mURI, mPath, user, pass, mFileData.getName(), new RemoveListener() {
 								@Override
 								public void onClose() {
@@ -1368,7 +1365,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								try {
 									String user = mServer.getUser();
 									String pass = mServer.getPass();
-									boolean isExist = FileAccess.exists(mActivity, DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass);
+									boolean isExist = FileAccess.exists(mActivity, DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass);
 									if (!isExist) {
 										// 削除されていたら消す
 										mListScreenView.removeFileList(mFileData);
@@ -1583,7 +1580,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								filename = filename + fromfile.substring(index);
 							}
 							try {
-								boolean ret = FileAccess.renameTo(mActivity, mUriPath, fromfile, filename, user, pass);
+								if (debug) {Log.d(TAG, "onCreateDialog: ファイル名を変更します: " + DEF.relativePath(mActivity, mURI, mPath, fromfile));}
+								boolean ret = FileAccess.renameTo(mActivity, DEF.relativePath(mActivity, mURI, mPath), fromfile, filename, user, pass);
 								if (filetype == FileData.FILETYPE_DIR) {
 									filename = filename + "/";
 								}
@@ -1591,7 +1589,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 									mFileData.setName(mActivity, filename);
 								}
 								else {
-									Toast.makeText(mActivity, "Failed to file rename.", Toast.LENGTH_SHORT).show();
+									Log.e(TAG, "onCreateDialog: " + getResources().getString(R.string.renameErrorMsg) + ": " + DEF.relativePath(mActivity, mURI, mPath, fromfile));
+									Toast.makeText(mActivity, R.string.renameErrorMsg + "\n" + DEF.relativePath(mActivity, mURI, mPath, fromfile), Toast.LENGTH_LONG).show();
 								}
 							} catch (FileAccessException e) {
 								Toast.makeText(mActivity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
@@ -2694,12 +2693,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
 						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.TEXT_VIEWER == mEpubViewer) {
-							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass));
-							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass) + "#pageRate");
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()) + "META-INF/container.xml", user, pass));
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()) + "META-INF/container.xml", user, pass) + "#pageRate");
 						}
 						else {
-							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass));
-							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass) + "#pageRate");
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass));
+							ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#pageRate");
 						}
 						ed.apply();
 						updateListView();
@@ -2729,16 +2728,20 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						break;
 					}
 					case OPERATE_READ: { // 既読にする
+						int type = mFileData.getType();
 						ed = mSharedPreferences.edit();
 						String user = mServer.getUser();
 						String pass = mServer.getPass();
 						if (mFileData.getType() == FileData.FILETYPE_EPUB && DEF.TEXT_VIEWER == mEpubViewer) {
-							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_READ);
-							ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()) + "META-INF/container.xml", user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()) + "META-INF/container.xml", user, pass), DEF.PAGENUMBER_READ);
+							ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()) + "META-INF/container.xml", user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
 						}
 						else {
-							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass), DEF.PAGENUMBER_READ);
-							ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), user, pass) + "#pageRate", (float)DEF.PAGENUMBER_READ);
+							if (debug) {Log.d(TAG, "showFileLongClickDialog: onSelectItem: OPERATE_READ: Url=" + DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass));}
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass), DEF.PAGENUMBER_READ);
+							if (type == FileData.FILETYPE_TXT) {
+								ed.putFloat(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#pageRate", (float) DEF.PAGENUMBER_READ);
+							}
 						}
 						ed.apply();
 						updateListView();
@@ -2762,15 +2765,15 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						showDialog(DEF.MESSAGE_FILE_RENAME);
 						break;
 					case OPERATE_DELCACHE: // サムネイルキャッシュ削除
-						ThumbnailLoader.deleteThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), mThumbSizeW, mThumbSizeH);
+						ThumbnailLoader.deleteThumbnailCache(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), mThumbSizeW, mThumbSizeH);
 						break;
 					case OPERATE_SETTHUMBASDIR: { // 親ディレクトリのサムネイルとして設定
-						mThumbnailLoader.setThumbnailCache(DEF.relativePath(mActivity, mUriPath, mFileData.getName()), DEF.relativePath(mActivity, mURI, mPath));
+						mThumbnailLoader.setThumbnailCache(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), DEF.relativePath(mActivity, mURI, mPath));
 						break;
 					}
 					case OPERATE_SETTHUMBCROPPED: { // クロップしてサムネイルに設定
 						Intent intent = new Intent(mActivity, CropImageActivity.class);
-						intent.putExtra("Path", mUriPath);
+						intent.putExtra("Path", DEF.relativePath(mActivity, mURI, mPath));
 						intent.putExtra("File", mFileData.getName());
 						intent.putExtra("User", mServer.getUser());
 						intent.putExtra("Pass", mServer.getPass());
@@ -2981,7 +2984,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							FileData data = files.get(i);
 							if (data.getType() == FileData.FILETYPE_ARC || data.getType() == FileData.FILETYPE_TXT || data.getType() == FileData.FILETYPE_DIR) {
 								// .zip又はディレクトリのしおり削除
-								String uri = DEF.createUrl(DEF.relativePath(mActivity, mUriPath, data.getName()), user, pass);
+								String uri = DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, data.getName()), user, pass);
 								ed.remove(uri);
 							}
 						}

@@ -160,7 +160,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			20	// 中央影表示
 	};
 
-	private final int COMMAND_ID[] =
+	private final int[] COMMAND_ID =
 	{
 		DEF.MENU_ROTATE,	// 画面方向
 		DEF.MENU_MGNCUT,	// 余白削除
@@ -189,7 +189,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		DEF.MENU_CMARGIN,	// 中央余白表示
 		DEF.MENU_CSHADOW	// 中央影表示
 	};
-	private final int COMMAND_RES[] =
+	private final int[] COMMAND_RES =
 	{
 		R.string.rotateMenu,	// 画面方向
 		R.string.mgnCutMenu,	// 余白削除
@@ -218,8 +218,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		R.string.cMargin,		// 中央余白表示
 		R.string.cShadow		// 中央影表示
 	};
-	private int mCommandId[];
-	private String mCommandStr[];
+	private int[] mCommandId;
+	private String[] mCommandStr;
 
 	private int RANGE_FLICK;
 
@@ -871,6 +871,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
+		boolean debug = false;
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 			if (mAutoPlay) {
 				// オートプレイ中は解除
@@ -987,6 +988,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	String mWorkMessage = "";
 	// スレッドからの通知取得
 	public boolean handleMessage(Message msg) {
+		boolean debug = false;
 
 		if (DEF.ToastMessage(mActivity, msg)) {
 			// HMSG_TOASTならトーストを表示して終了
@@ -1110,6 +1112,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				return true;
 
 			case EVENT_EFFECT: {
+				if (debug) {Log.d(TAG, "handleMessage: EVENT_EFFECT:");}
 				// 稼働中のみ次のイベント登録
 				int t = (int) (NextTime - mEffectStart);
 				if (t >= mEffectTime) {
@@ -1127,6 +1130,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				// エフェクト位置
 				mImageView.setEffectRate(mEffectRate);
 
+				if (debug) {Log.d(TAG, "handleMessage: EVENT_EFFECT: mEffectRate=" + mEffectRate);}
 				if (mEffectRate != 0.0f) {
 					// エフェクト中は次のイベントを登録
 					nextEvent = true;
@@ -1135,6 +1139,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				else {
 					// エフェクト無しのときはそのまま修了
 					mLoadingNext = true;
+					if (debug) {Log.d(TAG, "handleMessage: EVENT_EFFECT: SET mBitmapLoading = false");}
 					mBitmapLoading = false;
 					mImageLoading = false;
 					if (mAutoPlay) {
@@ -1189,7 +1194,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			// }
 			// break;
 			case DEF.HMSG_LOAD_END: // 画像読み込み終了
+				if (debug) {Log.d(TAG, "handleMessage: HMSG_LOAD_END:");}
 				if (mBitmapLoading) {
+					if (debug) {Log.d(TAG, "handleMessage: HMSG_LOAD_END: IF mBitmapLoading == true");}
 					// Loading中を消去
 					if (mSourceImage[0] != null) {
 						mGuideView.setLodingState();
@@ -1230,6 +1237,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					if (mEffect != 0 && !mPageSelecting) {
 						// エフェクト開始
 						// 次のページ遷移が予約されている場合はエフェクトしない
+						if (debug) {Log.d(TAG, "handleMessage: HMSG_LOAD_END: mEffect=" + mEffect +", mPageSelecting=" + mPageSelecting);}
+						if (debug) {Log.d(TAG, "handleMessage: HMSG_LOAD_END: startViewTimer(EVENT_EFFECT)");}
 						startViewTimer(EVENT_EFFECT);
 					}
 					else {
@@ -1238,6 +1247,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 						// エフェクト無しのときはそのまま終了
 						mLoadingNext = true;
+						if (debug) {Log.d(TAG, "handleMessage: HMSG_LOAD_END: SET mBitmapLoading = false");}
 						mBitmapLoading = false;
 						mImageLoading = false;
 						mPageSelecting = false;
@@ -1388,6 +1398,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 		if (nextEvent) {
 			// 次のイベントあり
+			if (debug) {Log.d(TAG, "handleMessage: 次のイベントを実行: msg.what=" + msg.what);}
 			msg = mHandler.obtainMessage(msg.what);
 			mHandler.sendMessageAtTime(msg, NextTime);
 		}
@@ -1409,6 +1420,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	public void setBitmapImage() {
+		boolean debug = false;
 		if (mImageMgr == null || mImageMgr.length() - 1 < mCurrentPage) {
 			return;
 		}
@@ -1417,6 +1429,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mBitmapLoading) {
 			return;
 		}
+		if (debug) {Log.d(TAG, "setBitmapImage: SET mBitmapLoading = true");}
 		mBitmapLoading = true;
 
 		mImageView.lockDraw();
@@ -1432,7 +1445,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		mCurrentPageHalf = false;
 		mCurrentPageDual = false;
-		if (isDualView() == false && mCurrentPage < 0) {
+		if (!isDualView() && mCurrentPage < 0) {
 			// 範囲外は読み込みしない
 			mCurrentPage = 0;
 		}
@@ -1809,17 +1822,22 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * @return タッチ操作を他の View へ伝搬しないなら true。する場合は false。
 	 */
 	public boolean onTouch(View v, MotionEvent event) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "onTouch: 開始します.");}
 
 		if (mAutoPlay) {
+			if (debug) {Log.d(TAG, "onTouch: mAutoPlay");}
 			// オートプレイ中は解除
 			setAutoPlay(false);
 		}
 
 		if (mListLoading) {
+			if (debug) {Log.d(TAG, "onTouch: mListLoading");}
 			// ファイル一覧の読み込み中はページ操作しない
 			return true;
 		}
 		if (mImageMgr == null || mImageMgr.length() == 0) {
+			if (debug) {Log.d(TAG, "onTouch: mImageMgr == null || mImageMgr.length() == 0");}
 			if (mImageMgr != null) {
 				// 読み込み停止
 				mImageMgr.setBreakTrigger();
@@ -1832,6 +1850,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 		if (mBitmapLoading) {
 			// ビットマップ読込中は操作不可
+			if (debug) {Log.d(TAG, "onTouch: IF mBitmapLoading == true");}
+			// mHandler.sendMessageAtTime がキャンセルされるので、再度セットする
+			startViewTimer(EVENT_EFFECT);
 			return true;
 		}
 
@@ -2001,7 +2022,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mLoadingNext) {
 			// ローディング中のタッチは次の移動イベントでONにする
 			if (action == MotionEvent.ACTION_MOVE) {
-				if (mScrlNext == false) {
+				if (!mScrlNext) {
 					action = MotionEvent.ACTION_DOWN;
 				}
 			}
@@ -2016,7 +2037,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					mImmCancel = true;
 				}
 			}
-			if (mImmCancel == true) {
+			if (mImmCancel) {
 				// ImmerModeの場合は上下端のタッチを無視する
 				if (action == MotionEvent.ACTION_UP) {
 					// UPイベントで解除
@@ -2028,6 +2049,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
+				if (debug) {Log.d(TAG, "onTouch: ACTION_DOWN");}
 				// 押下状態を設定
 				mGuideView.eventTouchDown((int)x, (int)y, cx, cy, mImmEnable ? false : true);
 
@@ -2086,6 +2108,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 
 			case MotionEvent.ACTION_MOVE:
+				if (debug) {Log.d(TAG, "onTouch: ACTION_MOVE");}
 				// Log.d("action_move", "x=" + x + ", y=" + y);
 				// 移動位置設定
 				mGuideView.eventTouchMove((int)x, (int)y);
@@ -2096,7 +2119,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 						int sel = GuideView.GUIDE_NOSEL;
 						if (y >= cy - mClickArea) {
 							// 操作エリアから出て戻ったらそこを基準にする
-							if (mPageModeIn == false) {
+							if (!mPageModeIn) {
 								// 指定のページを基準とした位置を設定
 								mTouchBeginX = x - calcPageSelectRange(mSelectPage);
 							}
@@ -2180,7 +2203,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 							mImageView.scrollStart(mTouchBeginX, mTouchBeginY, RANGE_FLICK, mScroll);
 						}
 
-						if (this.mTouchFirst == false && mVerticalSwipe == false) {
+						if (!this.mTouchFirst && !mVerticalSwipe) {
 //						if (this.mTouchFirst == false) {
 							// ■■■ スクロール中なら
 							long now = SystemClock.uptimeMillis();
@@ -2203,6 +2226,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 
 			case MotionEvent.ACTION_CANCEL:
+				if (debug) {Log.d(TAG, "onTouch: ACTION_CANCEL");}
 				if (mLongTouchMode) {
 					// ズーム表示解除
 					mImageView.setZoomMode(false);
@@ -2220,7 +2244,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				mGuideView.setGuideIndex(GuideView.GUIDE_NONE);
 				break;
 			case MotionEvent.ACTION_UP:
-			{
+				if (debug) {Log.d(TAG, "onTouch: ACTION_UP");}
 //				if (mVerticalSwipe) {
 //					// 縦フリックの指を離した
 //					//Toast.makeText(this, "メニューを表示します", Toast.LENGTH_SHORT).show();
@@ -2383,13 +2407,13 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 						// 下部選択の場合は対応する操作を実行
 						switch (index) {
 							case 0:
-								if (isDualView() == true) {
+								if (isDualView()) {
 									// 1ページ次へずらす
 									shiftPage(1);
 								}
 								break;
 							case 1:
-								if (isDualView() == true) {
+								if (isDualView()) {
 									// 1ページ前へずらす
 									shiftPage(-1);
 								}
@@ -2426,7 +2450,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 								break;
 							case 8:
 								// 表示中の画像が1枚か2枚かを判定
-								ImageData bm[] = mImageView.getImageBitmap();
+								ImageData[] bm = mImageView.getImageBitmap();
 								int shareType;
 								if (bm[0] != null && bm[1] != null) {
 									shareType = DEF.SHARE_LR;
@@ -2442,7 +2466,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 									mGuideView.setPageColor(0x80000000);
 
 									// ページ番号入力
-									if (PageSelectDialog.mIsOpened == false) {
+									if (!PageSelectDialog.mIsOpened) {
 										PageSelectDialog pageDlg = new PageSelectDialog(this, R.style.MyDialog);
 										pageDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 										pageDlg.setPageSelectListear(this);
@@ -2458,7 +2482,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 									mGuideView.setPageColor(0x80000000);
 
 									// サムネイルページ選択
-									if (PageThumbnail.mIsOpened == false) {
+									if (!PageThumbnail.mIsOpened) {
 										PageThumbnail thumbDlg = new PageThumbnail(this, R.style.MyDialog);
 										thumbDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 										thumbDlg.setPageSelectListear(this);
@@ -2496,6 +2520,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					mLongTouchMode = false;
 				}
 				else if (mOperation == TOUCH_OPERATION) {
+					if (debug) {Log.d(TAG, "onTouch: 通常タップ");}
 					// ■■■ タップ終了なら
 					if (this.mTouchFirst) {
 						this.mTouchFirst = false;
@@ -2571,7 +2596,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				mTouchFirst = false;
 				mOperation = TOUCH_NONE;
 				break;
-			}
 		}
 		return true;
 	}
@@ -4422,6 +4446,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// タイマー開始
 	public void startViewTimer(int event) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "startViewTimer: 開始します. event=" + event);}
+
 		Message msg = mHandler.obtainMessage(event);
 		long NextTime = SystemClock.uptimeMillis();
 
@@ -4458,7 +4485,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		mHandler.sendMessageAtTime(msg, NextTime);
-		return;
 	}
 
 	private void setAutoPlay(boolean mode) {
@@ -4610,6 +4636,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 現在ページ情報を保存
 	private void saveCurrentPage() {
+		boolean debug = false;
 		if (mImageMgr != null && mImageMgr.length() > 0) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
@@ -4631,6 +4658,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			if (mImageName != null && !mImageName.isEmpty()) {
 				ed.putString("LastImage", mImageMgr.mFileList[mCurrentPage].name);
 			}
+			if (debug) {Log.d(TAG, "saveCurrentPage: Url=" + DEF.createUrl(mFilePath, mUser, mPass));}
 			ed.putInt(DEF.createUrl(mFilePath, mUser, mPass), savePage);
 			ed.apply();
 		}

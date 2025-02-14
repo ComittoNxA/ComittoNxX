@@ -542,34 +542,91 @@ public class SmbFileAccess {
 			throw new FileAccessException(TAG + ": renameTo: Invalid file name.");
 		}
 
-		SmbFile orgfile;
-		try {
-			orgfile = SmbFileAccess.smbFile(uri + fromfile, user, pass);
-			if (!orgfile.exists()) {
-				// 変更前ファイルが存在しなければエラー
-				throw new FileAccessException(TAG + ": renameTo: File not found.");
+		if (!DEF.isUiThread()) {
+			// UIスレッドではない時はそのまま実行
+			SmbFile orgfile;
+			try {
+				orgfile = SmbFileAccess.smbFile(uri + fromfile, user, pass);
+				if (!orgfile.exists()) {
+					// 変更前ファイルが存在しなければエラー
+					Log.e(TAG, "renameTo: File not found.");
+					throw new FileAccessException(TAG + ": renameTo: File not found.");
+				}
+			} catch (SmbException e) {
+				Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 			}
-		} catch (SmbException e) {
-			throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
-		}
 
-		SmbFile dstfile;
-		try {
-			dstfile = SmbFileAccess.smbFile(uri + fromfile, user, pass);
-			if (dstfile.exists()) {
-				// 変更後ファイルが存在すればエラー
-				throw new FileAccessException(TAG + ": renameTo: File access error.");
+			SmbFile dstfile;
+			try {
+				dstfile = SmbFileAccess.smbFile(uri + tofile, user, pass);
+				if (dstfile.exists()) {
+					// 変更後ファイルが存在すればエラー
+					Log.e(TAG, "renameTo: File access error.");
+					throw new FileAccessException(TAG + ": renameTo: File access error.");
+				}
+			} catch (SmbException e) {
+				Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 			}
-		} catch (SmbException e) {
-			throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
-		}
 
-		// ファイル名変更
-		try {
-			orgfile.renameTo(dstfile);
-			return dstfile.exists();
-		} catch (SmbException e) {
-			throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
+			// ファイル名変更
+			try {
+				orgfile.renameTo(dstfile);
+				return dstfile.exists();
+			} catch (SmbException e) {
+				Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
+			}
+		}
+		else {
+			// UIスレッドの時は新しいスレッド内で実行
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			Future<Boolean> future = executor.submit(new Callable<Boolean>() {
+
+				@Override
+				public Boolean call() throws FileAccessException {
+					SmbFile orgfile;
+					try {
+						orgfile = SmbFileAccess.smbFile(uri + fromfile, user, pass);
+						if (!orgfile.exists()) {
+							// 変更前ファイルが存在しなければエラー
+							Log.e(TAG, "renameTo: File not found.");
+							throw new FileAccessException(TAG + ": renameTo: File not found.");
+						}
+					} catch (SmbException e) {
+						Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+						throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
+					}
+
+					SmbFile dstfile;
+					try {
+						dstfile = SmbFileAccess.smbFile(uri + tofile, user, pass);
+						if (dstfile.exists()) {
+							// 変更後ファイルが存在すればエラー
+							Log.e(TAG, "renameTo: File access error.");
+							throw new FileAccessException(TAG + ": renameTo: File access error.");
+						}
+					} catch (SmbException e) {
+						Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+						throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
+					}
+
+					// ファイル名変更
+					try {
+						orgfile.renameTo(dstfile);
+						return dstfile.exists();
+					} catch (SmbException e) {
+						Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+						throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
+					}
+				}
+			});
+			try {
+				return future.get();
+			} catch (Exception e) {
+				throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
+			}
 		}
 	}
 

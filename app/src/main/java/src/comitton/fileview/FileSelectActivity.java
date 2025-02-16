@@ -3856,7 +3856,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	// Bitmap読込のスレッドからの通知取得
 	public boolean handleMessage(Message msg) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) {Log.d(TAG, "handleMessage: what=" + msg.what);}
 
 		if (DEF.ToastMessage(mActivity, msg)) {

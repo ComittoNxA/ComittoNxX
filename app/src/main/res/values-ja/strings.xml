@@ -564,8 +564,8 @@
 
     <string name="MallocFailure">メモリの確保に失敗しました</string>
     <string name="CacheLimitExceeded">キャッシュの作成数が多すぎます</string>
-    <string name="CacheIndexOutOfRange">キャッシュのインデックスが間違っています</string>
-    <string name="CacheNotInitialized">キャッシュが初期化されていません</string>
+    <string name="CacheIndexOutOfRange">キャッシュのインデックスが範囲外です</string>
+    <string name="CacheNotInitialized">キャッシュは初期化されていないか解放済みです</string>
 
     <string name="Connecting">接続中...</string>
     <string name="GetError">取得に失敗しました.</string>

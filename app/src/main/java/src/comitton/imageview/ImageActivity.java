@@ -763,7 +763,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		public void run() {
-			boolean debug = true;
+			boolean debug = false;
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
 			if(debug) {Log.d(TAG, "run メモリ利用状況.\n" + getMemoryString());}
@@ -1415,7 +1415,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			msg = mHandler.obtainMessage(msg.what);
 			mHandler.sendMessageAtTime(msg, NextTime);
 		}
-		return false;
+		return true;
 	}
 
 	/**

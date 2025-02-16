@@ -350,7 +350,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 								if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
 									// 読書率を描画
 									// 読書率
-									float rate = (float)fd.getState() / (float)fd.getSize();
+									float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
 									// 文字サイズ
 									float fontsize = mTileSize;
 									Paint paint = new Paint();
@@ -458,7 +458,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
 							// 読書率を描画
 							// 読書率
-							float rate = (float)fd.getState() / (float)fd.getSize();
+							float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
 							// 文字サイズ
 							float fontsize = mTileSize;
 							Paint paint = new Paint();
@@ -781,7 +781,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
 								// 読書率を描画
 								// 読書率
-								float rate = (float)fd.getState() / (float)fd.getSize();
+								float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
 								// 文字サイズ
 								float fontsize = Math.min(mTitleSize, mInfoSize);
 								Paint paint = new Paint();
@@ -887,7 +887,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 					if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
 						// 読書率を描画
 						// 読書率
-						float rate = (float)fd.getState() / (float)fd.getSize();
+						float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
 						// 文字サイズ
 						float fontsize = Math.min(mTitleSize, mInfoSize);
 						Paint paint = new Paint();

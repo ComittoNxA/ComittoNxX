@@ -196,7 +196,7 @@ public class CallImgLibrary {
 
 			case DEF.ERROR_CODE_CACHE_INDEX_OUT_OF_RANGE:
 				//DEF.sendMessage(context, R.string.CacheIndexOutOfRange, Toast.LENGTH_LONG, handler);
-				Log.e(TAG, context.getString(R.string.CacheIndexOutOfRange));
+				Log.w(TAG, context.getString(R.string.CacheIndexOutOfRange));
 				break;
 
 			case DEF.ERROR_CODE_CACHE_NOT_INITIALIZED:

@@ -1294,14 +1294,15 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
     				isTop = true;
     			}
 
-				if	(mPageWay != 0)	{
+				if (mPageWay != 0) {
 					// ページ方向が左表紙の場合は左へ移動
 					isLeft = true;
 				}
-				if	(mIsPageBack)	{
+
+				if (mIsPageBack) {
 					// ページ戻り時は画面下に移動
 					isTop = false;
-					if	(!mPrevRev)	{
+					if (mPrevRev) {
 						// ページ戻り時の左右位置反転は左右逆
 						isLeft = !isLeft;
 					}

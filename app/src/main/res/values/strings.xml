@@ -565,8 +565,8 @@
 
     <string name="MallocFailure">Failed to allocate memory.</string>
     <string name="CacheLimitExceeded">Too many caches created</string>
-    <string name="CacheIndexOutOfRange">Cache index is wrong</string>
-    <string name="CacheNotInitialized">The cache has not been initialized</string>
+    <string name="CacheIndexOutOfRange">Cache index out of range</string>
+    <string name="CacheNotInitialized">The cache is uninitialized or has been released</string>
 
     <string name="Connecting">Connecting...</string>
     <string name="GetError">Failed to get.</string>

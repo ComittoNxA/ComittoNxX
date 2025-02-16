@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.config.SetCacheActivity;
 import src.comitton.fileaccess.FileAccess;
 import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
@@ -340,6 +341,10 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private int mTimeSize;
 	private int mTimeColor;
 
+	private int mMemSize;
+	private int mMemNext;
+	private int mMemPrev;
+
 	/**
 	 * 画面が作成された時に発生します。
 	 *
@@ -641,7 +646,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			// ファイルリストの読み込み
 			if (debug) {Log.d(TAG, "TextLoad: run: mUriPath=" + mUriPath + ", mFileName=" + mFileName + ", mTextName=" + mTextName);}
 			mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, true, ImageManager.OPENMODE_TEXTVIEW, 1);
-			mImageMgr.LoadImageList(0, 0, 0);
+			mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
 			mTextMgr = new TextManager(mImageMgr, mTextName, mUser, mPass, handler, mActivity, mFileType);
 			//mTextMgr.LoadTextFile();
 			mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
@@ -1094,15 +1099,15 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				}
 
 				// テキストの設定
-				char textbuff[] = mTextMgr.getTextBuffer();
+				char[] textbuff = mTextMgr.getTextBuffer();
 				String title = mTextMgr.getTitle();
 				// テキストデータ
-				TextDrawData page[][] = mTextMgr.getTextData();
+				TextDrawData[][] page = mTextMgr.getTextData();
 
 				mTextView.setTextBuffer(textbuff, title, page);
 
 				// 挿絵配列取得
-				PictureData pictures[] = mTextMgr.getPictures();
+				PictureData[] pictures = mTextMgr.getPictures();
 				mTextView.setPictures(pictures);
 
 				// 画面サイズが必要なのでここでセット
@@ -1113,7 +1118,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				mTextView.update(true);
 				break;
 		}
-		return false;
+		return true;
 	}
 
 	public void setTextPageData() {
@@ -1156,7 +1161,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	 *
 	 * @return タッチ操作を他の View へ伝搬しないなら true。する場合は false。
 	 */
-	public boolean onTouch(View v, MotionEvent event) {
+	@SuppressLint("SuspiciousIndentation")
+    public boolean onTouch(View v, MotionEvent event) {
 		if (mReadRunning) {
 			// ファイル一覧の読み込み中はページ操作しない
 			return true;
@@ -1299,15 +1305,16 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
     					mPinchScale = mPinchScaleSel;
     					// テキストモード
 						mTextView.lockDraw();
+
+						mTextView.setTextScale(DEF.SCALE_PINCH, mPinchScale);
 						mTextView.TextScaling();
-    					mPinchScale = mTextView.TextScaling();
-    					this.updateOverSize();
-    					mTextView.update(true);
+						this.updateOverSize();
+						mTextView.update(true);
 
 						Editor ed = mSharedPreferences.edit();
 						ed.putString(DEF.KEY_PinchScaleText, Integer.toString(mPinchScale));
 						ed.apply();
-    				}
+					}
     			}
     			return true;
     		}
@@ -2883,7 +2890,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 
 		String fontname = SetTextActivity.getFontName(sharedPreferences);
-		if (fontname != null && fontname.length() > 0) {
+		if (fontname.length() > 0) {
 			String path = DEF.getFontDirectory();
 			mFontFile = path + fontname;
 		}
@@ -2898,6 +2905,10 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			lp.screenBrightness = (float)mBkLight / 10;
 			getWindow().setAttributes(lp);
 		}
+
+		mMemSize = DEF.calcMemSize(SetCacheActivity.getMemSize(sharedPreferences));
+		mMemNext = DEF.calcMemPage(SetCacheActivity.getMemNext(sharedPreferences));
+		mMemPrev = DEF.calcMemPage(SetCacheActivity.getMemPrev(sharedPreferences));
 		return;
 	}
 
@@ -2905,7 +2916,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		if (mTextView != null) {
 			boolean result;
 			result = mTextView.setConfig(mMgnColor, mCenColor, mTopColor1, mViewPoint, mMargin, mCenter, mShadow, mScrlRngW, mScrlRngH, mVolScrl, mPrevRev, mCMargin, mCShadow, mPseLand, mEffect, mEffectTime, mFontFile, mAscMode != TextManager.ASC_NORMAL, mPicSize);
-			if (result == false) {
+			if (!result) {
 				Toast.makeText(this, "open font error:\"" + mFontFile + "\"", Toast.LENGTH_LONG).show();
 
 			}
@@ -3057,7 +3068,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			savePage = 0;
 		}
 		long maxpage = mTextMgr.length();
-		if	(mTextName.equals("META-INF/container.xml"))	{
+		if (mTextName.equals("META-INF/container.xml")) {
 			Log.d("TextActivity","mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", (int)maxpage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
@@ -3066,7 +3077,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				ed.putInt(DEF.createUrl(mUriFilePath, mUser, mPass) + "#date", (int) (mTimestamp / 1000));
 			}
 		}
-		else	{
+		else {
 			Log.d("TextActivity","mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", (int)maxpage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);

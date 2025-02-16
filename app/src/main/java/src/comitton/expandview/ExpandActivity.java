@@ -73,6 +73,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	private ListView mListView;
 
 	private ImageManager mImageMgr = null;
+	private ImageManager mImageMgr2 = null;
 	private TextManager mTextMgr;
 	private ExpandThumbnailLoader mThumbnailLoader;
 
@@ -855,7 +856,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			}
 			case DEF.HMSG_WORKSTREAM:
 				// ファイルアクセスの表示
-				break;
+				return true;
 			case DEF.HMSG_READ_END: {
 				if(debug) {Log.d(TAG, "handleMessage: DEF.HMSG_READ_END. ImageManager の読み込みが終了しました.");}
 				// 読込中の表示
@@ -911,14 +912,15 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 									int openmode = 0;
 									// ファイルリストの読み込み
 									openmode = ImageManager.OPENMODE_TEXTVIEW;
-									mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath, mFileName), "", mUser, mPass, 0, null, mHidden, openmode, 1);
-									mImageMgr.LoadImageList(0, 0, 0);
-									mTextMgr = new TextManager(mImageMgr, nextfile.getName(), mUser, mPass, null, mActivity, FileData.FILETYPE_TXT);
+									mImageMgr2 = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), mFileName, mUser, mPass, 0, null, mHidden, openmode, 1);
+									mImageMgr2.LoadImageList(0, 0, 0);
+									mTextMgr = new TextManager(mImageMgr2, nextfile.getName(), mUser, mPass, null, mActivity, FileData.FILETYPE_TXT);
 									FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
 									ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName() + "#maxpage", mTextMgr.length());
 									ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName(), mTextMgr.length());
 									//ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName() + "#date", (int)((nextfile.getDate() / 1000)));
 									ed.apply();
+									releaseManager();
 								}
 								updateListView();
 								return true;
@@ -958,7 +960,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				return true;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private void loadListView() {
@@ -1127,6 +1129,24 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		mThumbID = System.currentTimeMillis();
 
 		mThumbnailLoader = new ExpandThumbnailLoader(mActivity, mURI, DEF.relativePath(mActivity, mPath, mFileName), mHandler, mThumbID, mImageMgr, mFileList, mThumbSizeW, mThumbSizeH, mThumbNum, mThumbCrop, mThumbMargin);
+	}
+
+
+	// ImageManager と TextManager を解放する
+	private void releaseManager() {
+		// 読み込み終了
+		if (mImageMgr2 != null) {
+			try {
+				mImageMgr2.close();
+			} catch (IOException e) {
+				;
+			}
+			mImageMgr2 = null;
+		}
+		if (mTextMgr != null) {
+			mTextMgr.release();
+			mTextMgr = null;
+		}
 	}
 
 	// 解放

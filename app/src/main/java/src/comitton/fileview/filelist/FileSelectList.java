@@ -1,5 +1,6 @@
 package src.comitton.fileview.filelist;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -287,10 +288,10 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				if (fileList.get(i).getType() == FileData.FILETYPE_TXT) {
 					maxpage = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
 					state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
-					if	(state > 0)	{
+					if (state > 0) {
 						nowdate = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#date", DEF.PAGENUMBER_UNREAD);
 						date = fileList.get(i).getDate();
-						if ((nowdate != ((date / 1000))) || (mChangeTextSize))	{
+						if ((nowdate != ((date / 1000))) || (mChangeTextSize)) {
 							int openmode = 0;
 							// ファイルリストの読み込み
 							openmode = ImageManager.OPENMODE_TEXTVIEW;
@@ -304,21 +305,24 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 							ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
 							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
 							ed.apply();
+							releaseManager();
 							if (maxpage == DEF.PAGENUMBER_NONE) {
 								state = DEF.PAGENUMBER_UNREAD;
 								size = DEF.PAGENUMBER_NONE;
-							} else if (state >= maxpage) {
+							} else if (state + 1 >= maxpage - 1) {
+								// 0から始まるので+1、見開きの分で-1
 								state = DEF.PAGENUMBER_READ;
 								size = maxpage;
 							} else {
 								size = maxpage;
 							}
 						}
-						else	{
+						else {
 							if (maxpage == DEF.PAGENUMBER_NONE) {
 								state = DEF.PAGENUMBER_UNREAD;
 								size = DEF.PAGENUMBER_NONE;
-							} else if (state >= maxpage) {
+							} else if (state + 1 >= maxpage - 1) {
+								// 0から始まるので+1、見開きの分で-1
 								state = DEF.PAGENUMBER_READ;
 								size = maxpage;
 							} else {
@@ -351,25 +355,28 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 							ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
 							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
 							ed.apply();
+							releaseManager();
 							if (maxpage == DEF.PAGENUMBER_NONE) {
 								state = DEF.PAGENUMBER_UNREAD;
 								size = DEF.PAGENUMBER_NONE;
-							} else if (state >= (maxpage- 1)) {
+							} else if (state + 1 >= maxpage - 1) {
+								// 0から始まるので+1、見開きの分で-1
 								state = DEF.PAGENUMBER_READ;
-								size = maxpage - 1;
+								size = maxpage;
 							} else {
-								size = maxpage - 1;
+								size = maxpage;
 							}
 						}
-						else	{
+						else {
 							if (maxpage == DEF.PAGENUMBER_NONE) {
 								state = DEF.PAGENUMBER_UNREAD;
 								size = DEF.PAGENUMBER_NONE;
-							} else if (state >= (maxpage - 1)) {
+							} else if (state + 1 >= maxpage - 1) {
+								// 0から始まるので+1、見開きの分で-1
 								state = DEF.PAGENUMBER_READ;
-								size = maxpage - 1;
+								size = maxpage;
 							} else {
-								size = maxpage - 1;
+								size = maxpage;
 							}
 						}
 						fileList.get(i).setSize(size);
@@ -398,10 +405,12 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "META-INF/container.xml", state);
 								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
 								ed.apply();
+								releaseManager();
 								if (maxpage == DEF.PAGENUMBER_NONE) {
 									state = DEF.PAGENUMBER_UNREAD;
 									size = DEF.PAGENUMBER_NONE;
-								} else if (state >= (maxpage - 1)) {
+								} else if (state + 1 >= maxpage - 1) {
+									// 0から始まるので+1、見開きの分で-1
 									state = DEF.PAGENUMBER_READ;
 									size = maxpage;
 								} else {
@@ -412,7 +421,8 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 								if (maxpage == DEF.PAGENUMBER_NONE) {
 									state = DEF.PAGENUMBER_UNREAD;
 									size = DEF.PAGENUMBER_NONE;
-								} else if (state >= (maxpage - 1)) {
+								} else if (state + 1 >= maxpage - 1) {
+									// 0から始まるので+1、見開きの分で-1
 									state = DEF.PAGENUMBER_READ;
 									size = maxpage;
 								} else {
@@ -440,25 +450,28 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 								ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
 								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
 								ed.apply();
+								releaseManager();
 								if (maxpage == DEF.PAGENUMBER_NONE) {
 									state = DEF.PAGENUMBER_UNREAD;
 									size = DEF.PAGENUMBER_NONE;
-								} else if (state >= (maxpage - 1)) {
+								} else if (state + 1 >= maxpage - 1) {
+									// 0から始まるので+1、見開きの分で-1
 									state = DEF.PAGENUMBER_READ;
-									size = maxpage - 1;
+									size = maxpage;
 								} else {
-									size = maxpage - 1;
+									size = maxpage;
 								}
 							}
 							else {
 								if (maxpage == DEF.PAGENUMBER_NONE) {
 									state = DEF.PAGENUMBER_UNREAD;
 									size = DEF.PAGENUMBER_NONE;
-								} else if (state >= (maxpage - 1)) {
+								} else if (state + 1 >= maxpage - 1) {
+									// 0から始まるので+1、見開きの分で-1
 									state = DEF.PAGENUMBER_READ;
-									size = maxpage - 1;
+									size = maxpage;
 								} else {
-									size = maxpage - 1;
+									size = maxpage;
 								}
 							}
 							fileList.get(i).setSize(size);
@@ -487,25 +500,28 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 							ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
 							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
 							ed.apply();
+							releaseManager();
 							if (maxpage == DEF.PAGENUMBER_NONE) {
 								state = DEF.PAGENUMBER_UNREAD;
 								size = DEF.PAGENUMBER_NONE;
-							} else if (state >= (maxpage- 1)) {
+							} else if (state + 1 >= maxpage - 1) {
+								// 0から始まるので+1、見開きの分で-1
 								state = DEF.PAGENUMBER_READ;
-								size = maxpage - 1;
+								size = maxpage;
 							} else {
-								size = maxpage - 1;
+								size = maxpage;
 							}
 						}
 						else	{
 							if (maxpage == DEF.PAGENUMBER_NONE) {
 								state = DEF.PAGENUMBER_UNREAD;
 								size = DEF.PAGENUMBER_NONE;
-							} else if (state >= (maxpage - 1)) {
+							} else if (state + 1 >= maxpage - 1) {
+								// 0から始まるので+1、見開きの分で-1
 								state = DEF.PAGENUMBER_READ;
-								size = maxpage - 1;
+								size = maxpage;
 							} else {
-								size = maxpage - 1;
+								size = maxpage;
 							}
 						}
 						fileList.get(i).setSize(size);
@@ -706,9 +722,30 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	public boolean handleMessage(Message msg) {
 		// 終了
 		closeDialog();
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg.obj != null) {
 			Toast.makeText(mActivity, (String)msg.obj, Toast.LENGTH_LONG).show();
 		}
 		return false;
+	}
+
+	// ImageManager と TextManager を解放する
+	private void releaseManager() {
+		// 読み込み終了
+		if (mImageMgr != null) {
+			try {
+				mImageMgr.close();
+			} catch (IOException e) {
+				;
+			}
+			mImageMgr = null;
+		}
+		if (mTextMgr != null) {
+			mTextMgr.release();
+			mTextMgr = null;
+		}
 	}
 }

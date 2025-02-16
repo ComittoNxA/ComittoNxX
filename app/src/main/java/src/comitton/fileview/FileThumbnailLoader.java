@@ -74,18 +74,22 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	// スレッド停止
 	public void breakThread() {
 		super.breakThread();
+		releaseManager();
+	}
 
+	// スレッド停止
+	public void releaseManager() {
 		// 読み込み終了
 		synchronized (mImageMgrLock) {
 			if (mImageMgr != null) {
 				//mImageMgr.setBreakTrigger();
-                try {
-                    mImageMgr.close();
-                } catch (IOException e) {
+				try {
+					mImageMgr.close();
+				} catch (IOException e) {
 					;
-                }
+				}
 				mImageMgr = null;
-            }
+			}
 		}
 	}
 
@@ -437,6 +441,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			if (mThreadBreak) {
 				// 読み込み中断
 				if (debug) {Log.d(TAG, "index=" + index + " loadBitmap3 中断されました. filename=" + filename);}
+				releaseManager();
 				return true;
 			}
 			if (debug) {Log.d(TAG, "index=" + index + " loadBitmap3 サムネイル取得します. filename=" + filename);}
@@ -460,6 +465,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				Log.e(TAG, "index=" + index + " loadBitmap3 サムネイル取得でエラーになりました. filename=" + filename);
 				if (e.getLocalizedMessage() != null) {
 					Log.e(TAG, "index=" + index + " loadBitmap3 エラーメッセージ. " + e.getLocalizedMessage());
+					releaseManager();
 					return false;
 				}
 			} finally {
@@ -469,6 +475,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			if (bm == null) {
 				// NoImageであればステータス設定
 				if (debug) {Log.d(TAG, "index=" + index + " loadBitmap3 取得できませんでした. filename=" + filename);}
+				releaseManager();
 				return false;
 			}
 		} catch (Exception e) {
@@ -478,16 +485,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			}
 			return false;
 		} finally {
-			try {
-				synchronized (mImageMgrLock) {
-					if (mImageMgr != null) {
-						mImageMgr.close();
-					}
-					mImageMgr = null;
-				}
-			} catch (Exception e) {
-				// なにもしない
-			}
+			releaseManager();
 		}
 
 		if (mThreadBreak) {

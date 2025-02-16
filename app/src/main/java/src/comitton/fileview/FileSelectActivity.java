@@ -3,6 +3,7 @@ package src.comitton.fileview;
 import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -884,70 +885,103 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			switch (nextopen) {
 				case CloseDialog.CLICK_PREVTOP:
 				case CloseDialog.CLICK_NEXTTOP: {
+					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage");
 					ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass));
 					ed.apply();
 					break;
 				}
 				case CloseDialog.CLICK_PREVLAST:
 				case CloseDialog.CLICK_NEXTLAST: {
-					int	maxpage;
-					maxpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), -1);
-					if	(maxpage > 0)	{
-						//	未読で無かった場合
-						maxpage = maxpage / 100000;
-						ed = mSharedPreferences.edit();
-						ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), maxpage + maxpage * 100000);
-						ed.apply();
-					} else {
-						//	未読の場合
-						if	(nextfile.getType() == FileData.FILETYPE_TXT)	{
+					if	(nextfile.getType() == FileData.FILETYPE_TXT)	{
+						int maxpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), DEF.PAGENUMBER_NONE);
+						if	(maxpage > 0) {
+							//	未読で無かった場合
+							ed = mSharedPreferences.edit();
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage", maxpage);
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), maxpage);
+							ed.apply();
+						} else {
 							int openmode = 0;
 							// ファイルリストの読み込み
 							openmode = ImageManager.OPENMODE_TEXTVIEW;
-							mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), "", user, pass, 0, null, mHidden, openmode, 1);
+							mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), "", user, pass, 0, mHandler, mHidden, openmode, 1);
 							mImageMgr.LoadImageList(0, 0, 0);
-							mTextMgr = new TextManager(mImageMgr, nextfile.getName(), user, pass, null, mActivity, FileData.FILETYPE_TXT);
-							FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
-							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), mTextMgr.length() + mTextMgr.length() * 100000);
+							mTextMgr = new TextManager(mImageMgr, nextfile.getName(), user, pass, mHandler, mActivity, FileData.FILETYPE_TXT);
+							FileSelectList.SetReadConfig(mSharedPreferences, mTextMgr);
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage", mTextMgr.length());
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), mTextMgr.length());
 							ed.apply();
+							releaseManager();
 						}
-						if (mFileData.getType() == FileData.FILETYPE_EPUB)	{
-							if	(DEF.TEXT_VIEWER == mEpubViewer) {
+					}
+					if (mFileData.getType() == FileData.FILETYPE_EPUB)	{
+						if	(DEF.TEXT_VIEWER == mEpubViewer) {
+							int maxpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "META-INF/container.xml" + "#maxpage", DEF.PAGENUMBER_NONE);
+							if	(maxpage > 0) {
+								//	未読で無かった場合
+								ed = mSharedPreferences.edit();
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "META-INF/container.xml" + "#maxpage", maxpage);
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "META-INF/container.xml", maxpage);
+								ed.apply();
+							} else {
 								int openmode = 0;
 								// ファイルリストの読み込み
 								openmode = ImageManager.OPENMODE_TEXTVIEW;
-								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), nextfile.getName(), user, pass, 0, null, mHidden, openmode, 1);
+								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), nextfile.getName(), user, pass, 0, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
-								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", user, pass, null, mActivity, FileData.FILETYPE_EPUB);
-								FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
-								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), mTextMgr.length() + mTextMgr.length() * 100000);
+								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", user, pass, mHandler, mActivity, FileData.FILETYPE_EPUB);
+								FileSelectList.SetReadConfig(mSharedPreferences, mTextMgr);
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "META-INF/container.xml" + "#maxpage", mTextMgr.length());
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "META-INF/container.xml", mTextMgr.length());
+								releaseManager();
 							}
-							else	{
+						}
+						else {
+							int maxpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), DEF.PAGENUMBER_NONE);
+							if	(maxpage > 0) {
+								//	未読で無かった場合
+								ed = mSharedPreferences.edit();
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage", maxpage);
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), maxpage);
+								ed.apply();
+							} else {
 								int openmode = 0;
 								// ファイルリストの読み込み
-								openmode = ImageManager.OPENMODE_TEXTVIEW;
-								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), "", user, pass, 0, null, mHidden, openmode, 1);
+								openmode = ImageManager.OPENMODE_VIEW;
+								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), nextfile.getName(), user, pass, 0, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
-								mTextMgr = new TextManager(mImageMgr, nextfile.getName(), user, pass, null, mActivity, FileData.FILETYPE_TXT);
-								FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
-								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), mTextMgr.length() + mTextMgr.length() * 100000);
+								FileSelectList.SetReadConfig(mSharedPreferences, mTextMgr);
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage", mImageMgr.length());
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), mImageMgr.length());
+								releaseManager();
 							}
-							ed.apply();
 						}
-						if (mFileData.getType() == FileData.FILETYPE_ARC
-								|| mFileData.getType() == FileData.FILETYPE_PDF){
+						ed.apply();
+					}
+					if (mFileData.getType() == FileData.FILETYPE_ARC
+							|| mFileData.getType() == FileData.FILETYPE_PDF){
+						int maxpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), DEF.PAGENUMBER_NONE);
+						if	(maxpage > 0) {
+							//	未読で無かった場合
+							ed = mSharedPreferences.edit();
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage", maxpage);
+							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), maxpage);
+							ed.apply();
+						} else {
 							int openmode = 0;
 							// ファイルリストの読み込み
 							openmode = ImageManager.OPENMODE_VIEW;
 							int filesort = SetImageActivity.getFileSort(mSharedPreferences);
-							mImageMgr = new ImageManager(this.mActivity, DEF.relativePath(mActivity, mURI, mPath), nextfile.getName(), user, pass, filesort, null, mHidden, openmode, 1);
+							mImageMgr = new ImageManager(this.mActivity, DEF.relativePath(mActivity, mURI, mPath), nextfile.getName(), user, pass, filesort, mHandler, mHidden, openmode, 1);
 							mImageMgr.LoadImageList(0, 0, 0);
 							if (mImageMgr.length() > 0) {
 								ed = mSharedPreferences.edit();
 								//	最大ページ数を設定する
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass) + "#maxpage", mImageMgr.length());
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, nextfile.getName()), user, pass), mImageMgr.length() + mImageMgr.length() * 100000);
 								ed.apply();
 							}
+							releaseManager();
 						}
 					}
 					updateListView();
@@ -2254,9 +2288,9 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							int openmode = 0;
 							// ファイルリストの読み込み
 							openmode = ImageManager.OPENMODE_TEXTVIEW;
-							mImageMgr = new ImageManager(this.mActivity, path, "", user, pass, 0, null, mHidden, openmode, 1);
+							mImageMgr = new ImageManager(this.mActivity, path, "", user, pass, 0, mHandler, mHidden, openmode, 1);
 							mImageMgr.LoadImageList(0, 0, 0);
-							mTextMgr = new TextManager(mImageMgr, name, user, pass, null, mActivity, FileData.FILETYPE_TXT);
+							mTextMgr = new TextManager(mImageMgr, name, user, pass, mHandler, mActivity, FileData.FILETYPE_TXT);
 							FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
 							maxpage = mTextMgr.length();
 							Editor ed;
@@ -2264,6 +2298,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass) + "#maxpage", maxpage);
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass), state);
 							ed.apply();
+							releaseManager();
 							if (state >= maxpage) {
 								//	最大ページ数に達した場合は既読にする
 								state = DEF.PAGENUMBER_READ;
@@ -2287,7 +2322,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							// ファイルリストの読み込み
 							openmode = ImageManager.OPENMODE_VIEW;
 							// 設定の読み込み
-							mImageMgr = new ImageManager(this.mActivity,path, name, user, pass, 0, null, mHidden, openmode, 1);
+							mImageMgr = new ImageManager(this.mActivity,path, name, user, pass, 0, mHandler, mHidden, openmode, 1);
 							mImageMgr.LoadImageList(0, 0, 0);
 							maxpage = mImageMgr.length();
 							Editor ed;
@@ -2295,6 +2330,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass) + "#maxpage", maxpage);
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass), state);
 							ed.apply();
+							releaseManager();
 							if (state >= (maxpage - 1)) {
 								//	最大ページ数に達した場合は既読にする
 								state = DEF.PAGENUMBER_READ;
@@ -2317,9 +2353,9 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								int openmode = 0;
 								// ファイルリストの読み込み
 								openmode = ImageManager.OPENMODE_TEXTVIEW;
-								mImageMgr = new ImageManager(this.mActivity, path, name, user, pass, 0, null, mHidden, openmode, 1);
+								mImageMgr = new ImageManager(this.mActivity, path, name, user, pass, 0, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
-								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", user, pass, null, mActivity, FileData.FILETYPE_EPUB);
+								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", user, pass, mHandler, mActivity, FileData.FILETYPE_EPUB);
 
 								FileSelectList.SetReadConfig(mSharedPreferences, mTextMgr);
 								maxpage = mTextMgr.length();
@@ -2328,6 +2364,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass) + "META-INF/container.xml" + "#maxpage", maxpage);
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass) + "META-INF/container.xml", state);
 								ed.apply();
+								releaseManager();
 								if (state >= (maxpage - 1)) {
 									//	最大ページ数に達した場合は既読にする
 									state = DEF.PAGENUMBER_READ;
@@ -2350,7 +2387,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								int openmode = 0;
 								// ファイルリストの読み込み
 								openmode = ImageManager.OPENMODE_TEXTVIEW;
-								mImageMgr = new ImageManager(this.mActivity, path, "", user, pass, 0, null, mHidden, openmode, 1);
+								mImageMgr = new ImageManager(this.mActivity, path, "", user, pass, 0, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
 								maxpage = mImageMgr.length();
 								Editor ed;
@@ -2358,6 +2395,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass) + "#maxpage", maxpage);
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, path, name), user, pass), state);
 								ed.apply();
+								releaseManager();
 								if (state >= (maxpage - 1)) {
 									//	最大ページ数に達した場合は既読にする
 									state = DEF.PAGENUMBER_READ;
@@ -2966,41 +3004,42 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								int openmode = 0;
 								// ファイルリストの読み込み
 								openmode = ImageManager.OPENMODE_TEXTVIEW;
-								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), mFileData.getName(), user, pass, 0, null, mHidden, openmode, 1);
+								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), mFileData.getName(), user, pass, 0, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
-								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", user, pass, null, mActivity, FileData.FILETYPE_EPUB);
+								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", user, pass, mHandler, mActivity, FileData.FILETYPE_EPUB);
 								FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "META-INF/container.xml" + "#maxpage", mTextMgr.length());
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "META-INF/container.xml", mTextMgr.length());
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#date", (int)((mFileData.getDate() / 1000)));
 								ed.apply();
+								releaseManager();
 							}
 							else {
 								int openmode = 0;
 								// ファイルリストの読み込み
 								openmode = ImageManager.OPENMODE_TEXTVIEW;
-								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), "", user, pass, 0, null, mHidden, openmode, 1);
+								mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), mFileData.getName(), user, pass, 0, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
-								mTextMgr = new TextManager(mImageMgr, mFileData.getName(), user, pass, null, mActivity, FileData.FILETYPE_TXT);
-								FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
-								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#maxpage", mTextMgr.length());
-								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass), mTextMgr.length());
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#maxpage", mImageMgr.length());
+								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass), mImageMgr.length());
 								ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#date", (int)((mFileData.getDate() / 1000)));
 								ed.apply();
+								releaseManager();
 							}
 						}
 						if (mFileData.getType() == FileData.FILETYPE_TXT)	{
 							int openmode = 0;
 							// ファイルリストの読み込み
 							openmode = ImageManager.OPENMODE_TEXTVIEW;
-							mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), "", user, pass, 0, null, mHidden, openmode, 1);
+							mImageMgr = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), "", user, pass, 0, mHandler, mHidden, openmode, 1);
 							mImageMgr.LoadImageList(0, 0, 0);
-							mTextMgr = new TextManager(mImageMgr, mFileData.getName(), user, pass, null, mActivity, FileData.FILETYPE_TXT);
+							mTextMgr = new TextManager(mImageMgr, mFileData.getName(), user, pass, mHandler, mActivity, FileData.FILETYPE_TXT);
 							FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#maxpage", mTextMgr.length());
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass), mTextMgr.length());
 							ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#date", (int)((mFileData.getDate() / 1000)));
 							ed.apply();
+							releaseManager();
 						}
 						if (mFileData.getType() == FileData.FILETYPE_ARC
 								|| mFileData.getType() == FileData.FILETYPE_PDF){
@@ -3020,7 +3059,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								// ファイルリストの読み込み
 								openmode = ImageManager.OPENMODE_VIEW;
 								int filesort = SetImageActivity.getFileSort(mSharedPreferences);
-								mImageMgr = new ImageManager(mActivity,DEF.relativePath(mActivity, mURI, mPath), mFileData.getName(), user, pass, filesort, null, mHidden, openmode, 1);
+								mImageMgr = new ImageManager(mActivity,DEF.relativePath(mActivity, mURI, mPath), mFileData.getName(), user, pass, filesort, mHandler, mHidden, openmode, 1);
 								mImageMgr.LoadImageList(0, 0, 0);
 								maxpage = mImageMgr.length();
 								if (maxpage > 0) {
@@ -3031,6 +3070,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 									ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), user, pass) + "#date", (int)((mFileData.getDate() / 1000)));
 									ed.apply();
 								}
+								releaseManager();
 							}
 						}
 						updateListView();
@@ -3816,7 +3856,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	// Bitmap読込のスレッドからの通知取得
 	public boolean handleMessage(Message msg) {
-		boolean debug = false;
+		boolean debug = true;
 		if (debug) {Log.d(TAG, "handleMessage: what=" + msg.what);}
 
 		if (DEF.ToastMessage(mActivity, msg)) {
@@ -3895,6 +3935,23 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		// 現在時をIDに設定
 		mListScreenView.mFileListArea.setThumbnailId(mThumbID);
 		return;
+	}
+
+	// ImageManager と TextManager を解放する
+	private void releaseManager() {
+		// 読み込み終了
+		if (mImageMgr != null) {
+			try {
+				mImageMgr.close();
+			} catch (IOException e) {
+				;
+			}
+			mImageMgr = null;
+		}
+		if (mTextMgr != null) {
+			mTextMgr.release();
+			mTextMgr = null;
+		}
 	}
 
 	// サムネイル画像をメモリから解放

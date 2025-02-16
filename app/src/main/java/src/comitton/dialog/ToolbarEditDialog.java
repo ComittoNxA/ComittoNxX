@@ -348,7 +348,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 			}
 		}
 		ed.putInt(DEF.KEY_TOOLBAR_SIZE, mSkbBkSize.getProgress());
-		ed.commit();
+		ed.apply();
 		if (debug) {Log.d("ToolbarEditDialog", "saveToolbarState: 終了します.");}
 	}
 

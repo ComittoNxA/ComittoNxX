@@ -446,92 +446,198 @@ public class SmbFileAccess {
 		// [0]=host, [1]=share, [2]=path
 		String share = urlData[1];
 
-		// ファイルリストを取得
-		File lfiles[] = null;
-		SmbFile smbFile;
-		SmbFile[] smbFiles = null;
-		String[] fnames = null;
 		ArrayList<FileData> fileList = new ArrayList<FileData>();
-		int length;
 
-		// ファイル一覧取得
-		smbFile = SmbFileAccess.smbFile(uri, user, pass);
+		if (!DEF.isUiThread()) {
+			// UIスレッドではない時はそのまま実行
 
-		try {
-			if (share.isEmpty()) {
-				// ホスト名までしか指定されていない場合
-				fnames = smbFile.list();
-				if (fnames == null || fnames.length == 0) {
-					return fileList;
-				}
-				length = fnames.length;
-			}
-			else {
-				// 共有ポイントまで指定済みの場合
-				smbFiles = smbFile.listFiles();
-				if (smbFiles == null || smbFiles.length == 0) {
-					return fileList;
-				}
-				length = smbFiles.length;
-			}
-		} catch (SmbException e) {
-			Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-			}
-			DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
-			return fileList;
-		}
+			// ファイルリストを取得
+			File[] lfiles = null;
+			SmbFile smbFile;
+			SmbFile[] smbFiles = null;
+			String[] fnames = null;
+			int length;
 
-		if(debug) {Log.d(TAG, "listFiles: length=" + length);}
+			// ファイル一覧取得
+			smbFile = SmbFileAccess.smbFile(uri, user, pass);
 
-		// FileData型のリストを作成
-		boolean isDir;
-		String name;
-		long size = 0;
-		long date = 0;
-
-		for (int i = 0; i < length; i++) {
-			if (share.isEmpty()) {
-				// ホスト名までしか指定されていない場合
-				name = fnames[i];
-				// 全部フォルダ扱い
-				isDir = true;
-			}
-			else {
-				// 共有ポイントまで指定済みの場合
-				name = smbFiles[i].getName();
-                isDir = name.endsWith("/");
-                try {
-                    size = smbFiles[i].length();
-					date = smbFiles[i].lastModified();
-                } catch (SmbException e) {
-					Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-					if (e.getLocalizedMessage() != null) {
-						Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
+			try {
+				if (share.isEmpty()) {
+					// ホスト名までしか指定されていない場合
+					fnames = smbFile.list();
+					if (fnames == null || fnames.length == 0) {
+						return fileList;
 					}
-					DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
+					length = fnames.length;
+				} else {
+					// 共有ポイントまで指定済みの場合
+					smbFiles = smbFile.listFiles();
+					if (smbFiles == null || smbFiles.length == 0) {
+						return fileList;
+					}
+					length = smbFiles.length;
+				}
+			} catch (SmbException e) {
+				Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
+				if (e.getLocalizedMessage() != null) {
+					Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
+				}
+				DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
+				return fileList;
+			}
+
+			if (debug) {Log.d(TAG, "listFiles: length=" + length);}
+
+			// FileData型のリストを作成
+			boolean isDir;
+			String name;
+			long size = 0;
+			long date = 0;
+
+			for (int i = 0; i < length; i++) {
+				if (share.isEmpty()) {
+					// ホスト名までしか指定されていない場合
+					name = fnames[i];
+					// 全部フォルダ扱い
+					isDir = true;
+				} else {
+					// 共有ポイントまで指定済みの場合
+					name = smbFiles[i].getName();
+					isDir = name.endsWith("/");
+					try {
+						size = smbFiles[i].length();
+						date = smbFiles[i].lastModified();
+					} catch (SmbException e) {
+						Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
+						if (e.getLocalizedMessage() != null) {
+							Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
+						}
+						DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
+						return fileList;
+					}
+				}
+
+				if (isDir) {
+					// ディレクトリの場合
+					if (!name.endsWith("/")) {
+						name += "/";
+					}
+				}
+
+				FileData fileData = new FileData(activity, name, size, date);
+				fileList.add(fileData);
+
+				if (debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
+			}
+
+			if (!fileList.isEmpty()) {
+				Collections.sort(fileList, new FileAccess.FileDataComparator());
+			}
+		}
+		else {
+			// UIスレッドの時は新しいスレッド内で実行
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			Future<ArrayList<FileData>> future = executor.submit(new Callable<ArrayList<FileData>>() {
+
+				@Override
+				public ArrayList<FileData> call() throws FileAccessException {
+					// ファイルリストを取得
+					File[] lfiles = null;
+					SmbFile smbFile;
+					SmbFile[] smbFiles = null;
+					String[] fnames = null;
+					ArrayList<FileData> fileList = new ArrayList<FileData>();
+					int length;
+
+					// ファイル一覧取得
+					smbFile = SmbFileAccess.smbFile(uri, user, pass);
+
+					try {
+						if (share.isEmpty()) {
+							// ホスト名までしか指定されていない場合
+							fnames = smbFile.list();
+							if (fnames == null || fnames.length == 0) {
+								return fileList;
+							}
+							length = fnames.length;
+						} else {
+							// 共有ポイントまで指定済みの場合
+							smbFiles = smbFile.listFiles();
+							if (smbFiles == null || smbFiles.length == 0) {
+								return fileList;
+							}
+							length = smbFiles.length;
+						}
+					} catch (SmbException e) {
+						Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
+						if (e.getLocalizedMessage() != null) {
+							Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
+						}
+						DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
+						return fileList;
+					}
+
+					if (debug) {Log.d(TAG, "listFiles: length=" + length);}
+
+					// FileData型のリストを作成
+					boolean isDir;
+					String name;
+					long size = 0;
+					long date = 0;
+
+					for (int i = 0; i < length; i++) {
+						if (share.isEmpty()) {
+							// ホスト名までしか指定されていない場合
+							name = fnames[i];
+							// 全部フォルダ扱い
+							isDir = true;
+						} else {
+							// 共有ポイントまで指定済みの場合
+							name = smbFiles[i].getName();
+							isDir = name.endsWith("/");
+							try {
+								size = smbFiles[i].length();
+								date = smbFiles[i].lastModified();
+							} catch (SmbException e) {
+								Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
+								if (e.getLocalizedMessage() != null) {
+									Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
+								}
+								DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
+								return fileList;
+							}
+						}
+
+						if (isDir) {
+							// ディレクトリの場合
+							if (!name.endsWith("/")) {
+								name += "/";
+							}
+						}
+
+						FileData fileData = new FileData(activity, name, size, date);
+						fileList.add(fileData);
+
+						if (debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
+					}
+
+					if (!fileList.isEmpty()) {
+						Collections.sort(fileList, new FileAccess.FileDataComparator());
+					}
 					return fileList;
 				}
-			}
-
-			if (isDir) {
-				// ディレクトリの場合
-				if (!name.endsWith("/")) {
-					name += "/";
+			});
+			try {
+				fileList = future.get();
+			} catch (Exception e) {
+				Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
+				if (e.getLocalizedMessage() != null) {
+					Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
 				}
+				DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
+				return fileList;
 			}
-
-			FileData fileData = new FileData(activity, name, size, date);
-			fileList.add(fileData);
-
-			if(debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
 		}
-
-		if (!fileList.isEmpty()) {
-			Collections.sort(fileList, new FileAccess.FileDataComparator());
-		}
-
 		return fileList;
 	}
 
@@ -625,9 +731,23 @@ public class SmbFileAccess {
 			try {
 				return future.get();
 			} catch (Exception e) {
-				throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
+				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 			}
 		}
+	}
+
+	// タイムスタンプ
+	public static long date(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "date: 開始します. uri=" + uri);}
+
+		try {
+			SmbFile smbFile = SmbFileAccess.smbFile(uri, user, pass);
+			return smbFile.lastModified();
+		} catch (SmbException e) {
+			Log.e(TAG, "date: " + e.getLocalizedMessage());
+		}
+		return 0L;
 	}
 
 	// ファイル削除

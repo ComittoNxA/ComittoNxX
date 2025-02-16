@@ -147,7 +147,7 @@ public class SetFileColorActivity extends PreferenceActivity implements OnShared
 					for (int i = 0 ; i < newKeys.length ; i ++) {
 						ed.putInt(newKeys[i], mPresetColor[index][i]);
 					}
-					ed.commit();
+					ed.apply();
 					updateSummarys();
 				}
 				return true;

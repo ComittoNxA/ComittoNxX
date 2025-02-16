@@ -345,6 +345,14 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 	}
 
 	// 設定の読込
+	public static int getPinScale(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences,DEF.KEY_PinchScaleText, "100");
+		if( val < 0 || val > 250 ){
+			val = 100;
+		}
+		return val;
+	}
+
 	public static int getViewRota(SharedPreferences sharedPreferences){
 		int val = DEF.getInt(sharedPreferences, DEF.KEY_TX_VIEWROTA, "0");
 		return val;

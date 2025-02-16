@@ -11,8 +11,8 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr[];
-extern WORD			**gSclLinesPtr[];
+extern LONG			**gLinesPtr[];
+extern LONG			**gSclLinesPtr[];
 extern int			gCancel[];
 
 extern int			gMaxThreadNum;
@@ -44,10 +44,10 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 	int *d1   = gSclIntParam2[index];
 	int *d2   = gSclIntParam3[index];
 
-	WORD *buffptr = nullptr;
+    LONG *buffptr = nullptr;
 
-	WORD *orgbuff1;
-	WORD *orgbuff2;
+    LONG *orgbuff1;
+    LONG *orgbuff2;
 
 	long long syy;
 	int orgy;
@@ -87,20 +87,20 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 			// 
 			wkxx = orgx[xx] + HOKAN_DOTS / 2;
 
-			r1 = RGB565_RED_256(orgbuff1[wkxx + 0]);
-			r2 = RGB565_RED_256(orgbuff1[wkxx + 1]);
-			r3 = RGB565_RED_256(orgbuff2[wkxx + 0]);
-			r4 = RGB565_RED_256(orgbuff2[wkxx + 1]);
+			r1 = RGB888_RED(orgbuff1[wkxx + 0]);
+			r2 = RGB888_RED(orgbuff1[wkxx + 1]);
+			r3 = RGB888_RED(orgbuff2[wkxx + 0]);
+			r4 = RGB888_RED(orgbuff2[wkxx + 1]);
 
-			g1 = RGB565_GREEN_256(orgbuff1[wkxx + 0]);
-			g2 = RGB565_GREEN_256(orgbuff1[wkxx + 1]);
-			g3 = RGB565_GREEN_256(orgbuff2[wkxx + 0]);
-			g4 = RGB565_GREEN_256(orgbuff2[wkxx + 1]);
+			g1 = RGB888_GREEN(orgbuff1[wkxx + 0]);
+			g2 = RGB888_GREEN(orgbuff1[wkxx + 1]);
+			g3 = RGB888_GREEN(orgbuff2[wkxx + 0]);
+			g4 = RGB888_GREEN(orgbuff2[wkxx + 1]);
 
-			b1 = RGB565_BLUE_256(orgbuff1[wkxx + 0]);
-			b2 = RGB565_BLUE_256(orgbuff1[wkxx + 1]);
-			b3 = RGB565_BLUE_256(orgbuff2[wkxx + 0]);
-			b4 = RGB565_BLUE_256(orgbuff2[wkxx + 1]);
+			b1 = RGB888_BLUE(orgbuff1[wkxx + 0]);
+			b2 = RGB888_BLUE(orgbuff1[wkxx + 1]);
+			b3 = RGB888_BLUE(orgbuff2[wkxx + 0]);
+			b4 = RGB888_BLUE(orgbuff2[wkxx + 1]);
 
 			rr = ((r1 * d1[xx] + r2 * d2[xx]) * d3 + (r3 * d1[xx] + r4 * d2[xx]) * d4) / 256 / 256;
 			gg = ((g1 * d1[xx] + g2 * d2[xx]) * d3 + (g3 * d1[xx] + g4 * d2[xx]) * d4) / 256 / 256;
@@ -108,22 +108,8 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 
 // LOGD("CreateScaleLinear : x=%d, y=%d, rr=%d(%d,%d,%d,%d), gg=%d(%d,%d,%d,%d)", xx, yy, rr, r1, r2, r3, r4, gg, g1, g2, g3, g4);
 
-			// 切り捨ての値を分散
-			if (rr < 0xF8) {
-				rr = rr + gDitherX_3bit[rr & 0x07][(xx + yd3) & 0x07];
-			}
-			if (gg < 0xFC) {
-				gg = gg + gDitherX_2bit[gg & 0x03][(xx + yd2) & 0x03];
-			}
-//			if (gg < 0xF8) {
-//				gg = gg + gDitherX_3bit[gg & 0x07][(xx + yd3) & 0x07];
-//			}
-			if (bb < 0xF8) {
-				bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
-			}
 
-			buffptr[xx] = MAKE565(rr, gg, bb);
-//			buffptr[xx] = MAKE555(rr, gg, bb);
+			buffptr[xx] = MAKE8888(rr, gg, bb);
 		}
 		// 補完用の余裕
 		buffptr[-2] = buffptr[0];

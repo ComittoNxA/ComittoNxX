@@ -446,6 +446,29 @@ public class SafFileAccess {
 		return result;
 	}
 
+	// タイムスタンプ
+	public static long date(@NonNull final Context context, @NonNull final String uri) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "date: 開始します. uri=" + uri);}
+
+		String rootUri = uri.replaceFirst("/*$", "");
+
+		long result;
+		try {
+			result = getDate(context, rootUri);
+		}
+		catch (Exception e) {
+			result = 0L;
+			Log.e(TAG, "filename: エラーが発生しました. uri=" + uri);
+			if (e.getLocalizedMessage() != null) {
+				Log.e(TAG, "filename: エラーメッセージ. " + e.getLocalizedMessage());
+			}
+		}
+
+		if (debug) {Log.d(TAG, "filename: 終了します. result=" + result);}
+		return result;
+	}
+
 	// ファイル削除
 	public static boolean delete(@NonNull final Context context, @NonNull final String uri) throws FileAccessException {
 		boolean debug = false;
@@ -546,13 +569,25 @@ public class SafFileAccess {
 		return 0L;
 	}
 
+	public static long getDate(@NonNull final Context context, @NonNull final String uri) {
+		try {
+			return getLongValue(context, uri, DocumentsContract.Document.COLUMN_LAST_MODIFIED);
+		} catch (Exception e) {
+			Log.e(TAG, "getDate: エラーが発生しました. uri=" + uri);
+			if (e.getLocalizedMessage() != null) {
+				Log.e(TAG, "getDate: エラーメッセージ. " + e.getLocalizedMessage());
+			}
+		}
+		return 0L;
+	}
+
 	public static String getName(@NonNull final Context context, @NonNull final String uri) {
 		try {
 			return getStringValue(context, uri, DocumentsContract.Document.COLUMN_DISPLAY_NAME);
 		} catch (Exception e) {
-			Log.e(TAG, "GetMimeType: エラーが発生しました. uri=" + uri);
+			Log.e(TAG, "getName: エラーが発生しました. uri=" + uri);
 			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "GetMimeType: エラーメッセージ. " + e.getLocalizedMessage());
+				Log.e(TAG, "getName: エラーメッセージ. " + e.getLocalizedMessage());
 			}
 		}
 		return "";

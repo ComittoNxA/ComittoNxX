@@ -698,6 +698,60 @@ public class FileAccess {
 		return result;
 	}
 
+	public boolean date() throws FileAccessException {
+		return delete(mActivity, mURI, mUser, mPass);
+	}
+
+	// タイムスタンプ
+	public static long date(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "date: 開始します. uri=" + uri);}
+		long result = 0L;
+		switch (accessType(uri)) {
+			case DEF.ACCESS_TYPE_LOCAL: {
+				result = LocalFileAccess.date(activity, uri);
+				break;
+			}
+			case DEF.ACCESS_TYPE_SMB: {
+				// SMBなら
+				if (!DEF.isUiThread()) {
+					// UIスレッドではない時はそのまま実行
+					if (debug) {
+						Log.d(TAG, "date: UIスレッドではありません.");
+					}
+					result = SmbFileAccess.date(uri, user, pass);
+				} else {
+					// UIスレッドの時は新しいスレッド内で実行
+					if (debug) {
+						Log.d(TAG, "date: UIスレッドです.");
+					}
+					ExecutorService executor = Executors.newSingleThreadExecutor();
+					Future<Long> future = executor.submit(new Callable<Long>() {
+
+						@Override
+						public Long call() throws FileAccessException {
+							return SmbFileAccess.date(uri, user, pass);
+						}
+					});
+
+					try {
+						result = future.get();
+					} catch (Exception e) {
+						Log.e(TAG, "date: File read error. " + e.getLocalizedMessage());
+						result = 0L;
+					}
+				}
+				break;
+			}
+			case DEF.ACCESS_TYPE_SAF: {
+				result = SafFileAccess.date(activity, uri);
+				break;
+			}
+		}
+		if (debug) {Log.d(TAG, "date: 終了します. result=" + result);}
+		return result;
+	}
+
 	public boolean delete() throws FileAccessException {
 		return delete(mActivity, mURI, mUser, mPass);
 	}

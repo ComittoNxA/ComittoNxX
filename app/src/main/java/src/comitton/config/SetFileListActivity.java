@@ -505,12 +505,6 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		return flag;
 	}
 
-	public static int getThumbnailSortType(SharedPreferences sharedPreferences){
-		int flag;
-		flag =  DEF.getInt(sharedPreferences, DEF.KEY_THUMBSORTTYPE, 2);
-		return flag;
-	}
-
 	public static boolean getParentMove(SharedPreferences sharedPreferences){
 		boolean flag;
 		flag =  DEF.getBoolean(sharedPreferences, DEF.KEY_PARENTMOVE, true);
@@ -545,7 +539,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 	public static void setThumbnail(SharedPreferences sharedPreferences, boolean value){
 		Editor ed = sharedPreferences.edit();
 		ed.putBoolean(DEF.KEY_THUMBNAIL, value);
-		ed.commit();
+		ed.apply();
 	}
 
 	// 設定の読込(定義変更中)

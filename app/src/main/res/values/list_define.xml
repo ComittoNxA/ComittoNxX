@@ -502,11 +502,11 @@
     </string-array>
     <string-array name="history_name_list">
         <item>Not save</item>
-        <item>20</item>
-        <item>40</item>
-        <item>60</item>
-        <item>80</item>
-        <item>100</item>
+        <item>200</item>
+        <item>400</item>
+        <item>600</item>
+        <item>800</item>
+        <item>1000</item>
     </string-array>
     <string-array name="history_value_list">
         <item>0</item>

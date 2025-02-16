@@ -161,7 +161,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 		if (str != null) {
 			ed.remove(mKeyOld);
 		}
-		ed.commit();
+		ed.apply();
 	}
 
 	private int getValue() {

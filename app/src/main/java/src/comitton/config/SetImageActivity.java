@@ -305,6 +305,14 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 	}
 
 	// 設定の読込
+	public static int getPinScale(SharedPreferences sharedPreferences){
+		int val = DEF.getInt(sharedPreferences,DEF.KEY_PinchScale, "100");
+		if( val < 0 || val > 250 ){
+			val = 100;
+		}
+		return val;
+	}
+
 	public static int getViewRota(SharedPreferences sharedPreferences){
 		int val = DEF.getInt(sharedPreferences, DEF.KEY_VIEWROTA, "0");
 		if( val < 0 || val > 3 ){

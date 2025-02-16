@@ -46,15 +46,15 @@ public class RecordList {
 	private static final int INDEX_CHAPTER = 8;
 	private static final int INDEX_PAGERATE = 9;
 
-	private static final int MENU_TITLE_ID[] = {R.string.shortCut, R.string.delMenu, R.string.thumbMenu,
-			R.string.rotateMenu, R.string.onlineMenu, R.string.noticeMenu, R.string.aboutMenu, R.string.setMenu};
+	private static final int[] MENU_TITLE_ID = {R.string.shortCut, R.string.delMenu, R.string.thumbMenu,
+			R.string.rotateMenu, R.string.onlineMenu, R.string.noticeMenu, R.string.aboutMenu, R.string.downloadCountMenu, R.string.setMenu};
 
-	private static final int MENU_ITEM[] = {DEF.MENU_SHORTCUT, DEF.MENU_SIORI, DEF.MENU_THUMBDEL,
-			DEF.MENU_ROTATE, DEF.MENU_ONLINE, DEF.MENU_NOTICE, DEF.MENU_ABOUT, DEF.MENU_SETTING};
+	private static final int[] MENU_ITEM = {DEF.MENU_SHORTCUT, DEF.MENU_SIORI, DEF.MENU_THUMBDEL,
+			DEF.MENU_ROTATE, DEF.MENU_ONLINE, DEF.MENU_NOTICE, DEF.MENU_ABOUT, DEF.MENU_DOWLOAD_COUNT, DEF.MENU_SETTING};
 
-	private static final int MENU_IMAGE[] = {R.drawable.add_smartphone, R.drawable.delete_favorite,
+	private static final int[] MENU_IMAGE = {R.drawable.add_smartphone, R.drawable.delete_favorite,
 			R.drawable.delete_thumb, R.drawable.rotate, R.drawable.help,
-			R.drawable.note, R.drawable.info,
+			R.drawable.note, R.drawable.info, R.drawable.arrow_down_to_line,
 			R.drawable.config};
 
 	private static Context mContext;
@@ -67,7 +67,7 @@ public class RecordList {
 	public static boolean checkModified(int listtype, long modified) {
 		String filepath = getFilePath(listtype);
 
-		if (listtype == TYPE_SERVER  || listtype == TYPE_MENU){
+		if (listtype == TYPE_SERVER || listtype == TYPE_MENU){
 			return true;
 		}
 		else {

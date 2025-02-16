@@ -42,6 +42,7 @@ public class DEF {
 
 	public static final String DOWNLOAD_URL = "https://github.com/ComittoNxA/ComittoNxX";
 	public static final String API_RECENT_RELEASE = "https://api.github.com/repos/ComittoNxA/ComittoNxX/releases/latest";
+	public static final String APP_DOWNLOADS = "https://api.github.com/repos/ComittoNxA/ComittonxX/releases";
 	public static final int MESSAGE_FILE_DELETE = 1000;
 	public static final int MESSAGE_RECORD_DELETE = 1001;
 	public static final int MESSAGE_LASTPAGE = 1002;
@@ -92,6 +93,7 @@ public class DEF {
 	public static final int HMSG_WORKSTREAM = 20;
 	public static final int HMSG_SUB_MESSAGE = 21;
 	public static final int HMSG_ERROR_MALLOC = 22;
+	public static final int HMSG_APP_DOWNLOADS = 23;
 
 	public static final int MENU_HELP = Menu.FIRST + 0;
 	public static final int MENU_SETTING = Menu.FIRST + 1;
@@ -146,6 +148,7 @@ public class DEF {
 	public static final int MENU_BKLIGHT = Menu.FIRST + 50;
 	public static final int MENU_SEL_DIR_TREE = Menu.FIRST + 51;
 	public static final int MENU_EDIT_TOOLBAR = Menu.FIRST + 52;
+	public static final int MENU_DOWLOAD_COUNT = Menu.FIRST + 53;
 	public static final int MENU_BOOKMARK = Menu.FIRST + 1000;
 	public static final int MENU_CHAPTER = Menu.FIRST + 2000;
 	public static final int MENU_DIR_TREE = MENU_CHAPTER;
@@ -512,6 +515,9 @@ public class DEF {
 	public static final String KEY_MEMSIZE = "MemSize";
 	public static final String KEY_MEMNEXT = "MemNext";
 	public static final String KEY_MEMPREV = "MemPrev";
+
+	public static final String KEY_PinchScale = "PinchScale";
+	public static final String KEY_PinchScaleText = "PinchScaleText";
 
 	public static final String KEY_TOOLBAR_SIZE = "ToolbarSize";
 
@@ -1116,7 +1122,14 @@ public class DEF {
 
 	// 保持件数
 	static public int calcSaveNum(int val) {
-		return val * 20;
+		int calc_val = 0;
+		if (val == 0) calc_val = 0;
+		if (val == 1) calc_val = 50;
+		if (val == 2) calc_val = 100;
+		if (val == 3) calc_val = 200;
+		if (val == 4) calc_val = 500;
+		if (val == 5) calc_val = 1000;
+		return calc_val;
 	}
 
 	// サマリ文字列作成

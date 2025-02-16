@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.fileaccess.FileAccess;
 import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import src.comitton.config.SetCommonActivity;
@@ -17,6 +18,7 @@ import src.comitton.config.SetNoiseActivity;
 import src.comitton.config.SetTextActivity;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.data.RecordItem;
+import src.comitton.fileview.filelist.FileSelectList;
 import src.comitton.dialog.BookmarkDialog;
 import src.comitton.dialog.CloseDialog;
 import src.comitton.dialog.Information;
@@ -32,6 +34,7 @@ import src.comitton.dialog.MenuDialog.MenuSelectListener;
 import src.comitton.dialog.TabDialogFragment;
 import src.comitton.dialog.TextConfigDialog;
 import src.comitton.dialog.TextConfigDialog.TextConfigListenerInterface;
+import src.comitton.fileview.FileSelectActivity;
 import src.comitton.fileview.filelist.RecordList;
 import src.comitton.imageview.PageSelectListener;
 import src.comitton.noise.NoiseSwitch;
@@ -238,12 +241,15 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private int mPage;
 	private float mPageRate;
 	private int mFileType;
+	/** ファイルのタイムスタンプ */
+	private long mTimestamp = 0L;
 
 
 	private ImageManager mImageMgr;
 	private TextManager mTextMgr;
 
 	// ページ表示のステータス情報
+	private int mRestoreMaxPage;
 	private int mRestorePage;
 	private int mCurrentPage;
 	private float mRestorePageRate;
@@ -269,7 +275,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	private boolean mPageModeIn = false; // ページ選択中の操作エリア外フラグ
 	private boolean mPinchOn = false;
 	private boolean mPinchDown = false;
-	private int mPinchScale = 100;
+	private int mPinchScale;
 	private int mPinchScaleSel;
 	private int mPinchCount;
 	private long mPinchTime;
@@ -459,25 +465,70 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		// 最後に開いたファイル情報を保存
 		mUriPath = DEF.relativePath(mActivity, mURI, mPath);
 		mLocalFileName = DEF.relativePath(mActivity, mPath, mFileName);
-		mUriFilePath = DEF.relativePath(mActivity, mUriPath, mFileName);
 		if (mFileName.isEmpty()) {
 			// 圧縮ファイルじゃなければパスのURLを解決する
+			mUriFilePath = DEF.relativePath(mActivity, mUriPath, mTextName);
 			mUriTextPath = DEF.relativePath(mActivity, mUriPath, mTextName);
 		}
 		else {
 			// 圧縮ファイルなら中身のファイル名を連結する
+			mUriFilePath = DEF.relativePath(mActivity, mUriPath, mFileName);
 			mUriTextPath = DEF.relativePath(mActivity, mUriPath, mFileName) + mTextName;
 		}
+		mTimestamp = FileAccess.date(mActivity, mUriFilePath, mUser, mPass);
 		// 続きから開く設定を記録
 		saveLastFile();
 
-		Log.d(TAG, "onCreate: mRestorePageRate を取得します.");
-		mRestorePageRate = mSharedPreferences.getFloat(DEF.createUrl(mUriTextPath, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
-		Log.d(TAG, "onCreate: pageRate を設定します.");
-		mCurrentPageRate = (mPageRate != (float)DEF.PAGENUMBER_UNREAD) ? mPageRate : (mRestorePageRate != (float)DEF.PAGENUMBER_UNREAD ? mRestorePageRate : 0f);
-		Log.d(TAG, "onCreate: mCurrentPageRate=" + mCurrentPageRate);
-		mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
-		mCurrentPage = (mPage != DEF.PAGENUMBER_UNREAD) ? mPage : (mRestorePage != DEF.PAGENUMBER_UNREAD ? mRestorePage : 0);
+		Log.d("TextActivity", "onCreate: 既読位置を取得します.");
+		if (mTextName.equals("META-INF/container.xml"))	{
+			mRestoreMaxPage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
+			mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+			if (debug) {Log.d(TAG, "onCreate: mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mUriTextPath, mUser, mPass));}
+		}
+		else {
+			mRestoreMaxPage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
+			mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+			if (debug) {Log.d(TAG, "onCreate: mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mUriTextPath, mUser, mPass));}
+		}
+		int maxpage = mRestoreMaxPage;
+		int	state = mRestorePage;
+		if (maxpage == DEF.PAGENUMBER_NONE)	{
+			//	最大数が0の場合は補完する
+			if (mTextName.equals("META-INF/container.xml"))	{
+				int openmode = 0;
+				// ファイルリストの読み込み
+				openmode = ImageManager.OPENMODE_TEXTVIEW;
+				mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, 0, mHandler, true, openmode, 1);
+				mImageMgr.LoadImageList(0, 0, 0);
+				mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", mUser, mPass, mHandler, mActivity, FileData.FILETYPE_EPUB);
+				FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
+				maxpage = mTextMgr.length();
+			}
+			else {
+				int openmode = 0;
+				// ファイルリストの読み込み
+				openmode = ImageManager.OPENMODE_TEXTVIEW;
+				mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, 0, mHandler, true, openmode, 1);
+				mImageMgr.LoadImageList(0, 0, 0);
+				mTextMgr = new TextManager(mImageMgr, mTextName, mUser, mPass, mHandler, mActivity, FileData.FILETYPE_TXT);
+				FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
+				maxpage = mTextMgr.length();
+			}
+			if (mRestorePage == DEF.PAGENUMBER_READ)	state = maxpage;
+			if (mRestorePage == DEF.PAGENUMBER_UNREAD)	state = 0;
+			//	再計算する
+			mRestorePageRate = (float)state / (float)maxpage;
+		} else if (state >= (maxpage - 1))	{
+			//	最大ページ数に達した場合は既読にする
+			mRestorePageRate = 1f;
+		} else {
+			//	再計算する
+			mRestorePageRate = (float)state / (float)maxpage;
+		}
+		mRestorePage = state;
+		mCurrentPage = (mPage != DEF.PAGENUMBER_UNREAD) ? mPage : state;
+		mCurrentPageRate = (float)mCurrentPage / (float)maxpage;
+		Log.d("TextActivity", "onCreate: mCurrentPageRate=" + mCurrentPageRate);
 		mTextView.setOnTouchListener(this);
 
 		// プログレスダイアログ準備
@@ -1070,7 +1121,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			return;
 		}
 
-		mPinchScale = mTextView.TextScaling();
+		mTextView.TextScaling();
 		this.updateOverSize();
 		return;
 	}
@@ -1082,7 +1133,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		mScaleMode = mode;
 		mTextView.setTextScale(mScaleMode, mPinchScale);
 		// イメージ拡大縮小
-		mPinchScale = mTextView.TextScaling();
+		mTextView.TextScaling();
 
 		this.updateOverSize();
 
@@ -1092,7 +1143,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this); // ←このthisは普通Activityとかね
 		Editor ed = sp.edit();
 		ed.putInt("scalemode", mScaleMode);
-		ed.commit();
+		ed.apply();
 	}
 
 	/**
@@ -1161,7 +1212,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
     						// 100%にする
     						// 任意スケーリング変更中
     						mPinchOn = true;
-    						mPinchScaleSel = 100;
+							mPinchScaleSel = mPinchScale;
     					}
     				}
     				else {
@@ -1248,10 +1299,14 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
     					mPinchScale = mPinchScaleSel;
     					// テキストモード
 						mTextView.lockDraw();
-    					mTextView.setTextScale(DEF.SCALE_PINCH, mPinchScale);
+						mTextView.TextScaling();
     					mPinchScale = mTextView.TextScaling();
     					this.updateOverSize();
     					mTextView.update(true);
+
+						Editor ed = mSharedPreferences.edit();
+						ed.putString(DEF.KEY_PinchScaleText, Integer.toString(mPinchScale));
+						ed.apply();
     				}
     			}
     			return true;
@@ -2208,7 +2263,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			}
 			case DEF.MENU_SETTING: {
 				// 設定画面に遷移
-				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
+				mCurrentPageRate = (float)(mCurrentPage + 1) / mTextMgr.length();
 				Intent intent = new Intent(TextActivity.this, SetConfigActivity.class);
 				startActivityForResult(intent, DEF.REQUEST_SETTING);
 				break;
@@ -2241,7 +2296,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			case DEF.MENU_ADDBOOKMARK: {
 				// ブックマーク追加ダイアログ表示
 				mCurrentPage = mTextView.getPage(); // 現在ページ取得
-				mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
+				mCurrentPageRate = (float)(mCurrentPage + 1) / mTextMgr.length();
 
 				BookmarkDialog bookmarkDlg = new BookmarkDialog(this, R.style.MyDialog);
 				bookmarkDlg.setBookmarkListear(this);
@@ -2338,7 +2393,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 	// テキスト設定用ダイアログ表示
 	private void showTextConfigDialog() {
-		mCurrentPageRate = (float)mCurrentPage / mTextMgr.length();
+		mCurrentPageRate = (float)(mCurrentPage + 1) / mTextMgr.length();
 		if (mTextConfigDialog != null) {
 			return;
 		}
@@ -2405,7 +2460,12 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					ed.putInt(DEF.KEY_TX_MARGINW, mMarginWOrg);
 					ed.putInt(DEF.KEY_TX_MARGINH, mMarginHOrg);
 					ed.putInt(DEF.KEY_TX_ASCMODE, mAscMode);
-					ed.commit();
+					ed.apply();
+				}
+				if	((ischange) && (issave))	{
+					// テキスト表示設定が変更されたら通知
+					FileSelectList.ChangeTextSize();
+					FileSelectActivity.ChangeTextSize();
 				}
 			}
 
@@ -2806,6 +2866,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		mTimePos = SetImageActivity.getTimePos(sharedPreferences); // 時刻と充電表示位置
 		mTimeSize = DEF.calcPnumSizePix(SetImageActivity.getTimeSize(sharedPreferences), mDensity); // 時刻と充電表示サイズ
 		mTimeColor = SetImageActivity.getTimeColor(sharedPreferences); // 時刻と充電表示色
+		mPinchScale = SetTextActivity.getPinScale(sharedPreferences);
+		mPinchScaleSel = mPinchScale;
 
 		if (mGuideView != null) {
 			mGuideView.setTimeFormat(mTimeDisp, mTimeFormat, mTimePos, mTimeSize, mTimeColor);
@@ -2984,8 +3046,6 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		float savePageRate = (float)mCurrentPage / mTextMgr.length();
 		if (mTextMgr.length() <= mCurrentPage + 1) {
 			// 既読
-			savePage = DEF.PAGENUMBER_READ;
-			savePageRate = (float)DEF.PAGENUMBER_READ;
 		}
 		else if (mDispMode == DEF.DISPMODE_TX_DUAL && mTextMgr.length() <= mCurrentPage + 2) {
 			// 見開きの場合は1ページ前でも既読
@@ -2995,13 +3055,27 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		else if (savePage < 0) {
 			// 範囲外は読み込みしない
 			savePage = 0;
-			savePageRate = 0f;
 		}
-		ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
-		ed.putFloat(DEF.createUrl(mUriTextPath, mUser, mPass) + "#pageRate", savePageRate);
-		ed.apply();
-		if(debug) {Log.d(TAG, "saveCurrentPage: url=" + DEF.createUrl(mUriTextPath, mUser, mPass) + ", savePage=" + savePage + ", savePageRate=" + savePageRate);}
+		long maxpage = mTextMgr.length();
+		if	(mTextName.equals("META-INF/container.xml"))	{
+			Log.d("TextActivity","mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
+			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", (int)maxpage);
+			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
 
+			if (mTimestamp != 0L) {
+				ed.putInt(DEF.createUrl(mUriFilePath, mUser, mPass) + "#date", (int) (mTimestamp / 1000));
+			}
+		}
+		else	{
+			Log.d("TextActivity","mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
+			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", (int)maxpage);
+			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
+
+			if (mTimestamp != 0L) {
+				ed.putInt(DEF.createUrl(mUriFilePath, mUser, mPass) + "#date", (int) (mTimestamp / 1000));
+			}
+		}
+		ed.apply();
 	}
 
 	// 起動時のページ情報に戻す
@@ -3009,17 +3083,18 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		if (mImageMgr != null) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
-			if (mRestorePageRate == DEF.PAGENUMBER_UNREAD) {
-				ed.remove(DEF.createUrl(mUriTextPath, mUser, mPass) + "#pageRate");
-			}
-			else {
-				ed.putFloat(DEF.createUrl(mUriTextPath, mUser, mPass) + "#pageRate", mRestorePageRate);
-			}
 			if (mRestorePage == DEF.PAGENUMBER_UNREAD) {
+				ed.remove(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage");
 				ed.remove(DEF.createUrl(mUriTextPath, mUser, mPass));
+				ed.remove(DEF.createUrl(mUriTextPath, mUser, mPass) + "#date");
 			}
 			else {
+				ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", mRestoreMaxPage);
 				ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), mRestorePage);
+
+				if (mTimestamp != 0L) {
+					ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#date", (int) (mTimestamp / 1000));
+				}
 			}
 			ed.apply();
 		}

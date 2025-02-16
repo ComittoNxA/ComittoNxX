@@ -118,6 +118,7 @@
     <string name="exitMenu">Exit</string>
     <string name="noticeMenu">Notice</string>
     <string name="aboutMenu">About</string>
+    <string name="downloadCountMenu">Number of Downloads</string>
     <string name="licenseMenu">License</string>
     <string name="noiseMenu">Operation by noise</string>
     <string name="playMenu">Auto Play</string>
@@ -332,7 +333,7 @@
     <string name="thumbcache02">Max 500 files</string>
     <string name="thumbcache03">Max 1000 files</string>
     <string name="thumbcache04">Delete manually</string>
-    <string name="thumbsorttype00">NONE</string>
+    <string name="thumbsorttype00">DO NOT</string>
     <string name="thumbsorttype01">LOCAL</string>
     <string name="thumbsorttype02">LOCAL and SMB</string>
     <string name="thumbsorttype03">ALL</string>
@@ -372,11 +373,11 @@
     <string name="pageselect01">View slider</string>
     <string name="pageselect02">Thumbnail</string>
     <string name="histnum00">Not save</string>
-    <string name="histnum01">20</string>
-    <string name="histnum02">40</string>
-    <string name="histnum03">60</string>
-    <string name="histnum04">80</string>
-    <string name="histnum05">100</string>
+    <string name="histnum01">200</string>
+    <string name="histnum02">400</string>
+    <string name="histnum03">600</string>
+    <string name="histnum04">800</string>
+    <string name="histnum05">1000</string>
     <string name="scrlway00">Horizontal -> Direction</string>
     <string name="scrlway01">Direction -> Horizontal</string>
     <string name="mgncut00">None</string>
@@ -566,5 +567,10 @@
     <string name="CacheLimitExceeded">Too many caches created</string>
     <string name="CacheIndexOutOfRange">Cache index is wrong</string>
     <string name="CacheNotInitialized">The cache has not been initialized</string>
+
+    <string name="Connecting">Connecting...</string>
+    <string name="GetError">Failed to get.</string>
+    <string name="ParseError">Parsing failed.</string>
+    <string name="NoResult">There are no results.</string>
 
 </resources>

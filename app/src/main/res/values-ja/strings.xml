@@ -118,6 +118,7 @@
     <string name="exitMenu">終了</string>
     <string name="noticeMenu">ComittoNxXについて</string>
     <string name="aboutMenu">バージョン情報</string>
+    <string name="downloadCountMenu">ダウンロード数</string>
     <string name="licenseMenu">ライセンス情報</string>
     <string name="noiseMenu">音での操作</string>
     <string name="playMenu">自動再生</string>
@@ -332,7 +333,7 @@
     <string name="thumbcache02">最大500ファイル</string>
     <string name="thumbcache03">最大1000ファイル</string>
     <string name="thumbcache04">削除しない(手動削除)</string>
-    <string name="thumbsorttype00">なし</string>
+    <string name="thumbsorttype00">しない</string>
     <string name="thumbsorttype01">ローカル</string>
     <string name="thumbsorttype02">ローカルとSMB</string>
     <string name="thumbsorttype03">すべて</string>
@@ -372,11 +373,11 @@
     <string name="pageselect01">スライダーを表示</string>
     <string name="pageselect02">サムネイル</string>
     <string name="histnum00">保存しない</string>
-    <string name="histnum01">20</string>
-    <string name="histnum02">40</string>
-    <string name="histnum03">60</string>
-    <string name="histnum04">80</string>
-    <string name="histnum05">100</string>
+    <string name="histnum01">200</string>
+    <string name="histnum02">400</string>
+    <string name="histnum03">600</string>
+    <string name="histnum04">800</string>
+    <string name="histnum05">1000</string>
     <string name="scrlway00">横方向→縦方向</string>
     <string name="scrlway01">縦方向→横方向</string>
     <string name="mgncut00">なし</string>
@@ -565,5 +566,10 @@
     <string name="CacheLimitExceeded">キャッシュの作成数が多すぎます</string>
     <string name="CacheIndexOutOfRange">キャッシュのインデックスが間違っています</string>
     <string name="CacheNotInitialized">キャッシュが初期化されていません</string>
+
+    <string name="Connecting">接続中...</string>
+    <string name="GetError">取得に失敗しました.</string>
+    <string name="ParseError">解析に失敗しました.</string>
+    <string name="NoResult">結果がありません.</string>
 
 </resources>

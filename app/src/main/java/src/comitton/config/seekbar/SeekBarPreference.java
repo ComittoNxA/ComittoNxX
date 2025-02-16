@@ -186,7 +186,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 	private void setValue(int value) {
 		Editor ed = mSP.edit();
 		ed.putInt(mKey, value);
-		ed.commit();
+		ed.apply();
 	}
 
 	private int getValue() {

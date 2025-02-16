@@ -176,7 +176,7 @@ public class LocalFileAccess {
 		if(debug) {Log.d(TAG, "listFiles: uri=" + uri);}
 
 		// ファイルリストを取得
-		File lfiles[];
+		File[] lfiles;
 		ArrayList<FileData> fileList = new ArrayList<FileData>();
 		int length;
 
@@ -239,6 +239,17 @@ public class LocalFileAccess {
 			throw new FileAccessException(TAG + ": renameTo: File access error.");
 		}
 		return orgfile.renameTo(dstfile);
+	}
+
+	// タイムスタンプ
+	public static long date(@NonNull final Activity activity, @NonNull final String uri) {
+		boolean debug = false;
+		if (debug) {
+			Log.d(TAG, "date: 開始します. uri=" + uri);
+		}
+
+		File file = new File(uri);
+		return file.lastModified();
 	}
 
 	// ファイル削除

@@ -11,13 +11,14 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr[];
+extern LONG			**gLinesPtr[];
+extern LONG			**gSclLinesPtr[];
 extern int			gCancel[];
 
 extern int			gMaxThreadNum;
 
-static int colorConvert_5bit[32];
-static int colorConvert_6bit[64];
+static int colorConvert_5bit[256];
+static int colorConvert_6bit[256];
 
 void *ImageBright_ThreadFunc(void *param)
 {
@@ -28,8 +29,10 @@ void *ImageBright_ThreadFunc(void *param)
 	int OrgHeight = range[3];
     int index = range[4];
 
-	// 使用するバッファを保持
-	WORD *orgbuff;
+    LONG *buffptr = NULL;
+
+    // 使用するバッファを保持
+    LONG *orgbuff;
 
 	int		xx;	// x座標
 	int		yy;	// y座標
@@ -45,21 +48,24 @@ void *ImageBright_ThreadFunc(void *param)
 			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
-		orgbuff = gLinesPtr[index][yy + HOKAN_DOTS / 2];
+        // バッファ位置
+        buffptr = gSclLinesPtr[index][yy];
+
+        orgbuff = gLinesPtr[index][yy + HOKAN_DOTS / 2];
 
 		for (xx =  0 ; xx < OrgWidth + HOKAN_DOTS ; xx++) {
 			// 色の変換
-			rr = colorConvert_5bit[RGB565_RED(orgbuff[xx])];
-			gg = colorConvert_6bit[RGB565_GREEN(orgbuff[xx])];
-			bb = colorConvert_5bit[RGB565_BLUE(orgbuff[xx])];
-			orgbuff[xx] = MAKE565(rr, gg, bb);
+			rr = colorConvert_5bit[RGB888_RED(orgbuff[xx])];
+			gg = colorConvert_6bit[RGB888_GREEN(orgbuff[xx])];
+			bb = colorConvert_5bit[RGB888_BLUE(orgbuff[xx])];
+            buffptr[xx - HOKAN_DOTS / 2] = MAKE8888(rr, gg, bb);
 		}
 
 		// 補完用の余裕
-		orgbuff[-2] = orgbuff[0];
-		orgbuff[-1] = orgbuff[0];
-		orgbuff[OrgWidth + 0] = orgbuff[OrgWidth - 1];
-		orgbuff[OrgWidth + 1] = orgbuff[OrgWidth - 1];
+        buffptr[-2] = buffptr[0];
+        buffptr[-1] = buffptr[0];
+        buffptr[OrgWidth + 0] = buffptr[OrgWidth - 1];
+        buffptr[OrgWidth + 1] = buffptr[OrgWidth - 1];
 	}
 	return nullptr;
 }
@@ -83,12 +89,27 @@ int ImageBright(int index, int Page, int Half, int Count, int OrgWidth, int OrgH
 		base = 255 * (1.0f - scale);
 	}
 
-	for (int i = 0; i < 32; i ++) {
-		colorConvert_5bit[i] = (int)(pow(((float)(i << 3) / 255.0f), f) * 255.0f) * scale + base;
-	}
-	for (int i = 0; i < 64; i ++) {
-		colorConvert_6bit[i] = (int)(pow(((float)(i << 2) / 255.0f), f) * 255.0f) * scale + base;
-	}
+    for (int i = 0; i < 256; i ++) {
+        colorConvert_5bit[i] = (int)(pow(((float)(i) / 255.0f), f) * 255.0f) * scale + base;
+    }
+    for (int i = 0; i < 256; i ++) {
+        colorConvert_6bit[i] = (int)(pow(((float)(i) / 255.0f), f) * 255.0f) * scale + base;
+    }
+
+    int linesize;
+
+    // ラインサイズ
+    linesize  = OrgWidth + HOKAN_DOTS;
+
+    //  サイズ変更画像待避用領域確保
+    if (ScaleMemAlloc(index, linesize, OrgHeight) < 0) {
+        return -6;
+    }
+
+    // データの格納先ポインタリストを更新
+    if (RefreshSclLinesPtr(index, Page, Half, Count, OrgHeight, linesize) < 0) {
+        return -7;
+    }
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;

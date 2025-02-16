@@ -111,7 +111,9 @@ int LoadImageAvif(int index, int loadCommand, IMAGEDATA *pData, int page, int sc
     }
 
     if (loadCommand == SET_BUFFER) {
-        //LOGD("LoadImageAvif: SetBuff() Start. page=%d, width=%d, height=%d", page, width, height);
+#ifdef DEBUG
+        LOGD("LoadImageAvif: SetBuff() Start. page=%d, width=%d, height=%d", page, width, height);
+#endif
         returnCode = SetBuff(index, page, width, height, rgb.pixels, COLOR_FORMAT_RGB);
         if (returnCode < 0) {
             LOGE("LoadImageAvif: SetBuff() failed. return=%d", returnCode);

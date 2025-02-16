@@ -284,7 +284,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 					;
 				}
 				if (ed != null) {
-					ed.commit();
+					ed.apply();
 				}
 			}
 			if (debug) {Log.d("ImportSettingPreference", "onClick: 設定を読み込みました. " + filepath);}

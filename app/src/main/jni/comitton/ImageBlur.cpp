@@ -10,8 +10,8 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr[];
-extern WORD			**gSclLinesPtr[];
+extern LONG			**gLinesPtr[];
+extern LONG			**gSclLinesPtr[];
 extern int			gCancel[];
 
 extern int			gMaxThreadNum;
@@ -40,10 +40,10 @@ void *ImageBlur_ThreadFunc(void *param)
 	int		dotcnt;
 
 	// 使用するバッファを保持
-	WORD *orgbuff1;
-	WORD *orgbuff2;
+    LONG *orgbuff1;
+    LONG *orgbuff2;
 
-//	WORD *buffptr = NULL;
+	LONG *buffptr = NULL;
 
 	int raito = Zoom * Zoom / 100;
 //	LOGD("ImageBlur_ThreadFund : zoom=%d, raito=%d", Zoom, raito);
@@ -58,53 +58,45 @@ void *ImageBlur_ThreadFunc(void *param)
 			return (void*)ERROR_CODE_USER_CANCELED;
 		}
 
-		orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 0];
+        // バッファ位置
+        buffptr = gSclLinesPtr[index][yy];
+
+        orgbuff1 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 0];
 		orgbuff2 = gLinesPtr[index][yy + HOKAN_DOTS / 2 + 1];
 
 		yd3 = gDitherY_3bit[yy & 0x07];
 		yd2 = gDitherY_2bit[yy & 0x03];
 
-		for (int xx =  0 ; xx < Width ; xx++) {
-			rr1 =  RGB565_RED_256(orgbuff1[xx]);
-			gg1 =  RGB565_GREEN_256(orgbuff1[xx]);
-			bb1 =  RGB565_BLUE_256(orgbuff1[xx]);
+		for (int xx =  0 ; xx < Width + HOKAN_DOTS; xx++) {
+			rr1 =  RGB888_RED(orgbuff1[xx]);
+			gg1 =  RGB888_GREEN(orgbuff1[xx]);
+			bb1 =  RGB888_BLUE(orgbuff1[xx]);
 
-			rr2 =  RGB565_RED_256(orgbuff1[xx + 1]);
-			gg2 =  RGB565_GREEN_256(orgbuff1[xx + 1]);
-			bb2 =  RGB565_BLUE_256(orgbuff1[xx + 1]);
+			rr2 =  RGB888_RED(orgbuff1[xx + 1]);
+			gg2 =  RGB888_GREEN(orgbuff1[xx + 1]);
+			bb2 =  RGB888_BLUE(orgbuff1[xx + 1]);
 
-			rr2 += RGB565_RED_256(orgbuff2[xx]);
-			gg2 += RGB565_GREEN_256(orgbuff2[xx]);
-			bb2 += RGB565_BLUE_256(orgbuff2[xx]);
+			rr2 += RGB888_RED(orgbuff2[xx]);
+			gg2 += RGB888_GREEN(orgbuff2[xx]);
+			bb2 += RGB888_BLUE(orgbuff2[xx]);
 
-			rr2 += RGB565_RED_256(orgbuff2[xx + 1]);
-			gg2 += RGB565_GREEN_256(orgbuff2[xx + 1]);
-			bb2 += RGB565_BLUE_256(orgbuff2[xx + 1]);
+			rr2 += RGB888_RED(orgbuff2[xx + 1]);
+			gg2 += RGB888_GREEN(orgbuff2[xx + 1]);
+			bb2 += RGB888_BLUE(orgbuff2[xx + 1]);
 
 			// 0～255に収める
 			rr = LIMIT_RGB((rr1 * raito + rr2 * (100 - raito) / 3) / 100);
 			gg = LIMIT_RGB((gg1 * raito + gg2 * (100 - raito) / 3) / 100);
 			bb = LIMIT_RGB((bb1 * raito + bb2 * (100 - raito) / 3) / 100);
 
-			// 切り捨ての値を分散
-			if (rr < 0xF8) {
-				rr = rr + gDitherX_3bit[rr & 0x07][(xx + yd3) & 0x07];
-			}
-			if (gg < 0xFC) {
-				gg = gg + gDitherX_2bit[gg & 0x03][(xx + yd2) & 0x03];
-			}
-			if (bb < 0xF8) {
-				bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
-			}
-
-			orgbuff1[xx] = MAKE565(rr, gg, bb);
+            buffptr[xx - HOKAN_DOTS / 2] = MAKE8888(rr, gg, bb);
 		}
 
 		// 補完用の余裕
-		orgbuff1[-2] = orgbuff1[0];
-		orgbuff1[-1] = orgbuff1[0];
-		orgbuff1[Width + 0] = orgbuff1[Width - 1];
-		orgbuff1[Width + 1] = orgbuff1[Width - 1];
+        buffptr[-2] = buffptr[0];
+        buffptr[-1] = buffptr[0];
+        buffptr[Width + 0] = buffptr[Width - 1];
+        buffptr[Width + 1] = buffptr[Width - 1];
 	}
 //	LOGD("ImageBlur_ThreadFund : end");
 	return 0;
@@ -118,16 +110,30 @@ int ImageBlur(int index, int Page, int Half, int Count, int OrgWidth, int OrgHei
 {
 //	LOGD("ImageBlur : p=%d, h=%d, c=%d, ow=%d, oh=%d, zm=%d", Page, Half, Count, OrgWidth, OrgHeight, Zoom);
 
-//	int linesize;
-	int ret = 0;
+    int ret = 0;
 
-	int		xx;	// サイズ変更後のx座標
-	int		yy;	// サイズ変更後のy座標
+    int		xx;	// サイズ変更後のx座標
+    int		yy;	// サイズ変更後のy座標
 
-	// 50%まで
-	if (Zoom < 50) {
-		Zoom = 50;
-	}
+    // 50%まで
+    if (Zoom < 50) {
+        Zoom = 50;
+    }
+
+    int linesize;
+
+    // ラインサイズ
+    linesize  = OrgWidth + HOKAN_DOTS;
+
+    //  サイズ変更画像待避用領域確保
+    if (ScaleMemAlloc(index, linesize, OrgHeight) < 0) {
+        return -6;
+    }
+
+    // データの格納先ポインタリストを更新
+    if (RefreshSclLinesPtr(index, Page, Half, Count, OrgHeight, linesize) < 0) {
+        return -7;
+    }
 
 	pthread_t thread[gMaxThreadNum];
 	int start = 0;

@@ -19,6 +19,7 @@ import src.comitton.config.SetImageText;
 import src.comitton.config.SetImageTextColorActivity;
 import src.comitton.config.SetImageTextDetailActivity;
 import src.comitton.config.SetNoiseActivity;
+import src.comitton.fileaccess.FileAccess;
 import src.comitton.fileview.data.RecordItem;
 import src.comitton.dialog.BookmarkDialog;
 import src.comitton.dialog.CheckDialog;
@@ -248,7 +249,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private final int TOUCH_COMMAND   = 1;
 	private final int TOUCH_OPERATION = 2;
 
-	private final int SCALENAME_ORDER[] = { 0, 1, 6, 2, 3, 7, 4, 5 };
+	private final int[] SCALENAME_ORDER = { 0, 1, 6, 2, 3, 7, 4, 5 };
 
 	// 設定値の保持
 	private int mClickArea = 16;
@@ -357,10 +358,13 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private String mUriPath = "";
 	/** URIとパスと圧縮ファイル */
 	private String mFilePath = "";
+	/** ファイルのタイムスタンプ */
+	private long mTimestamp = 0L;
 
 	private ImageManager mImageMgr = null;
 
 	// ページ表示のステータス情報
+	private int mRestoreMaxPage;
 	private int mRestorePage;
 	private int mCurrentPage;
 	private int mNextPage;
@@ -404,7 +408,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private boolean mTopMode = false; // トップ操作モード
 	private boolean mPinchOn = false;
 	private boolean mPinchDown = false;
-	private int mPinchScale = 100;
+	private int mPinchScale;
 	private int mPinchScaleSel;
 	private int mPinchCount;
 	private long mPinchTime;
@@ -622,15 +626,24 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mFileName != null) {
 			mFilePath = DEF.relativePath(mActivity, mUriPath, mFileName);
 		}
+		else {
+			mFilePath = mUriPath;
+		}
+		mTimestamp = FileAccess.date(mActivity, mFilePath, mUser, mPass);
 		if (debug) {Log.d(TAG, "onCreate: mUriPath=" + mUriPath + ", mFilePath=" + mFilePath);}
 
 		saveLastFile();
 
 		mRestorePage = intent.getIntExtra("Page", DEF.PAGENUMBER_READ);
 		if (mRestorePage == DEF.PAGENUMBER_READ) {
+			if (debug) {Log.d(TAG, "onCreate: IF mRestorePage == DEF.PAGENUMBER_READ");}
+			mRestoreMaxPage = mSharedPreferences.getInt(DEF.createUrl(mFilePath, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
 			mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mFilePath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+			if (debug) {Log.d(TAG, "onCreate: mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mFilePath, mUser, mPass));}
 		}
 		mCurrentPage = mRestorePage != DEF.PAGENUMBER_UNREAD ? mRestorePage : 0;
+		if (debug) {Log.d(TAG, "onCreate: mCurrentPage=" + mCurrentPage);}
+
 		mImageView.setOnTouchListener(this);
 
 		// プログレスダイアログ準備
@@ -750,7 +763,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		public void run() {
-			boolean debug = false;
+			boolean debug = true;
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
 			if(debug) {Log.d(TAG, "run メモリ利用状況.\n" + getMemoryString());}
@@ -1674,7 +1687,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		Editor ed = sp.edit();
 		ed.putInt("scalemode", mScaleMode);
-		ed.commit();
+		ed.apply();
 	}
 
 	/**
@@ -1794,7 +1807,12 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 		// モードが変わればスケールは初期化
 		if (scaleinit) {
-			mPinchScale = mImgScale;
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			synchronized (mImageView) {
+				mPinchScale = SetImageActivity.getPinScale(sharedPreferences);
+				mImageMgr.setImageScale(mPinchScale);
+				ImageScaling();
+			}
 		}
 		if(debug) {Log.d(TAG, "setMgrConfig: 終了します.");}
 	}
@@ -1900,7 +1918,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
     					if (mPinchCount == 2) {
     						// 100%にする
     						// 任意スケーリング変更中
-    						mPinchScaleSel = mImgScale;
+							mPinchScaleSel = mPinchScale;
     						mImageView.setPinchChanging(mPinchScaleSel);
     						mGuideView.setGuideText(mPinchScaleSel + "%");
     					}
@@ -2013,6 +2031,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
     					}
     					this.updateOverSize(true);
     					mImageView.update(true);
+
+						Editor ed = mSharedPreferences.edit();
+						ed.putString(DEF.KEY_PinchScale, Integer.toString(mPinchScale));
+						ed.apply();
     				}
     			}
     			return true;
@@ -2921,7 +2943,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					ed.putString(DEF.KEY_MARGINCUT, Integer.toString(mMgnCut));
 					ed.putString(DEF.KEY_MARGINCUTCOLOR, Integer.toString(mMgnCutColor));
 					ed.putString(DEF.KEY_INISCALE, Integer.toString(mScaleMode));
-					ed.commit();
+					ed.apply();
 				}
 			}
 
@@ -3063,7 +3085,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				}
 			}
 		}
-		ed.commit();
+		ed.apply();
 		if (debug) {Log.d(TAG, "saveTopMenuState: 終了します.");}
 	}
 
@@ -3784,7 +3806,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				mKeepGuide = true;
 
 				// 表示中の画像が1枚か2枚かを判定
-				ImageData bm[] = mImageView.getImageBitmap();
+				ImageData[] bm = mImageView.getImageBitmap();
 				int shareType;
 				if (bm[0] != null && bm[1] != null) {
 					shareType = DEF.SHARE_LR;
@@ -3798,10 +3820,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					mPageSelect = PAGE_THUMB;
 					Editor ed = mSharedPreferences.edit();
 					ed.putString(DEF.KEY_PAGESELECT, String.valueOf(mPageSelect));
-					ed.commit();
+					ed.apply();
 
 					// サムネイルページ選択
-					if (PageThumbnail.mIsOpened = true) {
+					if (PageThumbnail.mIsOpened) {
 						PageThumbnail thumbDlg = new PageThumbnail(this, R.style.MyDialog);
 						thumbDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mPageWay == DEF.PAGEWAY_RIGHT, mImageMgr, mThumID, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 						thumbDlg.setPageSelectListear(this);
@@ -3815,10 +3837,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					mPageSelect = PAGE_INPUT;
 					Editor ed = mSharedPreferences.edit();
 					ed.putString(DEF.KEY_PAGESELECT, String.valueOf(mPageSelect));
-					ed.commit();
+					ed.apply();
 
 					// ページ番号入力
-					if (PageSelectDialog.mIsOpened = true) {
+					if (PageSelectDialog.mIsOpened) {
 						PageSelectDialog pageDlg = new PageSelectDialog(this, R.style.MyDialog);
 						pageDlg.setParams(DEF.IMAGE_VIEWER, mCurrentPage, mImageMgr.length(), mPageWay == DEF.PAGEWAY_RIGHT, (mImageMgr.getFileType() == mImageMgr.FILETYPE_ZIP || mImageMgr.getFileType() == mImageMgr.FILETYPE_RAR));
 						pageDlg.setPageSelectListear(this);
@@ -3837,11 +3859,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				mKeepGuide = true;
 
 				// ページ番号入力が開いていたら閉じる
-				if (PageSelectDialog.mIsOpened == true) {
+				if (PageSelectDialog.mIsOpened) {
 					mPageDlg.dismiss();
 				}
 				// サムネイルページ選択が開いていたら閉じる
-				if (PageThumbnail.mIsOpened == true) {
+				if (PageThumbnail.mIsOpened) {
 					mThumbDlg.dismiss();
 				}
 
@@ -3905,11 +3927,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 			case DEF.TOOLBAR_MENU: {
 				// ページ番号入力が開いていたら閉じる
-				if (PageSelectDialog.mIsOpened == true) {
+				if (PageSelectDialog.mIsOpened) {
 					mPageDlg.dismiss();
 				}
 				// サムネイルページ選択が開いていたら閉じる
-				if (PageThumbnail.mIsOpened == true) {
+				if (PageThumbnail.mIsOpened) {
 					mThumbDlg.dismiss();
 				}
 
@@ -3918,11 +3940,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			}
 			case DEF.TOOLBAR_CONFIG: {
 				// ページ番号入力が開いていたら閉じる
-				if (PageSelectDialog.mIsOpened == true) {
+				if (PageSelectDialog.mIsOpened) {
 					mPageDlg.dismiss();
 				}
 				// サムネイルページ選択が開いていたら閉じる
-				if (PageThumbnail.mIsOpened == true) {
+				if (PageThumbnail.mIsOpened) {
 					mThumbDlg.dismiss();
 				}
 
@@ -4052,6 +4074,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mGray = SetImageActivity.getGray(sharedPreferences);
 			mMoire = SetImageActivity.getMoire(sharedPreferences);
 			mTopSingle = SetImageActivity.getTopSingle(sharedPreferences);
+			mPinchScale = SetImageActivity.getPinScale(sharedPreferences);
+			mPinchScaleSel = mPinchScale;
 
 			mScrlRngW = DEF.calcScrlRange(SetImageDetailActivity.getScrlRngW(sharedPreferences));
 			mScrlRngH = DEF.calcScrlRange(SetImageDetailActivity.getScrlRngH(sharedPreferences));
@@ -4077,7 +4101,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				}
 			}
 
-			mLoupeSize = SetImageDetailActivity.getLoupeSize(sharedPreferences);
+			mLoupeSize = SetImageActivity.getZoomType(sharedPreferences);
+			ImageManager.setloupemode(mLoupeSize);
 
 			mNoiseScrl = DEF.calcScrlSpeedPix(SetNoiseActivity.getNoiseScrl(sharedPreferences), mSDensity);
 			mNoiseUnder = DEF.calcNoiseLevel(SetNoiseActivity.getNoiseUnder(sharedPreferences));
@@ -4219,7 +4244,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			// 並べて表示中は最終ページ-1なら次ページに遷移しない
 
 			// 最終ページ
-			if (mAutoPlay == true) {
+			if (mAutoPlay) {
 				// 自動再生中は停止
 				setAutoPlay(false);
 			}
@@ -4315,7 +4340,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 		else {
 			// 1ページ戻る
-			if (isDualView() == true) {
+			if (isDualView()) {
 				mCurrentPage -= 2;
 			}
 			else {
@@ -4366,7 +4391,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				return true;
 			}
 			else {
-				if (DEF.checkPortrait(mViewWidth, mViewHeight) == false) {
+				if (!DEF.checkPortrait(mViewWidth, mViewHeight)) {
 					// /* getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT */
 					return true;
 				}
@@ -4382,7 +4407,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 		else if (mDispMode == DISPMODE_EXCHANGE) {
 			if (mViewRota != DEF.ROTATE_PSELAND) {
-				if (DEF.checkPortrait(mViewWidth, mViewHeight) == true) {
+				if (DEF.checkPortrait(mViewWidth, mViewHeight)) {
 					/* getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT */
 					return true;
 				}
@@ -4419,7 +4444,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				longtaptime = LONGTAP_TIMER_BTM;
 			}
 			else {
-				if (mImmEnable == false) {
+				if (!mImmEnable) {
 					return false;
 				}
 				longtaptime = LONGTAP_TIMER_UI;
@@ -4637,31 +4662,29 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	// 現在ページ情報を保存
 	private void saveCurrentPage() {
 		boolean debug = false;
-		if (mImageMgr != null && mImageMgr.length() > 0) {
+
+		if (mImageMgr != null) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
 			int savePage = mCurrentPage;
-
-			if (mImageMgr.length() <= mCurrentPage + 1) {
-				// 既読
-				savePage = -2;
-			}
-			else if (mCurrentPageDual && mImageMgr.length() <= mCurrentPage + 2) {
-				// 見開きの場合は1ページ前でも既読
-				savePage = -2;
-			}
-			else if (savePage < 0) {
-				// 範囲外は読み込みしない
-				savePage = 0;
-			}
-
-			if (mImageName != null && !mImageName.isEmpty()) {
-				ed.putString("LastImage", mImageMgr.mFileList[mCurrentPage].name);
-			}
+			int	maxpage;
 			if (debug) {Log.d(TAG, "saveCurrentPage: Url=" + DEF.createUrl(mFilePath, mUser, mPass));}
-			ed.putInt(DEF.createUrl(mFilePath, mUser, mPass), savePage);
-			ed.apply();
+			maxpage = mImageMgr.length();
+			if	(maxpage > 0)	{
+				// ページ数が0でないときは保存する
+				ed.putInt(DEF.createUrl(mFilePath, mUser, mPass) + "#maxpage", maxpage);
+				ed.putInt(DEF.createUrl(mFilePath, mUser, mPass), savePage);
+
+				if (mTimestamp != 0L) {
+					ed.putInt(DEF.createUrl(mFilePath, mUser, mPass) + "#date", (int) (mTimestamp / 1000));
+				}
+				ed.apply();
+			} else {
+				// ページ数が0の時は保存しない
+			}
 		}
+
+
 	}
 
 	// 起動時のページ情報に戻す
@@ -4669,11 +4692,18 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mImageMgr != null && mImageMgr.length() > 0) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
-			if (mRestorePage == -1) {
+			if (mRestorePage == DEF.PAGENUMBER_UNREAD) {
+				ed.remove(DEF.createUrl(mFilePath, mUser, mPass) + "#maxpage");
 				ed.remove(DEF.createUrl(mFilePath, mUser, mPass));
+				ed.remove(DEF.createUrl(mFilePath, mUser, mPass) + "#date");
 			}
 			else {
+				ed.putInt(DEF.createUrl(mFilePath, mUser, mPass) + "#maxpage", mRestoreMaxPage);
 				ed.putInt(DEF.createUrl(mFilePath, mUser, mPass), mRestorePage);
+
+				if (mTimestamp != 0L) {
+					ed.putInt(DEF.createUrl(mFilePath, mUser, mPass) + "#date", (int) (mTimestamp / 1000));
+				}
 			}
 
 			if (mImageName != null && !mImageName.isEmpty()) {

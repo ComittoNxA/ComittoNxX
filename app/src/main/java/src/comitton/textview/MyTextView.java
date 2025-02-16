@@ -131,7 +131,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	private Thread mUpdateThread;
 	private boolean mIsRunning;
 
-	private Point mScrollPos[];
+	private Point[] mScrollPos;
 	private Point mScrollPoint;
 	private boolean mScrolling;
 
@@ -153,8 +153,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	private int mTextMarginH;
 
 	private SparseArray<ArrayList<MarkerDrawData>> mMarker;
-	private char mTextBuff[];
-	private PictureData mPictures[];
+	private char[] mTextBuff;
+	private PictureData[] mPictures;
 
 	private boolean mEffect;
 	private float mEffectRate;
@@ -189,8 +189,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 	private ImageManager mImageMgr;
 	private GuideView mGuideView;
 
-	private float mShiftX[] = { 0.0f, 0.65f, 0.2f, 0.05f, 0.0f, 0.3f, 0.0f, 0.0f, 0.0f, -0.7f, -0.15f};
-	private float mShiftY[] = { 0.0f, 0.5f, 0.1f, 0.10f, 0.1f, 0.5f, -0.03f, 0.03f, 0.0f, 0.0f, -0.30f};
+	private float[] mShiftX = { 0.0f, 0.65f, 0.2f, 0.05f, 0.0f, 0.3f, 0.0f, 0.0f, 0.0f, -0.7f, -0.15f};
+	private float[] mShiftY = { 0.0f, 0.5f, 0.1f, 0.10f, 0.1f, 0.5f, -0.03f, 0.03f, 0.0f, 0.0f, -0.30f};
 // TODO 半角対応
 //	private float mShiftX[] = { 0.0f, 0.65f, 0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -0.7f, -0.15f};
 //	private float mShiftY[] = { 0.0f, 0.5f, 0.1f, 0.0f, 0.1f, 0.0f, -0.03f, 0.03f, 0.0f, 0.0f, -0.30f};
@@ -665,12 +665,12 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 
 		// タイトル描画
 		if (mDrawTitle != null) {
-			canvas.drawText(mDrawTitle, x + mDrawWidth / 2l, y + -fm.top + margin, text);
+			canvas.drawText(mDrawTitle, x + mDrawWidth / 2L, y + -fm.top + margin, text);
 		}
 
 		// ページ番号描画
 		String pagestr = (index + 1) + " / " + mTextData.length;
-		canvas.drawText(pagestr, x + mDrawWidth / 2l, y + mDrawHeight - fm.bottom - margin, text);
+		canvas.drawText(pagestr, x + mDrawWidth / 2L, y + mDrawHeight - fm.bottom - margin, text);
 
 		char[] code = new char[2];
 
@@ -1037,7 +1037,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 			Bitmap bm = null;
 
 			option.inJustDecodeBounds = false;
-			option.inPreferredConfig = Config.RGB_565;
+			option.inPreferredConfig = Config.ARGB_8888;
 			try {
 				// ビットマップの読み込み
 				if (mImageMgr != null) {
@@ -2330,8 +2330,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		}
 		else if (mSclMode == DEF.SCALE_ORIGINAL) {
 			// 元サイズのまま
-			view_x = src_cx;
-			view_y = src_cy;
+			view_x = src_cx * mPinchScl / 100;
+			view_y = src_cy * mPinchScl / 100;
 		}
 		else if (mSclMode == DEF.SCALE_FIT_ALLMAX) {
 			// 縦横比無視で拡大

@@ -151,7 +151,7 @@ public class OperationPreference extends DialogPreference implements OnClickList
 		Editor ed = mSP.edit();
 		ed.putInt(DEF.KEY_TAPPATTERN, pattern);
 		ed.putInt(DEF.KEY_TAPRATE, rate);
-		ed.commit();
+		ed.apply();
 	}
 
 	private int getPatternValue() {

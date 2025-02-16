@@ -22,9 +22,14 @@
 
 #define MAKE565(red, green, blue) (((red<<8) & 0xf800) | ((green<<3) & 0x07e0) | ((blue >> 3) & 0x001f))
 #define MAKE555(red, green, blue) (((red<<8) & 0xf800) | ((green<<3) & 0x07c0) | ((blue >> 3) & 0x001f))
+#define MAKE8888(red, green, blue) (((red) & 0xff) | ((green<<8) & 0xff00) | ((blue << 16) & 0xff0000) | (0xff << 24))
+#define MAKE0888(red, green, blue) (((red) & 0xff) | ((green<<8) & 0xff00) | ((blue << 16) & 0xff0000))
 #define RGB565_RED_256(rgb) ((rgb>>8) & 0x00F8)
 #define RGB565_GREEN_256(rgb) ((rgb>>3) & 0x00FC)
 #define RGB565_BLUE_256(rgb) ((rgb<<3) & 0x00F8)
+#define RGB888_RED(rgb) ((rgb) & 0x00FF)
+#define RGB888_GREEN(rgb) ((rgb>>8) & 0x00FF)
+#define RGB888_BLUE(rgb) ((rgb >> 16) & 0x00FF)
 
 #define RGB555_GREEN_256(rgb) ((rgb>>3) & 0x00F8)
 
@@ -39,13 +44,13 @@
 #define COLOR_CHECK(rgb1, rgb2, mask) \
 ( \
     ( \
-        REMAKE565( \
-            std::abs(RGB565_RED(rgb1) - RGB565_RED(rgb2)) , \
-            std::abs(RGB565_GREEN(rgb1) - RGB565_GREEN(rgb2)) , \
-            std::abs(RGB565_BLUE(rgb1) - RGB565_BLUE(rgb2))) \
+        MAKE0888( \
+            std::abs(RGB888_RED(rgb1) - RGB888_RED(rgb2)) , \
+            std::abs(RGB888_GREEN(rgb1) - RGB888_GREEN(rgb2)) , \
+            std::abs(RGB888_BLUE(rgb1) - RGB888_BLUE(rgb2))) \
         & mask \
     ) \
-    == 0x0000 \
+    == 0x000000 \
 )
 
 //#define RED_RANGE(rr) (rr < 0 ? 0 : (rr > 0x001F ? 0x001F : rr))
@@ -65,6 +70,7 @@
 #define SCALE_BORDER1	0.5
 #define SCALE_BORDER2	0.8
 
+typedef unsigned long   LONG;
 typedef	unsigned short	WORD;
 typedef	unsigned char	BYTE;
 
@@ -101,7 +107,7 @@ typedef struct buff_manage {
 	long		Size;
     /** Scale変更をした回数 */
 	long		Count;
-	WORD		*Buff;
+	LONG		*Buff;
 } BUFFMNG;
 
 #define TYPE_ORIGINAL	1

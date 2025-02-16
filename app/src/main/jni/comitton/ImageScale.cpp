@@ -14,8 +14,8 @@
 //#define DEBUG
 
 extern IMAGEDATA	*gImageData[];
-extern WORD			**gLinesPtr[];
-extern WORD			**gSclLinesPtr[];
+extern LONG			**gLinesPtr[];
+extern LONG			**gSclLinesPtr[];
 
 extern BUFFMNG		*gBuffMng[];
 extern long			gBuffNum[];
@@ -182,9 +182,9 @@ int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int 
 				return ret;
 			}
 
-//			// 古いワークデータは削除
-//			EraseSclBuffMng(index, Count);
-//			Count ++;
+			// 古いワークデータは削除
+			EraseSclBuffMng(index, Count);
+			Count ++;
 		}
 #ifdef DEBUG_CREATESCALE
         LOGD("CreateScale: Moire   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
@@ -310,8 +310,8 @@ int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int 
 			return ret;
 		}
 		// 古いワークデータは削除
-		//EraseSclBuffMng(index, Count);
-        //Count ++;
+		EraseSclBuffMng(index, Count);
+        Count ++;
 #ifdef DEBUG_CREATESCALE
         LOGD("CreateScale: Sharpen   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
 #endif
@@ -332,10 +332,9 @@ int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int 
 		if (ret < 0) {
 			return ret;
 		}
-		// 色の変化だけなのでワークデータは作成されない
-#ifdef DEBUG_CREATESCALE
-        LOGD("CreateScale: Gray   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
-#endif
+        // 古いワークデータは削除
+        EraseSclBuffMng(index, Count);
+        Count ++;
 	}
 
 	if (Invert > 0) {
@@ -353,7 +352,9 @@ int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int 
 		if (ret < 0) {
 			return ret;
 		}
-		// 反転だけなのでワークデータは作成されない
+        // 古いワークデータは削除
+        EraseSclBuffMng(index, Count);
+        Count ++;
 #ifdef DEBUG_CREATESCALE
         LOGD("CreateScale: Invert   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
 #endif
@@ -374,7 +375,9 @@ int CreateScale(int index, int Page, int Half, int SclWidth, int SclHeight, int 
 		if (ret < 0) {
 			return ret;
 		}
-		// 色の調整だけなのでワークデータは作成されない
+        // 古いワークデータは削除
+        EraseSclBuffMng(index, Count);
+        Count ++;
 #ifdef DEBUG_CREATESCALE
         LOGD("CreateScale: Bright || Gamma   END: Page=%d, Half=%d, Count=%d, OrgWidth=%d, OrgHeight=%d", Page, Half, Count, OrgWidth, OrgHeight);
 #endif
@@ -550,7 +553,7 @@ int CopySclBuffMngToBuffMng(int index)
 			gBuffMng[index][buffindex].Half = gSclBuffMng[index][i].Half;
 			gBuffMng[index][buffindex].Size = gSclBuffMng[index][i].Size;
 			gBuffMng[index][buffindex].Count = 0;
-			memcpy(gBuffMng[index][buffindex].Buff, gSclBuffMng[index][i].Buff, BLOCKSIZE * sizeof(WORD));
+			memcpy(gBuffMng[index][buffindex].Buff, gSclBuffMng[index][i].Buff, BLOCKSIZE * sizeof(LONG));
 //			LOGD("CopySclBuffMngToBuffMng Ed : %d/%d -> %d/%d", i, gSclBuffNum[index], buffindex, gBuffNum[index]);
 		}
 	}

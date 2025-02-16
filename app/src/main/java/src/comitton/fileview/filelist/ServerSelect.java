@@ -71,7 +71,6 @@ public class ServerSelect {
 				accessType = DEF.ACCESS_TYPE_SMB;
 			}
 			if (debug) {Log.d(TAG, "ServerSelect: i=" + i + ", accessType=" + accessType + ", name=" + name + ", host=" + host + ", path=" + path + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);}
-			if (provider.equals("user")) {DEF.StackTrace(TAG , "save:");}
 			mServer[i].setAccessType(accessType);
 			mServer[i].setName(name);
 			mServer[i].setPath(path);

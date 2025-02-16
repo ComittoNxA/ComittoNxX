@@ -380,7 +380,7 @@ public class ImageManager extends InputStream implements Runnable {
 			if (mOpenMode == OPENMODE_THUMBSORT) {
 				// RARファイルかつソートありのサムネイル取得であればソート条件を取得
 				SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
-				thumbSortType = SetFileListActivity.getThumbnailSortType(sp);
+				thumbSortType = SetFileListActivity.getThumbSortType(sp);
 				if (debug) {Log.d(TAG, "cmpFileList: thumbSortType=" + thumbSortType);}
 			}
 			if(debug) {Log.d(TAG, "cmpFileList: RARファイルです.");}
@@ -516,26 +516,30 @@ public class ImageManager extends InputStream implements Runnable {
 									// RARファイルの時
 									if (mOpenMode == OPENMODE_THUMBNAIL && list.size() >= 5) {
 										// ソートなしのサムネイル取得であれば先頭5ファイルで終了
+										if (debug) {Log.d(TAG, "cmpFileList: ソートなし. thumbSortType=" + thumbSortType + ", mHostType=" + mHostType);}
 										break;
 									}
 									else if (mOpenMode == OPENMODE_THUMBSORT && list.size() >= 5) {
 										// ソートありのサムネイル取得であればソート条件で分岐
-										if (debug) {Log.d(TAG, "cmpFileList: mOpenMode=" + mOpenMode + ", thumbSortType=" + thumbSortType + ", mHostType=" + mHostType);}
+										if (debug) {Log.d(TAG, "cmpFileList: ソートあり. thumbSortType=" + thumbSortType + ", mHostType=" + mHostType);}
 
 										switch (thumbSortType) {
 											case 0:
 												// ソートなし
+												if (debug) {Log.d(TAG, "cmpFileList: ソートあり. case 0: SET stop = true");}
 												stop = true;
 												break;
 											case 1:
 												if (mHostType != DEF.ACCESS_TYPE_LOCAL) {
 													// ローカルだけソートあり
+													if (debug) {Log.d(TAG, "cmpFileList: ソートあり. case 1: SET stop = true");}
 													stop = true;
 												}
 												break;
 											case 2:
 												if (mHostType != DEF.ACCESS_TYPE_LOCAL && mHostType != DEF.ACCESS_TYPE_SMB) {
 													// ローカルとSMBはソートあり
+													if (debug) {Log.d(TAG, "cmpFileList: ソートあり. case 2: SET stop = true");}
 													stop = true;
 												}
 												break;
@@ -2576,6 +2580,8 @@ public class ImageManager extends InputStream implements Runnable {
 
 
 	public void dirListFiles(String uri, String user, String pass) throws IOException {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "dirListFiles: 開始します. uri=" + uri);}
 		mDirIndex = 0;
 		mDirOrgPos = 0;
 		try {
@@ -3432,6 +3438,7 @@ public class ImageManager extends InputStream implements Runnable {
 	public byte[] loadExpandData(String filename) {
 		boolean debug = false;
 		if (debug) {Log.d(TAG, "loadExpandData: 開始します. filename=" + filename + ", mFileList.length=" + mFileList.length);}
+		//if (debug) {DEF.StackTrace(TAG , "loadExpandData: ");}
 
 		int page = -1;
 
@@ -3542,6 +3549,7 @@ public class ImageManager extends InputStream implements Runnable {
 	public Bitmap loadBitmapByName(String filename) throws IOException {
 		boolean debug = false;
 		if(debug) {Log.d(TAG,"loadBitmapByName: filename=" + filename);}
+		if (debug) {DEF.StackTrace(TAG, "loadBitmapByName: ");}
 
 		int page = -1;
 
@@ -3564,7 +3572,7 @@ public class ImageManager extends InputStream implements Runnable {
 		Bitmap bm = null;
 
 		option.inJustDecodeBounds = false;
-		option.inPreferredConfig = Config.RGB_565;
+		option.inPreferredConfig = Config.ARGB_8888;
 		InputStream inputStream;
 
 		ZipInputStream zipStream = null;
@@ -3833,7 +3841,7 @@ public class ImageManager extends InputStream implements Runnable {
 		BitmapFactory.Options option = new BitmapFactory.Options();
 		Bitmap bm = null;
 		option.inJustDecodeBounds = false;
-		option.inPreferredConfig = Config.RGB_565;
+		option.inPreferredConfig = Config.ARGB_8888;
 		option.inSampleSize = mFileList[page].scale;
 
 		ImageData id = null;

@@ -453,7 +453,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 
 	@Override
 	public void onClick(View v) {
-		boolean debug  = true;
+		boolean debug  = false;
 		// ボタンクリック
 
 		if (mBtnBookLeft == v) {
@@ -610,7 +610,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 		//if (debug) {DEF.StackTrace("ToolbarDialog", "setProgress:");}
 		int convpos;
 
-		if (mReverse == false) {
+		if (!mReverse) {
 			convpos = pos;
 		}
 		else {
@@ -623,7 +623,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 	protected int calcProgress(int pos) {
 		int convpos;
 
-		if (mReverse == false) {
+		if (!mReverse) {
 			convpos = pos;
 		}
 		else {

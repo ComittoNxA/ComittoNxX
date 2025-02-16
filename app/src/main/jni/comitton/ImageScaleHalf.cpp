@@ -11,8 +11,8 @@
 
 #include "Image.h"
 
-extern WORD			**gLinesPtr[];
-extern WORD			**gSclLinesPtr[];
+extern LONG			**gLinesPtr[];
+extern LONG			**gSclLinesPtr[];
 extern int			gCancel[];
 
 extern int			gMaxThreadNum;
@@ -35,9 +35,9 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 
 //	LOGD("CreateScaleHalf_ThreadFund : st=%d, ed=%d, sw=%d, sh=%d, ow=%d, oh=%d", stindex, edindex, SclWidth, SclHeight, OrgWidth, OrgHeight);
 
-	WORD *buffptr = nullptr;
-	WORD *orgbuff1;
-	WORD *orgbuff2;
+    LONG *buffptr = nullptr;
+    LONG *orgbuff1;
+    LONG *orgbuff2;
 
 	int		sx;	// 元画像の参照x座標
 	int		sy;	// 元画像の参照x座標
@@ -70,38 +70,27 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 			// 元座標
 			sx = xx * 2;
 	
-			rr = RGB565_RED_256(orgbuff1[sx])
-			   + RGB565_RED_256(orgbuff1[sx + 1])
-			   + RGB565_RED_256(orgbuff2[sx])
-			   + RGB565_RED_256(orgbuff2[sx + 1]);
+			rr = RGB888_RED(orgbuff1[sx])
+			   + RGB888_RED(orgbuff1[sx + 1])
+			   + RGB888_RED(orgbuff2[sx])
+			   + RGB888_RED(orgbuff2[sx + 1]);
 
-			gg = RGB565_GREEN_256(orgbuff1[sx])
-			   + RGB565_GREEN_256(orgbuff1[sx + 1])
-			   + RGB565_GREEN_256(orgbuff2[sx])
-			   + RGB565_GREEN_256(orgbuff2[sx + 1]);
+			gg = RGB888_GREEN(orgbuff1[sx])
+			   + RGB888_GREEN(orgbuff1[sx + 1])
+			   + RGB888_GREEN(orgbuff2[sx])
+			   + RGB888_GREEN(orgbuff2[sx + 1]);
 
-			bb = RGB565_BLUE_256(orgbuff1[sx])
-			   + RGB565_BLUE_256(orgbuff1[sx + 1])
-			   + RGB565_BLUE_256(orgbuff2[sx])
-			   + RGB565_BLUE_256(orgbuff2[sx + 1]);
+			bb = RGB888_BLUE(orgbuff1[sx])
+			   + RGB888_BLUE(orgbuff1[sx + 1])
+			   + RGB888_BLUE(orgbuff2[sx])
+			   + RGB888_BLUE(orgbuff2[sx + 1]);
 
 			// 0～255に収める
 			rr = LIMIT_RGB(rr / 4);
 			gg = LIMIT_RGB(gg / 4);
 			bb = LIMIT_RGB(bb / 4);
 
-			// 切り捨ての値を分散
-			if (rr < 0xF8) {
-				rr = rr + gDitherX_3bit[rr & 0x07][(xx + yd3) & 0x07];
-			}
-			if (gg < 0xFC) {
-				gg = gg + gDitherX_2bit[gg & 0x03][(xx + yd2) & 0x03];
-			}
-			if (bb < 0xF8) {
-				bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
-			}
-
-			buffptr[xx] = MAKE565(rr, gg, bb);
+			buffptr[xx] = MAKE8888(rr, gg, bb);
 		}
 		// 補完用の余裕
 		buffptr[-2] = buffptr[0];

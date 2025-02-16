@@ -128,6 +128,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	private int mCurrentPage = 0;
 	private boolean mPageLock = false;
 
+	private int mThreadWaitLoop = 0;
 
 	// ルーペ表示
 	private int mZoomMode = ZOOM_NONE;
@@ -209,11 +210,18 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 //				update(false);
 			} catch (InterruptedException e) {
 				// 描画発生による割り込み
-				if (mIsRunning == false) {
+				if (!mIsRunning) {
 					break;
 				}
 				else {
-					update(false);
+					if	(mThreadWaitLoop < 1000)	{
+						mThreadWaitLoop++;
+						update(false);
+					}
+					else
+					{
+						mThreadWaitLoop = 0;
+					}
 				}
 			}
 			;
@@ -228,6 +236,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 	private boolean mDrawLock;
 	public void lockDraw() {
+		mThreadWaitLoop = 0;
 		mDrawLock = true;
 	}
 
@@ -1018,7 +1027,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 			int cx = getWidth();
 			int cy = getHeight();
 			if (cx > 0 && cy > 0) {
-				mBackBitmap = Bitmap.createBitmap(cx, cy, Config.RGB_565);
+				mBackBitmap = Bitmap.createBitmap(cx, cy, Config.ARGB_8888);
 			}
 		}
 		mEffect = effect;
@@ -1096,7 +1105,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 //		if (mBackMode) {
 		for (int retry = 0 ; retry < 3 ; retry ++) {
 			try {
-				mBackBitmap = Bitmap.createBitmap(w, h, Config.RGB_565);
+				mBackBitmap = Bitmap.createBitmap(w, h, Config.ARGB_8888);
 				Canvas canvas = new Canvas(mBackBitmap);
 				canvas.drawColor(mMgnColor);
 				break;
@@ -1108,7 +1117,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		}
 //		}
 
-		if (mPseLand == false) {
+		if (!mPseLand) {
 			mDispWidth = w;
 			mDispHeight = h;
 
@@ -1120,7 +1129,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 		for (int retry = 0 ; retry < 3 ; retry ++) {
 			try {
-				mCanvasBitmap = Bitmap.createBitmap(w, h, Config.RGB_565);
+				mCanvasBitmap = Bitmap.createBitmap(w, h, Config.ARGB_8888);
 			}
 			catch (OutOfMemoryError e) {
 				Log.i("ImageView", "OutOfMemoryError");
@@ -1279,15 +1288,24 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
     			if (mViewPoint == DEF.VIEWPT_LEFTTOP || mViewPoint == DEF.VIEWPT_LEFTBTM) {
     				isLeft = true;
     			}
-    			// ページ戻りの場合は左右の基準点を反対にする
-    			if (mPrevRev && mIsPageBack) {
-    				isLeft = !isLeft;
-    			}
 
     			Boolean isTop = false;
     			if (mViewPoint == DEF.VIEWPT_LEFTTOP || mViewPoint == DEF.VIEWPT_RIGHTTOP) {
     				isTop = true;
     			}
+
+				if	(mPageWay != 0)	{
+					// ページ方向が左表紙の場合は左へ移動
+					isLeft = true;
+				}
+				if	(mIsPageBack)	{
+					// ページ戻り時は画面下に移動
+					isTop = false;
+					if	(!mPrevRev)	{
+						// ページ戻り時の左右位置反転は左右逆
+						isLeft = !isLeft;
+					}
+				}
 
     			if (isLeft){
     				drawLeft = 0 + mMgnLeft;

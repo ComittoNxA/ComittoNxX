@@ -17,6 +17,7 @@ import src.comitton.fileview.data.FileData;
 import src.comitton.imageview.ImageManager;
 import src.comitton.fileview.data.FileListItem;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.BitmapFactory;
@@ -97,20 +98,20 @@ public class TextManager {
 	private Handler mHandler;
 
 	private Activity mActivity;
-	private TextDrawData mTextPages[][] = null;
-	private byte mInputBuff[];
-	private char mTextBuff[];
-	private PictureData mPictures[];
+	private TextDrawData[][] mTextPages = null;
+	private byte[] mInputBuff;
+	private char[] mTextBuff;
+	private PictureData[] mPictures;
 	private ArrayList<PictureData> mPicArray;
 	private MidashiManager mMidashi;
 //	private StyleManager mTextStyle;
 	private SparseArray<ArrayList<MarkerDrawData>> mMarker;
 	private MidashiData[] mSearchList;
-	private float mFontWidth[][];
+	private float[][] mFontWidth;
 
 	private static final int CODETBL_SIZE = 13288;
 	private static final int CODETBL_BLOCK = 4;
-	private byte mCodeTbl[];
+	private byte[] mCodeTbl;
 
 	// private int mPosX; // 次の文字X座標(文字の右上基準)
 	// private int mTxPosY; // 次の文字Y座標(文字の右上基準)
@@ -258,7 +259,7 @@ public class TextManager {
 			addTextBlock();
 
 			// 改行設定
-			if (isRubi == false) {
+			if (!isRubi) {
 				TextBlock tb = new TextBlock(TB_PAGECONTROL, param);
 				textblocks.add(tb);
 			}
@@ -270,7 +271,7 @@ public class TextManager {
 			addTextBlock();
 
 			// 挿絵設定
-			if (isRubi == false) {
+			if (!isRubi) {
 				TextBlock tb = new TextBlock(TB_PICTURE, param);
 				textblocks.add(tb);
 			}
@@ -278,14 +279,14 @@ public class TextManager {
 		
 		// その行のみ字下げ
 		public void setCurrentIndent(int indent) {
-			if (isRubi == false) {
+			if (!isRubi) {
 				currentindent = (short)indent;
 			}
 		}
 		
 		// 以降の行を字下げ
 		public void setBaseIndent(int indent) {
-			if (isRubi == false) {
+			if (!isRubi) {
 				baseindent = (short)indent;
 			}
 		}
@@ -302,7 +303,7 @@ public class TextManager {
 		public void appendText(char code) {
 			textbuff.append(code);
 			linecolumn++;
-			if (isRubi == false) { 
+			if (!isRubi) {
     			// 本文の位置を設定
     			textcolumn ++;
 			}
@@ -321,7 +322,7 @@ public class TextManager {
 		}
 
 		public void setRubiStart() {
-			if (isRubi == false && rubipos < textbuff.length()) {
+			if (!isRubi && rubipos < textbuff.length()) {
         		if (tx_st < rubipos) {
         			// ルビ対象よりも前の部分を登録
         			TextBlock tb = new TextBlock(tx_st, rubipos - tx_st);
@@ -336,7 +337,7 @@ public class TextManager {
     	}
 
 		public void setRubiTarget() {
-			if (isRubi == false) {
+			if (!isRubi) {
 				// ｜はルビ開始位置の指定なのでコピーしない
 				rubipos = textbuff.length();
 				isRubiSet = true;
@@ -348,7 +349,7 @@ public class TextManager {
 		 * @param newchartype 文字種
 		 */
 		public void checkRubiTarget(int newchartype) {
-			if (isRubi == false && isRubiSet == false) {
+			if (!isRubi && !isRubiSet) {
 				// テキストモードかつルビ位置指定なし
 				if (chartype != newchartype) {
 					// 漢字/非漢字の切り替わりで位置記憶
@@ -365,7 +366,7 @@ public class TextManager {
 			int ed = textbuff.length();
 			TextBlock tb = null;
 
-			if (isRubi == true) {
+			if (isRubi) {
 				// ルビ
 				if (rb_st < ed) {
 					// ルビの文字列がある
@@ -419,13 +420,14 @@ public class TextManager {
 		/**
 		 * 行の切り替え
 		 */
-		public void setNewLine() {
+		@SuppressLint("SuspiciousIndentation")
+        public void setNewLine() {
 			// 行変わりで状態を初期化
 			textblocks = new ArrayList<TextBlock>();
 			extdatas = null;
 			stylelist = null;
 			chartype = CHARTYPE_INIT;
-    		currentindent = baseindent;	// 次の行のインデント設定
+			currentindent = baseindent;	// 次の行のインデント設定
 			tx_st = rubipos = textbuff.length();
 			isRubiSet = false; // ルビ開始位置の明示的な指定
 			isRubi = false;
@@ -1004,7 +1006,7 @@ public class TextManager {
 		float sum = 0.0f;
 		int cnt;
 
-		float widths[] = mFontWidth[isText ? 0 : 1];
+		float[] widths = mFontWidth[isText ? 0 : 1];
 		// int i = 0;
 		for (int i = 0 ; i < len ; i += cnt) {
 			if (mAscMode != ASC_NORMAL && textbuff[idx + i] < 0x80) {
@@ -1064,7 +1066,7 @@ public class TextManager {
 				}
 			}
 
-			float result[] = new float[tl_adj];
+			float[] result = new float[tl_adj];
 			mTextPaint.getTextWidths(textbuff, ti, tl_adj, result);
 			// 先頭から詰める
 			float sum = 0.0f;
@@ -2127,9 +2129,7 @@ public class TextManager {
 
 			char[] intext;
 			if (!outputStr.isEmpty()) {
-				if (debug) {
-					Log.d(TAG, "formatTextFile: intext=\n" + outputStr.substring(0, Math.min(500, outputStr.length())));
-				}
+				if (debug) {Log.d(TAG, "formatTextFile: intext=\n" + outputStr.substring(0, Math.min(500, outputStr.length())));}
 				intext = outputStr.toCharArray();
 				outputStr = null;
 			} else {
@@ -3443,7 +3443,7 @@ public class TextManager {
 					else if (code == '》') {
 						rubi = false;
 					}
-					else if (rubi == false) {
+					else if (!rubi) {
 						cnt++;
 					}
 				}
@@ -3534,7 +3534,7 @@ public class TextManager {
 		if (szpos >= 2) {
 			// 面区点コードを数値化
 			int seppos;
-			String work[] = new String[3];
+			String[] work = new String[3];
 
 			szpos += 2; // 水準の次へ
 			// 面番号
@@ -5318,7 +5318,7 @@ public class TextManager {
 	}
 
 	private int[] analyzeTag(String comment) {
-		int result[] = { COMMENT_NONE, 0, 0 };
+		int[] result = { COMMENT_NONE, 0, 0 };
 		int size = comment.length();
 		if (size <= 5 || !comment.substring(0, 4).equals("<img")) {
 			// コメントになってない
@@ -5431,7 +5431,7 @@ public class TextManager {
 		int textcolumn3 = 0;
 		int prevchartype = CHARTYPE_INIT;
 		
-		while (mRunningFlag == true) {
+		while (mRunningFlag) {
 			if (inpos < size - 1 && inbuff[inpos] == '［' && inbuff[inpos + 1] == '＃') {
 				// 注釈は外字のみ処理する
 				int skipcnt = skipComment(inbuff, inpos, inbuff.length - inpos);
@@ -5555,7 +5555,7 @@ public class TextManager {
 				if (skipcnt > 0) {
 					// 本文のときのみ
 					String comment = new String(inbuff, inpos, skipcnt);
-					int commentResult[] = analyzeTag(comment);
+					int[] commentResult = analyzeTag(comment);
 					int cmd = commentResult[0];
 					int param = commentResult[1];
 					if (cmd == COMMENT_PICTURE) {
@@ -6031,7 +6031,7 @@ public class TextManager {
 	 */
 	private int loadBitmap(String filename, boolean isCharacter) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "loadBitmap: 開始します. filename=" + filename + ",  isCharacter=" + isCharacter + ", mFileType=" + (mFileType == 6 ? "FILETYPE_EPUB" : "FILETYPE_TXT"));}
+		if (debug) {Log.d(TAG, "loadBitmap: 開始します. filename=" + filename + ", isCharacter=" + isCharacter + ", mFileType=" + (mFileType == 6 ? "FILETYPE_EPUB" : "FILETYPE_TXT"));}
 		//if (debug) {DEF.StackTrace(TAG, "loadBitmap: ");}
 
 		DEF.sendMessage(mHandler, DEF.HMSG_SUB_MESSAGE, mPicArray.size(), 0, mActivity.getString(R.string.imageParsing));
@@ -6040,9 +6040,6 @@ public class TextManager {
 			DEF.sendMessage(mHandler, DEF.HMSG_SUB_MESSAGE, 0, 0, "");
 			return -1;
 		}
-
-		// BitmapFactory.Options option = new BitmapFactory.Options();
-		// option.inJustDecodeBounds = true;
 
 		Point pt = new Point(0, 0);
 		String textpath = "";
@@ -6077,6 +6074,7 @@ public class TextManager {
 				else {
 					if (debug) {Log.d(TAG, "loadBitmap: ARCです. mTextPath=" + mTextPath + ",  filename=" + DEF.relativePath(mActivity, mTextFile, filename));}
 					mImageMgr.getImageSize(DEF.relativePath(mActivity, mTextFile, filename), pt);
+					textpath = mTextPath;
 				}
 			}
 		} catch (IOException e) {

@@ -8,9 +8,15 @@ import src.comitton.common.DEF;
 import src.comitton.fileaccess.FileAccess;
 import src.comitton.fileview.data.FileData;
 import src.comitton.dialog.LoadingDialog;
+import src.comitton.imageview.ImageManager;
+import src.comitton.textview.TextManager;
+import src.comitton.config.SetTextActivity;
+import src.comitton.imageview.MyImageView;
+
+import android.graphics.Point;
+import android.view.WindowMetrics;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -20,6 +26,8 @@ import android.os.Handler.Callback;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("DefaultLocale")
 public class FileSelectList implements Runnable, Callback, DialogInterface.OnDismissListener {
@@ -46,11 +54,39 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	public LoadingDialog mDialog;
 	private Handler mHandler;
 	private Handler mActivityHandler;
-	private Activity mActivity;
-	private SharedPreferences mSp;
+	private static AppCompatActivity mActivity;
+	private static SharedPreferences mSp;
+	private ImageManager mImageMgr = null;
+	private TextManager mTextMgr;
 	private Thread mThread;
+	private MyImageView mImageView = null;
 
-	public FileSelectList(Handler handler, Activity activity, SharedPreferences sp) {
+	private static float mDensity;
+	private static int mHeadSizeOrg;
+	private static int mBodySizeOrg;
+	private static int mRubiSizeOrg;
+	private static int mInfoSizeOrg;
+	private static int mMarginWOrg;
+	private static int mMarginHOrg;
+
+	private static int mPaperSel;
+	private static int mTextWidth;
+	private static int mTextHeight;
+	private static int mHeadSize;
+	private static int mBodySize;
+	private static int mRubiSize;
+	private static int mInfoSize;
+	private static int mPicSize;
+	private static int mSpaceW;
+	private static int mSpaceH;
+	private static int mMarginW;
+	private static int mMarginH;
+
+	private static int mAscMode;	// 半角の表示方法
+	private static String mFontFile;
+	private static boolean mChangeTextSize = false;
+
+	public FileSelectList(Handler handler, AppCompatActivity activity, SharedPreferences sp) {
 		mActivityHandler = handler;
 		mHandler = new Handler(this);
 		mActivity = activity;
@@ -113,11 +149,78 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 		return;
 	}
 
+	public static void SetReadConfig(SharedPreferences msp, TextManager manager)	{
+		mSpaceW = SetTextActivity.getSpaceW(msp);
+		mSpaceH = SetTextActivity.getSpaceH(msp);
+		mHeadSizeOrg = SetTextActivity.getFontTop(msp);	// 見出し
+		mBodySizeOrg = SetTextActivity.getFontBody(msp);	// 本文
+		mRubiSizeOrg = SetTextActivity.getFontRubi(msp);	// ルビ
+		mInfoSizeOrg = SetTextActivity.getFontInfo(msp);	// ページ情報など
+		mMarginWOrg = SetTextActivity.getMarginW(msp);	// 左右余白(設定値)
+		mMarginHOrg = SetTextActivity.getMarginH(msp);	// 上下余白(設定値)
+		mDensity = mActivity.getResources().getDisplayMetrics().scaledDensity;
+		mHeadSize = DEF.calcFontPix(mHeadSizeOrg, mDensity);	// 見出し
+		mBodySize = DEF.calcFontPix(mBodySizeOrg, mDensity);	// 本文
+		mRubiSize = DEF.calcFontPix(mRubiSizeOrg, mDensity);	// ルビ
+		mInfoSize = DEF.calcFontPix(mInfoSizeOrg, mDensity);	// ページ情報など
+		mPicSize = SetTextActivity.getPicSize(msp);	// 挿絵サイズ
+
+		mMarginW = DEF.calcDispMargin(mMarginWOrg);				// 左右余白
+		mMarginH = mInfoSize + DEF.calcDispMargin(mMarginHOrg);	// 上下余白
+		mAscMode = SetTextActivity.getAscMode(msp);
+		String fontname = SetTextActivity.getFontName(msp);
+		if (fontname != null && fontname.length() > 0) {
+			String path = DEF.getFontDirectory();
+			mFontFile = path + fontname;
+		}
+		else {
+			mFontFile = null;
+		}
+		mPaperSel = SetTextActivity.getPaper(msp); // 用紙サイズ
+		if (mPaperSel == DEF.PAPERSEL_SCREEN) {
+			int cx;
+			int cy;
+			if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
+				Point point = new Point();
+				mActivity.getWindowManager().getDefaultDisplay().getRealSize(point);
+				cx = point.x;
+				cy = point.y;
+			}else{
+				WindowMetrics wm = mActivity.getWindowManager().getCurrentWindowMetrics();
+				cx = wm.getBounds().width();
+				cy = wm.getBounds().height();
+			}
+
+			if (cx < cy) {
+				mTextWidth = cx;
+				mTextHeight = cy;
+			}
+			else {
+				mTextWidth = cy;
+				mTextHeight = cx;
+			}
+		}
+		else {
+			mTextWidth = DEF.PAPERSIZE[mPaperSel][0];
+			mTextHeight = DEF.PAPERSIZE[mPaperSel][1];
+		}
+		manager.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
+	}
+
+	public static void ChangeTextSize()
+	{
+		mChangeTextSize = true;
+	}
+
 	@Override
 	public void run() {
 		boolean debug = false;
 		String name;
+		int maxpage;
 		int state;
+		long size;
+		long date;
+		long nowdate;
 		boolean hit;
 
 		Thread thread = mThread;
@@ -179,30 +282,237 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 			for (int i = fileList.size() - 1; i >= 0; i--) {
 
 				name = fileList.get(i).getName();
-				uri = DEF.relativePath(mActivity, currentPath, fileList.get(i).getName());
+				uri = DEF.relativePath(mActivity, currentPath, name);
+
+				if (fileList.get(i).getType() == FileData.FILETYPE_TXT) {
+					maxpage = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
+					state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+					if	(state > 0)	{
+						nowdate = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#date", DEF.PAGENUMBER_UNREAD);
+						date = fileList.get(i).getDate();
+						if ((nowdate != ((date / 1000))) || (mChangeTextSize))	{
+							int openmode = 0;
+							// ファイルリストの読み込み
+							openmode = ImageManager.OPENMODE_TEXTVIEW;
+							mImageMgr = new ImageManager(this.mActivity, currentPath, "", mUser, mPass, 0, mHandler, mHidden, openmode, 1);
+							mImageMgr.LoadImageList(0, 0, 0);
+							mTextMgr = new TextManager(mImageMgr, name, mUser, mPass, mHandler, mActivity, FileData.FILETYPE_TXT);
+							SetReadConfig(mSp, mTextMgr);
+							maxpage = mTextMgr.length();
+							SharedPreferences.Editor ed = mSp.edit();
+							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", maxpage);
+							ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
+							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
+							ed.apply();
+							if (maxpage == DEF.PAGENUMBER_NONE) {
+								state = DEF.PAGENUMBER_UNREAD;
+								size = DEF.PAGENUMBER_NONE;
+							} else if (state >= maxpage) {
+								state = DEF.PAGENUMBER_READ;
+								size = maxpage;
+							} else {
+								size = maxpage;
+							}
+						}
+						else	{
+							if (maxpage == DEF.PAGENUMBER_NONE) {
+								state = DEF.PAGENUMBER_UNREAD;
+								size = DEF.PAGENUMBER_NONE;
+							} else if (state >= maxpage) {
+								state = DEF.PAGENUMBER_READ;
+								size = maxpage;
+							} else {
+								size = maxpage;
+							}
+						}
+						fileList.get(i).setSize(size);
+					}
+					fileList.get(i).setState(state);
+				}
 
 				if (fileList.get(i).getType() == FileData.FILETYPE_ARC
-						|| fileList.get(i).getType() == FileData.FILETYPE_PDF
-						|| fileList.get(i).getType() == FileData.FILETYPE_TXT
-						|| fileList.get(i).getType() == FileData.FILETYPE_DIR) {
-					state = (int)mSp.getFloat(DEF.createUrl(uri, mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
-					if (state == DEF.PAGENUMBER_UNREAD) {
-						state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+						|| fileList.get(i).getType() == FileData.FILETYPE_PDF) {
+					maxpage = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
+					state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+					fileList.get(i).setState(state);
+					if	(state > 0)	{
+						nowdate = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#date", DEF.PAGENUMBER_UNREAD);
+						date = fileList.get(i).getDate();
+						if (nowdate != ((date / 1000)))	{
+							int openmode = 0;
+							// ファイルリストの読み込み
+							openmode = ImageManager.OPENMODE_VIEW;
+							// 設定の読み込み
+							mImageMgr = new ImageManager(this.mActivity, currentPath, name, mUser, mPass, 0, mHandler, mHidden, openmode, 1);
+							mImageMgr.LoadImageList(0, 0, 0);
+							maxpage = mImageMgr.length();
+							SharedPreferences.Editor ed = mSp.edit();
+							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", maxpage);
+							ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
+							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
+							ed.apply();
+							if (maxpage == DEF.PAGENUMBER_NONE) {
+								state = DEF.PAGENUMBER_UNREAD;
+								size = DEF.PAGENUMBER_NONE;
+							} else if (state >= (maxpage- 1)) {
+								state = DEF.PAGENUMBER_READ;
+								size = maxpage - 1;
+							} else {
+								size = maxpage - 1;
+							}
+						}
+						else	{
+							if (maxpage == DEF.PAGENUMBER_NONE) {
+								state = DEF.PAGENUMBER_UNREAD;
+								size = DEF.PAGENUMBER_NONE;
+							} else if (state >= (maxpage - 1)) {
+								state = DEF.PAGENUMBER_READ;
+								size = maxpage - 1;
+							} else {
+								size = maxpage - 1;
+							}
+						}
+						fileList.get(i).setSize(size);
 					}
 					fileList.get(i).setState(state);
 				}
 				if (fileList.get(i).getType() == FileData.FILETYPE_EPUB) {
 					if (DEF.TEXT_VIEWER == mEpubViewer) {
-                        state = (int)mSp.getFloat(DEF.createUrl(uri + "META-INF/container.xml", mUser, mPass) + "#pageRate", (float)DEF.PAGENUMBER_UNREAD);
-                        if (state == DEF.PAGENUMBER_UNREAD) {
-                            state = mSp.getInt(DEF.createUrl(uri + "META-INF/container.xml", mUser, mPass), DEF.PAGENUMBER_UNREAD);
-                        }
+						maxpage = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "META-INF/container.xml" + "#maxpage", DEF.PAGENUMBER_NONE);
+						state = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "META-INF/container.xml", DEF.PAGENUMBER_UNREAD);
+						if	(state > 0)	{
+							nowdate = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#date", DEF.PAGENUMBER_UNREAD);
+							date = fileList.get(i).getDate();
+							if ((nowdate != ((date / 1000))) || (mChangeTextSize))	{
+								int openmode = 0;
+								// ファイルリストの読み込み
+								openmode = ImageManager.OPENMODE_TEXTVIEW;
+								if (debug) {Log.d(TAG,"run: mUri + mPath=" + mURI + mPath + ", name=" + name);}
+								mImageMgr = new ImageManager(this.mActivity, mURI + mPath, name, mUser, mPass, 0, mHandler, mHidden, openmode, 1);
+								mImageMgr.LoadImageList(0, 0, 0);
+								mTextMgr = new TextManager(mImageMgr, "META-INF/container.xml", mUser, mPass, mHandler, mActivity, FileData.FILETYPE_EPUB);
+								SetReadConfig(mSp, mTextMgr);
+								maxpage = mTextMgr.length();
+								SharedPreferences.Editor ed = mSp.edit();
+								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "META-INF/container.xml" + "#maxpage", maxpage);
+								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "META-INF/container.xml", state);
+								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
+								ed.apply();
+								if (maxpage == DEF.PAGENUMBER_NONE) {
+									state = DEF.PAGENUMBER_UNREAD;
+									size = DEF.PAGENUMBER_NONE;
+								} else if (state >= (maxpage - 1)) {
+									state = DEF.PAGENUMBER_READ;
+									size = maxpage;
+								} else {
+									size = maxpage;
+								}
+							}
+							else	{
+								if (maxpage == DEF.PAGENUMBER_NONE) {
+									state = DEF.PAGENUMBER_UNREAD;
+									size = DEF.PAGENUMBER_NONE;
+								} else if (state >= (maxpage - 1)) {
+									state = DEF.PAGENUMBER_READ;
+									size = maxpage;
+								} else {
+									size = maxpage;
+								}
+							}
+							fileList.get(i).setSize(size);
+						}
 					}
 					else {
-                        state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+						maxpage = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
+						state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+						if	(state > 0)	{
+							nowdate = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#date", DEF.PAGENUMBER_UNREAD);
+							date = fileList.get(i).getDate();
+							if ((nowdate != ((date / 1000))) || (mChangeTextSize))	{
+								int openmode = 0;
+								// ファイルリストの読み込み
+								openmode = ImageManager.OPENMODE_VIEW;
+								mImageMgr = new ImageManager(this.mActivity, currentPath, "", mUser, mPass, 0, mHandler, mHidden, openmode, 1);
+								mImageMgr.LoadImageList(0, 0, 0);
+								maxpage = mImageMgr.length();
+								SharedPreferences.Editor ed = mSp.edit();
+								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", maxpage);
+								ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
+								ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
+								ed.apply();
+								if (maxpage == DEF.PAGENUMBER_NONE) {
+									state = DEF.PAGENUMBER_UNREAD;
+									size = DEF.PAGENUMBER_NONE;
+								} else if (state >= (maxpage - 1)) {
+									state = DEF.PAGENUMBER_READ;
+									size = maxpage - 1;
+								} else {
+									size = maxpage - 1;
+								}
+							}
+							else {
+								if (maxpage == DEF.PAGENUMBER_NONE) {
+									state = DEF.PAGENUMBER_UNREAD;
+									size = DEF.PAGENUMBER_NONE;
+								} else if (state >= (maxpage - 1)) {
+									state = DEF.PAGENUMBER_READ;
+									size = maxpage - 1;
+								} else {
+									size = maxpage - 1;
+								}
+							}
+							fileList.get(i).setSize(size);
+						}
 					}
 					fileList.get(i).setState(state);
 				}
+
+				if (fileList.get(i).getType() == FileData.FILETYPE_DIR) {
+					maxpage = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
+					state = mSp.getInt(DEF.createUrl(uri, mUser, mPass), DEF.PAGENUMBER_UNREAD);
+					fileList.get(i).setState(state);
+					if	(state > 0)	{
+						nowdate = mSp.getInt(DEF.createUrl(uri, mUser, mPass) + "#date", DEF.PAGENUMBER_UNREAD);
+						date = fileList.get(i).getDate();
+						if (nowdate != ((date / 1000)))	{
+							int openmode = 0;
+							// ファイルリストの読み込み
+							openmode = ImageManager.OPENMODE_VIEW;
+							// 設定の読み込み
+							mImageMgr = new ImageManager(this.mActivity, currentPath, name, mUser, mPass, 0, mHandler, mHidden, openmode, 1);
+							mImageMgr.LoadImageList(0, 0, 0);
+							maxpage = mImageMgr.length();
+							SharedPreferences.Editor ed = mSp.edit();
+							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#maxpage", maxpage);
+							ed.putInt(DEF.createUrl(uri, mUser, mPass), state);
+							ed.putInt(DEF.createUrl(uri, mUser, mPass) + "#date", (int)((date / 1000)));
+							ed.apply();
+							if (maxpage == DEF.PAGENUMBER_NONE) {
+								state = DEF.PAGENUMBER_UNREAD;
+								size = DEF.PAGENUMBER_NONE;
+							} else if (state >= (maxpage- 1)) {
+								state = DEF.PAGENUMBER_READ;
+								size = maxpage - 1;
+							} else {
+								size = maxpage - 1;
+							}
+						}
+						else	{
+							if (maxpage == DEF.PAGENUMBER_NONE) {
+								state = DEF.PAGENUMBER_UNREAD;
+								size = DEF.PAGENUMBER_NONE;
+							} else if (state >= (maxpage - 1)) {
+								state = DEF.PAGENUMBER_READ;
+								size = maxpage - 1;
+							} else {
+								size = maxpage - 1;
+							}
+						}
+						fileList.get(i).setSize(size);
+					}
+					fileList.get(i).setState(state);
+				}
+
 				if (fileList.get(i).getType() == FileData.FILETYPE_IMG){
 					state = DEF.PAGENUMBER_NONE;
 					fileList.get(i).setState(state);
@@ -252,6 +562,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 					return;
 				}
 			}
+			mChangeTextSize = false;
 		}
 		catch (Exception e) {
 			String s = null;

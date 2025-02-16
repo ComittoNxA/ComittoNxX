@@ -10,8 +10,8 @@
 
 #include "Image.h"
 
-extern WORD	**gLinesPtr[];
-extern WORD	**gSclLinesPtr[];
+extern LONG	**gLinesPtr[];
+extern LONG	**gSclLinesPtr[];
 extern int	gCancel[];
 
 extern int			gMaxThreadNum;
@@ -71,12 +71,12 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 	int		rr, gg, bb;
 	int		yd3, yd2;
 
-	WORD *buffptr = nullptr;
+    LONG *buffptr = nullptr;
 
-	WORD *orgbuff1;
-	WORD *orgbuff2;
-	WORD *orgbuff3;
-	WORD *orgbuff4;
+    LONG *orgbuff1;
+    LONG *orgbuff2;
+    LONG *orgbuff3;
+    LONG *orgbuff4;
 
 	int *x_index = gSclIntParam1[index];
 	int *x_pos   = gSclIntParam2[index];
@@ -123,22 +123,22 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 			hx4 = gCubicSplines[xi].h4;
 
 			rr = (
-				hy1 * (hx1 * RGB565_RED_256(orgbuff1[bx-1]) + hx2 * RGB565_RED_256(orgbuff1[bx+0]) + hx3 * RGB565_RED_256(orgbuff1[bx+1]) + hx4 * RGB565_RED_256(orgbuff1[bx+2])) +
-				hy2 * (hx1 * RGB565_RED_256(orgbuff2[bx-1]) + hx2 * RGB565_RED_256(orgbuff2[bx+0]) + hx3 * RGB565_RED_256(orgbuff2[bx+1]) + hx4 * RGB565_RED_256(orgbuff2[bx+2])) +
-				hy3 * (hx1 * RGB565_RED_256(orgbuff3[bx-1]) + hx2 * RGB565_RED_256(orgbuff3[bx+0]) + hx3 * RGB565_RED_256(orgbuff3[bx+1]) + hx4 * RGB565_RED_256(orgbuff3[bx+2])) +
-				hy4 * (hx1 * RGB565_RED_256(orgbuff4[bx-1]) + hx2 * RGB565_RED_256(orgbuff4[bx+0]) + hx3 * RGB565_RED_256(orgbuff4[bx+1]) + hx4 * RGB565_RED_256(orgbuff4[bx+2]))
+				hy1 * (hx1 * RGB888_RED(orgbuff1[bx-1]) + hx2 * RGB888_RED(orgbuff1[bx+0]) + hx3 * RGB888_RED(orgbuff1[bx+1]) + hx4 * RGB888_RED(orgbuff1[bx+2])) +
+				hy2 * (hx1 * RGB888_RED(orgbuff2[bx-1]) + hx2 * RGB888_RED(orgbuff2[bx+0]) + hx3 * RGB888_RED(orgbuff2[bx+1]) + hx4 * RGB888_RED(orgbuff2[bx+2])) +
+				hy3 * (hx1 * RGB888_RED(orgbuff3[bx-1]) + hx2 * RGB888_RED(orgbuff3[bx+0]) + hx3 * RGB888_RED(orgbuff3[bx+1]) + hx4 * RGB888_RED(orgbuff3[bx+2])) +
+				hy4 * (hx1 * RGB888_RED(orgbuff4[bx-1]) + hx2 * RGB888_RED(orgbuff4[bx+0]) + hx3 * RGB888_RED(orgbuff4[bx+1]) + hx4 * RGB888_RED(orgbuff4[bx+2]))
 				) / 256 / 256;
 			gg = (
-				hy1 * (hx1 * RGB565_GREEN_256(orgbuff1[bx-1]) + hx2 * RGB565_GREEN_256(orgbuff1[bx+0]) + hx3 * RGB565_GREEN_256(orgbuff1[bx+1]) + hx4 * RGB565_GREEN_256(orgbuff1[bx+2])) +
-				hy2 * (hx1 * RGB565_GREEN_256(orgbuff2[bx-1]) + hx2 * RGB565_GREEN_256(orgbuff2[bx+0]) + hx3 * RGB565_GREEN_256(orgbuff2[bx+1]) + hx4 * RGB565_GREEN_256(orgbuff2[bx+2])) +
-				hy3 * (hx1 * RGB565_GREEN_256(orgbuff3[bx-1]) + hx2 * RGB565_GREEN_256(orgbuff3[bx+0]) + hx3 * RGB565_GREEN_256(orgbuff3[bx+1]) + hx4 * RGB565_GREEN_256(orgbuff3[bx+2])) +
-				hy4 * (hx1 * RGB565_GREEN_256(orgbuff4[bx-1]) + hx2 * RGB565_GREEN_256(orgbuff4[bx+0]) + hx3 * RGB565_GREEN_256(orgbuff4[bx+1]) + hx4 * RGB565_GREEN_256(orgbuff4[bx+2]))
+				hy1 * (hx1 * RGB888_GREEN(orgbuff1[bx-1]) + hx2 * RGB888_GREEN(orgbuff1[bx+0]) + hx3 * RGB888_GREEN(orgbuff1[bx+1]) + hx4 * RGB888_GREEN(orgbuff1[bx+2])) +
+				hy2 * (hx1 * RGB888_GREEN(orgbuff2[bx-1]) + hx2 * RGB888_GREEN(orgbuff2[bx+0]) + hx3 * RGB888_GREEN(orgbuff2[bx+1]) + hx4 * RGB888_GREEN(orgbuff2[bx+2])) +
+				hy3 * (hx1 * RGB888_GREEN(orgbuff3[bx-1]) + hx2 * RGB888_GREEN(orgbuff3[bx+0]) + hx3 * RGB888_GREEN(orgbuff3[bx+1]) + hx4 * RGB888_GREEN(orgbuff3[bx+2])) +
+				hy4 * (hx1 * RGB888_GREEN(orgbuff4[bx-1]) + hx2 * RGB888_GREEN(orgbuff4[bx+0]) + hx3 * RGB888_GREEN(orgbuff4[bx+1]) + hx4 * RGB888_GREEN(orgbuff4[bx+2]))
 				) / 256 / 256;
 			bb = (
-				hy1 * (hx1 * RGB565_BLUE_256(orgbuff1[bx-1]) + hx2 * RGB565_BLUE_256(orgbuff1[bx+0]) + hx3 * RGB565_BLUE_256(orgbuff1[bx+1]) + hx4 * RGB565_BLUE_256(orgbuff1[bx+2])) +
-				hy2 * (hx1 * RGB565_BLUE_256(orgbuff2[bx-1]) + hx2 * RGB565_BLUE_256(orgbuff2[bx+0]) + hx3 * RGB565_BLUE_256(orgbuff2[bx+1]) + hx4 * RGB565_BLUE_256(orgbuff2[bx+2])) +
-				hy3 * (hx1 * RGB565_BLUE_256(orgbuff3[bx-1]) + hx2 * RGB565_BLUE_256(orgbuff3[bx+0]) + hx3 * RGB565_BLUE_256(orgbuff3[bx+1]) + hx4 * RGB565_BLUE_256(orgbuff3[bx+2])) +
-				hy4 * (hx1 * RGB565_BLUE_256(orgbuff4[bx-1]) + hx2 * RGB565_BLUE_256(orgbuff4[bx+0]) + hx3 * RGB565_BLUE_256(orgbuff4[bx+1]) + hx4 * RGB565_BLUE_256(orgbuff4[bx+2]))
+				hy1 * (hx1 * RGB888_BLUE(orgbuff1[bx-1]) + hx2 * RGB888_BLUE(orgbuff1[bx+0]) + hx3 * RGB888_BLUE(orgbuff1[bx+1]) + hx4 * RGB888_BLUE(orgbuff1[bx+2])) +
+				hy2 * (hx1 * RGB888_BLUE(orgbuff2[bx-1]) + hx2 * RGB888_BLUE(orgbuff2[bx+0]) + hx3 * RGB888_BLUE(orgbuff2[bx+1]) + hx4 * RGB888_BLUE(orgbuff2[bx+2])) +
+				hy3 * (hx1 * RGB888_BLUE(orgbuff3[bx-1]) + hx2 * RGB888_BLUE(orgbuff3[bx+0]) + hx3 * RGB888_BLUE(orgbuff3[bx+1]) + hx4 * RGB888_BLUE(orgbuff3[bx+2])) +
+				hy4 * (hx1 * RGB888_BLUE(orgbuff4[bx-1]) + hx2 * RGB888_BLUE(orgbuff4[bx+0]) + hx3 * RGB888_BLUE(orgbuff4[bx+1]) + hx4 * RGB888_BLUE(orgbuff4[bx+2]))
 				) / 256 / 256;
 
 			// 0～255に収める
@@ -146,19 +146,7 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 			gg = LIMIT_RGB(gg);
 			bb = LIMIT_RGB(bb);
 
-			// 切り捨ての値を分散
-			if (rr < 0xF8) {
-				rr = rr + gDitherX_3bit[rr & 0x07][(xx + yd3) & 0x07];
-			}
-			if (gg < 0xFC) {
-				gg = gg + gDitherX_2bit[gg & 0x03][(xx + yd2) & 0x03];
-			}
-			if (bb < 0xF8) {
-				bb = bb + gDitherX_3bit[bb & 0x07][(xx + yd3) & 0x07];
-			}
-
-			// buffptr[xx] = REMAKE565(rr, gg, bb);
-			buffptr[xx] = MAKE565(rr, gg, bb);
+			buffptr[xx] = MAKE8888(rr, gg, bb);
 		}
 		// 補完用の余裕
 		buffptr[-2] = buffptr[0];

@@ -109,7 +109,7 @@ public class ThumbnailPreference extends DialogPreference implements SeekBar.OnS
 		Editor ed = mSP.edit();
 		ed.putInt(DEF.KEY_THUMBSIZEW, mSeekBar[0].getProgress());
 		ed.putInt(DEF.KEY_THUMBSIZEH, mSeekBar[1].getProgress());
-		ed.commit();
+		ed.apply();
 	}
 
 	// 幅情報

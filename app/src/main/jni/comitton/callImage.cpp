@@ -20,10 +20,10 @@ long		gLoadBuffSize[MAX_BUFFER_INDEX] = {0};
 /** 画像ファイルを受け取るためのバッファー */
 char		*gLoadBuffer[MAX_BUFFER_INDEX] = {nullptr};
 /** ピクセルデータの保存先アドレス */
-WORD		**gLinesPtr[MAX_BUFFER_INDEX];
-WORD		**gDsLinesPtr[MAX_BUFFER_INDEX];
+LONG		**gLinesPtr[MAX_BUFFER_INDEX];
+LONG		**gDsLinesPtr[MAX_BUFFER_INDEX];
 /** サイズ変更時ピクセルデータの一時保存先アドレス */
-WORD		**gSclLinesPtr[MAX_BUFFER_INDEX];
+LONG		**gSclLinesPtr[MAX_BUFFER_INDEX];
 
 long		gLoadFileSize[MAX_BUFFER_INDEX];
 long		gLoadFilePos[MAX_BUFFER_INDEX];
@@ -646,11 +646,6 @@ JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ImageGetBitmap (JNIE
         return -3;
     }
 
-    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-        LOGE("callImage: ImageGetBitmap: Bitmap format is not RGB_565 !");
-        return -4;
-    }
-
     if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
         LOGE("callImage: ImageGetBitmap: AndroidBitmap_lockPixels() failed ! error=%d", ret);
         return -5;
@@ -910,11 +905,6 @@ JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ImageDraw (JNIEnv *e
 		return -2;
 	}
 
-	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("callImage: ImageDraw : Bitmap format is not RGB_565 !");
-		return -3;
-	}
-
 	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {
 		LOGE("callImage: ImageDraw : AndroidBitmap_lockPixels() failed ! error=%d", ret);
 		return -4;
@@ -968,11 +958,6 @@ JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ImageScaleDraw (JNIE
 	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
 		LOGE("callImage: ImageScaleDraw : AndroidBitmap_getInfo() failed ! error=%d", ret);
 		return -3;
-	}
-
-	if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-		LOGE("callImage: ImageScaleDraw : Bitmap format is not RGB_565 !");
-		return -4;
 	}
 
 	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &canvas)) < 0) {

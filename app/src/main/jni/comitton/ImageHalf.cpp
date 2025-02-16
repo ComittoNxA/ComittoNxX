@@ -10,7 +10,7 @@
 #include "Image.h"
 
 extern IMAGEDATA	*gImageData[];
-extern WORD			**gLinesPtr[];
+extern LONG			**gLinesPtr[];
 
 extern BUFFMNG		*gBuffMng[];
 extern long			gBuffNum[];
@@ -27,13 +27,13 @@ int ImageHalf(int index, int Page, int Half, int Count, int OrgWidth, int OrgHei
 	int buffindex;
 	int buffpos = 0;
 	int linesize;
-	WORD *buffptr = nullptr;
+	LONG *buffptr = nullptr;
 
 	// 使用するバッファを保持
 	int StartX;
 	int HalfWidth;
 
-	WORD *orgbuff1;
+	LONG *orgbuff1;
 
 	int		xx;	// サイズ変更後のx座標
 	int		yy;	// サイズ変更後のy座標

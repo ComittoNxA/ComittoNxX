@@ -9,10 +9,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import src.comitton.common.DEF;
 import android.annotation.SuppressLint;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
@@ -34,6 +40,7 @@ import android.webkit.WebViewClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import jp.dip.muracoro.comittonx.R;
 
@@ -44,6 +51,8 @@ public class Information implements DialogInterface.OnDismissListener {
 	public static boolean mIsOpened = false;
 	private AppCompatActivity mActivity;
 	private Dialog mDialog;
+	private AlertDialog mDownLoadsDialog;
+	private String mDownloadsMessage;
 
 	public String mRecentVersion = null;
 	public String mRecentHtml = null;
@@ -74,19 +83,86 @@ public class Information implements DialogInterface.OnDismissListener {
 		}
 	}
 
+	public void showDownloads(Handler handler) {
+		if (!mIsOpened) {
+			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mActivity, R.style.MyDialog);
+			dialogBuilder.setTitle(R.string.downloadCountMenu);
+
+			dialogBuilder.setMessage(R.string.Connecting);
+
+			dialogBuilder.setNegativeButton(R.string.btnOK, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// dialog.cancel();
+				}
+			});
+			mDownLoadsDialog = dialogBuilder.create();
+			mDownLoadsDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+			mDownLoadsDialog.getWindow().getDecorView().setSystemUiVisibility(
+					mActivity.getWindow().getDecorView().getSystemUiVisibility());
+			mDownLoadsDialog.show();
+			mDownLoadsDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+
+			// ダイアログ終了通知を受け取る
+			mDownLoadsDialog.setOnDismissListener(this);
+			mDownLoadsDialog.show();
+
+			DownloadsLoad downloads = new DownloadsLoad(handler);
+			Thread thread = new Thread(downloads);
+			thread.start();
+
+		}
+	}
+
+	public void setDownloadsMessage() {
+
+		if (mDownLoadsDialog != null) {
+			if (mDownloadsMessage != null) {
+				mDownLoadsDialog.setMessage(mDownloadsMessage);
+			} else {
+				mDownLoadsDialog.setMessage(mActivity.getString(R.string.NoResult));
+			}
+		}
+		else {
+			Log.e(TAG, "setDownloadsMessage: mDownLoadsDialog が null です.");
+		}
+	}
+
 	public void showRecentRelease() {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "showRecentRelease: 開始します.");}
 
 		if (!mManually) {
 			// 自動実行ならダイアログを表示した時刻を保存する
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor ed = sp.edit();
 			ed.putLong(DEF.KEY_TIME_CHECK_RELEASE, System.currentTimeMillis());
-			ed.commit();
+			ed.apply();
+		}
+		if (debug) {Log.d(TAG, "AboutDialog: AboutDialog: mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);}
+		if (debug) {Log.d(TAG, "AboutDialog: AboutDialog: BuildConfig.VERSION_NAME=" + BuildConfig.VERSION_NAME + ", DEF.BUILD_DATE=" + DEF.BUILD_DATE);}
+
+		long recent_time = 0L;
+		try {
+			// タイムゾーン(グリニッジ標準時)
+			final TimeZone DATE_TIME_ZONE = TimeZone.getTimeZone("Europe/London");
+			// 時刻の形式
+			final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+			//日時のテキストから、地域と形式の２つを使ってUNIX時間を得る
+			final SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_PATTERN);
+			format.setTimeZone(DATE_TIME_ZONE);
+			recent_time = format.parse(mRecentDate).getTime();
+		}
+		catch (ParseException e) {
+			;
 		}
 
-		if (!mRecentVersion.equals(BuildConfig.VERSION_NAME) &&  mRecentDate.substring(0, 10).replace("-", "/").compareTo(DEF.BUILD_DATE) > 0) {
+		if (debug) {Log.d(TAG, "AboutDialog: BUILD_DATE = " + (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())).format(BuildConfig.BUILD_DATE));}
+		if (debug) {Log.d(TAG, "AboutDialog: recent_time = " + (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())).format(recent_time));}
+
+		if (!mRecentVersion.equals(BuildConfig.VERSION_NAME) && recent_time > BuildConfig.BUILD_DATE) {
 			// 1.リリースバージョンとアプリのバージョンが違う
-			// 2.リリース日がアプリのビルド日より新しい
+			// 2.リリース時刻がアプリのビルド時刻より新しい
 			// ならダイアログを表示する
 			mDialog = (Dialog) new RecentReleaseDialog(mActivity, R.style.MyDialog);
 			mDialog.show();
@@ -94,6 +170,9 @@ public class Information implements DialogInterface.OnDismissListener {
 	}
 
 	public void checkRecentRelease(Handler handler, boolean manually) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "checkRecentRelease: 開始します.");}
+
 		// 新しいリリースのチェック
 		mTurnOff = !manually;
 		boolean flag = false;
@@ -103,7 +182,7 @@ public class Information implements DialogInterface.OnDismissListener {
 			flag = true;
 		}
 		else if (sp.getBoolean(DEF.KEY_CHECK_RELEASE, true)) {
-			if (sp.getLong(DEF.KEY_TIME_CHECK_RELEASE, 0l) < System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1L)) {
+			if (sp.getLong(DEF.KEY_TIME_CHECK_RELEASE, 0L) < System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1L)) {
 				// 自動実行なら1日以上経過していたら実行する
 				flag = true;
 			}
@@ -264,7 +343,7 @@ public class Information implements DialogInterface.OnDismissListener {
 								SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
 								SharedPreferences.Editor ed = sp.edit();
 								ed.putBoolean(DEF.KEY_CHECK_RELEASE, false);
-								ed.commit();
+								ed.apply();
 								dismiss();
 							}
 						});
@@ -308,14 +387,14 @@ public class Information implements DialogInterface.OnDismissListener {
 			boolean debug = false;
 			boolean result = getRecentVersion();
 			if (result) {
-				if (debug) {Log.d(TAG, "AboutDialog: AboutDialog: mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);}
+				if (debug) {Log.d(TAG, "RecentVersionLoad: run: mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);}
 				// 終了通知
 				Message message = new Message();
 				message.what = DEF.HMSG_RECENT_RELEASE;
 				handler.sendMessage(message);
 			}
 			else {
-				Log.e(TAG, "RecentVersionLoad: バージョン情報の取得に失敗しました.");
+				Log.e(TAG, "RecentVersionLoad: run: バージョン情報の取得に失敗しました.");
 			}
 		}
 
@@ -361,4 +440,79 @@ public class Information implements DialogInterface.OnDismissListener {
 		}
 	}
 
+	public class DownloadsLoad implements Runnable {
+		private final Handler handler;
+
+		public DownloadsLoad(Handler handler) {
+			super();
+			this.handler = handler;
+		}
+
+		public void run() {
+			boolean debug = false;
+			if (debug) {Log.d(TAG, "DownloadsLoad: run: 開始します.");}
+			getDownloads();
+		}
+
+		private void getDownloads() {
+			boolean debug = false;
+			if (debug) {Log.d(TAG, "getDownloads: 開始します.");}
+			try {
+				URL url = new URL(DEF.APP_DOWNLOADS);
+				HttpURLConnection con = (HttpURLConnection)url.openConnection();
+				con.setRequestProperty("Accept", "application/vnd.github+json");
+				setMessage(con.getInputStream());
+			}
+			catch (MalformedURLException e) {
+				Log.e(TAG, "getDownloads: " + e.getLocalizedMessage());
+				mDownloadsMessage = mActivity.getString(R.string.GetError);
+			}
+			catch (IOException e) {
+				Log.e(TAG, "getDownloads: " + e.getLocalizedMessage());
+				mDownloadsMessage = mActivity.getString(R.string.GetError);
+			}
+			Message message = new Message();
+			message.what = DEF.HMSG_APP_DOWNLOADS;
+			handler.sendMessage(message);
+
+		}
+
+		// InputStream -> String
+		private void setMessage(InputStream is) throws IOException {
+			boolean debug = false;
+			if (debug) {Log.d(TAG, "setMessage: 開始します.");}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+			br.close();
+
+			String string = sb.toString();
+			mDownloadsMessage = "";
+
+			try {
+				JSONArray top = new JSONArray(string);
+				for (int i = 0; i < top.length(); i++) {
+					JSONObject top_child = top.getJSONObject(i);
+					mDownloadsMessage += "Version: " + top_child.getString("tag_name");
+					mDownloadsMessage += "  :  " + top_child.getString("published_at") + "\n";
+
+					JSONArray assets = top_child.getJSONArray("assets");
+					for (int j = 0; j < assets.length(); j++) {
+						JSONObject assets_child = assets.getJSONObject(j);
+						mDownloadsMessage += "    " + assets_child.getString("name");
+						mDownloadsMessage += "  :  " + assets_child.getString("download_count") + "\n";
+					}
+					mDownloadsMessage += "\n";
+				}
+
+			} catch (JSONException e) {
+				Log.e(TAG, "setMessage: " + e.getLocalizedMessage());
+				mDownloadsMessage = mActivity.getString(R.string.ParseError);
+			}
+		}
+	}
 }

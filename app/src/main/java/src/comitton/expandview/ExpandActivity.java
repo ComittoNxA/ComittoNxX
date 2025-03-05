@@ -9,6 +9,8 @@ import java.util.Comparator;
 
 import jp.dip.muracoro.comittonx.R;
 
+import src.comitton.common.Logcat;
+import src.comitton.fileview.FileSelectActivity;
 import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import src.comitton.config.SetCommonActivity;
@@ -24,11 +26,8 @@ import src.comitton.fileview.filelist.FileSelectList;
 import src.comitton.imageview.ImageManager;
 import src.comitton.textview.TextActivity;
 import src.comitton.textview.TextManager;
-import src.comitton.fileview.view.ListItemView;
 import src.comitton.fileview.view.TitleView;
 
-
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,10 +37,11 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -106,8 +106,6 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	private String mPass;
 	private String mFileName;
 	private String mText;
-	private int mPage;
-	private float mPageRate;
 	private int mCurrentPage;
 
 	private ProgressDialog mReadDialog;
@@ -202,12 +200,9 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			mPass = intent.getStringExtra("Pass");
 			mFileName = intent.getStringExtra("File"); 		// ZIP指定時
 			mText = intent.getStringExtra("Text"); 			// Textファイル
-			mPage = intent.getIntExtra("Page", DEF.PAGENUMBER_UNREAD);					// 既読ページ
-			mPageRate = intent.getFloatExtra("PageRate", (float)DEF.PAGENUMBER_UNREAD);	// 既読ページ％
 			if (debug) {Log.d(TAG, "onCreate: mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
 					+ ", mUser=" + mUser + ", mPass=" + mPass
-					+ ", mFileName=" + mFileName + ", mText=" + mText
-			+ ", mPage=" + mPage + ", mPageRate=" + mPageRate);}
+					+ ", mFileName=" + mFileName + ", mText=" + mText);}
 		}
 
 		setContentView(R.layout.serverview);
@@ -250,13 +245,11 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 					String name = file.getName();
 					int type = file.getType();
 
-					freeListView();
-
 					// 現在のパスを設定
 					mSelectIndex = position;
 					mSelectPos = 0;
 
-					if (type == FileData.FILETYPE_TXT) {
+					if (type == FileData.FILETYPE_TXT || type == FileData.FILETYPE_EPUB_SUB) {
 						// TXTファイル表示
 						Log.d(TAG, "onItemClick: openTextFile()");
 						openTextFile(name);
@@ -265,6 +258,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 						// イメージファイル表示
 						openImageFile(name);
 					}
+
+					freeListView();
 				}
 			}
 		} );
@@ -272,8 +267,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	}
 
 	public class ZipLoad implements Runnable {
-		private Handler handler;
-		private AppCompatActivity mActivity;
+		private final Handler handler;
+		private final AppCompatActivity mActivity;
 
 		public ZipLoad(Handler handler, AppCompatActivity activity) {
 			super();
@@ -434,7 +429,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 //			if (lvi != null) {
 //				mSelectPos = v.getTop();
 //			}
-			if (type == FileData.FILETYPE_EPUB || type == FileData.FILETYPE_TXT) {
+			if (type == FileData.FILETYPE_EPUB_SUB || type == FileData.FILETYPE_TXT) {
 				// TXTファイル表示
 				openTextFile(name);
 			}
@@ -447,8 +442,36 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	*/
 
 	private void openImageFile(String image) {
+		boolean debug = false;
+
 		Toast.makeText(this, image, Toast.LENGTH_SHORT).show();
+
+		if (mFileList == null) {
+			Logcat.d(debug, TAG, "mFileList=" + mFileList);
+		}
+		else {
+			Logcat.d(debug, TAG, "mFileList.size()=" + mFileList.size());
+		}
+
+		ArrayList<FileData> sortfiles = new ArrayList<FileData>(mFileList.size());
+		for (FileData fd : mFileList) {
+			if (fd.getType() == FileData.FILETYPE_IMG) {
+				sortfiles.add(fd);
+			}
+		}
+		Collections.sort(sortfiles, new FileSelectActivity.FilenameComparator());
+
+		// ソート後に現在ファイルを探す
+		FileData searchfd = new FileData(mActivity, image);
+		int index = sortfiles.indexOf(searchfd);
+		Logcat.d(TAG, "index=" + index);
+
+		Editor ed = mSharedPreferences.edit();
+		ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass), index);
+		ed.apply();
+
 		Intent intent = new Intent(ExpandActivity.this, ImageActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra("Server", mServer);
 		intent.putExtra("Uri", mURI);
 		intent.putExtra("Path", mPath);
@@ -460,13 +483,13 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	}
 
 	private void openTextFile(String text) {
-		openTextFile(text, DEF.PAGENUMBER_UNREAD, DEF.PAGENUMBER_UNREAD);
-	}
+		boolean debug = false;
+		Logcat.d(debug, TAG, "text=" + text);
 
-	private void openTextFile(String text, int page, float pageRate) {
 		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 		Intent intent;
 		intent = new Intent(ExpandActivity.this, TextActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra("Server", mServer);
 		intent.putExtra("Uri", mURI);
 		intent.putExtra("Path", mPath);
@@ -474,11 +497,10 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		intent.putExtra("Pass", mPass);
 		intent.putExtra("File", mFileName);
 		intent.putExtra("Text", text);
-		intent.putExtra("PageRate", pageRate);
-		intent.putExtra("Page", page);
 		startActivityForResult(intent, DEF.REQUEST_TEXT);
 	}
 
+	/*
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean ret = super.onCreateOptionsMenu(menu);
 		Resources res = getResources();
@@ -494,6 +516,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		menu.add(0, DEF.MENU_ONLINE, Menu.NONE, res.getString(R.string.onlineMenu)).setIcon(android.R.drawable.ic_menu_set_as);
 		return ret;
 	}
+	*/
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -503,7 +526,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		}
 		else if (id == DEF.MENU_THUMBSWT) {
 			// サムネイル表示切替
-			mThumbnail = mThumbnail ? false : true;
+			mThumbnail = !mThumbnail;
 			updateListView();
 
 			// サムネイル読み込み
@@ -515,6 +538,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			String url = res.getString(R.string.url_complist);	// 設定画面
 			Intent intent;
 			intent = new Intent(ExpandActivity.this, HelpActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.putExtra("Url", url);
 			startActivity(intent);
 		}
@@ -523,7 +547,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 	// 長押しイベント処理用クラス
 	class MyClickAdapter implements OnItemLongClickListener {
-		private int[] mOperate = { -1, -1, -1, -1 };
+		private final int[] mOperate = { -1, -1, -1, -1 };
 
 		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 			Resources res = getResources();
@@ -540,7 +564,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 			int state = filedata.getState();
 			int itemnum;
-			if (filedata.getType() == FileData.FILETYPE_TXT) {
+			if (filedata.getType() == FileData.FILETYPE_TXT || filedata.getType() == FileData.FILETYPE_EPUB_SUB) {
 				// テキストファイル長押し
 				switch (state) {
 					case -1:
@@ -559,7 +583,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			items = new String[itemnum];
 
 			int i = 0;
-			if (filedata.getType() == FileData.FILETYPE_TXT) {
+			if (filedata.getType() == FileData.FILETYPE_TXT || filedata.getType() == FileData.FILETYPE_EPUB_SUB) {
 				// テキストファイル長押し
 				if (state != DEF.PAGENUMBER_UNREAD) {
 					// 未読にする
@@ -584,7 +608,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				i++;
 			}
 
-			mListDialog = new ListDialog(mActivity, R.style.MyDialog, res.getString(R.string.opeTitle), items, -1, true, new ListDialog.ListSelectListener() {
+			mListDialog = new ListDialog(mActivity, R.style.MyDialog, res.getString(R.string.opeTitle), items, -1, new ListDialog.ListSelectListener() {
 				public void onSelectItem(int pos) {
 					boolean debug = false;
 					if (debug) {Log.d(TAG, "ListDialog: onSelectItem: 開始します.");}
@@ -621,7 +645,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 							// ここまで読んだ
 							int state = DEF.PAGENUMBER_READING;
 							for (int i = 0 ; i <= datapos ; i ++) {
-								if (mFileList.get(i).getType() != FileData.FILETYPE_TXT) {
+								if (mFileList.get(i).getType() != FileData.FILETYPE_TXT && mFileList.get(i).getType() != FileData.FILETYPE_EPUB_SUB) {
 									state ++;
 								}
 							}
@@ -672,7 +696,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 			int state = filedata.getState();
 			int itemnum;
-			if (filedata.getType() == FileData.FILETYPE_TXT) {
+			if (filedata.getType() == FileData.FILETYPE_TXT || filedata.getType() == FileData.FILETYPE_EPUB_SUB) {
 				// テキストファイル長押し
 				switch (state) {
 					case -1:
@@ -691,7 +715,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			items = new CharSequence[itemnum];
 
 			int i = 0;
-			if (filedata.getType() == FileData.FILETYPE_TXT) {
+			if (filedata.getType() == FileData.FILETYPE_TXT || filedata.getType() == FileData.FILETYPE_EPUB_SUB) {
 				// テキストファイル長押し
 				if (state != -1) {
 					// 未読にする
@@ -743,7 +767,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 						case OPERATE_READHERE: { // ここまで読んだ
 							int state = 0;
 							for (int i = 0 ; i <= datapos ; i ++) {
-								if (mFileList.get(i).getType() != FileData.FILETYPE_TXT) {
+								if (mFileList.get(i).getType() != FileData.FILETYPE_TXT && mFileList.get(i).getType() != FileData.FILETYPE_EPUB_SUB) {
 									state ++;
 								}
 							}
@@ -772,8 +796,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	}
 
 	public class FileListAdapter extends ArrayAdapter<FileData> {
-		private ArrayList<FileData> items;
-		private LayoutInflater inflater;
+		private final ArrayList<FileData> items;
+		private final LayoutInflater inflater;
 
 		public FileListAdapter(Context context, int textViewResourceId, ArrayList<FileData> items) {
 			super(context, textViewResourceId, items);
@@ -781,8 +805,9 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
+        @NonNull
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 			// ビューを受け取る
 			View view = convertView;
 			if (view == null) {
@@ -800,7 +825,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				boolean thumbflag = false;
 
 				if (mThumbnail) {
-					if (item.getType() != FileData.FILETYPE_TXT) {
+					if (item.getType() != FileData.FILETYPE_TXT && item.getType() != FileData.FILETYPE_EPUB_SUB) {
 						thumbflag = true;
 					}
 				}
@@ -875,7 +900,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 				// レジュームオープン
 				if (mText != null && !mText.isEmpty()) {
 					// TXTファイル表示
-					openTextFile(mText, mPage, mPageRate);
+					openTextFile(mText);
 					mText = null;
 				}
 				else if (mOpenOperation != CloseDialog.CLICK_CLOSE) {
@@ -883,21 +908,21 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 					// 次のファイル検索
 					FileData nextfile = searchNextFile(mFileList, mOpenLastFile, mOpenOperation);
 					if (nextfile != null && !nextfile.getName().isEmpty()) {
+						if(debug) {Log.d(TAG, "handleMessage: nextfile=" + nextfile.getName());}
+						Editor ed = mSharedPreferences.edit();
 						switch (mOpenOperation) {
+							case CloseDialog.CLICK_PREVTOP:
 							case CloseDialog.CLICK_NEXTTOP:
-							{
-								Editor ed = mSharedPreferences.edit();
 								ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName() + "#maxpage");
 								ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName());
 								//ed.remove(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName() + "#date");
 								updateListView();
 								ed.apply();
-								return true;
-							}
+								break;
+
 							case CloseDialog.CLICK_PREVLAST:
-							{
+							case CloseDialog.CLICK_NEXTLAST:
 								// DEF.REQUEST_TEXT時のみ呼び出される
-								Editor ed = mSharedPreferences.edit();
 								int	maxpage;
 								maxpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName(), DEF.PAGENUMBER_NONE);
 								// 未読の場合と未読で無かった場合で場合分けする
@@ -912,10 +937,10 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 									int openmode = 0;
 									// ファイルリストの読み込み
 									openmode = ImageManager.OPENMODE_TEXTVIEW;
-									mImageMgr2 = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), mFileName, mUser, mPass, 0, null, mHidden, openmode, 1);
+									mImageMgr2 = new ImageManager(mActivity, DEF.relativePath(mActivity, mURI, mPath), mFileName, mUser, mPass, 0, mHandler, mHidden, openmode, 1);
 									mImageMgr2.LoadImageList(0, 0, 0);
-									mTextMgr = new TextManager(mImageMgr2, nextfile.getName(), mUser, mPass, null, mActivity, FileData.FILETYPE_TXT);
-									FileSelectList.SetReadConfig(mSharedPreferences,mTextMgr);
+									mTextMgr = new TextManager(mImageMgr2, nextfile.getName(), mUser, mPass, mHandler, mActivity, nextfile.getType());
+									FileSelectList.SetReadConfig(mSharedPreferences, mTextMgr);
 									ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName() + "#maxpage", mTextMgr.length());
 									ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName(), mTextMgr.length());
 									//ed.putInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + nextfile.getName() + "#date", (int)((nextfile.getDate() / 1000)));
@@ -923,8 +948,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 									releaseManager();
 								}
 								updateListView();
-								return true;
-							}
+								break;
 						}
                         // 次のファイルがあれば開く
                         openTextFile(nextfile.getName());
@@ -966,6 +990,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 	private void loadListView() {
 		boolean debug = false;
 		if(debug) {Log.d(TAG, "loadListView 開始します.");}
+
 		Resources res = getResources();
 		mReadingMsg = new String[1];
 		mReadingMsg[0] = res.getString(R.string.reading);
@@ -1012,15 +1037,15 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		int imageCnt = 0;
 		for (int i = 0; i < filenum; i++) {
 			int state = DEF.PAGENUMBER_UNREAD;
-			if (files[i].type == FileData.FILETYPE_TXT) {
+			if (files[i].type == FileData.FILETYPE_TXT || files[i].type == FileData.FILETYPE_EPUB_SUB) {
 				if(debug) {Log.d(TAG, "loadListViewAfter: FILETYPE_TXT url=" + DEF.relativePath(mActivity,mURI, mPath, mFileName) + files[i].name);}
 				int	maxtextpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName) + files[i].name, mUser, mPass) + "#maxpage", DEF.PAGENUMBER_NONE);
 				int	textpage = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName) + files[i].name, mUser, mPass), DEF.PAGENUMBER_UNREAD);
-				if	(textpage == DEF.PAGENUMBER_READ)	{
+				if	(textpage == DEF.PAGENUMBER_READ) {
 					//	既読で-2がセットされた場合
 					state = DEF.PAGENUMBER_READ;
 				}
-				else if (maxtextpage == DEF.PAGENUMBER_NONE)	{
+				else if (maxtextpage == DEF.PAGENUMBER_NONE) {
 				}
 				else if	(textpage >= (maxtextpage - 1))	{
 					state = DEF.PAGENUMBER_READ;
@@ -1048,13 +1073,14 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			FileData data = new FileData(mActivity, files[i].name, files[i].orglen, files[i].dtime, state);
 			mFileList.add(data);
 
-			if (files[i].type != FileData.FILETYPE_TXT) {
+			if (files[i].type != FileData.FILETYPE_TXT && files[i].type != FileData.FILETYPE_EPUB_SUB) {
 				imageCnt ++;
 			}
 		}
 		mFileListAdapter = new FileListAdapter(this, R.layout.listitem, mFileList);
 		//setListAdapter(mFileListAdapter);
 		mListView.setAdapter(mFileListAdapter);
+
 		if (mSelectIndex >= mFileList.size()) {
 			mSelectIndex = mFileList.size() - 1;
 			mSelectPos = 0;
@@ -1063,6 +1089,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			mSelectIndex = 0;
 			mSelectPos = 0;
 		}
+
 		mListView.setSelectionFromTop(mSelectIndex, mSelectPos);
 	}
 
@@ -1082,7 +1109,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			FileData data = files.get(i);
 
 			int state = DEF.PAGENUMBER_UNREAD;
-			if (data.getType() == FileData.FILETYPE_TXT) {
+			if (data.getType() == FileData.FILETYPE_TXT || data.getType() == FileData.FILETYPE_EPUB_SUB) {
 				state = mSharedPreferences.getInt(DEF.createUrl(DEF.relativePath(mActivity, mURI, mPath, mFileName), mUser, mPass) + data.getName(), DEF.PAGENUMBER_UNREAD);
 			}
 			else {
@@ -1098,7 +1125,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 			data.setState(state);
 
-			if (data.getType() != FileData.FILETYPE_TXT) {
+			if (data.getType() != FileData.FILETYPE_TXT && data.getType() != FileData.FILETYPE_EPUB_SUB) {
 				imageCnt ++;
 			}
 		}
@@ -1187,10 +1214,12 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			switch (nextopen) {
 				case CloseDialog.CLICK_NEXT:
 				case CloseDialog.CLICK_NEXTTOP:
+				case CloseDialog.CLICK_NEXTLAST:
 					// 次のファイル
 					index ++;
 					break;
 				case CloseDialog.CLICK_PREV:
+				case CloseDialog.CLICK_PREVTOP:
 				case CloseDialog.CLICK_PREVLAST:
 					// 前のファイル
 					index --;

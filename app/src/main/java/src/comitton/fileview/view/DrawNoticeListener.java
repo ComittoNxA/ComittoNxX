@@ -1,4 +1,4 @@
-package src.comitton.fileview;
+package src.comitton.fileview.view;
 
 import java.util.EventListener;
 

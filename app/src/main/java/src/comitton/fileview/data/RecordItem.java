@@ -227,9 +227,9 @@ public class RecordItem {
 		RecordItem data = (RecordItem) obj;
 		if (this.server != data.getServer()) {
 			return false;
-		} else if (compare(this.path, data.getPath()) == false) {
+		} else if (!compare(this.path, data.getPath())) {
 			return false;
-		} else if (compare(this.file, data.getFile()) == false) {
+		} else if (!compare(this.file, data.getFile())) {
 			return false;
 		}
 

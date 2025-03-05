@@ -38,13 +38,13 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 	private Button mBtnCancel;
 	private ListView mListView;
 
-	private String mTitle;
-	private String mItems[];
-	private int mSelect;
+	private final String mTitle;
+	private final String[] mItems;
+	private final int mSelect;
 
 	private ItemArrayAdapter mItemArrayAdapter;
 
-	public ListDialog(AppCompatActivity activity, @StyleRes int themeResId, String title, String[] items, int select, boolean backcolor, ListSelectListener listener) {
+	public ListDialog(AppCompatActivity activity, @StyleRes int themeResId, String title, String[] items, int select, ListSelectListener listener) {
 		super(activity, themeResId);
 
 		setCanceledOnTouchOutside(true);
@@ -107,7 +107,7 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 
 	public class ItemArrayAdapter extends ArrayAdapter<String>
 	{
-		private String[] mItems; // ファイル情報リスト
+		private final String[] mItems; // ファイル情報リスト
 
 		// コンストラクタ
 		public ItemArrayAdapter(Context context, int resId, String[] items)
@@ -146,10 +146,14 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 			String item = mItems[index];
 			textview.setText(item);
 			int color = Color.WHITE;
+			int backcolor = Color.TRANSPARENT;
 			if (mSelect == index) {
 				color = 0xFF80FFFF;
+				//backcolor = 0x90008000;
+				textview.setSelected(true);
 			}
 			textview.setTextColor(color);
+			textview.setBackgroundColor(backcolor);
 			return view;
 		}
 	}

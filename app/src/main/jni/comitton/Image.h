@@ -141,6 +141,7 @@ int ThumbnailCheckAll(long long);
 int ThumbnailMemorySizeCheck(long long, int, int);
 int ThumbnailImageAlloc(long long, int, int);
 int ThumbnailSave(long long, int, int, int, int, BYTE*);
+int ThumbnailRemove(long long, int);
 int ThumbnailImageSize(long long, int);
 int ThumbnailDraw(long long, int, int, int, int, BYTE*);
 void ThumbnailFree(long long);

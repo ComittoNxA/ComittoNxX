@@ -2,14 +2,17 @@ package src.comitton.fileview.view.list;
 
 import java.util.ArrayList;
 
+import src.comitton.common.DEF;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.data.RecordItem;
 import src.comitton.fileview.filelist.RecordList;
-import src.comitton.fileview.DrawNoticeListener;
+import src.comitton.fileview.view.DrawNoticeListener;
 import src.comitton.fileview.view.list.ListSwitcher.ListSwitcherListener;
 
 import jp.dip.muracoro.comittonx.R;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -20,10 +23,14 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import androidx.preference.PreferenceManager;
 //import android.util.Log;
+import android.os.Handler;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class ListScreenView extends SurfaceView implements SurfaceHolder.Callback, DrawNoticeListener, ListSwitcherListener, Runnable {
+	private static final String TAG = "ListScreenView";
+
 	// 描画領域の種別
 	public final static short AREATYPE_NONE = 0x00;
 	public final static short AREATYPE_TITLE = 0x01;
@@ -49,7 +56,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	public RecordListArea mFavoListArea;
 	public RecordListArea mHistListArea;
 	public RecordListArea mMenuListArea;
-	// public ScrollerArea mScrollerArea;
 
 	private Rect mTitleRect;
 	private Rect mToolbarRect;
@@ -60,13 +66,13 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	private Rect mFavoListRect;
 	private Rect mHistListRect;
 	private Rect mMenuListRect;
-	// private Rect mScrollerRect;
 
 	private int mListBorder;
 
 	private int mOrientation;
 
 	// アプリ制御
+	private Handler mHandler;
 	private SurfaceHolder mHolder;
 	private Thread mUpdateThread;
 	private boolean mIsRunning;
@@ -79,17 +85,16 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	private ListNoticeListener mListNoticeListener = null;
 
 	// 現在表示中のリスト情報
-	private short mListType[];
-	// private short mListIndex;
-	// private int mListOffsetX;
+	private short[] mListType;
 	private long mListPosition;
 	private short mUpdateArea;
 
 	private Paint mFillPaint;
 	private int mBakColor;
 
-	public ListScreenView(Context context, int duration) {
-		this(context);
+	public ListScreenView(Activity activity, Handler handler, int duration) {
+		this(activity);
+		mHandler = handler;
 		mFileListArea.setDuration(duration);
 	}
 
@@ -160,8 +165,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			updateLayout();
 		}
 		update(AREATYPE_ALL);
-		// mUpdateLayoutMsg = mHandler.obtainMessage(EVENT_UPDATELAYOUT);
-		// mHandler.sendMessage(mUpdateLayoutMsg);
 	}
 
 	@Override
@@ -174,7 +177,7 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	@Override
 	public void onUpdateArea(short areatype, boolean isRealtime) {
 		if (mUpdateThread != null) {
-			if (isRealtime == false) {
+			if (!isRealtime) {
 				mUpdateArea |= areatype;
 				mUpdateThread.interrupt();
 			}
@@ -226,9 +229,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 				areatype = AREATYPE_MENULIST;
 			}
 		}
-		// else if (checkInRect(mScrollerRect, x, y)) {
-		// areatype = AREATYPE_SCROLLER;
-		// }
 		return areatype;
 	}
 
@@ -283,18 +283,14 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	}
 
 	public void update(short areatype) {
-		if (mDrawEnable == false) {
+		if (!mDrawEnable) {
 			// 描画停止
 			return;
 		}
 
 		Rect rc = mTargetRect;
 		int listOffsetX = getIntLow(mListPosition);
-		// if (areatype == AREATYPE_ALL) {
-		// // 全体描画
-		// rc = mAllRect;
-		// }
-		// else {
+
 		if (rc != null && mTitleRect != null) {
 			rc.set(getWidth(), getHeight(), 0, 0);
 			if ((areatype & AREATYPE_TITLE) != 0) {
@@ -316,74 +312,17 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			if (rc.left < rc.right && rc.top < rc.bottom) {
 				update(areatype, rc);
 			}
-			// }
 		}
 
-		// if (areatype == AREATYPE_ALL) {
-		// // 全体描画
-		// update(AREATYPE_ALL, mAllRect);
-		// }
-		// else if (areatype == AREATYPE_TITLE) {
-		// update(areatype, mTitleRect);
-		// }
-		// else if (areatype == AREATYPE_LIST || (areatype == AREATYPE_FILELIST
-		// && mListOffsetX != 0)) {
-		// // リストとツールバーを一緒に
-		// update(areatype, mListRect);
-		// }
-		// else if (areatype == AREATYPE_TOOLBAR) {
-		// update(areatype, mToolbarRect);
-		// }
-		// else if (areatype == AREATYPE_FILELIST) {
-		// update(areatype, mFileListRect);
-		// }
-		// else if ((areatype & AREATYPE_SELECTOR) != 0) {
-		// update(areatype, mSelectorRect);
-		// }
-		// else if () {
-		// update(AREATYPE_TITLE, mTitleRect);
-		// update(AREATYPE_TOOLBAR, mToolbarRect);
-		// update(AREATYPE_FILELIST, mFileListRect);
-		// update(AREATYPE_SELECTOR, mSelectorRect);
-		// }
-		return;
 	}
 
-	// private Object mLock = new Object();
-	// private int mLockCount = 0;
 	private boolean update(short areatype, Rect rc) {
-		// if (areatype != mAreaTypeLog) {
-		// Log.d("ListScreenView", "update at=" + Integer.toHexString(areatype)
-		// + ", de=" + mDrawEnable + ", rc=(" + rc.left + "," + rc.top + "," +
-		// rc.right + "," + rc.bottom + ")");
-		// mAreaTypeLog = areatype;
-		// }
+
 		if (rc == null) {
 			return false;
 		}
 
-		// synchronized (mLock) {
 		Rect lockRect = new Rect(rc);
-		// if (mLockCount % 8 == 0) {
-		// rcClone = new Rect(0, 0, getWidth(), getHeight());
-		// }
-		// else {
-		// rcClone = new Rect(0, 0, getWidth()/2, getHeight()/2);
-		// }
-		// mLockCount ++;
-		// Log.d("update", "ct=" + mLockCount + ", at=" + areatype + ", l="
-		// +rc.left+ ", t=" +rc.top+ ", r=" +rc.right+ ", b=" + rc.bottom);
-
-		// リストの切り替え対応
-		// if (areatype == AREATYPE_TOOLLIST) {
-		// rcClone.offset(mListOffsetX, 0);
-		// if (mOrientation == Configuration.ORIENTATION_LANDSCAPE &&
-		// rcClone.right > mSelectorRect.left) {
-		// // 横画面の場合はセレクタをつぶさないように
-		// rcClone.right = mSelectorRect.left;
-		// }
-		//
-		// }
 
 		Canvas canvas = null;
 		SurfaceHolder surfaceHolder = getHolder();
@@ -408,8 +347,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 		long listPosition = mListPosition;
 		int stListIndex = getIntHigh(listPosition);
 		int stListOffsetX = getIntLow(listPosition);
-		// Log.d("draw", "lp=" + mListPosition + ", idx=" + stListIndex +
-		// ", ofx=" + stListOffsetX);
 		if (stListOffsetX != 0) {
 			// 背景塗りつぶし
 			canvas.drawColor(mBakColor);
@@ -577,22 +514,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 				if (mIsRunning) {
 					short areatype = mUpdateArea;
 					mUpdateArea = 0;
-					// if ((areatype & AREATYPE_TITLE) != 0) {
-					// if((areatype & (AREATYPE_LIST | AREATYPE_FILELIST)) != 0)
-					// {
-					// update(AREATYPE_ALL);
-					// }
-					// else {
-					// update(AREATYPE_TITLE);
-					// }
-					// }
-					// else if (mListType[mListIndex] ==
-					// RecordList.TYPE_FILELIST) {
-					// update(AREATYPE_FILELIST);
-					// }
-					// else {
-					// update(AREATYPE_LIST);
-					// }
 					update(areatype);
 				}
 				else {
@@ -625,12 +546,6 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	public boolean onListSwitch(int diff, int offsetx) {
 		// 横スライド完了でインデックスを変更
 		int listIndex = getIntHigh(mListPosition);
-		// if (mListOffsetX > mAllRect.right / 3) {
-		// listindex--;
-		// }
-		// else if (mListOffsetX < (mAllRect.right / 3) * -1) {
-		// listindex++;
-		// }
 		listIndex += diff;
 		if (listIndex < 0) {
 			listIndex = (short) (mListType.length - 1);
@@ -639,7 +554,7 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			listIndex = 0;
 		}
 		// 表示リストの選択
-		setListIndex(listIndex, offsetx, false);
+		setListIndex(listIndex, offsetx);
 
 		onUpdateArea(AREATYPE_ALL, false);
 		return false;
@@ -662,25 +577,25 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 		}
 	}
 
-	// isForce : 初期化など設定を強制する
-	public void setListIndex(int listindex, int offsetx, boolean isForce) {
+	// 表示するリストを切り変える
+	public void setListIndex(int listindex, int offsetx) {
+		boolean debug = false;
+		if(debug) {Log.d(TAG, "setListIndex: 開始します. offsetx=" + offsetx);}
+		//if (debug) {DEF.StackTrace(TAG, "setListIndex: ");}
+
 		if (mListType == null) {
 			return;
 		}
 
-		// 変化がある場合設定する
-		// if (isForce || (0 <= listindex && listindex < mListType.length &&
-		// listindex != getIntHigh(mListPosition))) {
 		int listtype = mListType[listindex];
 		mListPosition = makeLong(listindex, offsetx);
 		mSelectorArea.setSelect(listindex);
 		updateTitle(listtype);
 		updateTitleSortName(listtype);
-		// }
-		// else {
-		// mListPosition = makeLong(getIntHigh(mListPosition), offsetx);
-		// }
 		update(AREATYPE_ALL);
+
+		// 切り替えたことを通知する
+		DEF.sendMessage(mHandler, DEF.HMSG_SET_LISTVIEW_INDEX, listtype, 0, null);
 	}
 
 	// 指定されたリスト種別のインデックスを返す
@@ -721,14 +636,14 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			listIndex = mListType.length - 1;
 		}
 		updateRecordList();
-		setListIndex(listIndex, 0, false);
+		setListIndex(listIndex, 0);
 		onUpdateArea(ListScreenView.AREATYPE_ALL, false);
 	}
 
-	public void setListType(short listtype[]) {
+	public void setListType(short[] listtype) {
 		mListType = listtype;
 		// リストの選択
-		setListIndex(0, 0, true);
+		setListIndex(0, 0);
 	}
 
 	// タイトル文字列をリストに保持

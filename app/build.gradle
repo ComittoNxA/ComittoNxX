@@ -9,7 +9,7 @@ def applicationName = "ComittoNxX"
 
 def versionMajor = 2
 def versionMinor = 4
-def versionPatch = 2
+def versionPatch = 3
 
 // アプリに署名するため以下のファイルを作成して signingConfig の設定を記述してください
 apply from:'../signingConfigs/release.gradle', to: android
@@ -194,16 +194,17 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core:1.15.0'
+    implementation 'androidx.activity:activity:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.activity:activity:1.9.3'
-    implementation 'androidx.fragment:fragment:1.8.5'
-    implementation "androidx.constraintlayout:constraintlayout:2.2.0"
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation "androidx.viewpager2:viewpager2:1.1.0"
-    implementation "androidx.preference:preference:1.2.1"
-    implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
+    implementation 'androidx.core:core:1.15.0'
+    implementation "androidx.constraintlayout:constraintlayout:2.2.1"
     implementation "androidx.documentfile:documentfile:1.1.0-alpha01"
+    implementation 'androidx.fragment:fragment:1.8.6'
+    implementation "androidx.preference:preference:1.2.1"
+    implementation "androidx.viewpager2:viewpager2:1.1.0"
+    implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'commons-io:commons-io:2.18.0'
 
     // SMB接続用ライブラリjcifs(SMB1, SMB202, SMB210, SMB300, SMB302, SMB311に対応)
     implementation 'org.codelibs:jcifs:2.1.39'

@@ -1,5 +1,6 @@
 package src.comitton.cropimageview;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -183,6 +184,7 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
     }
 
     private final Handler handler = new Handler() {
+        @SuppressLint("HandlerLeak")
         public void handleMessage(Message message){
             switch (message.what){
                 case DEF.HMSG_LOADING: // ロード状況表示
@@ -199,6 +201,9 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
                     if (message.obj != null) {
                         mProgress.setMessage(message.obj.toString());
                     }
+                    break;
+                case DEF.HMSG_WORKSTREAM:
+                    // ファイルアクセスの表示
                     break;
             }
         }

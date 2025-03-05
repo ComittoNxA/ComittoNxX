@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="0px" >
 
-    <src.comitton.fileview.view.ListItemView
+    <src.comitton.expandview.ListItemView
         android:id="@+id/listitem"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

@@ -2232,7 +2232,7 @@ public class TextManager {
 		// 現在のフォントサイズ
 		mFontSize = mHeadSize;
 
-		char ascii[] = new char[0x80];
+		char[] ascii = new char[0x80];
 		for (int i = 0 ; i < 0x80 ; i ++) {
 			// 半角文字を配列化
 			ascii[i] = (char)i;
@@ -5602,7 +5602,7 @@ public class TextManager {
 					int chartype = getCharType(code);
 					char[] extdata = null;
 
-					if (tb.isRubi == false) {
+					if (!tb.isRubi) {
 						if (prevchartype != chartype) {
 							if (mAscMode == ASC_TWINCHK && chartype == CHARTYPE_ASCII) {
 								// 2文字だけが半角かをチェック

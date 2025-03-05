@@ -32,7 +32,7 @@ public class SetImageDetailActivity extends PreferenceActivity implements OnShar
 	private ListPreference mMaxThread;
 	private ListPreference mLoupeSize;
 
-	public static final int MaxThread[] =
+	public static final int[] MaxThread =
 		{ R.string.maxthread00		// 自動
 		, R.string.maxthread01		// 1スレッド
 		, R.string.maxthread02		// 2スレッド
@@ -42,7 +42,7 @@ public class SetImageDetailActivity extends PreferenceActivity implements OnShar
 		, R.string.maxthread06		// 6スレッド
 		, R.string.maxthread07		// 7スレッド
 		, R.string.maxthread08 };	// 8スレッド
-	public static final int LoupeSize[] =
+	public static final int[] LoupeSize =
 		{
 			R.string.loupesize00,
 			R.string.loupesize01,
@@ -76,6 +76,7 @@ public class SetImageDetailActivity extends PreferenceActivity implements OnShar
 				String url = res.getString(R.string.url_imagedetail);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetImageDetailActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

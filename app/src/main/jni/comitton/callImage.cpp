@@ -173,6 +173,19 @@ JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ThumbnailSave (JNIEn
 	return ret;
 }
 
+// サムネイルが全て設定されているかをチェック
+JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ThumbnailRemove (JNIEnv *env, jclass obj, jlong id, jint index)
+{
+//#define DEBUG_ThumbnailRemove
+
+#ifdef DEBUG_ThumbnailRemove
+    LOGD("callImage: ThumbnailRemove : id=%lld, index=%d", id, index);
+#endif
+
+    return ThumbnailRemove(id, index);
+
+}
+
 // サムネイル描画
 JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ThumbnailImageSize(JNIEnv *env, jclass obj, jlong id, jint index)
 {

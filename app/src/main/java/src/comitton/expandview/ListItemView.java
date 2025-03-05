@@ -1,7 +1,9 @@
-package src.comitton.fileview.view;
+package src.comitton.expandview;
 
 import src.comitton.common.DEF;
 import src.comitton.jni.CallImgLibrary;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -17,7 +19,9 @@ import android.util.Log;
 import android.view.View;
 
 public class ListItemView extends View {
-//	private final int MARGIN_CY = 4;
+	private static final String TAG = "ListItemView";
+
+	//	private final int MARGIN_CY = 4;
 //	private final int MARGIN_CX = 4;
 	private final int MAX_LINES = 3;
 	private final int DATETIME_LENGTH = 21;
@@ -34,10 +38,10 @@ public class ListItemView extends View {
 	private int mThumbSizeH;
 	private String mTitle;
 //	private String mTitleDot;
-	private String mTitleSep[];
+	private String[] mTitleSep;
 	private String mSummary;
 //	private String mSummaryDot;
-	private String mSummarySep[];
+	private String[] mSummarySep;
 	private int mTitleSize;
 	private int mSummarySize;
 	private int mItemMargin;
@@ -71,9 +75,12 @@ public class ListItemView extends View {
 		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG); 
 	}
 
-	@Override
+	@SuppressLint("SuspiciousIndentation")
+    @Override
 	protected void onDraw(Canvas canvas) {
 		boolean debug = false;
+		if (debug) {Log.d(TAG,"onDraw: 開始します.");}
+
 		//		super.onDraw(canvas);
 		int cx = getWidth();
 		int cy = getHeight();
@@ -86,9 +93,9 @@ public class ListItemView extends View {
 //			canvas.drawRect(0, 0, getWidth(), getHeight(), fill);
 //		}
 
-		if (this.isPressed() == true || this.isSelected() == true) {
+		if (this.isPressed() || this.isSelected()) {
 			int mh = mItemMargin / 2;
-			if (this.isPressed() == true) {
+			if (this.isPressed()) {
 				mFillPaint.setColor(DEF.margeColor(mCurColor, mBakColor, mCounter + 64, 96));
     			if (mCounter < 32) {
     				mCounter ++;
@@ -132,15 +139,15 @@ public class ListItemView extends View {
 					int dstWidth = 0;
 					int dstHeight = 0;
 
-					if (debug) {Log.d("ListItemView", "onDraw: width/height=" + ((float)width / (float)height) + ", draw_cx/draw_cy=" + ((float)draw_cx / (float)draw_cy));}
+					if (debug) {Log.d(TAG, "onDraw: width/height=" + ((float)width / (float)height) + ", draw_cx/draw_cy=" + ((float)draw_cx / (float)draw_cy));}
 					if ((float)width / height > (float)draw_cx / draw_cy) {
-						if (debug) {Log.d("ListItemView", "onDraw: 幅に合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
+						if (debug) {Log.d(TAG, "onDraw: 幅に合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
 						// 幅に合わせる
 						dstWidth = draw_cx;
 						dstHeight = height * draw_cx / width;
 					}
 					else {
-						if (debug) {Log.d("ListItemView", "onDraw: 高さに合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
+						if (debug) {Log.d(TAG, "onDraw: 高さに合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
 						// 高さに合わせる
 						dstWidth = width * draw_cy / height;
 						dstHeight = draw_cy;
@@ -244,8 +251,8 @@ public class ListItemView extends View {
 			mSummaryAscent = (int) (-fm.ascent);
 			mSummaryDecent = (int) (fm.descent);
 //			mSummaryDot = getDotText(mSummary, cx, text);
-			float result[] = new float[mSummary.length()];
-			float len[] = { 0, 0 };
+			float[] result = new float[mSummary.length()];
+			float[] len = { 0, 0 };
 			mTextPaint.getTextWidths(mSummary, result);
 			for (int i = 0; i < result.length; i++) {
 				len[0] += result[i];
@@ -304,7 +311,7 @@ public class ListItemView extends View {
 		mThumbSizeH = tsizeh;
 		mItemMargin = margin;
 		mCounter = 0;
-		if (thumb == true) {
+		if (thumb) {
 			// サムネイル有りの場合
 			mThumbBitmap = Bitmap.createBitmap(tsizew, tsizeh, Config.RGB_565);
 		}
@@ -318,7 +325,7 @@ public class ListItemView extends View {
 		mThumbIndex = bmIndex;
 		mThumbView = bmView;
 		mTitle = title;
-		if (showext == false) {
+		if (!showext) {
 			int dot = title.lastIndexOf('.');
 			if (dot >= 1 && dot < title.length() - 1){
 				mTitle = title.substring(0, dot);
@@ -337,14 +344,14 @@ public class ListItemView extends View {
 	}
 		
 	private String[] getMultiLine(String str, int cx, Paint text) {
-		float result[] = new float[str.length()];
+		float[] result = new float[str.length()];
 		text.getTextWidths(str, result);
 
 		int i;
 		int lastpos = 0;
 		int line = 0;
 		float sum = 0.0f;
-		int pos[] = new int[MAX_LINES];
+		int[] pos = new int[MAX_LINES];
 
 		float dotwidth = text.measureText("...");
 
@@ -370,7 +377,7 @@ public class ListItemView extends View {
 			}
 		}
 
-		String strSep[] = new String[line + 1];
+		String[] strSep = new String[line + 1];
 		int st = 0;
 		// 文字列の切り出し
 		for (i = 0; i <= line; i++) {

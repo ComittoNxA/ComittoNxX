@@ -62,6 +62,7 @@ public class SetImageTextDetailActivity extends PreferenceActivity implements On
 				String url = res.getString(R.string.url_imagetextdetail);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetImageTextDetailActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

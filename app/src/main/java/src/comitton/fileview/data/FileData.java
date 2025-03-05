@@ -45,9 +45,9 @@ public class FileData {
 	private int state;		// 読書状態
 	private long size;
 	private long date;
-	private String uri;
-	private String display_uri;
+	private int maxpage;
 	private boolean marker;
+	private int index;
 
 	public FileData () {
 		;
@@ -92,6 +92,22 @@ public class FileData {
 
 	public void setState(int state) {
 		this.state = state;
+	}
+
+	public int getMaxpage() {
+		return maxpage;
+	}
+
+	public void setMaxpage(int maxpage) {
+		this.maxpage = maxpage;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 	public short getType() {

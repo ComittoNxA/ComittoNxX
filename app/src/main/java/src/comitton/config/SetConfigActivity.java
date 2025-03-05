@@ -31,6 +31,7 @@ public class SetConfigActivity extends PreferenceActivity implements OnSharedPre
 				String url = res.getString(R.string.url_config);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetConfigActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

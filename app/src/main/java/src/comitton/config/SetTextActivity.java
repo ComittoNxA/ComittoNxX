@@ -56,27 +56,27 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 	private OperationPreference mTapPattern;
 	private TimeAndBatteryPreference mTimeAndBattery;
 
-	public static final int ScaleName[] =
+	public static final int[] ScaleName =
 		{ R.string.selsize00	// 元のサイズで表示
 		, R.string.selsize01	// 幅に合わせて表示
 		, R.string.selsize02	// 高さに合わせて表示
 		, R.string.selsize03 };	// 全体を表示
-	public static final int ViewName[] =
+	public static final int[] ViewName =
 		{ R.string.selview01	// 見開き表示
 		, R.string.selview02	// 単ページ表示
 		, R.string.selview03 };	// 連続表示
-	public static final int RotateName[] =
+	public static final int[] RotateName =
 		{ R.string.rota00		// 回転あり
 		, R.string.rota01		// 縦固定
 		, R.string.rota02		// 横固定
 		, R.string.rota03 };	// 縦固定(90°回転)
-	public static final int PaperName[] =
+	public static final int[] PaperName =
 		{ R.string.paper00		// 縦画面サイズ
 		, R.string.paper01		// 800×1280
 		, R.string.paper02		// 720×1280
 		, R.string.paper03		// 540×960
 		, R.string.paper04 };	// 480×800
-	public static final int PicSizeName[] =
+	public static final int[] PicSizeName =
 		{ R.string.picsize00	// 元画像サイズ
 		, R.string.picsize01	// 2倍
 		, R.string.picsize02	// 3倍
@@ -85,21 +85,21 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 		, R.string.picsize05	// 画面サイズに拡大(余白無視)
 		, R.string.picsize06	// 画面サイズに拡大(見開き対応)
 		, R.string.picsize07 };	// 画面サイズに拡大(見開き対応:余白無視)
-	public static final int AscModeName[] =
+	public static final int[] AscModeName =
 		{ R.string.ascmode00	// 縦表示
 		, R.string.ascmode01	// 横表示
 		, R.string.ascmode02 };	// 2桁は縦
-	public static final int TimePosName[] =
+	public static final int[] TimePosName =
 		{ R.string.pnumpos00	// 左上
 		, R.string.pnumpos01	// 中央上
 		, R.string.pnumpos02	// 右上
 		, R.string.pnumpos03	// 左下
 		, R.string.pnumpos04	// 中央下
 		, R.string.pnumpos05 };	// 右下
-	public static final int PnumColorName[] =
+	public static final int[] PnumColorName =
 		{ R.string.pnumcolor00		// 白
 		, R.string.pnumcolor01 };		// 黒
-	public static final int TimeFormatName[] =
+	public static final int[] TimeFormatName =
 		{ R.string.timeformat00		// 24:00
 		, R.string.timeformat01		// 24:00 [100%]
 		, R.string.timeformat02		// 24:00 [100%] [AC]
@@ -153,7 +153,7 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 		CharSequence[] values;
 		// キャッシュ保存先
 
-		File files[] = new File(fontpath).listFiles();
+		File[] files = new File(fontpath).listFiles();
 		if (files == null) {
 			// ファイルなし
 			items = new CharSequence[1];
@@ -202,6 +202,7 @@ public class SetTextActivity extends PreferenceActivity implements OnSharedPrefe
 				String url = res.getString(R.string.url_text);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetTextActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

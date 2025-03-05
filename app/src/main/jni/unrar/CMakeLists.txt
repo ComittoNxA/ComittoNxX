@@ -19,8 +19,8 @@ option(
 )
 
 if(DOWNLOAD_UNRAR_SOURCES)
-  set(UNRAR_VERSION "7.1.2")
-  set(UNRAR_HASH_SHA256 "143dcacb3a9d9ca0af695adecabe1350b0a3e93d927a065ef8f7cc605ab2d322")
+  set(UNRAR_VERSION "7.1.4")
+  set(UNRAR_HASH_SHA256 "7f3decbcbf71704ffb3726b9c4e2222f055953310042a9ba0f96b3fb2209971f")
 
   set(FILE_NAME "unrarsrc-${UNRAR_VERSION}.tar.gz")
   FetchContent_Declare(

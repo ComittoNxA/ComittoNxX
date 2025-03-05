@@ -9,6 +9,8 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 
+import src.comitton.common.DEF;
+
 public class MomentScroller implements Callback {
 	// 慣性スクロール
 	private final int MAX_TOUCHPOINT = 5;
@@ -150,6 +152,10 @@ public class MomentScroller implements Callback {
 
 	@Override
 	public boolean handleMessage(Message msg) {
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg.what == HMSG_MOMENTIUM) {
     		// 慣性スクロール
     		if (mMomentiumMsg == msg) {

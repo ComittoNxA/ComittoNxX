@@ -23,7 +23,7 @@ public class SetNoiseActivity extends PreferenceActivity implements OnSharedPref
 	private NoiseOverSeekbar mNoiseOver;
 	private ListPreference mNoiseDec;
 
-	public static final int NoiseDecName[] =
+	public static final int[] NoiseDecName =
 		{ R.string.noisedec00		// ゆっくり
 		, R.string.noisedec01		// 普通
 		, R.string.noisedec02 };	// 迅速
@@ -50,6 +50,7 @@ public class SetNoiseActivity extends PreferenceActivity implements OnSharedPref
 				String url = res.getString(R.string.url_noise);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetNoiseActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

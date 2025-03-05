@@ -101,7 +101,7 @@ public class FileAccess {
 	public static String parent(@NonNull final Context context, @NonNull final String uri) {
 		boolean debug = false;
 		if (debug) {Log.d(TAG, "parent: 開始します. uri=" + uri);}
-		if (debug) {DEF.StackTrace(TAG, "parent: ");}
+		//if (debug) {DEF.StackTrace(TAG, "parent: ");}
 
 		String result = "";
 		switch (accessType(uri)) {
@@ -541,13 +541,13 @@ public class FileAccess {
 	}
 
 	// OutputStreamを返す
-	public static OutputStream getOutputStream(@NonNull final Context context, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
+	public static OutputStream getOutputStream(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
 		boolean debug = false;
 		if (debug) {Log.d(TAG, "getOutputStream: 開始します. uri=" + uri);}
 		OutputStream result = null;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
-				result = LocalFileAccess.getOutputStream(uri);
+				result = LocalFileAccess.getOutputStream(activity, uri);
 				break;
 			}
 			case DEF.ACCESS_TYPE_SMB: {
@@ -555,7 +555,7 @@ public class FileAccess {
 				break;
 			}
 			case DEF.ACCESS_TYPE_SAF: {
-				result = SafFileAccess.getOutputStream(context, uri);
+				result = SafFileAccess.getOutputStream(activity, uri);
 				break;
 			}
 		}
@@ -676,13 +676,13 @@ public class FileAccess {
 		return renameTo(mActivity, mURI, fromfile, tofile, mUser, mPass);
 	}
 
-	public static boolean renameTo(@NonNull final Context context, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
+	public static boolean renameTo(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
 		boolean debug = false;
 		if (debug) {Log.d(TAG, "renameTo: 開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
 		boolean result = false;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
-				result = LocalFileAccess.renameTo(uri, fromfile, tofile);
+				result = LocalFileAccess.renameTo(activity, uri, fromfile, tofile);
 				break;
 			}
 			case DEF.ACCESS_TYPE_SMB: {
@@ -690,7 +690,7 @@ public class FileAccess {
 				break;
 			}
 			case DEF.ACCESS_TYPE_SAF: {
-				result = SafFileAccess.renameTo(context, uri, fromfile, tofile);
+				result = SafFileAccess.renameTo(activity, uri, fromfile, tofile);
 				break;
 			}
 		}
@@ -830,6 +830,29 @@ public class FileAccess {
 			}
 		}
 		if (debug) {Log.d(TAG, "mkdir: 終了します. result=" + result);}
+		return result;
+	}
+
+	// ファイル作成
+	public static boolean createFile(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String item, @NonNull final String user, @NonNull final String pass) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+		boolean result = false;
+		switch (accessType(uri)) {
+			case DEF.ACCESS_TYPE_LOCAL: {
+				result = LocalFileAccess.createFile(activity, uri, item);
+				break;
+			}
+			case DEF.ACCESS_TYPE_SMB: {
+				result = SmbFileAccess.createFile(uri, user, pass, item);
+				break;
+			}
+			case DEF.ACCESS_TYPE_SAF: {
+				result = SafFileAccess.createFile(activity, uri, item);
+				break;
+			}
+		}
+		if (debug) {Log.d(TAG, "createFile: 終了します. result=" + result);}
 		return result;
 	}
 

@@ -165,6 +165,10 @@ public class TitleView extends View implements Handler.Callback {
 	// スクロールタイマーイベント検知処理
 	@Override
 	public boolean handleMessage(Message msg) {
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg != mScrollMsg) {
 			return false;
 		}

@@ -1812,8 +1812,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		}
 		mScrollBaseX = x;
 		mScrollBaseY = y;
-		mMomentiumX = sx * MOMENTIUM_TERM / term;
-		mMomentiumY = sy * MOMENTIUM_TERM / term;
+		mMomentiumX = sx * DEF.INTERVAL_MOMENTIUM / term;
+		mMomentiumY = sy * DEF.INTERVAL_MOMENTIUM / term;
 		mMomentiumTime = SystemClock.uptimeMillis();
 		mMomentiumNum = 0;
 		if (mode == 0) {
@@ -1826,8 +1826,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 			mMomentDrain = mode;
 		}
 
-		mMomentiumMsg = mHandler.obtainMessage(EVENT_MOMENTIUM, scroll, term);
-		mHandler.sendMessageAtTime(mMomentiumMsg, mMomentiumTime + MOMENTIUM_TERM);
+		mMomentiumMsg = mHandler.obtainMessage(DEF.HMSG_EVENT_MOMENTIUM, scroll, term);
+		mHandler.sendMessageAtTime(mMomentiumMsg, mMomentiumTime + DEF.INTERVAL_MOMENTIUM);
 	}
 
 	/**
@@ -2516,25 +2516,13 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		return mScrolling;
 	}
 
-	private final int EVENT_EFFECT = 201;
-	private final int EVENT_SCROLL = 202;
-	private final int EVENT_PAGE = 203;
-	private final int EVENT_ATTENUATE = 204;
-	private final int EVENT_MOMENTIUM = 205;
-
-	private final int EFFECT_TERM = 1;
-	private final int SCROLL_TERM = 4;
-	private final int PAGE_TERM = 1;
-	private final int ATTENUATE_TERM = 10;
-	private final int MOMENTIUM_TERM = 10;
-	
 	private int mAttenuate = 0;
 
 	// フリックを減衰させる
 	public void attenuate() {
-		long NextTime = SystemClock.uptimeMillis() + ATTENUATE_TERM * 5;
+		long NextTime = SystemClock.uptimeMillis() + DEF.INTERVAL_ATTENUATE * 5;
 
-		Message msg = mHandler.obtainMessage(EVENT_ATTENUATE); 
+		Message msg = mHandler.obtainMessage(DEF.HMSG_EVENT_ATTENUATE);
 		msg.arg1 = ++ mAttenuate;
 		mHandler.sendMessageAtTime(msg, NextTime);
 	}
@@ -2546,12 +2534,12 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 			long NextTime = SystemClock.uptimeMillis() + 1;
 			mEffectStart = NextTime;
 
-			Message msg = mHandler.obtainMessage(EVENT_EFFECT);
-			msg.what = EVENT_EFFECT;
+			Message msg = mHandler.obtainMessage(DEF.HMSG_EVENT_EFFECT);
+			msg.what = DEF.HMSG_EVENT_EFFECT;
 
 //			mEffectRate = 0.99f;
 //			setEffectRate(mEffectRate);
-			NextTime += EFFECT_TERM;
+			NextTime += DEF.INTERVAL_EFFECT;
 			mHandler.sendMessageAtTime(msg, NextTime);
 		}
 		else {
@@ -2562,15 +2550,15 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 
 	// タイマー開始
 	public void startScroll() {
-		Message msg = mHandler.obtainMessage(EVENT_SCROLL);
-		msg.what = EVENT_SCROLL;
+		Message msg = mHandler.obtainMessage(DEF.HMSG_EVENT_SCROLL);
+		msg.what = DEF.HMSG_EVENT_SCROLL;
 		long NextTime = SystemClock.uptimeMillis();
 
 		// エフェクト開始
 		if (!moveToNextPoint(mVolScrl)) {
 			return;
 		}
-		NextTime += SCROLL_TERM;
+		NextTime += DEF.INTERVAL_SCROLL;
 		mScrolling = true;
 
 		mHandler.sendMessageAtTime(msg, NextTime);
@@ -2579,8 +2567,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 
 	// エフェクト開始
 	public void startPageMove() {
-		mEventPageMsg = mHandler.obtainMessage(EVENT_PAGE);
-		mEventPageMsg.what = EVENT_PAGE;
+		mEventPageMsg = mHandler.obtainMessage(DEF.HMSG_EVENT_PAGE);
+		mEventPageMsg.what = DEF.HMSG_EVENT_PAGE;
 		long NextTime = SystemClock.uptimeMillis();
 		mMoveStart = NextTime;
 		mMoveFromLeft = (int)mDrawLeft;
@@ -2590,7 +2578,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 //		if (moveToNextPage() == false) {
 //			return;
 //		}
-		NextTime += PAGE_TERM;
+		NextTime += DEF.INTERVAL_PAGE;
 
 		mHandler.sendMessageAtTime(mEventPageMsg, NextTime);
 		return;
@@ -2651,7 +2639,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 		boolean nextEvent = false;
 
 		switch (msg.what) {
-			case EVENT_ATTENUATE:
+			case DEF.HMSG_EVENT_ATTENUATE:
 			{
 				if (mAttenuate == msg.arg1) {
 					// 最後に登録したメッセージ
@@ -2669,7 +2657,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 					}
 					update(false);
 					if (mOverScrollX != 0) {
-						NextTime += ATTENUATE_TERM;
+						NextTime += DEF.INTERVAL_ATTENUATE;
 						Message nextmsg = mHandler.obtainMessage(msg.what);
 						nextmsg.arg1 = ++ mAttenuate;
 						mHandler.sendMessageAtTime(nextmsg, NextTime);
@@ -2679,7 +2667,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				}
 				break;
 			}
-			case EVENT_MOMENTIUM:
+			case DEF.HMSG_EVENT_MOMENTIUM:
 			{
 				// 慣性スクロール
 				if (mMomentiumMsg == msg) {
@@ -2728,8 +2716,8 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 					// 次のメッセージ
 					if ((ox != (int)mDrawLeft || oy != (int)mDrawTop)
 								&& (Math.abs(mMomentiumX) >= 2.0f || Math.abs(mMomentiumY) >= 2.0f)) {
-						NextTime += MOMENTIUM_TERM;
-						mMomentiumMsg = mHandler.obtainMessage(EVENT_MOMENTIUM, msg.arg1, msg.arg2);
+						NextTime += DEF.INTERVAL_MOMENTIUM;
+						mMomentiumMsg = mHandler.obtainMessage(DEF.HMSG_EVENT_MOMENTIUM, msg.arg1, msg.arg2);
 						mHandler.sendMessageAtTime(mMomentiumMsg, NextTime);
 					}
 					else {
@@ -2739,7 +2727,7 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				}
 				break;
 			}
-			case EVENT_EFFECT:
+			case DEF.HMSG_EVENT_EFFECT:
 				// 稼働中のみ次のイベント登録
 				int t = (int)(NextTime - mEffectStart);
 				if (t >= mEffectTime) {
@@ -2760,35 +2748,38 @@ public class MyTextView extends SurfaceView implements Handler.Callback, Surface
 				if (mEffectRate != 0.0f) {
 					// エフェクト中は次のイベントを登録
 					nextEvent = true;
-					NextTime += EFFECT_TERM;
+					NextTime += DEF.INTERVAL_EFFECT;
 				}
 				break;
-			case EVENT_SCROLL:
+			case DEF.HMSG_EVENT_SCROLL:
 				// スクロールで移動
 				if (moveToNextPoint(mVolScrl)) {
 					// エフェクト中は次のイベントを登録
 					nextEvent = true;
-					NextTime += SCROLL_TERM;
+					NextTime += DEF.INTERVAL_SCROLL;
 				}
 				else {
 					mScrolling = false;
 				}
 				break;
-			case EVENT_PAGE:
+			case DEF.HMSG_EVENT_PAGE:
 				if (mEventPageMsg == msg) {
     				// スクロールで移動
     				if (moveToNextPage()) {
     					// エフェクト中は次のイベントを登録
     					nextEvent = true;
-    					NextTime += PAGE_TERM;
+    					NextTime += DEF.INTERVAL_PAGE;
     				}
 				}
 				break;
+			case DEF.HMSG_WORKSTREAM:
+				// ファイルアクセスの表示
+				return true;
 		}
 		if (nextEvent) {
 			// 次のイベントあり
 			msg = mHandler.obtainMessage(msg.what);
-			if (msg.what == EVENT_PAGE) {
+			if (msg.what == DEF.HMSG_EVENT_PAGE) {
 				mEventPageMsg = msg;
 			}
 			this.mHandler.sendMessageAtTime(msg, NextTime);

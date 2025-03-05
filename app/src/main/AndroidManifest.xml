@@ -52,6 +52,7 @@
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true"
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
+            android:launchMode="singleTop"
             android:exported="true" >
         </activity>
         <activity
@@ -59,87 +60,104 @@
             android:theme="@style/MyAppCompat"
             android:resizeableActivity="true"
             android:configChanges="keyboardHidden|orientation|keyboard|screenSize"
+            android:launchMode="singleTop"
             android:exported="true" >
         </activity>
         <activity
             android:name="src.comitton.expandview.ExpandActivity"
-            android:configChanges="keyboardHidden|orientation|keyboard|screenSize|screenLayout"
             android:theme="@style/MyAppCompat"
+            android:configChanges="keyboardHidden|orientation|keyboard|screenSize|screenLayout"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.helpview.HelpActivity"
             android:theme="@style/MyAppCompat"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.cropimageview.CropImageActivity"
             android:theme="@style/MyAppCompat"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetConfigActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetFileListActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetRecorderActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetFileColorActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageDetailActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetTextActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetEpubActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageTextDetailActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetImageTextColorActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetNoiseActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetCacheActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
         <activity
             android:name="src.comitton.config.SetCommonActivity"
             android:theme="@style/MyTheme"
+            android:launchMode="singleTop"
             android:resizeableActivity="true" >
         </activity>
 

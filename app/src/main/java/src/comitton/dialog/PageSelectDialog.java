@@ -1,6 +1,8 @@
 package src.comitton.dialog;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.DEF;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -176,7 +178,7 @@ public class PageSelectDialog extends ToolbarDialog implements Handler.Callback,
 		// ダイアログ終了
 		mObject = null;
 
-		if (mIsCancel == true && mAutoApply) {
+		if (mIsCancel && mAutoApply) {
 			// キャンセルなら元ページへ
 			mListener.onSelectPage(mPage);
 			Toast.makeText(mActivity, "Canceled.", Toast.LENGTH_SHORT).show();
@@ -210,8 +212,12 @@ public class PageSelectDialog extends ToolbarDialog implements Handler.Callback,
 
 	@Override
 	public boolean handleMessage(Message msg) {
-		// ページ選択
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg.what == HMSG_PAGESELECT) {
+			// ページ選択
 			if (msg.obj == mObject && msg.obj != null) {
 				mListener.onSelectPage(msg.arg1);
 			}

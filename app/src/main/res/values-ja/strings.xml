@@ -162,6 +162,7 @@
     <string name="renameErrorMsg">ファイル名を変更できませんでした。</string>
     <string name="downMsg1"></string>
     <string name="downMsg2"> にダウンロードします。</string>
+    <string name="downErrorMsg">ダウンロードできませんでした。</string>
     <string name="scTitle">ショートカットの作成</string>
     <string name="scMsg">ホーム画面にこのディレクトリへのショートカットを作成します。\n表示するショートカット名を入力してください。</string>
     <string name="mkTitle">マーカー設定</string>
@@ -571,5 +572,8 @@
     <string name="GetError">取得に失敗しました.</string>
     <string name="ParseError">解析に失敗しました.</string>
     <string name="NoResult">結果がありません.</string>
+
+    <string name="UnknownArchiveFormat">圧縮形式が不明です.</string>
+    <string name="ErrorNoPages">表示するページがありません.</string>
 
 </resources>

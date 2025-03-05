@@ -391,7 +391,7 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(mActivity, R.style.MyDialog, title, items, selIndex, false, new ListSelectListener() {
+		mListDialog = new ListDialog(mActivity, R.style.MyDialog, title, items, selIndex, new ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {

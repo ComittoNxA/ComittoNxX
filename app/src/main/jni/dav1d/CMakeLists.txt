@@ -2,7 +2,7 @@
 FetchContent_Populate(
         dav1d
     GIT_REPOSITORY https://code.videolan.org/videolan/dav1d.git
-    GIT_TAG         1.5.0
+    GIT_TAG         1.5.1
     SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/dav1d-src"
     BINARY_DIR "${FETCHCONTENT_BASE_DIR}/dav1d-subbuild"
     SUBBUILD_DIR "${FETCHCONTENT_BASE_DIR}/dav1d-build"

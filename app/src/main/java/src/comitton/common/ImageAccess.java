@@ -1,13 +1,16 @@
 package src.comitton.common;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
@@ -63,6 +66,35 @@ public class ImageAccess {
 		int rgb3 = (((red3<<16) & 0x00FF0000) | ((green3<<8) & 0x0000FF00) | (blue3 & 0x000000FF));
 		return ((rgb3 & mask) == 0x00000000);
 	}
+
+	// ビットマップをリサイズして切り出し
+	public static Bitmap setText(Bitmap bitmap, String text, int color, int align) {
+		Bitmap bm = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.RGB_565);
+		Canvas canvas = new Canvas();
+		canvas.setBitmap(bm);
+		canvas.drawBitmap(bitmap, 0, 0, new Paint());
+
+		Paint mTextPaint;
+		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mTextPaint.setTextSize((float)bitmap.getHeight() / 3);
+		mTextPaint.setTypeface(Typeface.DEFAULT);
+		mTextPaint.setTextAlign(Paint.Align.CENTER);
+
+		float text_x = (float) bm.getWidth() / 2;
+		float text_y = ((float) bm.getHeight() / 6)  + ((float) bm.getHeight() * align / 3) - ((mTextPaint.descent() + mTextPaint.ascent()) / 2);
+
+		mTextPaint.setShader(null);
+		mTextPaint.setStyle(Paint.Style.STROKE);
+		mTextPaint.setStrokeWidth(2.0f);
+		mTextPaint.setColor(Color.DKGRAY);
+		canvas.drawText(text, text_x, text_y, mTextPaint);
+		mTextPaint.setStyle(Paint.Style.FILL);
+		mTextPaint.setColor(color);
+		canvas.drawText(text, text_x, text_y, mTextPaint);
+
+		return bm;
+	}
+
 
 	// ビットマップをリサイズして切り出し
 	public static Bitmap resizeTumbnailBitmap(Bitmap bm, int thum_cx, int thum_cy, int crop, int margin) {

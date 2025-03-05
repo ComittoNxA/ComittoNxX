@@ -95,7 +95,7 @@ public class MarkerInputDialog extends ImmersiveDialog implements OnClickListene
 	@Override
 	public void onClick(View v) {
 		if (v == mBtnSearch) {
-			String text = null;
+			String text = "";
 			if (mEditText.getText() != null) {
 				text = mEditText.getText().toString().trim();
 			}

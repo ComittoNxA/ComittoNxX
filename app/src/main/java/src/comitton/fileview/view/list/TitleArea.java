@@ -1,7 +1,7 @@
 package src.comitton.fileview.view.list;
 
 import src.comitton.common.DEF;
-import src.comitton.fileview.DrawNoticeListener;
+import src.comitton.fileview.view.DrawNoticeListener;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -227,6 +227,10 @@ public class TitleArea implements Handler.Callback {
 	public boolean handleMessage(Message msg) {
 		if (msg != mScrollMsg) {
 			return false;
+		}
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
 		}
 		long NextTime = SystemClock.uptimeMillis();
 

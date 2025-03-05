@@ -358,22 +358,28 @@ int ThumbnailSave(long long id, int index, int bmp_width, int bmp_height, int bm
 	pthread_mutex_lock(&gThMutex);
 //	LOGD("ThumbnailSave : Mutex Lock/Aft");
 
+    if (ThumbnailMemorySizeCheck(id, bmp_width, bmp_height) != 0) {
+        // メモリに空きがない
+//		LOGD("ThumbnailSave : Illegal thumbnail ID(id=%lld)", id);
+        ret = -1;
+        goto ERROREND;
+    }
 	// IDの一致チェック
 	if (gThumbnailId != id) {
 		// 初期化したIDと異なる
 //		LOGD("ThumbnailSave : Illegal thumbnail ID(id=%lld)", id);
-		ret = -1;
+		ret = -2;
 		goto ERROREND;
 	}
 	if (gThPageBuff == nullptr || gThImageMng == nullptr) {
 		// 獲得されていない
 //		LOGD("ThumbnailSave : Pages Not Alloced");
-		ret = -2;
+		ret = -3;
 		goto ERROREND;
 	}
 	if (index < 0 || index >= gThImageNum) {
 //		LOGD("ThumbnailSave : Out of range(index=%d)", index);
-		ret = -3;
+		ret = -4;
 		goto ERROREND;
 	}
 
@@ -449,6 +455,35 @@ ERROREND:
 	pthread_mutex_unlock( &gThMutex );
 //	LOGD("ThumbnailSave : Mutex Unlock/Aft");
 	return ret;
+}
+
+int ThumbnailRemove(long long id, int index)
+{
+    int ret = 0;
+
+    // IDの一致チェック
+    if (gThumbnailId != id) {
+        // 初期化したIDと異なる
+//		LOGD("ThumbnailSave : Illegal thumbnail ID(id=%lld)", id);
+        ret = -2;
+        goto ERROREND;
+    }
+    if (gThPageBuff == nullptr || gThImageMng == nullptr) {
+        // 獲得されていない
+//		LOGD("ThumbnailSave : Pages Not Alloced");
+        ret = -3;
+        goto ERROREND;
+    }
+    if (index < 0 || index >= gThImageNum) {
+//		LOGD("ThumbnailSave : Out of range(index=%d)", index);
+        ret = -4;
+        goto ERROREND;
+    }
+
+    ThumbnailImageFree(index);
+
+ERROREND:
+    return ret;
 }
 
 int ThumbnailImageSize(long long id, int index)

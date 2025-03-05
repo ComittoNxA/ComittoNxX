@@ -70,12 +70,12 @@
             android:summary="dummy"
             android:title="スクロール開始の感度" />
         <src.comitton.config.seekbar.VolScrlSeekbar
-            android:dialogMessage="音量キーや音操作でのスクロール速度"
+            android:dialogMessage="タップでスクロールや音量キーや音操作でのスクロール速度"
             android:dialogTitle="スクロール速度"
             android:key="VolScrlSp"
             android:negativeButtonText="@null"
             android:summary="dummy"
-            android:title="音量キーでのスクロール速度" />
+            android:title="スクロール速度" />
         <src.comitton.config.seekbar.MomentModeSeekbar
             android:dialogMessage="小さいほどすぐ止まる"
             android:dialogTitle="減速スピード"

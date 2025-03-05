@@ -8,7 +8,7 @@ import src.comitton.common.ImageAccess;
 import src.comitton.common.TextFormatter;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.data.RecordItem;
-import src.comitton.fileview.DrawNoticeListener;
+import src.comitton.fileview.view.DrawNoticeListener;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -39,9 +39,9 @@ public class RecordListArea extends ListArea {
 
 	private String mTitleName;
 
-	private String mTitleSep[][][];
-	private String mInfoSep[][][];
-	private Bitmap mBitmap[];
+	private String[][][] mTitleSep;
+	private String[][][] mInfoSep;
+	private Bitmap[] mBitmap;
 
 	private int mTitleSize;
 	private int mTitleAscent;
@@ -131,7 +131,7 @@ public class RecordListArea extends ListArea {
 			// 選択背景塗り
 			int color;
 			boolean isTouchDraw = (mTouchIndex == index && mTouchDraw);
-			boolean isCursorDraw = (mCursorDisp == true && mCursorPosY * mColumnNum + mCursorPosX == index); 
+			boolean isCursorDraw = (mCursorDisp && mCursorPosY * mColumnNum + mCursorPosX == index);
 			color = mBakColor;
 			if (isTouchDraw) {
 				color = DEF.margeColor(mCurColor, color, mTouchCounter + 48, 96);
@@ -161,7 +161,8 @@ public class RecordListArea extends ListArea {
 			if (rd != null && rd.getType() == RecordItem.TYPE_MENU) {
 				// アイコン描画
 				Bitmap bm = mBitmap[index];
-				canvas.drawBitmap(bm,  x, y + (int)(mTitleSize / 4), mBitmapPaint);
+				//canvas.drawBitmap(bm,  x, y + (int)(mTitleSize / 4), mBitmapPaint);
+				canvas.drawBitmap(bm,  x, baseY + ypos + ((float) itemHeight - bm.getHeight()) / 2, mBitmapPaint);
 
 				// タイトル描画
 				for (int j = 0; j < mTitleSep[index].length; j++) {

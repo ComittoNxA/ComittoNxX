@@ -96,7 +96,7 @@ public class MenuItemView extends View {
 		mCurColor = curcolor;
 		mTxtColor = txtcolor;
 
-		int colors[] = { mBakColor, mTxtColor, mTxtColor, mBakColor };
+		int[] colors = { mBakColor, mTxtColor, mTxtColor, mBakColor };
 		mGradient = new GradientDrawable(Orientation.LEFT_RIGHT, colors);
 
 		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -152,7 +152,7 @@ public class MenuItemView extends View {
 		int x = MARGIN_SIZE;
 
 		// タイトル以外は選択時に色塗り
-		if (mPress == true && mType == TYPE_ITEM) {
+		if (mPress && mType == TYPE_ITEM) {
 			//mFillPaint.setColor(mCurColor);
 			canvas.drawColor(mCurColor);
 		}

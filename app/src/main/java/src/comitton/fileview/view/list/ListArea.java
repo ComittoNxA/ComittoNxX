@@ -1,5 +1,6 @@
 package src.comitton.fileview.view.list;
 
+import src.comitton.common.DEF;
 import src.comitton.fileview.view.list.MomentScroller.ScrollMoveListener;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -53,7 +54,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	private int mDispRange;
 	private int mTailRow;
 	private int mTailPos;
-	private short mRowHeight[];
+	private short[] mRowHeight;
 
 	protected int mTouchCounter;
 
@@ -132,7 +133,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 
 		RectF rc = new RectF(baseX + mAreaWidth - mRangeScrollerY * 2, baseY + y + 1, baseX + mAreaWidth, baseY + y + mRangeScrollerY * 2 - 1);
 		if (mVisibleCounter > MAX_VISIBLECOUNTER * 3 / 4) {
-    		if (mFirstScroll == true) {
+    		if (mFirstScroll) {
     			// 高速スクロール中
     			//canvas.drawCircle(x, baseY + y + mRangeScrollerX, mRangeScroller, mLinePaint);
     			color = 0x40FF4040;
@@ -209,7 +210,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 				doOperation(true);
 			}
 		}
-		if (mFirstScroll == true) {
+		if (mFirstScroll) {
 			// 高速スクロール中
 			if (action == MotionEvent.ACTION_MOVE) {
 				try {
@@ -244,7 +245,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		Point point = new Point(0,0);
 		int index = getRowFromPoint((int) x, (int) y, point);
 
-		if (mMomentScroller.sendTouchEvent(action, x, y) != false) {
+		if (mMomentScroller.sendTouchEvent(action, x, y)) {
 			return -1;
 		}
 		// 操作あり
@@ -399,7 +400,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			}
 		}
 
-		if (isRefresh == true) {
+		if (isRefresh) {
 			if (mColumnNum >= 1) {
 				if (oldColnumNum != mColumnNum) {
 	    			int idx = oldTopRow * oldColnumNum;	// 前回の先頭インデックス
@@ -595,7 +596,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 
 	public void doOperation(boolean operation) {
 		mIsOperation = operation;
-		if (operation == true) {
+		if (operation) {
 			mOperationTime = SystemClock.uptimeMillis();
 		}
 		if (mOperationMsg == null) {
@@ -620,6 +621,10 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	@Override
 	public boolean handleMessage(Message msg) {
 		boolean debug = false;
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg.what == HMSG_OPERATION) {
 			if (mOperationMsg == msg) {
     			long nowtime = SystemClock.uptimeMillis();
@@ -730,9 +735,9 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			return;
 		}
 
-		if (isMarker == true) {
+		if (isMarker) {
 			boolean marker = false;
-			for (int i = currentTop ; i >= 0 && marker == false ; i --) {
+			for (int i = currentTop; i >= 0 && !marker; i --) {
     			for (int j = 0 ; j < mColumnNum ; j ++) {
     				marker = isMarker(i * mColumnNum + j);
     				if (marker) {
@@ -741,7 +746,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
     				}
     			}
 			}
-			if (marker == false) {
+			if (!marker) {
 				return;
 			}
 		}
@@ -761,10 +766,10 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		// 次の行を求める
 		int nextrow = mBottomRow + 1; 
 		int h = getRowHeight(nextrow);
-		if (isMarker == true) {
+		if (isMarker) {
 			// 検索あり
 			boolean marker = false;
-			for (int i = nextrow ; i < mRowNum && marker == false ; i ++) {
+			for (int i = nextrow; i < mRowNum && !marker; i ++) {
     			for (int j = 0 ; j < mColumnNum ; j ++) {
     				marker = isMarker(i * mColumnNum + j);
     				if (marker) {
@@ -773,7 +778,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
     				}
     			}
 			}
-			if (marker == false) {
+			if (!marker) {
 				return;
 			}
 			// 見つけた
@@ -788,7 +793,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		doOperation(true);
 		updateBottomRowPos();
 
-		if (mCursorDisp == true && keycode == KeyEvent.KEYCODE_ENTER || keycode == KeyEvent.KEYCODE_DPAD_CENTER) {
+		if (mCursorDisp && keycode == KeyEvent.KEYCODE_ENTER || keycode == KeyEvent.KEYCODE_DPAD_CENTER) {
 			// 改行はカーソル移動とは分けて処理
 			int index = mCursorPosY * mColumnNum + mCursorPosX; 
 			if (isDown) {
@@ -819,7 +824,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			top  ++;
 		}
 
-		if (mCursorDisp == false) {
+		if (!mCursorDisp) {
 			// カーソル非表示中は表示するだけで移動しない
     		if (y < top) {
     			y = top;
@@ -921,14 +926,14 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	}
 
 	protected String[] getMultiLine(String str, int cx, int maxline, Paint text) {
-		float result[] = new float[str.length()];
+		float[] result = new float[str.length()];
 		text.getTextWidths(str, result);
 
 		int i;
 		int lastpos = 0;
 		int line = 0;
 		float sum = 0.0f;
-		int pos[] = { 0, 0, 0 };
+		int[] pos = { 0, 0, 0 };
 
 		float dotwidth = text.measureText("...");
 
@@ -954,7 +959,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			}
 		}
 
-		String strSep[] = new String[line + 1];
+		String[] strSep = new String[line + 1];
 		int st = 0;
 		// 文字列の切り出し
 		for (i = 0; i <= line; i++) {

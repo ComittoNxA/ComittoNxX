@@ -308,7 +308,7 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 			default:
 				return;
 		}
-		mListDialog = new ListDialog(mActivity, R.style.MyDialog, title, items, selIndex, false, new ListDialog.ListSelectListener() {
+		mListDialog = new ListDialog(mActivity, R.style.MyDialog, title, items, selIndex, new ListDialog.ListSelectListener() {
 			@Override
 			public void onSelectItem(int index) {
 				switch (mSelectMode) {

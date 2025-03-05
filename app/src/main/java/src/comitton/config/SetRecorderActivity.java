@@ -18,7 +18,7 @@ import android.preference.PreferenceScreen;
 public class SetRecorderActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private ListPreference mHistNum;
 
- 	public static final int HistNumName[] =
+ 	public static final int[] HistNumName =
 		{ R.string.histnum00	// 保存しない
 		, R.string.histnum01	// 20
 		, R.string.histnum02	// 40
@@ -43,6 +43,7 @@ public class SetRecorderActivity extends PreferenceActivity implements OnSharedP
 				String url = res.getString(R.string.url_recordlist);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetRecorderActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

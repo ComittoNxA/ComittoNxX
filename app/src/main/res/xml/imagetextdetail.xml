@@ -70,7 +70,7 @@
             android:summary="dummy"
             android:title="Scroll Start Sensitivity" />
         <src.comitton.config.seekbar.VolScrlSeekbar
-            android:dialogMessage="Scroll Speed of Vol-Button or Noise Operation."
+            android:dialogMessage="Scroll Speed of Tap, Vol-Button or Noise Operation."
             android:dialogTitle="Scroll Speed"
             android:key="VolScrlSp"
             android:negativeButtonText="@null"

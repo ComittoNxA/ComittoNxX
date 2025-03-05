@@ -63,7 +63,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 	private EditTextPreference mPriorityWord09;
 	private EditTextPreference mPriorityWord10;
 
-	public static final int RotateBtnName[] =
+	public static final int[] RotateBtnName =
 		{ R.string.rotabtn00	// 使用しない
 		, R.string.rotabtn01	// フォーカスキー
 		, R.string.rotabtn02 };	// シャッターキー
@@ -97,6 +97,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 				String url = res.getString(R.string.url_common);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetCommonActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

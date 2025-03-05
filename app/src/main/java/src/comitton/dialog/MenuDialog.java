@@ -239,7 +239,7 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 			}
 			else if (action == MotionEvent.ACTION_UP) {
 				if (mSelectView != null) {
-					if (mSelected == false) {
+					if (!mSelected) {
 						mListener.onSelectMenuDialog(mSelectView.getMenuId());
 					}
 					mSelectView.setSelect(false);

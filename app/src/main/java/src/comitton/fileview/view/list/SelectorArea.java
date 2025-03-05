@@ -2,7 +2,7 @@ package src.comitton.fileview.view.list;
 
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
-import src.comitton.fileview.DrawNoticeListener;
+import src.comitton.fileview.view.DrawNoticeListener;
 import jp.dip.muracoro.comittonx.R;
 import android.content.Context;
 import android.content.res.Configuration;

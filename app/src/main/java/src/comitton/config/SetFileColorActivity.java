@@ -54,7 +54,7 @@ public class SetFileColorActivity extends PreferenceActivity implements OnShared
 
 	SharedPreferences mSharedPreferences;
 
-	static final int mPresetName[] =
+	static final int[] mPresetName =
 	{ R.string.preset00		// カスタム
 	, R.string.preset01		// 標準（黒）
 	, R.string.preset02		// 標準（白）
@@ -79,7 +79,7 @@ public class SetFileColorActivity extends PreferenceActivity implements OnShared
 	static final int PRESET_TLD = 12;
 	static final int PRESET_TLB = 13;
 
-	static final int mPresetColor[][] =
+	static final int[][] mPresetColor =
 	//   ----TXT----, ---DIR----, ---BEF----, ---NOW----, ---AFT----, ---IMG----, ---INF----, ---MRK----, ---BAK----, ---Cur----, ---TIT----, ---TIB----, ---TLD----, ---TLB----
 	{
 /*標*/	{ 0xFFFFFFFF, 0xFF00FF00, 0xFFFFFFFF, 0xFF00FFFF, 0xFF808080, 0xFFFFFF00, 0xFF9F9F9F, 0xFFFFFF00, 0xFF000000, 0xFF0080FF, 0xFFFFFFFF, 0xFF202020, 0xFF000000, 0xFF808080 },
@@ -128,6 +128,7 @@ public class SetFileColorActivity extends PreferenceActivity implements OnShared
 				String url = res.getString(R.string.url_filecolor);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetFileColorActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;
@@ -141,7 +142,7 @@ public class SetFileColorActivity extends PreferenceActivity implements OnShared
 				// プリセットを反映
 				int index = getPreset(mSharedPreferences);
 				if (index > 0 || index < mPresetColor.length) {
-					String newKeys[] = { DEF.KEY_TXTRGB, DEF.KEY_DIRRGB, DEF.KEY_BEFRGB, DEF.KEY_NOWRGB, DEF.KEY_AFTRGB, DEF.KEY_IMGRGB, DEF.KEY_INFRGB, DEF.KEY_MRKRGB, DEF.KEY_BAKRGB, DEF.KEY_CURRGB, DEF.KEY_TITRGB, DEF.KEY_TIBRGB, DEF.KEY_TLDRGB, DEF.KEY_TLBRGB };
+					String[] newKeys = { DEF.KEY_TXTRGB, DEF.KEY_DIRRGB, DEF.KEY_BEFRGB, DEF.KEY_NOWRGB, DEF.KEY_AFTRGB, DEF.KEY_IMGRGB, DEF.KEY_INFRGB, DEF.KEY_MRKRGB, DEF.KEY_BAKRGB, DEF.KEY_CURRGB, DEF.KEY_TITRGB, DEF.KEY_TIBRGB, DEF.KEY_TLDRGB, DEF.KEY_TLBRGB };
 
 					Editor ed = mSharedPreferences.edit();
 					for (int i = 0 ; i < newKeys.length ; i ++) {

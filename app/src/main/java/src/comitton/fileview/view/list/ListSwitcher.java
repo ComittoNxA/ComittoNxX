@@ -2,11 +2,14 @@ package src.comitton.fileview.view.list;
 
 import java.util.EventListener;
 
+import android.annotation.SuppressLint;
 import android.os.Handler.Callback;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.view.MotionEvent;
+
+import src.comitton.common.DEF;
 
 public class ListSwitcher implements Callback {
 	private final int HMSG_LISTSWITCH = 6001;
@@ -163,8 +166,13 @@ public class ListSwitcher implements Callback {
 		mListSwitcherListener.onListSwitch(diff, mOffset);
 	}
 	
-	@Override
+	@SuppressLint("SuspiciousIndentation")
+    @Override
 	public boolean handleMessage(Message msg) {
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg.what == HMSG_LISTSWITCH) {
 			if (mSwitchMsg == msg) { 
     			long NextTime = SystemClock.uptimeMillis() + LISTSWITCH_TERM;

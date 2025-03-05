@@ -41,6 +41,7 @@ public class SetCacheActivity extends PreferenceActivity implements OnSharedPref
 				String url = res.getString(R.string.url_cache);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetCacheActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

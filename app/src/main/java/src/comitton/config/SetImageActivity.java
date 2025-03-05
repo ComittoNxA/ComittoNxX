@@ -36,17 +36,17 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 	private PageNumberPreference mPageNumber;
 	private TimeAndBatteryPreference mTimeAndBattery;
 
-	public static final int FileSortName[] =
+	public static final int[] FileSortName =
 		{ R.string.fsort00		// ソートなし
 		, R.string.fsort01		// ファイル名-昇順
 		, R.string.fsort02 };	// ファイル名-降順
-	public static final int ViewPtName[] =
+	public static final int[] ViewPtName =
 		{ R.string.posi00		// 右上
 		, R.string.posi01		// 左上
 		, R.string.posi02		// 右下
 		, R.string.posi03		// 左下
 		, R.string.posi04 };	// 左下
-	public static final int ScaleName[] =
+	public static final int[] ScaleName =
 		{ R.string.selsize00	// 元のサイズで表示
 		, R.string.selsize01	// 幅に合わせて表示
 		, R.string.selsize02	// 高さに合わせて表示
@@ -55,20 +55,20 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		, R.string.selsize05	// 画面全体で表示(見開き対応)
 		, R.string.selsize06	// 幅に合わせて表示(見開き対応)
 		, R.string.selsize07 };	// 全体を表示(見開き対応)
-	public static final int PageWayName[] =
+	public static final int[] PageWayName =
 		{ R.string.pgway00		// 右から左
 		, R.string.pgway01 };	// 左から右
-	public static final int ViewName[] =
+	public static final int[] ViewName =
 		{ R.string.selview00	// そのまま表示
 		, R.string.selview01	// 見開き表示
 		, R.string.selview02	// 単ページ表示
 		, R.string.selview04 };	// 単ページ／見開き
-	public static final int RotateName[] =
+	public static final int[] RotateName =
 		{ R.string.rota00		// 回転あり
 		, R.string.rota01		// 縦固定
 		, R.string.rota02		// 横固定
 		, R.string.rota03 };	// 縦固定(90°回転)
-	public static final int LoupeName[] =
+	public static final int[] LoupeName =
 		{ R.string.loupe00		// 原寸x1.0
 		, R.string.loupe01		// 原寸x2.0
 		, R.string.loupe02		// 原寸x3.0
@@ -76,26 +76,26 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		, R.string.loupe04		// 表示x2.0
 		, R.string.loupe05		// 表示x2.5
 		, R.string.loupe06 };	// 表示x3.0
-	public static final int AlgoModeName[] =
+	public static final int[] AlgoModeName =
 		{ R.string.selalgo00	// 最近傍補間
 		, R.string.selalgo01	// 双一次補間
 		, R.string.selalgo02	// 双一次補間(2Step)
 		, R.string.selalgo03	// 双三次補間
 		, R.string.selalgo04 };	// 双三次補間(2Step)
 //		, R.string.selalgo05 };	// Lanczos3
-	public static final int ImgRotaName[] =
+	public static final int[] ImgRotaName =
 		{ R.string.selrota00	// 回転無しで表示
 		, R.string.selrota01	// 90°回転して表示
 		, R.string.selrota02	// 180°回転して表示
 		, R.string.selrota03 };	// 270°回転して表示
-	public static final int VolKeyName[] =
+	public static final int[] VolKeyName =
 		{ R.string.volkey00		// 使用しない
 		, R.string.volkey01		// VolUp:前/Down:次
 		, R.string.volkey02 };	// VolUp:次/Down:前
-	public static final int ScrlWayName[] =
+	public static final int[] ScrlWayName =
 		{ R.string.scrlway00	// 横→縦
 		, R.string.scrlway01 };	// 縦→横
-	public static final int MgnCutName[] =
+	public static final int[] MgnCutName =
 		{ R.string.mgncut00		// なし
 		, R.string.mgncut01		// 弱
 		, R.string.mgncut02		// 中
@@ -103,28 +103,28 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 		, R.string.mgncut04		// 特上
 		, R.string.mgncut05		// 最強
 		, R.string.mgncut06 };	// 縦横比無視
-	public static final int MgnCutColorName[] =
+	public static final int[] MgnCutColorName =
 			{ R.string.mgncutcolor00		// 白と黒
 			, R.string.mgncutcolor01 };		// 全ての色
-	public static final int EffectName[] =
+	public static final int[] EffectName =
 		{ R.string.effect00		// なし
 		, R.string.effect01		// フリップ
 		, R.string.effect02		// フェードイン
 		, R.string.effect03 };	// スクロール
-	public static final int PnumFormatName[] =
+	public static final int[] PnumFormatName =
 		{ R.string.pnumformat00		// page / total
 		, R.string.pnumformat01 };	// page1-2 / total
-	public static final int PnumPosName[] =
+	public static final int[] PnumPosName =
 		{ R.string.pnumpos00	// 左上
 		, R.string.pnumpos01	// 中央上
 		, R.string.pnumpos02	// 右上
 		, R.string.pnumpos03	// 左下
 		, R.string.pnumpos04	// 中央下
 		, R.string.pnumpos05 };	// 右下
-	public static final int PnumColorName[] =
+	public static final int[] PnumColorName =
 			{ R.string.pnumcolor00		// 白
 		, R.string.pnumcolor01 };		// 黒
-	public static final int TimeFormatName[] =
+	public static final int[] TimeFormatName =
 		{ R.string.timeformat00		// 24:00
 		, R.string.timeformat01		// 24:00 [100%]
 		, R.string.timeformat02		// 24:00 [100%] [AC]
@@ -180,6 +180,7 @@ public class SetImageActivity extends PreferenceActivity implements OnSharedPref
 				String url = res.getString(R.string.url_image);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetImageActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

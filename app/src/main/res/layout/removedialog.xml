@@ -12,7 +12,6 @@
 			android:layout_height="wrap_content"
 			android:gravity="center"
 			android:textSize="22sp"
-			android:textColor="#FFFFFFFF"
 			android:text="@string/rmTitle" />
 
 		<ImageView
@@ -30,8 +29,6 @@
 			android:layout_marginRight="10sp"
 			android:gravity="left|center_vertical"
 			android:textSize="18sp"
-			android:textColor="#FFFFFFFF"
-			android:text=""
 			android:layout_marginTop="20sp"
 			android:layout_marginBottom="20sp" />
 

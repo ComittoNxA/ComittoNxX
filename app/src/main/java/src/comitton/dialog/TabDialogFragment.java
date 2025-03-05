@@ -55,19 +55,19 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     private boolean mSelected;
     private boolean mIsClose;
 
-    private static int pager_bakcolor = 0x80000000;
+    private final static int pager_bakcolor = 0x80000000;
 
-    private static int curcolor = 0x90008000;
-    private static int title_txtcolor = 0xFFFFFFFF;
-    private static int title_bakcolor = 0xA0000080;
+    private final static int curcolor = 0x808080FF;
+    private final static int title_txtcolor = 0xFFFFFFFF;
+    private final static int title_bakcolor = 0xA0000080;
     private int title_txtsize;
-    private static int tab_txtcolor_selected = 0xFFFFFFFF;
-    private static int tab_txtcolor = 0xBBFFFFFF;
-    private static int tab_bakcolor = 0xA0000080;
-    private static int item_txtcolor = 0xFFFFFFFF;
-    private static int item_bakcolor = 0x00000000;
-    private static int separater_txtcolor = 0xBBFFFFFF;
-    private static int separater_bakcolor = 0xBBFFFFFF;
+    private final static int tab_txtcolor_selected = 0xFFFFFFFF;
+    private final static int tab_txtcolor = 0xBBFFFFFF;
+    private final static int tab_bakcolor = 0xA0000080;
+    private final static int item_txtcolor = 0xFFFFFFFF;
+    private final static int item_bakcolor = 0x00000000;
+    private final static int separater_txtcolor = 0xBBFFFFFF;
+    private final static int separater_bakcolor = 0xBBFFFFFF;
     private int item_txtsize;
 
     public TabDialogFragment(AppCompatActivity activity, @StyleRes int themeResId, boolean isclose, MenuDialog.MenuSelectListener listener) {
@@ -202,7 +202,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
         // タッチイベント
         int action = event.getAction();
 
-        String eventName[] = { "DOWN" , "UP" , "MOVE" , "CANCEL" , "OUTSIDE" ,
+        String[] eventName = { "DOWN" , "UP" , "MOVE" , "CANCEL" , "OUTSIDE" ,
                 "POINTER_DOWN" , "POINTER_UP" , "HOVER_MOVE" , "SCROLL" , "HOVER_ENTER" ,
                 "HOVER_EXIT" , "BUTTON_PRESS" , "BUTTON_RELEASE" };
         if (debug) {Log.d("TabDialogFragment", "onTouch: view=" + v + ", action=" + eventName[action]);}
@@ -219,7 +219,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
         }
         else if (action == MotionEvent.ACTION_UP) {
             if (mSelectView != null) {
-                if (mSelected == false) {
+                if (!mSelected) {
                     mListener.onSelectMenuDialog(mSelectView.getMenuId());
                 }
                 mSelectView.setSelect(false);

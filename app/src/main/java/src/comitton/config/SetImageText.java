@@ -6,17 +6,17 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 
 public class SetImageText {
-	public static final int ViewPtName[] =
+	public static final int[] ViewPtName =
 		{ R.string.posi00		// 右上
 		, R.string.posi01		// 左上
 		, R.string.posi02		// 右下
 		, R.string.posi03		// 左下
 		, R.string.posi04 };	// 中央
-	public static final int VolKeyName[] =
+	public static final int[] VolKeyName =
 		{ R.string.volkey00		// 使用しない
 		, R.string.volkey01		// VolUp:前/Down:次
 		, R.string.volkey02 };	// VolUp:次/Down:前
-	public static final String RateDisp[] =
+	public static final String[] RateDisp =
 		{ "(10%:90%)"
 		, "(20%:80%)"
 		, "(30%:70%)"
@@ -26,11 +26,11 @@ public class SetImageText {
 		, "(70%:30%)"
 		, "(80%:20%)"
 		, "(90%:10%)" };	// VolUp:次/Down:前
-	public static final int LastPageName[] =
+	public static final int[] LastPageName =
 		{ R.string.lastpage00		// 画面を閉じる
 		, R.string.lastpage01		// 確認ダイアログ
 		, R.string.lastpage02 };	// 次のファイルへ移動
-	public static final int PageSelectName[] =
+	public static final int[] PageSelectName =
 		{ R.string.pageselect00		// フリック
 		, R.string.pageselect01		// スライダー
 		, R.string.pageselect02 };	// サムネイル

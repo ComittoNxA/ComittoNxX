@@ -72,7 +72,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		int left;
 	}
 
-	private PageArea mPageArea[];
+	private PageArea[] mPageArea;
 	private int mPageAreaNum;
 
 	public ThumbnailView(Context context, AttributeSet attrs) {
@@ -607,6 +607,10 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	@Override
 	public boolean handleMessage(Message msg) {
 		// ページ読込通知
+		if (msg.what == DEF.HMSG_WORKSTREAM) {
+			// ファイルアクセスの表示
+			return true;
+		}
 		if (msg.what == MESSAGE_INIT) {
 			if (this.getWidth() > 0) {
 				setPosition(mFirstPage);

@@ -34,6 +34,7 @@ import src.comitton.fileview.data.FileData;
 import org.mozilla.universalchardet.UniversalDetector;
 
 public class DEF {
+	private static final String TAG = "DEF";
 
 	public static final boolean DEBUG = BuildConfig.DEBUG;
 	public static final String BUILD_DATE = (new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())).format(BuildConfig.BUILD_DATE);
@@ -94,6 +95,34 @@ public class DEF {
 	public static final int HMSG_SUB_MESSAGE = 21;
 	public static final int HMSG_ERROR_MALLOC = 22;
 	public static final int HMSG_APP_DOWNLOADS = 23;
+	public static final int HMSG_SET_LISTVIEW_INDEX = 24;
+	public static final int HMSG_FILE_STATUS = 25;
+
+	public static final int HMSG_EVENT_READTIMER = 200;
+	public static final int HMSG_EVENT_EFFECT = 201;
+	public static final int HMSG_EVENT_SCROLL = 202;
+	public static final int HMSG_EVENT_LOADING = 203;
+	public static final int HMSG_EVENT_AUTOPLAY = 204;
+	public static final int HMSG_EVENT_TOUCH_ZOOM = 205;
+	public static final int HMSG_EVENT_TOUCH_TOP = 206;
+	public static final int HMSG_EVENT_TOUCH_BOTTOM = 207;
+	public static final int HMSG_EVENT_PAGE = 208;
+	public static final int HMSG_EVENT_ATTENUATE = 209;
+	public static final int HMSG_EVENT_MOMENTIUM = 210;
+	public static final int HMSG_EVENT_EFFECT_NEXT = 211;
+	public static final int HMSG_EVENT_SCROLL_NEXT = 212;
+	public static final int HMSG_EVENT_LOADING_NEXT = 213;
+
+	public static final int INTERVAL_DEFAULT = 50;	// Milliseconds
+	public static final int INTERVAL_EFFECT = 1;	// Milliseconds
+	public static final int INTERVAL_EFFECT_NEXT = 1;	// Milliseconds
+	public static final int INTERVAL_SCROLL = 4;	// Milliseconds
+	public static final int INTERVAL_SCROLL_NEXT = 4;	// Milliseconds
+	public static final int INTERVAL_LOADING = 500;	// Milliseconds
+	public static final int INTERVAL_LOADING_NEXT = 150;	// Milliseconds
+	public static final int INTERVAL_PAGE = 1;
+	public static final int INTERVAL_ATTENUATE = 10;
+	public static final int INTERVAL_MOMENTIUM = 10;
 
 	public static final int MENU_HELP = Menu.FIRST + 0;
 	public static final int MENU_SETTING = Menu.FIRST + 1;
@@ -429,6 +458,8 @@ public class DEF {
 	public static final String KEY_VOLKEY = "VolKey";
 	public static final String KEY_SCRLWAY = "ScrlWay";
 	public static final String KEY_THUMBNAIL = "Thumbnail";
+	public static final String KEY_LISTMODE = "ListMode";
+	public static final String KEY_INITIALIZE = "Initialize";
 	public static final String KEY_THUMBCACHE = "ThumbCache";
 	public static final String KEY_THUMBSORTTYPE = "ThumbSortType";
 	public static final String KEY_THUMBCROP = "ThumbCrop";
@@ -714,13 +745,18 @@ public class DEF {
 	public static final long MILLIS_DELETECHE = (10 * 60 * 1000); // 10分
 
 	public static final int PAPERSEL_SCREEN = 0;
-	public static final int PAPERSIZE[][] = {{0, 0}, {800, 1280}, {720, 1280}, {540, 960}, {480, 800}};
+	public static final int[][] PAPERSIZE = {{0, 0}, {800, 1280}, {720, 1280}, {540, 960}, {480, 800}};
 
 	public static final String URL_IMAGEDETIAL = "";
 	public static final String URL_FILESELECT = "https://docs.google.com/document/d/197jmNnXY3BP4F9HHmJCuroWslbTFH8nWTBVWbn8T4dE/edit";
 	public static final String URL_COMMON = "";
 	public static final String URL_IMAGEVIEW = "";
 	public static final String URL_SERVER = "";
+
+	public static final int DISPMODE_IM_NORMAL = 0;
+	public static final int DISPMODE_IM_DUAL = 1;
+	public static final int DISPMODE_IM_HALF = 2;
+	public static final int DISPMODE_IM_EXCHANGE = 3;
 
 	public static final int DISPMODE_TX_DUAL = 0;
 	public static final int DISPMODE_TX_HALF = 1;
@@ -736,7 +772,12 @@ public class DEF {
 	public static final int SHOWMENU_LOCAL = 2;
 	public static final int SHOWMENU_SERVER = 3;
 
-	public static final int ColorList[] = {Color.rgb(0, 0, 0) // 0
+	public static final int ALIGN_TOP = 0;
+	public static final int ALIGN_CENTER = 1;
+	public static final int ALIGN_BOTTOM = 2;
+
+
+	public static final int[] ColorList = {Color.rgb(0, 0, 0) // 0
 			, Color.rgb(255, 255, 255) // 1
 			, Color.rgb(0, 0, 255) // 2
 			, Color.rgb(255, 0, 0) // 3
@@ -759,7 +800,7 @@ public class DEF {
 			, Color.rgb(97, 97, 0) // 20
 			, Color.rgb(0, 97, 97) // 21
 			, Color.rgb(97, 97, 97)}; // 22
-	public static final int GuideList[] = {0x80000000 // 0 : 黒
+	public static final int[] GuideList = {0x80000000 // 0 : 黒
 			, 0x80000070 // 1 : 青
 			, 0x80700000 // 2 : 赤
 			, 0x80700070 // 3 : マゼンタ
@@ -767,10 +808,10 @@ public class DEF {
 			, 0x80707000 // 5 : 黄
 			, 0x80007070}; // 6 : シアン
 
-	public static final int RotateBtnList[] = {0, KeyEvent.KEYCODE_FOCUS // フォーカスキー
+	public static final int[] RotateBtnList = {0, KeyEvent.KEYCODE_FOCUS // フォーカスキー
 			, KeyEvent.KEYCODE_CAMERA // シャッターキー
 	};
-	public static final String CharsetList[] = {"UTF-8", "Shift_JIS", "EUC-JP", "EUC-KR", "Big5", "CB2312", "GB18030", "Big5-HKSCS"};
+	public static final String[] CharsetList = {"UTF-8", "Shift_JIS", "EUC-JP", "EUC-KR", "Big5", "CB2312", "GB18030", "Big5-HKSCS"};
 
 	public static final int ROTATE_AUTO = 0;
 	public static final int ROTATE_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -789,10 +830,14 @@ public class DEF {
 	public static final boolean TEXT_VIEWER = false;
 	public static final boolean IMAGE_VIEWER = true;
 
-	public static final int PAGENUMBER_NONE = 0;    // 未定
-	public static final int PAGENUMBER_READING = 0;    // 読書中
-	public static final int PAGENUMBER_UNREAD = -1;    // 未読
-	public static final int PAGENUMBER_READ = -2;        // 既読
+	/** 読書中 */
+	public static final int PAGENUMBER_READING = 0;
+	/** 未読 */
+	public static final int PAGENUMBER_UNREAD = -1;
+	/** 既読 */
+	public static final int PAGENUMBER_READ = -2;
+	/** 未定 */
+	public static final int PAGENUMBER_NONE = -3;
 
 	// 縦長チェック
 	static public boolean checkPortrait(int cx, int cy) {
@@ -808,7 +853,7 @@ public class DEF {
 	}
 
 	static public boolean checkHiddenFile(String path) {
-		String folder[] = path.split("/");
+		String[] folder = path.split("/");
 		if (folder.length == 0) {
 			return true;
 		}
@@ -830,7 +875,7 @@ public class DEF {
 		if (keyOld != null) {
 			str = sp.getString(keyOld, "");
 		}
-		if (!str.equals("")) {
+		if (!str.isEmpty()) {
 			index = Integer.parseInt(str);
 		}
 		if (0 <= index && index < DEF.ColorList.length) {
@@ -853,7 +898,7 @@ public class DEF {
 		if (keyOld != null) {
 			str = sp.getString(keyOld, "");
 		}
-		if (!str.equals("")) {
+		if (!str.isEmpty()) {
 			index = Integer.parseInt(str);
 		}
 		if (0 <= index && index < DEF.GuideList.length) {
@@ -914,7 +959,7 @@ public class DEF {
 			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
 			String path = str + ":" + thum_cx + "x" + thum_cy;
 			digest.update(path.getBytes());
-			byte messageDigest[] = digest.digest();
+			byte[] messageDigest = digest.digest();
 
 			// Create Hex String
 			StringBuffer hexString = new StringBuffer();
@@ -1332,7 +1377,7 @@ public class DEF {
 	}
 
 	// 2バイト数値取得
-	static public short getShort(byte b[], int pos) {
+	static public short getShort(byte[] b, int pos) {
 		int val;
 		val = ((int) b[pos] & 0x000000FF) | (((int) b[pos + 1] << 8) & 0x0000FF00);
 
@@ -1340,7 +1385,7 @@ public class DEF {
 	}
 
 	// 4バイト数値取得
-	static public int getInt(byte b[], int pos) {
+	static public int getInt(byte[] b, int pos) {
 		int val;
 		val = ((int) b[pos] & 0x000000FF) | (((int) b[pos + 1] << 8) & 0x0000FF00) | (((int) b[pos + 2] << 16) & 0x00FF0000) | (((int) b[pos + 3] << 24) & 0xFF000000);
 
@@ -1421,7 +1466,7 @@ public class DEF {
 
 	static public int compareFileName(final String str1, final String str2, final boolean sortByFileType) {
 		boolean debug = false;
-		if (debug) {Log.d("DEF","compareFileName: 開始します. str1=" + str1 + ", str2=" + str2 + ", sortByFileType=" + sortByFileType);}
+		if (debug) {Log.d(TAG,"compareFileName: 開始します. str1=" + str1 + ", str2=" + str2 + ", sortByFileType=" + sortByFileType);}
 
 		String name1 = str1;
 		String name2 = str2;
@@ -1452,8 +1497,8 @@ public class DEF {
 				ext2 = "";
 			}
 		}
-		if (debug) {Log.d("DEF","compareFileName: ext1=" + ext1 + ", ext2=" + ext2 + ", sortByFileType=" + sortByFileType);}
-		if (debug) {Log.d("DEF","compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
+		if (debug) {Log.d(TAG,"compareFileName: ext1=" + ext1 + ", ext2=" + ext2 + ", sortByFileType=" + sortByFileType);}
+		if (debug) {Log.d(TAG,"compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
 
 		while (!flag1 && !flag2) {
 			// 最上位ディレクトリとそれ以外に分ける
@@ -1488,14 +1533,14 @@ public class DEF {
 				flag2 = true;
 			}
 
-			if (debug) {Log.d("DEF","compareFileName: dir1=" + dir1 + ", dir2=" + dir2 + ", sortByFileType=" + sortByFileType);}
-			if (debug) {Log.d("DEF","compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
+			if (debug) {Log.d(TAG,"compareFileName: dir1=" + dir1 + ", dir2=" + dir2 + ", sortByFileType=" + sortByFileType);}
+			if (debug) {Log.d(TAG,"compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
 			// ファイル優先ならファイルをディレクトリより優先
 			if (sortByFileType && file1 && !file2) {
-				if (debug) {Log.d("DEF","compareFileName: dir1 はファイルです.");}
+				if (debug) {Log.d(TAG,"compareFileName: dir1 はファイルです.");}
 				return -1;
 			} else if (sortByFileType && !file1 && file2) {
-				if (debug) {Log.d("DEF","compareFileName: dir2 はファイルです.");}
+				if (debug) {Log.d(TAG,"compareFileName: dir2 はファイルです.");}
 				return 1;
 			} else {
 				// ディレクトリ同士を比較
@@ -1540,7 +1585,7 @@ public class DEF {
 			return -1;
 		}
 
-		if (debug) {Log.d("DEF","compareFileName: 開始します. name1=" + name1 + ", name2=" + name2);}
+		if (debug) {Log.d(TAG,"compareFileName: 開始します. name1=" + name1 + ", name2=" + name2);}
 
 		int i1, i2;
 		char ch1, ch2;
@@ -1562,7 +1607,7 @@ public class DEF {
 		int len2 = name2.length();
 
 		for (i1 = i2 = 0; i1 < len1 && i2 < len2; i1++, i2++) {
-			if (debug) {Log.d("DEF","compareFileName: ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);}
+			if (debug) {Log.d(TAG,"compareFileName: ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);}
 			ch1 = name1.charAt(i1);
 			ch2 = name2.charAt(i2);
 			ct1 = getCharType(ch1);
@@ -1643,7 +1688,7 @@ public class DEF {
 			}
 
 			if (ct1 != ct2) {
-				if (debug) {Log.d("DEF","compareFileName: 文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);}
+				if (debug) {Log.d(TAG,"compareFileName: 文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);}
 				// 文字種が違う場合
 				char tmp1, tmp2;
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
@@ -1677,7 +1722,7 @@ public class DEF {
 
 			if (SORT_BY_NATURAL_NUMBERS) {
 				if (ct1 == CHTYPE_NUM) {
-					//Log.d("DEF","compareFileName 文字1=" + ch1 + ", 文字2=" + ch2);
+					//Log.d(TAG,"compareFileName 文字1=" + ch1 + ", 文字2=" + ch2);
 					String num1 = getNumbers(name1, i1);
 					String num2 = getNumbers(name2, i2);
 					int nlen1 = num1.length();
@@ -1699,7 +1744,7 @@ public class DEF {
 						// num1が大きい
 						return 1;
 					} else {
-						//Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2);
+						//Log.d(TAG,"compareFileName 数字1=" + num1 + ", 数字2=" + num2);
 						//小数点の位置
 						int index_dot1 = num1.indexOf(".");
 						int index_dot2 = num2.indexOf(".");
@@ -1726,10 +1771,10 @@ public class DEF {
 						for (int i = -1; i >= col_diff; i--) {
 							num1 = num1 + "0";
 						}
-						//Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
+						//Log.d(TAG,"compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
 						num1 = num1.replace(".", "");
 						num2 = num2.replace(".", "");
-						//Log.d("DEF","compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
+						//Log.d(TAG,"compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
 
 						int num_len1 = num1.length();
 						int num_len2 = num2.length();
@@ -1770,7 +1815,7 @@ public class DEF {
 									}
 								}
 							} else {
-								if (debug) {Log.d("DEF", "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
+								if (debug) {Log.d(TAG, "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
 							}
 						} else {
 							// どちらも負の数
@@ -1812,7 +1857,7 @@ public class DEF {
 									}
 								}
 							} else {
-								if (debug) {Log.d("DEF", "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
+								if (debug) {Log.d(TAG, "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
 							}
 						}
 						i1 += nlen1 - 1;
@@ -1824,18 +1869,18 @@ public class DEF {
 
 			if (SORT_BY_KANJI_NUMERALS) {
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
-					if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);}
+					if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);}
 					String num1 = getKanjiNumerals(name1, i1);
 					String num2 = getKanjiNumerals(name2, i2);
 					int nlen1 = num1.length();
 					int nlen2 = num2.length();
-					if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. num1=" + num1 + ", num2=" + num2);}
+					if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. num1=" + num1 + ", num2=" + num2);}
 					if (nlen1 < nlen2) {
 						int difflen = nlen2 - nlen1;
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num2.charAt(i)) != 0) {
 								// num2の方が大きい
-								if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. num1が小さいです.");}
+								if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. num1が小さいです.");}
 								return -1;
 							}
 						}
@@ -1846,7 +1891,7 @@ public class DEF {
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num1.charAt(i)) > 0) {
 								// num1の方が大きい
-								if (debug) {Log.d("DEF", "compareFileName: 漢数字を比較します. num2が小さいです.");}
+								if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. num2が小さいです.");}
 								return 1;
 							}
 						}
@@ -1859,8 +1904,8 @@ public class DEF {
 						if (diff != 0) {
 							// num1の方が大きい
 							if (debug) {
-								if (diff>0) {Log.d("DEF", "compareFileName: 漢数字を比較します. num2が小さいです.");}
-								else {Log.d("DEF", "compareFileName: 漢数字を比較します. num1が小さいです.");}
+								if (diff>0) {Log.d(TAG, "compareFileName: 漢数字を比較します. num2が小さいです.");}
+								else {Log.d(TAG, "compareFileName: 漢数字を比較します. num1が小さいです.");}
 							}
 							return diff;
 						}
@@ -2256,31 +2301,31 @@ public class DEF {
 	static private int getCharType(char ch) {
 		boolean debug = false;
 		if (SORT_BY_SYMBOL && getSymbolBefore(ch) >= 0) {
-			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_SYMBOL_BEFORE");}
+			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_SYMBOL_BEFORE");}
 			return CHTYPE_SYMBOL_BEFORE;
 		}
 
 		if (SORT_BY_SYMBOL && getSymbolAfter(ch) >= 0) {
-			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_SYMBOL_AFTER");}
+			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_SYMBOL_AFTER");}
 			return CHTYPE_SYMBOL_AFTER;
 		}
 
 		if (SORT_BY_NATURAL_NUMBERS && (('0' <= ch && ch <= '9') || '.' == ch || ',' == ch)) {
-			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_NUM");}
+			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_NUM");}
 			return CHTYPE_NUM;
 		}
 
 		if (SORT_BY_JAPANESE_VOLUME_NAME && getJapaneseVolumeName(ch) >= 0) {
-			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_JAPANESE_VOLUME_NAME");}
+			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_JAPANESE_VOLUME_NAME");}
 			return CHTYPE_JAPANESE_VOLUME_NAME;
 		}
 
 		if (SORT_BY_KANJI_NUMERALS && getKanjiNumeral(ch) >= 0) {
-			if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_KANJI_NUMERALS");}
+			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_KANJI_NUMERALS");}
 			return CHTYPE_KANJI_NUMERALS;
 		}
 
-		if (debug) {Log.d("DEF", "getCharType: TYPE=CHTYPE_CHAR");}
+		if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_CHAR");}
 		return CHTYPE_CHAR;
 	}
 
@@ -2375,7 +2420,7 @@ public class DEF {
 			// 読み込み
 			intval = sp.getBoolean(key, defval);
 		} catch (Exception e) {
-			Log.e("DEF.getBoolean", "error(key=" + key + ")");
+			Log.e("DEF.getBoolean", "getBoolean: error(key=" + key + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 		}
 		return intval;
 	}
@@ -2387,7 +2432,7 @@ public class DEF {
 			// 読み込み
 			intval = sp.getInt(key, defval);
 		} catch (Exception e) {
-			Log.e("DEF.getInt", "error(key=" + key + ")");
+			Log.e("DEF.getInt", "getInt: error(key=" + key + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 		}
 		return intval;
 	}
@@ -2399,14 +2444,14 @@ public class DEF {
 		try {
 			strval = sp.getString(key, defval);
 		} catch (Exception e) {
-			Log.e("DEF.getInt", "getInt error(key=" + key + ")");
+			Log.e("DEF.getInt", "getInt: error(key=" + key + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 		}
 
 		try {
 			// 読み込み
 			intval = Integer.parseInt(strval);
 		} catch (Exception e) {
-			Log.e("DEF.getInt", "parseInt error(key=" + key + ", str=" + strval + ")");
+			Log.e("DEF.getInt", "getInt: parseInt error(key=" + key + ", str=" + strval + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 		}
 		return intval;
 	}
@@ -2441,7 +2486,7 @@ public class DEF {
 				ret += ":" + URLEncoder.encode(pass, "UTF-8");
 			}
 		} catch (UnsupportedEncodingException e) {
-			Log.e("DEF", "createUrl: " + e.getLocalizedMessage());
+			Log.e(TAG, "createUrl: " + e.getLocalizedMessage());
 		}
 		ret += "@" + url.substring(6);
 		return ret;
@@ -2484,17 +2529,17 @@ public class DEF {
 			tmp_length = length - 1;
 		}
 
-		if (debug) {Log.d("DEF", "toUTF8: 文字コードを自動判定します.");}
+		if (debug) {Log.d(TAG, "toUTF8: 文字コードを自動判定します.");}
 		encoding = CharDetecter(bytes, tmp_offset, tmp_length);
 
 		dst = new String(bytes, tmp_offset, tmp_length, Charset.forName(encoding));
-		if(debug) {Log.d("DEF", "toUTF8: Stringを出力します. dst=" + dst);}
+		if(debug) {Log.d(TAG, "toUTF8: Stringを出力します. dst=" + dst);}
 		return dst;
 	}
 
 	public static String CharDetecter(byte[] bytes, int offset, int length) {
 		boolean debug = false;
-		if (debug) {Log.d("DEF", "CharDetecter: 文字コードを判定します.");}
+		if (debug) {Log.d(TAG, "CharDetecter: 文字コードを判定します.");}
 
 		String encoding = null;
 		int tmp_offset = offset;
@@ -2521,42 +2566,42 @@ public class DEF {
 			if (encoding != null) {
 				if("WINDOWS-1252".equals(encoding)) {
 					// 判定された文字コードがWindows-1252の場合は誤判定ではないか確認する
-					if (debug) {Log.d("DEF", "CharDetecter: 判定結果が WINDOWS-1252 なので誤判定かどうか確認します.");}
+					if (debug) {Log.d(TAG, "CharDetecter: 判定結果が WINDOWS-1252 なので誤判定かどうか確認します.");}
 					byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
 					String charset = (CHARSET.equals("Shift_JIS") ? "MS932" : CHARSET);
 					if (Arrays.equals(src, new String(src, Charset.forName(charset)).getBytes(Charset.forName(charset)))) {
-						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは " + charset + " です.");}
+						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは " + charset + " です.");}
 						encoding = charset;
 						return encoding;
 					} else {
-						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは " + charset + " ではありません.");}
+						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは " + charset + " ではありません.");}
 					}
 					if (Arrays.equals(src, new String(src, Charset.forName("MS932")).getBytes(Charset.forName("MS932")))) {
-						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは MS932 です.");}
+						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは MS932 です.");}
 						encoding = "MS932";
 					} else {
-						if (debug) {Log.d("DEF", "CharDetecter: 文字コードは MS932 ではありません.");}
+						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは MS932 ではありません.");}
 					}
 				}
 				// 判定された文字コードがShift_JISの場合は、MS932としてデータを読み込む
 				if("Shift_JIS".equals(encoding)) {
 					encoding = "MS932";
 				}
-				if (debug) {Log.d("DEF", "CharDetecter: 文字コードを判定しました. encoding=" + encoding);}
+				if (debug) {Log.d(TAG, "CharDetecter: 文字コードを判定しました. encoding=" + encoding);}
 			} else {
-				if (debug) {Log.d("DEF", "CharDetecter: 文字コードを判定できませんでした.");}
+				if (debug) {Log.d(TAG, "CharDetecter: 文字コードを判定できませんでした.");}
 				byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
 
 				if (debug) {
-					Log.d("DEF", "CharDetecter: 文字コードを自動判定できませんでした.");
+					Log.d(TAG, "CharDetecter: 文字コードを自動判定できませんでした.");
 				}
 				// 文字コード判定に失敗したので中国国家標準規格かどうか再度確認する
-				if (debug) {Log.d("DEF", "CharDetecter: 文字コードが GB18030 かどうか判定します.");}
+				if (debug) {Log.d(TAG, "CharDetecter: 文字コードが GB18030 かどうか判定します.");}
 				if (Arrays.equals(src, new String(src, Charset.forName("GB18030")).getBytes(Charset.forName("GB18030")))) {
-					if (debug) {Log.d("DEF", "CharDetecter: 文字コードは GB18030 です.");}
+					if (debug) {Log.d(TAG, "CharDetecter: 文字コードは GB18030 です.");}
 					encoding = "GB18030";
 				} else {
-					if (debug) {Log.d("DEF", "CharDetecter: 文字コードは GB18030 ではありません.");}
+					if (debug) {Log.d(TAG, "CharDetecter: 文字コードは GB18030 ではありません.");}
 				}
 			}
 		}
@@ -2564,7 +2609,7 @@ public class DEF {
 		if (encoding == null) {
 			// 判定できなかったら共通の操作設定設定で設定した文字コードに設定する
 			String charset = (CHARSET.equals("Shift_JIS") ? "MS932" : CHARSET);
-			if (debug) {Log.d("DEF", "CharDetecter: 文字コードを設定画面で設定した " + charset + " に設定します.");}
+			if (debug) {Log.d(TAG, "CharDetecter: 文字コードを設定画面で設定した " + charset + " に設定します.");}
 			encoding = charset;
 		}
 		return encoding;

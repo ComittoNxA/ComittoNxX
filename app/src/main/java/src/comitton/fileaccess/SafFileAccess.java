@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+
 import androidx.core.provider.DocumentsContractCompat;
 
 import android.provider.DocumentsContract;
@@ -70,7 +71,7 @@ public class SafFileAccess {
 	public static String relativePath(@NonNull final Context context, @NonNull final String base, @NonNull final String target) {
 		boolean debug = false;
 		if (debug) {Log.d(TAG, "relativePath: 開始します. base=" + base + ", target=" + target);}
-		if (debug) {DEF.StackTrace(TAG, "relativePath: ");}
+		//if (debug) {DEF.StackTrace(TAG, "relativePath: ");}
 
 		// baseから末尾のスラッシュを除いた文字列を結果の初期値に代入する
 		String result = base.replaceFirst("/*$", "");
@@ -103,13 +104,15 @@ public class SafFileAccess {
 
 					if (targetArray[i].isEmpty()) {
 						// 文字列が空文字列なら次を実行する
+						if (debug) {Log.d(TAG, "relativePath: 文字列が空なのでスキップします. i=" + i + ", targetArray.length=" + targetArray.length);}
 						continue;
                     }
 					else if (targetArray[i].equals("..")) {
-						// 文字列が..なら親を返す
-						result = parent(context, result);
+						// 文字列が『..』ならエラー
+						Log.e(TAG, "relativePath: 親ディレクトリ指定には対応していません. i=" + i + ", targetArray.length=" + targetArray.length);
+						return "";
 					} else {
-						// 文字列が..以外なら子を探す
+						// 文字列が『..』以外なら子を探す
 						uri = Uri.parse(result);
 						String documentId = getDocumentId(context, uri);
 						Uri childTree = DocumentsContractCompat.buildChildDocumentsUriUsingTree(uri, documentId);
@@ -126,7 +129,8 @@ public class SafFileAccess {
 								null
 						);
 
-						if (debug) {Log.d(TAG, "relativePath: 子要素を検索します. index=" + i + ", targetArray[i]=" + targetArray[i]);}
+						if (debug) {Log.d(TAG, "relativePath: 子要素を検索します. targetArray[" + i + "]=" + targetArray[i]);}
+						boolean find = false;
 						while (cursor.moveToNext()) {
 							docId = cursor.getString(0);
 							name = cursor.getString(1);
@@ -135,6 +139,7 @@ public class SafFileAccess {
 
 							if (targetArray[i].equals(name)) {
 								// ファイル名が一致するなら
+								find = true;
 								result = DocumentsContractCompat.buildDocumentUriUsingTree(Uri.parse(result), docId).toString();
 								if (i == targetArray.length - 1 && DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)) {
 									// 最後の回でディレクトリの場合
@@ -143,6 +148,11 @@ public class SafFileAccess {
 								if (debug) {Log.d(TAG, "relativePath: 子要素を取得しました. i=" + i + ", targetArray[index]=" + targetArray[i] + ", result=" + result);}
 								break;
 							}
+						}
+						if (!find) {
+							// 名前が一致しなければエラー
+							Log.w(TAG, "relativePath: ファイルが存在しません. i=" + i + ", targetArray.length=" + targetArray.length + ", name=" + targetArray[i]);
+							return "";
 						}
 					}
 				}
@@ -171,7 +181,7 @@ public class SafFileAccess {
 
 	public static ParcelFileDescriptor openParcelFileDescriptor(@NonNull final Context context, @NonNull final String uri) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: uri=" + uri);}
+		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 開始します. uri=" + uri);}
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -200,7 +210,7 @@ public class SafFileAccess {
 	// RandomAccessFile
 	public static SafRandomAccessFile openRandomAccessFile(@NonNull final Context context, @NonNull final String uri, @NonNull final String mode) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "openRandomAccessFile:");}
+		if (debug) {Log.d(TAG, "openRandomAccessFile: 開始します. ");}
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -222,7 +232,7 @@ public class SafFileAccess {
 
 	public static InputStream getInputStream(@NonNull final Context context, @NonNull final String uri) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "getInputStream: uri=" + uri);}
+		if (debug) {Log.d(TAG, "getInputStream: 開始します. uri=" + uri);}
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -245,30 +255,31 @@ public class SafFileAccess {
 
 	public static OutputStream getOutputStream(@NonNull final Context context, @NonNull final String uri) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "getOutputStream: uri=" + uri);}
+		if (debug) {Log.d(TAG, "getOutputStream: 開始します. uri=" + uri);}
 		String rootUri = uri.replaceFirst("/*$", "");
 
 		OutputStream result = null;
 		try {
+			DocumentFile documentFile = DocumentFile.fromSingleUri(context, Uri.parse(rootUri));
 			ContentResolver contentResolver = context.getContentResolver();
 			result = contentResolver.openOutputStream(Uri.parse(rootUri));
 		}
 		catch (Exception e) {
 			result = null;
-			Log.e(TAG, "getInputStream: エラーが発生しました. uri=" + uri);
+			Log.e(TAG, "getOutputStream: エラーが発生しました. uri=" + uri);
 			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getInputStream: エラーメッセージ. " + e.getLocalizedMessage());
+				Log.e(TAG, "getOutputStream: エラーメッセージ. " + e.getLocalizedMessage());
 			}
 		}
 
-		if (debug) {Log.d(TAG, "getInputStream: 終了します. result=" + result);}
+		if (debug) {Log.d(TAG, "getOutputStream: 終了します. result=" + result);}
 		return result;
 	}
 
 	// ファイル存在チェック
 	public static boolean exists(@NonNull final Context context, @NonNull final String uri) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "exists: uri=" + uri);}
+		if (debug) {Log.d(TAG, "exists: 開始します. uri=" + uri);}
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -296,7 +307,12 @@ public class SafFileAccess {
 			result = false;
 			Log.e(TAG, "exists: エラーが発生しました. uri=" + uri);
 			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "exists: エラーメッセージ. " + e.getLocalizedMessage());
+				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName() + ":" + e.getLocalizedMessage());
+				throw new FileAccessException(TAG + ": exists: " + e.getClass().getSimpleName() + ":" + e.getLocalizedMessage());
+			}
+			else {
+				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName());
+				throw new FileAccessException(TAG + ": exists: " + e.getClass().getSimpleName());
 			}
 		}
 
@@ -424,15 +440,21 @@ public class SafFileAccess {
 
 	public static boolean renameTo(@NonNull final Context context, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "renameTo: uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
+		if (debug) {Log.d(TAG, "renameTo: 開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
 		boolean result = false;
 		try {
 			final ContentResolver contentResolver = context.getContentResolver();
-			if (debug) {Log.d(TAG, "renameTo: fromUri=" + relativePath(context, rootUri, fromfile) + ", tofile=" + tofile);}
-			result = (DocumentsContractCompat.renameDocument(contentResolver, Uri.parse(relativePath(context, rootUri, fromfile)), tofile) != null);
+			String path = relativePath(context, rootUri, fromfile);
+			if (debug) {Log.d(TAG, "renameTo: path=" + path + ", tofile=" + tofile);}
+			if (!path.isEmpty()) {
+				result = (DocumentsContractCompat.renameDocument(contentResolver, Uri.parse(path), tofile) != null);
+			}
+			else {
+				Log.e(TAG, "renameTo: ファイルが存在しません.uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
+			}
 		}
 		catch (Exception e) {
 			result = false;
@@ -514,6 +536,56 @@ public class SafFileAccess {
 		}
 
 		if (debug) {Log.d(TAG, "mkdir: 終了します. result=" + result);}
+		return result;
+	}
+
+	// ディレクトリ作成
+	public static boolean createFile(@NonNull final Context context, @NonNull final String uri, @NonNull final String item) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+
+		String rootUri = uri.replaceFirst("/*$", "");
+
+		DocumentFile documentFile = null;
+		boolean result = false;
+		try {
+			if (!relativePath(context, uri, item).isEmpty()) {
+				Log.e(TAG, "createFile: ファイルが存在します.");
+				return false;
+			}
+
+			String item2 = item;
+			if (item.endsWith("._dl")) {
+				item2 = item.substring(0, item.lastIndexOf('.'));
+			}
+			String mimeType = FileData.getMimeType(context, item2);
+			if (debug) {Log.d(TAG, "documentUri: mimeType=" + mimeType);}
+
+			DocumentFile documentParent = DocumentFile.fromSingleUri(context, Uri.parse(rootUri));
+			result = (documentParent.createFile(mimeType, item) != null);
+		}
+		catch (Exception e) {
+			result = false;
+			Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri + ", item=" + item);
+			if (e.getLocalizedMessage() != null) {
+				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName() + ":" + e.getLocalizedMessage());
+			}
+			else {
+				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName());
+			}
+		}
+
+
+		if (!relativePath(context, uri, item).isEmpty()) {
+			if (debug) {Log.d(TAG, "createFile: ファイルが存在します.");}
+			result = true;
+		}
+		else {
+			Log.e(TAG, "createFile: ファイルが存在しません.");
+			result = true;
+		}
+
+		if (debug) {Log.d(TAG, "createFile: 終了します. result=" + result);}
 		return result;
 	}
 

@@ -53,6 +53,8 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 
 	public DownloadDialog(AppCompatActivity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, String local) {
 		super(activity, themeResId);
+		boolean debug = false;
+		if(debug) {Log.d(TAG, "DownloadDialog: 開始します. uri=" + uri + ", path=" + path + ", item=" + item + ", local=" + local);}
 
 		setCanceledOnTouchOutside(false);
 		setOnDismissListener(this);
@@ -115,8 +117,10 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 	// path = ローカルのパス
 	// name = リモートのファイル名
 	public boolean downloadFile(String path, String item) throws Exception {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "downloadFile: 開始します. path=" + path + ", item=" + item);}
 
-		String ServerFileUri = DEF.relativePath(mActivity, mURI, mPath + path + item);
+		String ServerFileUri = DEF.relativePath(mActivity, mURI, mPath, path, item);
 		boolean exists = FileAccess.exists(mActivity, ServerFileUri, mUser, mPass);
 		if (!exists) {
 			// リモートのファイルが存在しない
@@ -127,13 +131,13 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		if (isDirectory) {
 			// ローカルにディレクトリ作成
 			boolean ret = FileAccess.mkdir(mActivity, DEF.relativePath(mActivity, mLocal, path), item, mUser, mPass);
-			if (ret == false) {
+			if (!ret) {
 				// ディレクトリ作成に失敗
 				return false;
 			}
 
 			// 再帰呼び出し
-			String childpath = path + item;
+			String childpath = DEF.relativePath(mActivity, path, item);
 			ArrayList<FileData> sfiles = FileAccess.listFiles(mActivity, DEF.relativePath(mActivity, mURI, mPath, childpath), mUser, mPass, mHandler);
 
 			int filenum = sfiles.size();
@@ -153,8 +157,13 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 		else {
 			// ダウンロード実行
 			try {
-				String tmpfile = item + "_dl";
+				String tmpfile = item + "._dl";
 				String tmpFileUri = DEF.relativePath(mActivity, mLocal, path, tmpfile);
+				if (!FileAccess.createFile(mActivity, DEF.relativePath(mActivity, mLocal, path), tmpfile, "", "")) {
+					sendMessage(MSG_ERRMSG, mActivity.getString(R.string.downErrorMsg), 0, 0);
+					Log.e(TAG, "downloadFile: ファイルの作成に失敗しました. path=" + DEF.relativePath(mActivity, mLocal, path) + ", tmpfile=" + tmpfile);
+					return false;
+				}
 				OutputStream localFile = FileAccess.getOutputStream(mActivity, tmpFileUri, "", "");
 				WorkStream workStream = new WorkStream(mActivity, ServerFileUri, mUser, mPass, mHandler);
 
@@ -168,7 +177,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				sendMessage(MSG_MESSAGE, path + item, 0, 0);
 				sendMessage(MSG_SETMAX, null, 0, (int)fileSize);
 
-				byte buff[] = new byte[1024 * 16];
+				byte[] buff = new byte[1024 * 16];
 				int size;
 				long total = 0;
 				while (true) {
@@ -188,7 +197,9 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 						localFile.write(buff, 0, size);
 					}
 					catch (Exception e) {
-						Log.e(TAG, "downloadFile " + e.getLocalizedMessage());
+						sendMessage(MSG_ERRMSG, mActivity.getString(R.string.downErrorMsg), 0, 0);
+						Log.e(TAG, "downloadFile: Exception1: " + e.getLocalizedMessage());
+						return false;
 					}
 					total += size;
 					sendMessage(MSG_PROGRESS, null, (int)total, (int)fileSize);
@@ -219,11 +230,14 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				}
 				if (!FileAccess.renameTo(mActivity, DEF.relativePath(mActivity, mLocal, path), tmpfile, dstfile, mUser, mPass)) {
 					// リネーム失敗ならダウンロードしたファイルを削除
+					Log.e(TAG, "downloadFile: ファイル名の変更に失敗しました. path=" + DEF.relativePath(mActivity, mLocal, path) + ", tmpfile=" + tmpfile + ", item=" + item);
 					FileAccess.delete(mActivity, tmpFileUri, mUser, mPass);
 				}
 			}
 			catch (Exception e) {
-				throw new Exception(e);
+				sendMessage(MSG_ERRMSG, mActivity.getString(R.string.downErrorMsg), 0, 0);
+				Log.e(TAG, "downloadFile: Exception2: " + e.getLocalizedMessage());
+				return false;
 			}
 		}
 		return true;
@@ -253,6 +267,9 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 			case MSG_ERRMSG:
 				String msgstr = (String)msg.obj;
 				Toast.makeText(mActivity, msgstr, Toast.LENGTH_LONG).show();
+				return true;
+			case DEF.HMSG_WORKSTREAM:
+				// ファイルアクセスの表示
 				return true;
 		}
 		return false;

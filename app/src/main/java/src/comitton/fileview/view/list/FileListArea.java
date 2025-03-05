@@ -7,7 +7,7 @@ import src.comitton.common.ImageAccess;
 import src.comitton.common.TextFormatter;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.filelist.RecordList;
-import src.comitton.fileview.DrawNoticeListener;
+import src.comitton.fileview.view.DrawNoticeListener;
 import src.comitton.jni.CallImgLibrary;
 
 import jp.dip.muracoro.comittonx.R;
@@ -98,8 +98,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 	private int mLoadingSize;
 
-	private String mTitleSep[][];
-	private String mInfoSep[][];
+	private String[][] mTitleSep;
+	private String[][] mInfoSep;
 
 	private int mTileSize;
 	private int mTileAscent;
@@ -123,7 +123,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	private int mDrawLeft;
 	private Bitmap mDrawBitmap;
 
-	private String mText[][][];
+	private String[][][] mText;
 
 	private Context mContext;
 
@@ -171,8 +171,10 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	}
 
 	// タイルモード時の描画
-	private void drawTileItems(Canvas canvas, int baseX, int baseY) {
+	@SuppressLint("SuspiciousIndentation")
+    private void drawTileItems(Canvas canvas, int baseX, int baseY) {
 		boolean debug = false;
+		if (debug) {Log.d(TAG, "drawTileItems: 開始します.");}
 
 //		int cx = mAreaWidth;
 		int cy = mAreaHeight;
@@ -275,6 +277,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						case DEF.PAGENUMBER_READ:
 							color = mAftColor;
 							break;
+						case DEF.PAGENUMBER_NONE:
 						default:
 							color = mNowColor;
 							break;
@@ -319,13 +322,13 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 							if (debug) {Log.d(TAG, "drawTileItems: width/height=" + ((float)width / (float)height) + ", mIconWidth/mIconHeight=" + ((float)mIconWidth / (float)mIconHeight));}
 							if ((float)width / height > (float)mIconWidth / mIconHeight) {
-								if (debug) {Log.d(TAG, "drawTileItems: 幅に合わせます.  width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
+								if (debug) {Log.d(TAG, "drawTileItems: 幅に合わせます. width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
 								// 幅に合わせる
 								dstWidth = mIconWidth;
 								dstHeight = height * mIconWidth / width;
 							}
 							else {
-								if (debug) {Log.d(TAG, "drawTileItems: 高さに合わせます.  width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
+								if (debug) {Log.d(TAG, "drawTileItems: 高さに合わせます. width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
 								// 高さに合わせる
 								dstWidth = width * mIconHeight / height;
 								dstHeight = mIconHeight;
@@ -346,60 +349,9 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 							if (bmMark != null) {
 								canvas.drawBitmap(bmMark, x + mIconWidth - mMarkSizeW, y + mIconHeight - mMarkSizeH, mBitmapPaint);
-								if (debug) {Log.d(TAG,"run: fd.getState()=" + fd.getState() + ", fd.getSize()=" + fd.getSize() + ", fd.getName()=" + fd.getName());}
-								if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
-									// 読書率を描画
-									// 読書率
-									float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
-									// 文字サイズ
-									float fontsize = mTileSize;
-									Paint paint = new Paint();
-									paint.setTextSize(fontsize);
-									paint.setTypeface(Typeface.MONOSPACE);
-									paint.setTextAlign(Paint.Align.CENTER);
-									// テキスト幅
-									float textWidth = paint.measureText("99%");
-									// アイコンサイズの短辺の長さ
-									float shortsidelength = Math.min(mIconWidth, mIconHeight);
-									// 円の半径
-									float radiud1 = textWidth * 1.5F / 2F;
-									float radiud2 = textWidth * 1.2F / 2F;
-									float radiud3 = textWidth * 1F / 2F;
-									// 円の中心座標
-									float centerX = x + (mIconWidth / 2F);
-									float centerY = y + mIconHeight - (radiud1 * 2);
-
-									// 読書率のドーナツチャートを描画
-									paint.setColor(Color.DKGRAY);
-									canvas.drawArc(centerX - radiud1 - 2, centerY - radiud1 - 2, centerX + radiud1 + 2,centerY + radiud1 + 2, -90F, rate * 360, true, paint);
-									paint.setColor(color);
-									canvas.drawArc(centerX - radiud1, centerY - radiud1, centerX + radiud1,centerY + radiud1, -90F, rate * 360, true, paint);
-
-									//グラデーション円(中サイズ)を描画
-									paint.setColor(Color.LTGRAY);
-									Shader s = new LinearGradient(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2, Color.LTGRAY, Color.GRAY, Shader.TileMode.CLAMP);
-									paint.setShader(s);
-									canvas.drawOval(new RectF(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2), paint);
-
-									//グラデーション円(小サイズ)を描画
-									s = new LinearGradient(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3, Color.GRAY, Color.LTGRAY, Shader.TileMode.CLAMP);
-									paint.setShader(s);
-									canvas.drawOval(new RectF(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3), paint);
-
-									// 読書率の文字列を描画
-									String str = (int)(rate * 100) + "%";
-									paint.setShader(null);
-									paint.setStyle(Paint.Style.STROKE);
-									paint.setStrokeWidth(2.0f);
-									paint.setColor(Color.DKGRAY);
-									float text_x = centerX;
-									float text_y = centerY - ((paint.descent() + paint.ascent()) / 2);
-									canvas.drawText(str, text_x, text_y, paint);
-									paint.setStyle(Paint.Style.FILL);
-									paint.setColor(color);
-									canvas.drawText(str, text_x, text_y, paint);
-								}
 							}
+							if (debug) {Log.d(TAG,"run: fd.getState()=" + fd.getState() + ", fd.getMaxpage()=" + fd.getMaxpage() + ", fd.getName()=" + fd.getName());}
+							drawPagerate(canvas, fd, mIconWidth, mIconHeight, x, y, color);
 						}
 						else {
 							// サムネイルありかつ画像なし
@@ -455,58 +407,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						mSrcRect.set(0, 0, dstWidth, dstHeight);
 						mDstRect.set(x + dstX, y + dstY, x + dstX + (int)(dstWidth * dsMin), y + dstY + (int)(dstHeight * dsMin));
 						canvas.drawBitmap(bm, mSrcRect, mDstRect, mBitmapPaint);
-						if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
-							// 読書率を描画
-							// 読書率
-							float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
-							// 文字サイズ
-							float fontsize = mTileSize;
-							Paint paint = new Paint();
-							paint.setTextSize(fontsize);
-							paint.setTypeface(Typeface.MONOSPACE);
-							paint.setTextAlign(Paint.Align.CENTER);
-							// テキスト幅
-							float textWidth = paint.measureText("99%");
-							// アイコンサイズの短辺の長さ
-							float shortsidelength = Math.min(mIconWidth, mIconHeight);
-							// 円の半径
-							float radiud1 = textWidth * 1.5F / 2F;
-							float radiud2 = textWidth * 1.2F / 2F;
-							float radiud3 = textWidth * 1F / 2F;
-							// 円の中心座標
-							float centerX = x + (mIconWidth / 2F);
-							float centerY = y + mIconHeight - (radiud1 * 2);
-
-							// 読書率のドーナツチャートを描画
-							paint.setColor(Color.DKGRAY);
-							canvas.drawArc(centerX - radiud1 - 2, centerY - radiud1 - 2, centerX + radiud1 + 2,centerY + radiud1 + 2, -90F, rate * 360, true, paint);
-							paint.setColor(color);
-							canvas.drawArc(centerX - radiud1, centerY - radiud1, centerX + radiud1,centerY + radiud1, -90F, rate * 360, true, paint);
-
-							//グラデーション円(中サイズ)を描画
-							paint.setColor(Color.LTGRAY);
-							Shader s = new LinearGradient(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2, Color.LTGRAY, Color.GRAY, Shader.TileMode.CLAMP);
-							paint.setShader(s);
-							canvas.drawOval(new RectF(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2), paint);
-
-							//グラデーション円(小サイズ)を描画
-							s = new LinearGradient(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3, Color.GRAY, Color.LTGRAY, Shader.TileMode.CLAMP);
-							paint.setShader(s);
-							canvas.drawOval(new RectF(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3), paint);
-
-							// 読書率の文字列を描画
-							String str = (int)(rate * 100) + "%";
-							paint.setShader(null);
-							paint.setStyle(Paint.Style.STROKE);
-							paint.setStrokeWidth(2.0f);
-							paint.setColor(Color.DKGRAY);
-							float text_x = centerX;
-							float text_y = centerY - ((paint.descent() + paint.ascent()) / 2);
-							canvas.drawText(str, text_x, text_y, paint);
-							paint.setStyle(Paint.Style.FILL);
-							paint.setColor(color);
-							canvas.drawText(str, text_x, text_y, paint);
-						}
+						drawPagerate(canvas, fd, mIconWidth, mIconHeight, x, y, color);
 					}
 				}else{ // タイル表示・サムネ無しの場合は枠で囲む
 					canvas.drawRect(baseX + mDrawLeft + ix * mItemWidth + mItemMargin, y + mIconHeight,
@@ -612,6 +513,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	@SuppressLint("SuspiciousIndentation")
     private void drawListItems(Canvas canvas, int baseX, int baseY) {
 		boolean debug = false;
+		if (debug) {Log.d(TAG, "drawListItems: 開始します.");}
 
 		int cx = mAreaWidth;
 		int cy = mAreaHeight;
@@ -701,6 +603,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 					case DEF.PAGENUMBER_READ:
 						color = mAftColor;
 						break;
+					case DEF.PAGENUMBER_NONE:
 					default:
 						color = mNowColor;
 						break;
@@ -752,13 +655,13 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 						if (debug) {Log.d(TAG, "drawListItems: width/height=" + ((float)width / (float)height) + ", iconWidth/iconHeight=" + ((float)iconWidth / (float)iconHeight));}
 						if ((float)width / height > (float)iconWidth / iconHeight) {
-							if (debug) {Log.d(TAG, "drawListItems: 幅に合わせます.  width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
+							if (debug) {Log.d(TAG, "drawListItems: 幅に合わせます. width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
 							// 幅に合わせる
 							dstWidth = iconWidth;
 							dstHeight = height * iconWidth / width;
 						}
 						else {
-							if (debug) {Log.d(TAG, "drawListItems: 高さに合わせます.  width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
+							if (debug) {Log.d(TAG, "drawListItems: 高さに合わせます. width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
 							// 高さに合わせる
 							dstWidth = width * iconHeight / height;
 							dstHeight = iconHeight;
@@ -777,59 +680,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						canvas.drawBitmap(mDrawBitmap, mSrcRect, mDstRect, mBitmapPaint);
 
 						if (bmMark != null) {
-                            canvas.drawBitmap(bmMark, x + dstX + dstWidth - mMarkSizeW, y + iconHeight - mMarkSizeH, mBitmapPaint);
-							if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
-								// 読書率を描画
-								// 読書率
-								float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
-								// 文字サイズ
-								float fontsize = Math.min(mTitleSize, mInfoSize);
-								Paint paint = new Paint();
-								paint.setTextSize(fontsize);
-								paint.setTypeface(Typeface.MONOSPACE);
-								paint.setTextAlign(Paint.Align.CENTER);
-								// テキスト幅
-								float textWidth = paint.measureText("99%");
-								// アイコンサイズの短辺の長さ
-								float shortsidelength = Math.min(iconWidth, iconHeight);
-								// 円の半径
-								float radiud1 = textWidth * 1.5F / 2F;
-								float radiud2 = textWidth * 1.2F / 2F;
-								float radiud3 = textWidth * 1F / 2F;
-								// 円の中心座標
-								float centerX = x + (iconWidth / 2F);
-								float centerY = y + iconHeight - (radiud1 * 2);
-
-								// 読書率のドーナツチャートを描画
-								paint.setColor(Color.DKGRAY);
-								canvas.drawArc(centerX - radiud1 - 2, centerY - radiud1 - 2, centerX + radiud1 + 2,centerY + radiud1 + 2, -90F, rate * 360, true, paint);
-								paint.setColor(color);
-								canvas.drawArc(centerX - radiud1, centerY - radiud1, centerX + radiud1,centerY + radiud1, -90F, rate * 360, true, paint);
-
-								//グラデーション円(中サイズ)を描画
-								paint.setColor(Color.LTGRAY);
-								Shader s = new LinearGradient(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2, Color.LTGRAY, Color.GRAY, Shader.TileMode.CLAMP);
-								paint.setShader(s);
-								canvas.drawOval(new RectF(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2), paint);
-
-								//グラデーション円(小サイズ)を描画
-								s = new LinearGradient(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3, Color.GRAY, Color.LTGRAY, Shader.TileMode.CLAMP);
-								paint.setShader(s);
-								canvas.drawOval(new RectF(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3), paint);
-
-								// 読書率の文字列を描画
-								String str = (int)(rate * 100) + "%";
-								paint.setShader(null);
-								paint.setStyle(Paint.Style.STROKE);
-								paint.setStrokeWidth(2.0f);
-								paint.setColor(Color.DKGRAY);
-								float text_x = centerX;
-								float text_y = centerY - ((paint.descent() + paint.ascent()) / 2);
-								canvas.drawText(str, text_x, text_y, paint);
-								paint.setStyle(Paint.Style.FILL);
-								paint.setColor(color);
-								canvas.drawText(str, text_x, text_y, paint);
-							}
+                            canvas.drawBitmap(bmMark, x + iconWidth - mMarkSizeW, y + iconHeight - mMarkSizeH, mBitmapPaint);
+							drawPagerate(canvas, fd, iconWidth, iconHeight, x, y, color);
 						}
 					}
 					else {
@@ -884,10 +736,10 @@ public class FileListArea extends ListArea implements Handler.Callback {
 					mSrcRect.set(0, 0, dstWidth, dstHeight);
 					mDstRect.set(x + dstX, y + dstY, x + dstX + (int)(dstWidth * dsMin), y + dstY + (int)(dstHeight * dsMin));
 					canvas.drawBitmap(bm, mSrcRect, mDstRect, mBitmapPaint);
-					if ((fd.getState() >= 0) && (fd.getSize() > 0)) {
+					if ((fd.getState() >= 0) && (fd.getMaxpage() > 0)) {
 						// 読書率を描画
 						// 読書率
-						float rate = (float)(fd.getState() + 1) / (float)fd.getSize();
+						float rate = (float)(fd.getState() + 1) / (float)fd.getMaxpage();
 						// 文字サイズ
 						float fontsize = Math.min(mTitleSize, mInfoSize);
 						Paint paint = new Paint();
@@ -969,6 +821,61 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			ypos += itemHeight + BORDER_HEIGHT;
 		}
 		return;
+	}
+
+	private void drawPagerate(Canvas canvas, FileData file, int width, int height, int x, int y, int color) {
+		if ((file.getState() >= 0) && (file.getMaxpage() > 0)) {
+			// 読書率を描画
+			// 読書率
+			float rate = (float)(file.getState() + 1) / (float)file.getMaxpage();
+			// 文字サイズ
+			float fontsize = Math.min(mTitleSize, mInfoSize);
+			Paint paint = new Paint();
+			paint.setTextSize(fontsize);
+			paint.setTypeface(Typeface.MONOSPACE);
+			paint.setTextAlign(Paint.Align.CENTER);
+			// テキスト幅
+			float textWidth = paint.measureText("99%");
+			// アイコンサイズの短辺の長さ
+			float shortsidelength = Math.min(width, height);
+			// 円の半径
+			float radiud1 = textWidth * 1.5F / 2F;
+			float radiud2 = textWidth * 1.2F / 2F;
+			float radiud3 = textWidth * 1F / 2F;
+			// 円の中心座標
+			float centerX = x + (width / 2F);
+			float centerY = y + height - (radiud1 * 2);
+
+			// 読書率のドーナツチャートを描画
+			paint.setColor(Color.DKGRAY);
+			canvas.drawArc(centerX - radiud1 - 2, centerY - radiud1 - 2, centerX + radiud1 + 2,centerY + radiud1 + 2, -90F, rate * 360, true, paint);
+			paint.setColor(color);
+			canvas.drawArc(centerX - radiud1, centerY - radiud1, centerX + radiud1,centerY + radiud1, -90F, rate * 360, true, paint);
+
+			//グラデーション円(中サイズ)を描画
+			paint.setColor(Color.LTGRAY);
+			Shader s = new LinearGradient(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2, Color.LTGRAY, Color.GRAY, Shader.TileMode.CLAMP);
+			paint.setShader(s);
+			canvas.drawOval(new RectF(centerX - radiud2, centerY - radiud2, centerX + radiud2,centerY + radiud2), paint);
+
+			//グラデーション円(小サイズ)を描画
+			s = new LinearGradient(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3, Color.GRAY, Color.LTGRAY, Shader.TileMode.CLAMP);
+			paint.setShader(s);
+			canvas.drawOval(new RectF(centerX - radiud3, centerY - radiud3, centerX + radiud3,centerY + radiud3), paint);
+
+			// 読書率の文字列を描画
+			String str = (int)(rate * 100) + "%";
+			paint.setShader(null);
+			paint.setStyle(Paint.Style.STROKE);
+			paint.setStrokeWidth(2.0f);
+			paint.setColor(Color.DKGRAY);
+			float text_x = centerX;
+			float text_y = centerY - ((paint.descent() + paint.ascent()) / 2);
+			canvas.drawText(str, text_x, text_y, paint);
+			paint.setStyle(Paint.Style.FILL);
+			paint.setColor(color);
+			canvas.drawText(str, text_x, text_y, paint);
+		}
 	}
 
 	// タイルとリストの切り替え
@@ -1138,6 +1045,9 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	}
 
 	private void requestLayout(boolean isRefresh) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG,"requestLayout: 開始します.");}
+
 		int width;
 		int columnNum = 0;
 		int rowNum = 0;
@@ -1196,8 +1106,11 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 				// 項目の高さ(タイルは固定)
 				mItemHeight = (short)(mIconHeight + (mTileSize + mTileDescent) * mMaxLines + mItemMargin * 3);
-				disprange = (mAreaHeight / mItemHeight + 2) * columnNum;
+				if (debug) {Log.d(TAG,"requestLayout: 開始します. mTileSize=" + mTileSize + ", mTileDescent=" + mTileDescent + ", mMaxLines=" + mMaxLines);}
+				disprange = (int)(Math.ceil((double) mAreaHeight / (mItemHeight + 2))) * columnNum;
+				if (debug) {Log.d(TAG,"requestLayout: 開始します. disprange=" + disprange + ", mAreaHeight=" + mAreaHeight + ", mItemHeight=" + mItemHeight + ", columnNum=" + columnNum);}
 			}
+
 			// 項目の幅
 			mItemWidth = (short)(mAreaWidth / columnNum);
 
@@ -1244,8 +1157,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 				String info = fd.getFileInfo();
 				if (info != null) {
-					float result[] = new float[info.length()];
-					float len[] = { 0, 0 };
+					float[] result = new float[info.length()];
+					float[] len = { 0, 0 };
 					mInfoPaint.getTextWidths(info, result);
 					for (int i = 0; i < result.length; i++) {
 						len[0] += result[i];

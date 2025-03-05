@@ -27,6 +27,7 @@ public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnD
 	public static final int LAYOUT_LAST = 2;
 //	public static final int LAYOUT_TEXT = 3;
 
+	public static final int CLICK_NONE   = -1;
 	public static final int CLICK_CANCEL   = 0;
 	public static final int CLICK_CLOSE    = 1;
 //	public static final int CLICK_EXITAPP  = 2;
@@ -36,7 +37,9 @@ public class CloseDialog extends ImmersiveDialog implements OnClickListener, OnD
 	public static final int CLICK_NEXTLAST = 6;
 	public static final int CLICK_PREVTOP  = 7;
 	public static final int CLICK_PREVLAST = 8;
-	public static final int CLICK_THIS     = 9;
+	public static final int CLICK_BOOKMARK = 9;
+	public static final int CLICK_HISTORY  = 10;
+	public static final int CLICK_LASTOPEN = 11;
 
 	private CloseListenerInterface mListener = null;
 

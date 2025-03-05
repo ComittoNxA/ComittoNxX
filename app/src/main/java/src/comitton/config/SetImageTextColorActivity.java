@@ -41,7 +41,7 @@ public class SetImageTextColorActivity extends PreferenceActivity implements OnS
 
 	private ListPreference mGradation;
 
- 	public static final int GradationName[] =
+ 	public static final int[] GradationName =
 		{ R.string.txgrad00		// グラデーションなし
 		, R.string.txgrad01		// 左上→右下
 		, R.string.txgrad02		// 上  →下
@@ -84,6 +84,7 @@ public class SetImageTextColorActivity extends PreferenceActivity implements OnS
 				String url = res.getString(R.string.url_imagetextcolor);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetImageTextColorActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

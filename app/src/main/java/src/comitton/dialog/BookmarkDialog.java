@@ -72,7 +72,7 @@ public class BookmarkDialog extends ImmersiveDialog implements OnClickListener {
 		if (mBtnOk == v) {
 			// キャンセル以外
 			String name = mEditName.getText().toString().trim();
-			if (name.length() == 0) {
+			if (name.isEmpty()) {
 				// 未設定なら設定不可
 				Toast.makeText(mActivity, "Name is empty.", Toast.LENGTH_SHORT).show();
 				return;

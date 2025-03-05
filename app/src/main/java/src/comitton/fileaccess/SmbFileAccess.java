@@ -274,7 +274,7 @@ public class SmbFileAccess {
 	public static SmbRandomAccessFile openRandomAccessFile(@NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final String mode) throws FileAccessException {
 		boolean debug = false;
 		if (debug) {Log.d(TAG, "smbAccessFile: uri=" + uri + ", user=" + user + ", pass=" + pass);}
-		if (debug) {DEF.StackTrace(TAG, "smbAccessFile:");}
+		//if (debug) {DEF.StackTrace(TAG, "smbAccessFile: ");}
 		SmbRandomAccessFile stream;
 		try {
 			if (!exists(uri, user, pass)) {
@@ -800,8 +800,13 @@ public class SmbFileAccess {
 			try {
 				// UIスレッドではない時はそのまま実行
 				SmbFile smbFile = smbFile(uri + item, user, pass);
-				smbFile.mkdir();
-				result = smbFile.exists();
+				if (smbFile.exists()) {
+					result = false;
+				}
+				else {
+					smbFile.mkdir();
+					result = smbFile.exists();
+				}
 			} catch (SmbException e) {
 				result = false;
 				Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
@@ -818,8 +823,13 @@ public class SmbFileAccess {
 				public Boolean call() throws FileAccessException {
 					try {
 						SmbFile smbFile = smbFile(uri + item, user, pass);
-						smbFile.mkdir();
-						return smbFile.exists();
+						if (smbFile.exists()) {
+							return false;
+						}
+						else {
+							smbFile.mkdir();
+							return smbFile.exists();
+						}
 					} catch (SmbException e) {
 						Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
 						if (e.getLocalizedMessage() != null) {
@@ -836,6 +846,68 @@ public class SmbFileAccess {
 				Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
 				if (e.getLocalizedMessage() != null) {
 					Log.e(TAG, "mkdir: エラーメッセージ. " + e.getLocalizedMessage());
+				}
+			}
+		}
+		return result;
+	}
+
+	// ファイル作成
+	public static boolean createFile(@NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final String item) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+
+		boolean result = false;
+		if (!DEF.isUiThread()) {
+			try {
+				// UIスレッドではない時はそのまま実行
+				SmbFile smbFile = smbFile(uri + item, user, pass);
+				if (smbFile.exists()) {
+					result = false;
+				}
+				else {
+					smbFile.createNewFile();
+					result = smbFile.exists();
+				}
+			} catch (SmbException e) {
+				result = false;
+				Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri);
+				if (e.getLocalizedMessage() != null) {
+					Log.e(TAG, "createFile: エラーメッセージ. " + e.getLocalizedMessage());
+				}
+			}
+		} else {
+			// UIスレッドの時は新しいスレッド内で実行
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			Future<Boolean> future = executor.submit(new Callable<Boolean>() {
+
+				@Override
+				public Boolean call() throws FileAccessException {
+					try {
+						SmbFile smbFile = smbFile(uri + item, user, pass);
+						if (smbFile.exists()) {
+							return false;
+						}
+						else {
+							smbFile.createNewFile();
+							return smbFile.exists();
+						}
+					} catch (SmbException e) {
+						Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri);
+						if (e.getLocalizedMessage() != null) {
+							Log.e(TAG, "createFile: エラーメッセージ. " + e.getLocalizedMessage());
+						}
+						return false;
+					}
+				}
+			});
+			try {
+				result = future.get();
+			} catch (Exception e) {
+				result = false;
+				Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri);
+				if (e.getLocalizedMessage() != null) {
+					Log.e(TAG, "createFile: エラーメッセージ. " + e.getLocalizedMessage());
 				}
 			}
 		}

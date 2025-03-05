@@ -1,20 +1,13 @@
 package src.comitton.fileaccess;
 
 import android.app.Activity;
-import android.app.RecoverableSecurityException;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
-import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,13 +17,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
+import jp.dip.muracoro.comittonx.R;
+import org.apache.commons.io.FileUtils;
+import src.comitton.common.DEF;
 import src.comitton.fileview.data.FileData;
 
 public class LocalFileAccess {
@@ -38,14 +32,14 @@ public class LocalFileAccess {
 
 	public static String filename(@NonNull final String uri) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "parent: uri=" + uri);}
+		if (debug) {Log.d(TAG, "filename: 開始します. uri=" + uri);}
 
 		return uri.replaceFirst("^.*?(([^/]+)?/?)$", "$1");
 	}
 
 	public static long length(@NonNull final String uri) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "length: uri=" + uri);}
+		if (debug) {Log.d(TAG, "length: 開始します. uri=" + uri);}
 		new File(uri);
 		return new File(uri).length();
 	}
@@ -93,7 +87,7 @@ public class LocalFileAccess {
 
 	public static ParcelFileDescriptor openParcelFileDescriptor(@NonNull final String uri) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: uri=" + uri);}
+		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 開始します. uri=" + uri);}
 
 		ParcelFileDescriptor parcelFileDescriptor = null;
 
@@ -121,7 +115,7 @@ public class LocalFileAccess {
 			result = null;
 			Log.e(TAG, "openRandomAccessFile: エラーが発生しました. uri=" + uri);
 			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "openRandomAccessFile: エラーメッセージ. " + e.getLocalizedMessage());
+				Log.e(TAG, "openRandomAccessFile: エラーメッセージ. " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 			}
 		}
 		if (debug) {Log.d(TAG, "openRandomAccessFile: 終了します.");}
@@ -130,7 +124,7 @@ public class LocalFileAccess {
 
 	public static InputStream getInputStream(@NonNull final String uri) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "getInputStream: uri=" + uri);}
+		if (debug) {Log.d(TAG, "getInputStream: 開始します. uri=" + uri);}
 		try {
 			File orgfile = new File(uri);
 			return new FileInputStream(orgfile);
@@ -140,26 +134,36 @@ public class LocalFileAccess {
 		return null;
 	}
 
-	public static OutputStream getOutputStream(@NonNull final String uri) {
+	public static OutputStream getOutputStream(@NonNull final Activity activity, @NonNull final String uri) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "getOutputStream: uri=" + uri);}
-		try {
-			File orgfile = new File(uri);
-			if (!orgfile.exists()) {
-				// ファイルがなければ作成する
-				orgfile.createNewFile();
+		if (debug) {Log.d(TAG, "getOutputStream: 開始します. uri=" + uri);}
+
+		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q) {
+			// Android10(Q) ではない場合
+
+			try {
+				File orgfile = new File(uri);
+				return new FileOutputStream(orgfile);
+			} catch (IOException e) {
+				Log.e(TAG, "getOutputStream: " + e.getLocalizedMessage());
 			}
-			return new FileOutputStream(orgfile);
-		} catch (IOException e) {
-			if(debug) {Log.d(TAG, "getOutputStream: " + e.getLocalizedMessage());}
+
 		}
+		else {
+			// Android10(Q) の場合
+
+			String documentUri = documentUri(activity, uri);
+			Log.d(TAG, "getOutputStream: documentUri=" + documentUri);
+			return SafFileAccess.getOutputStream(activity, documentUri);
+		}
+
 		return null;
 	}
 
 	// ファイル存在チェック
 	public static boolean exists(@NonNull final String uri) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "exists: uri=" + uri);}
+		if (debug) {Log.d(TAG, "exists: 開始します. uri=" + uri);}
 		return new File(uri).exists();
 	}
 
@@ -173,7 +177,7 @@ public class LocalFileAccess {
 
 	public static ArrayList<FileData> listFiles(@NonNull final Activity activity, @NonNull final String uri) {
 		boolean debug = false;
-		if(debug) {Log.d(TAG, "listFiles: uri=" + uri);}
+		if(debug) {Log.d(TAG, "listFiles: 開始します. uri=" + uri);}
 
 		// ファイルリストを取得
 		File[] lfiles;
@@ -221,9 +225,9 @@ public class LocalFileAccess {
 		return fileList;
 	}
 
-	public static boolean renameTo(@NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile) throws FileAccessException {
+	public static boolean renameTo(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile) throws FileAccessException {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "renameTo: uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
+		if (debug) {Log.d(TAG, "renameTo: 開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
 		if (tofile.indexOf('/') > 0) {
 			throw new FileAccessException(TAG + ": renameTo: Invalid file name.");
 		}
@@ -238,7 +242,40 @@ public class LocalFileAccess {
 			// 変更後ファイルが存在すればエラー
 			throw new FileAccessException(TAG + ": renameTo: File access error.");
 		}
-		return orgfile.renameTo(dstfile);
+
+		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q) {
+			// Android10(Q) ではない場合
+
+			// deleteメソッドを使用してファイル名を変更する
+			if (orgfile.renameTo(dstfile)) {
+				if (debug) {Log.d(TAG, "renameTo: file.renameTo() 成功しました.");}
+			} else {
+				Log.e(TAG, "renameTo: file.renameTo() 失敗しました.");
+			}
+		}
+		else {
+			// Android10(Q) の場合
+
+			// SAFでファイル名を変更する
+			String documentUri = documentUri(activity, uri);
+			Log.d(TAG, "renameTo: documentUri=" + documentUri);
+			if(!documentUri.isEmpty() && SafFileAccess.renameTo(activity, documentUri, fromfile, tofile)) {
+				if (debug) {Log.d(TAG, "renameTo: SafFileAccess.renameTo() 成功しました.");}
+			} else {
+				Log.e(TAG, "renameTo: SafFileAccess.renameTo() 失敗しました.");
+			}
+		}
+
+		// 変更後ファイルが存在するかチェック
+		if (dstfile.exists()) {
+			if (debug) {Log.d(TAG, "renameTo: ファイルが存在します.");}
+			return true;
+		}
+		else {
+			Log.e(TAG, "renameTo: ファイルが存在しません.");
+		}
+
+		return false;
 	}
 
 	// タイムスタンプ
@@ -268,204 +305,48 @@ public class LocalFileAccess {
 		else {
 			// ファイルが存在する場合
 
-			if (!file.canRead()) {
-				Log.e(TAG, "delete: 読み込み権限がありません.");
-			}
-			if (!file.canWrite()) {
-				Log.e(TAG, "delete: 書き込み権限がありません.");
-			}
+			if (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q) {
+				// Android10(Q) ではない場合
 
-			try {
 				// deleteメソッドを使用してファイルを削除する
-				if (file.delete()) {
-					if (debug) {Log.d(TAG, "delete: file.delete() 成功しました.");}
-				} else {
-					Log.e(TAG, "delete: file.delete() 失敗しました.");
-				}
-			} catch (SecurityException e) {
-				Log.e(TAG, "delete: SecurityException: " + e.getLocalizedMessage());
-				throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
-			}
+				if (file.isDirectory()) {
+					try {
+						FileUtils.deleteDirectory(file);
+						if (debug) {Log.d(TAG, "delete: FileUtils.deleteDirectory() 成功しました.");}
+					} catch (IOException e) {
+						Log.e(TAG, "delete: FileUtils.deleteDirectory() 失敗しました.");
+					}
 
-			// 消せたかどうかチェック
-			if (!file.exists()) {
-				return true;
+				}
+				else {
+					if (file.delete()) {
+						if (debug) {Log.d(TAG, "delete: file.delete() 成功しました.");}
+					} else {
+						Log.e(TAG, "delete: file.delete() 失敗しました.");
+					}
+				}
 			}
 			else {
-				Log.e(TAG, "delete: ファイルが存在します.");
-			}
+				// Android10(Q) の場合
 
-			// *************
-			// ここ以降は通常実行されない(Android 10の時は実行される)
-			// *************
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				Path path = Paths.get(uri);
-				try {
-					if (Files.deleteIfExists(path)) {
-						if (debug) {Log.d(TAG, "delete: Files.deleteIfExists() 成功しました.");}
-					} else {
-						Log.e(TAG, "delete: Files.deleteIfExists() 失敗しました.");
-					}
-				}
-				catch (DirectoryNotEmptyException e) {
-					Log.e(TAG, "delete: SecurityException: " + e.getLocalizedMessage());
-					throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
-				}
-				catch (SecurityException e) {
-					// ソース読んだらSecurityException返さないじゃないか！！
-					Log.e(TAG, "delete: SecurityException: " + e.getLocalizedMessage());
-					throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
-				}
-				catch (IOException e) {
-					Log.e(TAG, "delete: IOException: " + e.getLocalizedMessage());
-				}
-
-				// 消せたかどうかチェック
-				if (!file.exists()) {
-					return true;
-				}
-				else {
-					Log.e(TAG, "delete: ファイルが存在します.");
+				// SAFでファイルを削除する
+				String documentUri = documentUri(activity, uri);
+				Log.d(TAG, "delete: documentUri=" + documentUri);
+				if(!documentUri.isEmpty() && SafFileAccess.delete(activity, documentUri)) {
+					if (debug) {Log.d(TAG, "delete: SafFileAccess.delete() 成功しました.");}
+				} else {
+					Log.e(TAG, "delete: SafFileAccess.delete() 失敗しました.");
 				}
 			}
+		}
 
-			if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-				// Android10(Q) のとき
-
-				// なにしても消せない…
-
-				final String where = MediaStore.MediaColumns.DATA + "=?";
-				final String[] selectionArgs = new String[] {
-						file.getAbsolutePath()
-				};
-				ContentResolver contentResolver = activity.getContentResolver();
-				Uri deleteUri = FileProvider.getUriForFile(activity, activity.getPackageName() + ".provider", file);
-				activity.grantUriPermission(activity.getPackageName(), deleteUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-				DocumentFile documentFile = DocumentFile.fromSingleUri(activity, deleteUri);
-				if (debug) {Log.d(TAG, "delete: deleteUri=" + deleteUri);}
-
-				// 永続的なアクセス権を要求する
-				//final int takeFlags =
-				//		( Intent.FLAG_GRANT_READ_URI_PERMISSION |
-				//				Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
-				//				Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
-				//				Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
-				//		);
-				//activity.grantUriPermission(activity.getPackageName(), deleteUri, takeFlags);
-
-				// ディレクトリにアクセス権を要求するUIを表示する
-				//Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-				//intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, deleteUri);
-				//activity.startActivityForResult(intent, FileSelectActivity.WRITE_REQUEST_CODE);
-
-
-				try {
-					boolean isDeleted = DocumentFile.fromSingleUri(activity, deleteUri).delete();
-					if (isDeleted) {
-						if (debug) {Log.d(TAG, "delete: DocumentFile.fromSingleUri.delete() 成功しました.");}
-					}
-					else {
-						Log.e(TAG, "delete: DocumentFile.fromSingleUri.delete() 失敗しました.");
-					}
-				} catch (NullPointerException e) {
-					Log.e(TAG, "delete: NullPointerException: " + e.getLocalizedMessage());
-					throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
-				}
-
-				// 消せたかどうかチェック
-				if (!file.exists()) {
-					return true;
-				}
-				else {
-					Log.e(TAG, "delete: ファイルが存在します.");
-				}
-
-				try {
-					boolean isDeleted = DocumentsContract.deleteDocument(contentResolver, documentFile.getUri());
-					if (isDeleted) {
-						if (debug) {Log.d(TAG, "delete: DocumentsContract.deleteDocument() 成功しました.");}
-					}
-					else {
-						Log.e(TAG, "delete: DocumentsContract.deleteDocument() 失敗しました.");
-					}
-				} catch (FileNotFoundException e) {
-					Log.e(TAG, "delete: FileNotFoundException: " + e.getLocalizedMessage());
-					throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
-				}
-
-				// 消せたかどうかチェック
-				if (!file.exists()) {
-					return true;
-				}
-				else {
-					Log.e(TAG, "delete: ファイルが存在します.");
-				}
-
-				if (documentFile.delete()) {
-					if (debug) {Log.d(TAG, "delete: documentFile.delete() 成功しました.");}
-				}
-				else {
-					Log.e(TAG, "delete: documentFile.delete() 失敗しました.");
-				}
-
-				// 消せたかどうかチェック
-				if (!file.exists()) {
-					return true;
-				}
-				else {
-					Log.e(TAG, "delete: ファイルが存在します.");
-				}
-
-				try {
-					// sdk 28 (Android 9) 未満
-					int numDeleted = contentResolver.delete(deleteUri, where, selectionArgs);
-					if (numDeleted != 0) {
-						if (debug) {Log.d(TAG, "delete: contentResolver.delete() 成功しました.");}
-					}
-					else {
-						Log.e(TAG, "delete: contentResolver.delete() 失敗しました.");
-					}
-				} catch (IllegalArgumentException e) {
-					Log.e(TAG, "delete: IllegalArgumentException: " + e.getLocalizedMessage());
-					throw new FileAccessException(TAG + ": delete: " + e.getLocalizedMessage());
-				} catch (SecurityException e) {
-					// ソース読んだらSecurityException返さないじゃないか！！
-					if (debug) {Log.d(TAG, "delete: SecurityException をキャッチしました.");}
-					IntentSender intentSender = null;
-					// sdk 30 (Android 11)
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-						if (debug) {Log.d(TAG, "delete: Android11(R)以降のバージョンです.");}
-						intentSender = MediaStore.createDeleteRequest(contentResolver, Collections.singletonList(deleteUri)).getIntentSender();
-					}
-					// sdk 29 (Android 10)
-					else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-						if (debug) {Log.d(TAG, "delete: Android10(Q)です.");}
-						RecoverableSecurityException recoverableSecurityException = (RecoverableSecurityException) e;
-						if (recoverableSecurityException != null) {
-							intentSender = recoverableSecurityException.getUserAction().getActionIntent().getIntentSender();
-						}
-					}
-
-					if (intentSender != null) {
-						int REQUEST_CODE = 2025;
-						try {
-							activity.startIntentSenderForResult(intentSender, REQUEST_CODE, null, 0, 0, 0, null);
-						} catch (IntentSender.SendIntentException ex) {
-							throw new RuntimeException(ex);
-						}
-					}
-				}
-
-				// 消せたかどうかチェック
-				if (!file.exists()) {
-					return true;
-				}
-				else {
-					Log.e(TAG, "delete: ファイルが存在します.");
-				}
-
-			}
+		// 消せたかどうかチェック
+		if (!file.exists()) {
+			if (debug) {Log.d(TAG, "delete: ファイルが存在しません.");}
+			return true;
+		}
+		else {
+			Log.e(TAG, "delete: ファイルが存在します.");
 		}
 
 		return false;
@@ -474,9 +355,114 @@ public class LocalFileAccess {
 	// ディレクトリ作成
 	public static boolean mkdir(@NonNull final String uri, @NonNull final String item) {
 		boolean debug = false;
-		if (debug) {Log.d(TAG, "mkdir: uri=" + uri + ", item=" + item);}
+		if (debug) {Log.d(TAG, "mkdir: 開始します. uri=" + uri + ", item=" + item);}
 
 		File orgfile = new File(uri + item);
 		return orgfile.mkdir();
 	}
+
+	// ファイル作成
+	public static boolean createFile(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String item) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+
+		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q) {
+			// Android10(Q) ではない場合
+
+			try {
+				File orgfile = new File(uri + item);
+				if (!orgfile.exists()) {
+					// ファイルがなければ作成する
+					return orgfile.createNewFile();
+				}
+			} catch (IOException e) {
+				Log.e(TAG, "createFile: " + e.getLocalizedMessage());
+			}
+
+		}
+		else {
+				// Android10(Q) の場合
+
+				// SAFでファイルを作成する
+				String documentUri = documentUri(activity, uri);
+				Log.d(TAG, "renameTo: documentUri=" + documentUri);
+				if(!documentUri.isEmpty() && SafFileAccess.createFile(activity, documentUri, item)) {
+					if (debug) {Log.d(TAG, "renameTo: SafFileAccess.createFile() 成功しました.");}
+				} else {
+					Log.e(TAG, "renameTo: SafFileAccess.createFile() 失敗しました.");
+				}
+			}
+
+		return false;
+	}
+
+	/**
+	 * ローカルパスをSAFで使えるパスに変換する
+	 * @param activity
+	 * @param uri
+	 * @return
+	 */
+	public static String documentUri(@NonNull final Activity activity, @NonNull final String uri) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "documentUri: 開始します. uri=" + uri);}
+
+		String result = "";
+		String id = "";
+		String base = "";
+		String target = "";
+
+		if (uri.startsWith("/storage/emulated/0/")) {
+			id = "primary";
+			target = uri.substring("/storage/emulated/0/".length());
+		}
+		else if (uri.startsWith("/storage/")) {
+			String[] pathArray = uri.split("/");
+			id = uri.split("/")[2];
+			target = String.join("/", Arrays.copyOfRange(pathArray, 3, pathArray.length));
+		}
+		base = "content://com.android.externalstorage.documents/tree/" + id + "%3A";
+
+		if (debug) {Log.d(TAG, "documentUri: base=" + base + ", subUri=" + target);}
+
+		/*
+		result = SafFileAccess.relativePath(activity, base, target);
+		if (result.isEmpty()) {
+			requestPermission(activity, base);
+		}
+		if (debug) {Log.d(TAG, "documentUri: result=" + result);}
+		*/
+
+		result = base + "/document/" + id + "%3A" + URLEncoder.encode(target);
+		if (debug) {Log.d(TAG, "documentUri: result=" + result);}
+
+		try {
+			SafFileAccess.exists(activity, result);
+		}
+		catch (Exception e) {
+			// エラーが出たらアクセス権を要求する
+			requestPermission(activity, base);
+		}
+
+		if (debug) {Log.d(TAG, "documentUri: 終了します. result=" + result);}
+		return result;
+	}
+
+	public static void requestPermission(@NonNull final Activity activity, @NonNull final String uri) {
+		boolean debug = false;
+		if (debug) {Log.d(TAG, "requestPermission: 開始します. uri=" + uri);}
+
+		// ストレージアクセスフレームワーク
+		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+		intent.addFlags(
+				Intent.FLAG_GRANT_READ_URI_PERMISSION |
+						Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+						Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
+						Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+		);
+		intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+		activity.startActivityForResult(Intent.createChooser(intent, activity.getText(R.string.SafChooseTitle)), DEF.REQUEST_CODE_ACTION_OPEN_DOCUMENT_TREE);
+
+		if (debug) {Log.d(TAG, "requestPermission: 終了します.");}
+	}
+
 }

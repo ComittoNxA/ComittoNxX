@@ -49,7 +49,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 
 	private ThumbnailPreference mThumbnail;
 
- 	public static final int ListSortName[] =
+ 	public static final int[] ListSortName =
 		{ R.string.lsort00		// ソートなし
 		, R.string.lsort01		// ファイル名順(ディレクトリ混在)
 		, R.string.lsort02		// ファイル名順(ディレクトリ分離)
@@ -57,41 +57,41 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 		, R.string.lsort04		// 新しい順(ディレクトリ分離)
 		, R.string.lsort05		// 古い順(ディレクトリ混在)
 		, R.string.lsort06 };	// 古い順(ディレクトリ分離)
-	public static final int FileSortName[] =
+	public static final int[] FileSortName =
 		{ R.string.fsort00		// ソートなし
 		, R.string.fsort01		// ファイル名-昇順
 		, R.string.fsort02 };	// ファイル名-降順
-	public static final int RotateName[] =
+	public static final int[] RotateName =
 		{ R.string.rota00		// 回転あり
 		, R.string.rota01		// 縦固定
 		, R.string.rota02 };	// 横固定
-	public static final int BackModeName[] =
+	public static final int[] BackModeName =
 		{ R.string.bkmode00		// アプリ終了
 		, R.string.bkmode01		// 親ディレクトリ
 		, R.string.bkmode02 };	// 遷移を戻る
-	public static final int ShowMenu[] =
+	public static final int[] ShowMenu =
 		{ R.string.showmenu00		// 表示しない
 		, R.string.showmenu01		// 表示する
 		, R.string.showmenu02		// ローカルのみ表示
 		, R.string.showmenu03 };	// サーバのみ表示
-	public static final int ThumCacheName[] =
+	public static final int[] ThumCacheName =
 		{ R.string.thumbcache00		// 保持しない
 		, R.string.thumbcache01		// 100まで
 		, R.string.thumbcache02		// 500まで
 		, R.string.thumbcache03		// 1000まで
 		, R.string.thumbcache04 };	// 手動で削除
-	public static final int ThumSortTypeName[] =
+	public static final int[] ThumSortTypeName =
 		{ R.string.thumbsorttype00		// なし
 		, R.string.thumbsorttype01		// ローカル
 		, R.string.thumbsorttype02		// ローカルとSMB
 		, R.string.thumbsorttype03 };	// すべて
-	public static final int ThumCropName[] =
+	public static final int[] ThumCropName =
 			{ R.string.thumbcrop00		// 中央
 			, R.string.thumbcrop01		// 左
 			, R.string.thumbcrop02		// 右
 			, R.string.thumbcrop03	// 幅に合わせる
 			, R.string.thumbcrop04 };	// 紙の表紙カバーに合わせる
-	public static final int ThumMarginName[] =
+	public static final int[] ThumMarginName =
 			{ R.string.mgncut00		// なし
 			, R.string.mgncut01		// 弱
 			, R.string.mgncut02		// 中
@@ -135,6 +135,7 @@ public class SetFileListActivity extends PreferenceActivity implements OnSharedP
 				String url = res.getString(R.string.url_filelist);	// 設定画面
 				Intent intent;
 				intent = new Intent(SetFileListActivity.this, HelpActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("Url", url);
 				startActivity(intent);
 				return true;

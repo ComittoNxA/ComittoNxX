@@ -19,7 +19,7 @@ public class ThumbnailPreference extends DialogPreference implements SeekBar.OnS
 	private static SharedPreferences mSP;
 	private Context mContext;
 	private TextView mMsgView;
-	private SeekBar mSeekBar[] = {null, null};
+	private SeekBar[] mSeekBar = {null, null};
 	private TextView mTextView;
 	private String mSizeUnit;
 

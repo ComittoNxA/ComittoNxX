@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbRandomAccessFile;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 
 @TargetApi(26)
 public class SambaProxyFileCallback extends StorageManagerCompat.ProxyFileDescriptorCallbackCompat {
@@ -24,28 +25,30 @@ public class SambaProxyFileCallback extends StorageManagerCompat.ProxyFileDescri
     private SmbRandomAccessFile mSmbRandomAccessFile = null;
 
     public SambaProxyFileCallback(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
-        boolean debug = false;
-        if (debug) {Log.d(TAG, "SambaProxyFileCallback: uri=" + uri + ", user=" + user + ", pass=" + pass);}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel, "uri=" + uri + ", user=" + user + ", pass=" + pass);
         mActivity = activity;
         try {
             mSmbRandomAccessFile = SmbFileAccess.openRandomAccessFile(uri, user, pass, "rw");
         } catch (IOException e) {
-            Log.e(TAG,"SambaProxyFileCallback: Constructor Error.");
+            Logcat.e(logLevel, "Constructor Error.", e);
         }
     }
 
     @Override
     public long onGetSize() {
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         try {
           return mSmbRandomAccessFile.length();
         } catch (IOException e) {
-          Log.e(TAG,"onGetSize: Get File Size Error.");
+          Logcat.e(logLevel,"Get File Size Error.", e);
         }
         return 0;
     }
 
     @Override
     public int onRead(long offset, int size, byte[] data) {
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         try {
             if (!DEF.isUiThread()) {
                 // UIスレッドではない時はそのまま実行
@@ -66,18 +69,19 @@ public class SambaProxyFileCallback extends StorageManagerCompat.ProxyFileDescri
                 try {
                     return future.get();
                 } catch (Exception e) {
-                    Log.e(TAG, "read: File read error. " + e.getLocalizedMessage());
+                    Logcat.e(logLevel, "File read error. ", e);
                     return 0;
                 }
             }
         } catch (IOException e) {
-          Log.e(TAG,"onRead: File Read Error.");
+          Logcat.e(logLevel,"File Read Error.", e);
         }
       return 0;
     }
 
     @Override
     public int onWrite(long offset, int size, byte[] data) {
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         try {
             if (!DEF.isUiThread()) {
                 // UIスレッドではない時はそのまま実行
@@ -99,12 +103,12 @@ public class SambaProxyFileCallback extends StorageManagerCompat.ProxyFileDescri
                 try {
                     return future.get();
                 } catch (Exception e) {
-                    Log.e(TAG, "read: File read error. " + e.getLocalizedMessage());
+                    Logcat.e(logLevel, "File read error. ", e);
                     return 0;
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG,"onRead: File Read Error.");
+            Logcat.e(logLevel, "File Read Error.", e);
         }
         return size;
     }
@@ -116,6 +120,7 @@ public class SambaProxyFileCallback extends StorageManagerCompat.ProxyFileDescri
 
     @Override
     public void onRelease() {
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         // 非同期処理にする
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(new Runnable() {
@@ -124,7 +129,7 @@ public class SambaProxyFileCallback extends StorageManagerCompat.ProxyFileDescri
                 try {
                     mSmbRandomAccessFile.close();
                 } catch (SmbException e) {
-                    Log.e(TAG,"onRelease: File Release Error: " + e.getLocalizedMessage());
+                    Logcat.e(logLevel, "File Release Error.", e);
                 }
             }
         });

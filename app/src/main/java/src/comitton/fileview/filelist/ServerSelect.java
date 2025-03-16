@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import jp.dip.muracoro.comittonx.R;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.ServerData;
 import src.comitton.fileview.data.RecordItem;
 
@@ -25,13 +26,13 @@ public class ServerSelect {
 	private int mSelect = DEF.INDEX_LOCAL;
 	private SharedPreferences mSharedPrefer = null;
 
-	private ServerData mServer[];
+	private ServerData[] mServer;
 	private String mLocalPath;
 	private String mLocalName;
 
 	public ServerSelect(SharedPreferences sharedPreferences, Context context) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "ServerSelect: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		mSharedPrefer = sharedPreferences;
 		mServer = new ServerData[DEF.MAX_SERVER];
@@ -70,7 +71,7 @@ public class ServerSelect {
 			if (accessType < DEF.ACCESS_TYPE_SMB || accessType > DEF.ACCESS_TYPE_PICKER) {
 				accessType = DEF.ACCESS_TYPE_SMB;
 			}
-			if (debug) {Log.d(TAG, "ServerSelect: i=" + i + ", accessType=" + accessType + ", name=" + name + ", host=" + host + ", path=" + path + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);}
+			Logcat.d(logLevel, "i=" + i + ", accessType=" + accessType + ", name=" + name + ", host=" + host + ", path=" + path + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);
 			mServer[i].setAccessType(accessType);
 			mServer[i].setName(name);
 			mServer[i].setPath(path);
@@ -275,9 +276,8 @@ public class ServerSelect {
 
 	// サーバパスの設定
 	public void setPath(String path) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "setPath: 開始します. path=" + path);}
-		if (debug) {DEF.StackTrace(TAG, "setPath:");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. path=" + path);
 		if (mSelect == DEF.INDEX_LOCAL) {
 			// ローカル名
 			mLocalPath = path;
@@ -348,9 +348,9 @@ public class ServerSelect {
 	 * サーバの情報の保存
  	 */
 	public void setData(int index, RecordItem record) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (0 <= index && index < DEF.MAX_SERVER) {
-			if (debug) {Log.d(TAG, "setData: index=" + index + ", accessType=" + record.getAccessType() + ", name=" + record.getServerName() + ", host=" + record.getHost() + ", path=" + record.getPath() + ", user=" + record.getUser() + ", pass=" + record.getPass() + ", provider=" + record.getProvider() + ", dispName=" + record.getDispName());}
+			Logcat.d(logLevel, "index=" + index + ", accessType=" + record.getAccessType() + ", name=" + record.getServerName() + ", host=" + record.getHost() + ", path=" + record.getPath() + ", user=" + record.getUser() + ", pass=" + record.getPass() + ", provider=" + record.getProvider() + ", dispName=" + record.getDispName());
 			setData(index, record.getAccessType(), record.getServerName(), record.getHost(), record.getUser(), record.getPass(), record.getPath(), record.getProvider(), record.getDispName());
 			save(index);
 		}
@@ -374,10 +374,10 @@ public class ServerSelect {
 	 * サーバの情報の保存
 	 */
 	public void save(int index) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Editor ed = mSharedPrefer.edit();
 		// サーバ情報
-		if (debug) {Log.d(TAG, "save: index=" + index + ", accessType=" + mServer[index].getAccessType() + ", name=" + mServer[index].getName() + ", host=" + mServer[index].getHost() + ", path=" + mServer[index].getPath() + ", user=" + mServer[index].getUser() + ", pass=" + mServer[index].getPass() + ", provider=" + mServer[index].getProvider());}
+		Logcat.d(logLevel, "index=" + index + ", accessType=" + mServer[index].getAccessType() + ", name=" + mServer[index].getName() + ", host=" + mServer[index].getHost() + ", path=" + mServer[index].getPath() + ", user=" + mServer[index].getUser() + ", pass=" + mServer[index].getPass() + ", provider=" + mServer[index].getProvider());
 		if (mServer[index].getProvider().equals("user")) {DEF.StackTrace(TAG , "save:");}
 		ed.putInt("smb-access-type" + index, mServer[index].getAccessType());
 		ed.putString("smb-name" + index, mServer[index].getName());

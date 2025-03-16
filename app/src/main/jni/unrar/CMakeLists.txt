@@ -14,7 +14,7 @@ endif()
 unset(DOWNLOAD_UNRAR_SOURCES CACHE)
 option(
   DOWNLOAD_UNRAR_SOURCES
-  "Download UnRAR library, and patch. (Need Linux environment, not Windows)"
+  "Download UnRAR library, and patch."
   ON
 )
 
@@ -40,7 +40,6 @@ if(DOWNLOAD_UNRAR_SOURCES)
 
   if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
     execute_process(
-      #COMMAND "${BUSYBOX}" bash -c "${CMAKE_CURRENT_SOURCE_DIR}/patch-unrar.sh ${PATCH_PATH}"
       COMMAND cmd /C "${CMAKE_CURRENT_SOURCE_DIR}/patch-unrar.bat" "${PATCH_PATH}"
       WORKING_DIRECTORY "${unrar_SOURCE_DIR}/unrar"
       RESULT_VARIABLE BUILD_COMMAND_RESULT

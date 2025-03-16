@@ -22,7 +22,7 @@ public class TitleView extends View implements Handler.Callback {
 	private final int SCROLL_TERM_NEXT = 30;
 
 	private int mTextColor;
-	private int mBackColor[] = { 0, 0, 0 };
+	private int[] mBackColor = { 0, 0, 0 };
 	private int mTextSize;
 	private String mTitle1;
 	private String mTitle2;

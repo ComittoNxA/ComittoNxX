@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.imageview.ImageManager;
 
 
@@ -135,7 +136,7 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
      */
     @Override
     public void run() {
-        boolean debug = false;
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         Message message = new Message();
         message.what = DEF.HMSG_ERROR;
         ImageManager imageMgr = null;
@@ -146,30 +147,29 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
         }
         if(mCropPath != null) {
             try {
-                if(debug) {Log.d("CropImageActivity", "run: イメージファイルを開きます. mURI=" + mURI);}
-                if(debug) {Log.d("CropImageActivity", "run: mCropPath=" + mCropPath);}
+                Logcat.d(logLevel, "イメージファイルを開きます. mURI=" + mURI);
+                Logcat.d(logLevel, "mCropPath=" + mCropPath);
                 mBitmap = imageMgr.GetBitmapFromPath(this, mCropPath, null);
                 if (mBitmap == null) {
-                    Log.e("CropImageActivity", "run: ビットマップ取得に失敗しました.");
+                    Logcat.e(logLevel, "ビットマップ取得に失敗しました.");
                 }
                 else {
-                    if(debug) {Log.d("CropImageActivity", "run: ビットマップ取得に成功しました.");}
+                    Logcat.d(logLevel, "ビットマップ取得に成功しました.");
                     message.what = DEF.HMSG_LOAD_END;
                 }
                 if (mBitmap.getHeight() > 1000) {
-                    Log.e("CropImageActivity", "run: ビットマップを縮小します.");
+                    Logcat.e(logLevel, "ビットマップを縮小します.");
                     float dsH = (float)1000 / (float)mBitmap.getHeight();
                     mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth() * dsH), (int)(mBitmap.getHeight() * dsH), true);
                 }
             } catch (Exception e) {
-                Log.e("CropImageActivity", "run: エラーが発生しました.");
-                if (e.getLocalizedMessage() != null) {
-                    Log.e("CropImageActivity", "run: エラーメッセージ. " + e.getLocalizedMessage());
-                }
+                Logcat.e(logLevel, "エラーが発生しました." , e);
                 throw new RuntimeException(e);
             } finally {
                 try {
-                    imageMgr.close();
+                    if (imageMgr != null) {
+                        imageMgr.close();
+                    }
                 } catch (Exception e) {
                     // なにもしない
                 }

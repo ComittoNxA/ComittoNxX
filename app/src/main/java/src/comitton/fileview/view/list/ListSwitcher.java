@@ -72,7 +72,7 @@ public class ListSwitcher implements Callback {
     				mOffset = 0;
     				mListSwitcherListener.onListSwitching(mOffset, false);
 				}
-//				Log.d("listswitch", "d(x=" + x + ", y=" + y + ")");
+//				Logcat.d(logLevel, "d(x=" + x + ", y=" + y + ")");
 				break;
 			case MotionEvent.ACTION_MOVE:
 				mTouchX2 = mTouchX1;
@@ -130,10 +130,10 @@ public class ListSwitcher implements Callback {
 //						}
 //						break;
 				}
-//				Log.d("listswitch", "m(x=" + x + ", y=" + y + ")");
+//				Logcat.d(logLevel, "m(x=" + x + ", y=" + y + ")");
 				break;
 			case MotionEvent.ACTION_UP:
-//				Log.d("listswitch", "u(x=" + x + ", y=" + y + ")");
+//				Logcat.d(logLevel, "u(x=" + x + ", y=" + y + ")");
 				// 選択
 				switch (mTouchMode) {
 					case GESTURE_SWITCH:
@@ -143,7 +143,7 @@ public class ListSwitcher implements Callback {
 						float xrange = mTouchX2 - x;
 						float yrange = mTouchY2 - y;
 						long term = mTouchTime1 - mTouchTime2;
-//						Log.d("listswitch", "chg:cnt" + mTouchCount + ", xr=" + xrange + ", yr=" + yrange + ", term=" + term + ", offset=" + mOffset);
+//						Logcat.d(logLevel, "chg:cnt" + mTouchCount + ", xr=" + xrange + ", yr=" + yrange + ", term=" + term + ", offset=" + mOffset);
 						if (((mOffset < 0 ? true : false) != (xrange < 0 ? true : false))
 								&& ((mTouchCount >= 2 && term < 200) || (Math.abs(mOffset) >= mSwitchWidth))) { 
 							diff = mOffset < 0 ? 1 : -1;

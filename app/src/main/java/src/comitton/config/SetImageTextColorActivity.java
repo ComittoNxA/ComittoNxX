@@ -240,7 +240,7 @@ public class SetImageTextColorActivity extends PreferenceActivity implements OnS
 	}
 
 	private String getColorSummary(int val) {
-		String str[] = { "Red", "Green", "Blue" };
+		String[] str = { "Red", "Green", "Blue" };
 		String result = "";
 		for (int i = 0; i < 3; i++) {
 			int v = ((val >> 8 * (2 - i)) & 0x000000FF);

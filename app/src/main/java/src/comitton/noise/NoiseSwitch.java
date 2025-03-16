@@ -29,8 +29,8 @@ public class NoiseSwitch implements NoiseHandler {
 	public static final int MSG_NOISE = 7;
 	public static final int MSG_NOISESTATE = 8;
 
-	private static int NOISE_COUNT_OFF[]  = {4, 3, 2};
-	private static int NOISE_COUNT_LONG[] = {12, 8, 4};
+	private static int[] NOISE_COUNT_OFF = {4, 3, 2};
+	private static int[] NOISE_COUNT_LONG = {12, 8, 4};
 
 	private static final int NOISESTATE_TON = 1; 
 	private static final int NOISESTATE_TOO = 2; 
@@ -55,7 +55,7 @@ public class NoiseSwitch implements NoiseHandler {
 		mDecSpeed = dec;
 	}
 
-	public void onNotice(int level[]) {
+	public void onNotice(int[] level) {
 		int state;
 //		if (mInvalidCount > 0) {
 //			mInvalidCount --;

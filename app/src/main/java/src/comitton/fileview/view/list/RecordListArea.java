@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
+import src.comitton.common.Logcat;
 import src.comitton.common.TextFormatter;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.data.RecordItem;
@@ -306,7 +307,7 @@ public class RecordListArea extends ListArea {
 	 * リストのレイアウト情報を保存
 	 */
 	private void requestLayout(boolean isRefresh) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		int width = mAreaWidth;
 		int listSize = 0;
@@ -341,7 +342,7 @@ public class RecordListArea extends ListArea {
 					else {
 						mTitleSep[index][0] = TextFormatter.getMultiLine("[" + rd.getServerName() + "]", tcx, mTitlePaint, 1);
 					}
-					if (debug) {Log.d(TAG, "requestLayout: SERVER index=" + index + ", title=" + mTitleSep[index][0][0] + ", accessType=" + rd.getAccessType());}
+					Logcat.d(logLevel, "SERVER index=" + index + ", title=" + mTitleSep[index][0][0] + ", accessType=" + rd.getAccessType());
 				}
 				else if (rd.getType() == RecordItem.TYPE_MENU){
 					mTitleSep[index] = new String[1][];
@@ -371,7 +372,7 @@ public class RecordListArea extends ListArea {
 					}
 					else {
 						uri = rd.getDispName();
-						if (debug) {Log.d(TAG, "requestLayout: SERVER index="+ index + ", uri=" + uri);}
+						Logcat.d(logLevel, "SERVER index="+ index + ", uri=" + uri);
 					}
 					mInfoSep[index] = new String[1][];
 					mInfoSep[index][0] = TextFormatter.getMultiLine(uri, tcx, mInfoPaint, 5);

@@ -98,7 +98,7 @@ public class ImageAccess {
 
 	// ビットマップをリサイズして切り出し
 	public static Bitmap resizeTumbnailBitmap(Bitmap bm, int thum_cx, int thum_cy, int crop, int margin) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		if (bm == null || bm.isRecycled()) {
 			return null;
@@ -107,10 +107,10 @@ public class ImageAccess {
 		int x = 0;
 		int y = 0;
 
-		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 開始します. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", crop=" + crop);}
+		Logcat.d(logLevel, "開始します. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", crop=" + crop);
 		int src_cx = bm.getWidth();
 		int src_cy = bm.getHeight();
-		//Log.d("ImageAccess", "resizeTumbnailBitmap: ソース幅を求めました. src_cx=" + src_cx + ", src_cy=" + src_cy);
+		//Logcat.d(logLevel, "ソース幅を求めました. src_cx=" + src_cx + ", src_cy=" + src_cy);
 
 		if (margin != 0) {
 			// 余白を削除する
@@ -360,7 +360,7 @@ public class ImageAccess {
 
 			// 上の余白チェック
 			for (yy = startH; yy < CheckCY; yy++) {
-				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
+				//Logcat.d(logLevel, "yy=" + yy);
 				overcnt = 0;    // 余白でないカウンタ
 				CutT = yy;
 				for (xx = 0; xx < src_cx; xx++) {
@@ -376,7 +376,7 @@ public class ImageAccess {
 			}
 			// 下の余白チェック
 			for (yy = src_cy - startH - 1; yy >= src_cy - CheckCY; yy--) {
-				//Log.d("comitton", "resizeTumbnailBitmap yy=" + yy);
+				//Logcat.d(logLevel, "yy=" + yy);
 				overcnt = 0;    // 余白でないカウンタ
 				CutB = src_cy - 1 - yy;
 				for (xx = 0; xx < src_cx; xx++) {
@@ -392,7 +392,7 @@ public class ImageAccess {
 			}
 			// 左の余白チェック
 			for (xx = startW; xx < CheckCX; xx++) {
-				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
+				//Logcat.d(logLevel, "xx=" + xx);
 				overcnt = 0;    // 余白でないカウンタ
 				CutL = xx;
 				for (yy = CutT + 1; yy < src_cy - CutB; yy++) {
@@ -409,7 +409,7 @@ public class ImageAccess {
 			}
 			// 右の余白チェック
 			for (xx = src_cx - startW - 1; xx >= src_cx - CheckCX; xx--) {
-				//Log.d("comitton", "resizeTumbnailBitmap xx=" + xx);
+				//Logcat.d(logLevel, "xx=" + xx);
 				overcnt = 0;    // 余白でないカウンタ
 				CutR = src_cx - 1 - xx;
 				for (yy = CutT + 1; yy < src_cy - CutB; yy++) {
@@ -434,21 +434,21 @@ public class ImageAccess {
 			CutT = CutT * space / 100;
 			CutB = CutB * space / 100;
 
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: カット幅を求めました. CutT=" + CutT + ", CutB=" + CutB + ", CutL=" + CutL + ", CutR=" + CutR);}
+			Logcat.d(logLevel, "カット幅を求めました. CutT=" + CutT + ", CutB=" + CutB + ", CutL=" + CutL + ", CutR=" + CutR);
 
 			// 余白削除後のサイズを初期サイズに設定
 			work_cx = src_cx - CutL - CutR;
 			work_cy = src_cy - CutT - CutB;
 
-			//Log.d("comitton", "resizeTumbnailBitmap src_cx=" + src_cx + ", src_cy=" + src_cy + ", x=" + x + ", y=" + y);
+			//Logcat.d(logLevel, "src_cx=" + src_cx + ", src_cy=" + src_cy + ", x=" + x + ", y=" + y);
 
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 縦横比を補正します. work_cx=" + work_cx + ", work_cy=" + work_cy);}
+			Logcat.d(logLevel, "縦横比を補正します. work_cx=" + work_cx + ", work_cy=" + work_cy);
 			// 横幅がサムネイルの縦横比より細い場合、横のカットを戻す
 			if (CutL + CutR > 0) {
 				if (work_cx * 1000 / thum_cx < work_cy * 1000 / thum_cy) {
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 横幅を補正します.");}
+					Logcat.d(logLevel, " 横幅を補正します.");
 					int margin_x = (int) ((float) src_cx - ((float) work_cy * ((float) thum_cx / (float) thum_cy)));
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 横幅を補正します. margin_x=" + margin_x);}
+					Logcat.d(logLevel, "横幅を補正します. margin_x=" + margin_x);
 					margin_x = Math.max(0, margin_x);
 					CutL = margin_x * CutL / (CutL + CutR);
 					CutR = margin_x - CutL;
@@ -457,9 +457,9 @@ public class ImageAccess {
 			// 縦幅がサムネイルの縦横比より細い場合、横のカットを戻す
 			if (CutT + CutB > 0) {
 				if (work_cx * 1000 / thum_cx > work_cy * 1000 / thum_cy) {
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 縦幅を補正します.");}
+					Logcat.d(logLevel, "縦幅を補正します.");
 					int margin_y = (int) ((float) src_cy - ((float) work_cx * ((float) thum_cy / (float) thum_cx)));
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 横幅を補正します. margin_y=" + margin_y);}
+					Logcat.d(logLevel, "横幅を補正します. margin_y=" + margin_y);
 					margin_y = Math.max(0, margin_y);
 					CutT = margin_y * CutT / (CutT + CutB);
 					CutB = margin_y - CutT;
@@ -471,31 +471,31 @@ public class ImageAccess {
 			src_cy = src_cy - CutT - CutB;
 			x = CutL;
 			y = CutT;
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 縦横比を補正しました. x=" + x + ", y=" + y + ", src_cx=" + src_cx + ", src_cy=" + src_cy);}
+			Logcat.d(logLevel, "縦横比を補正しました. x=" + x + ", y=" + y + ", src_cx=" + src_cx + ", src_cy=" + src_cy);
 		}
 
-		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 縮小サイズを計算します.  x=" + x + ", y=" + y + ", src_cx=" + src_cx + ", src_cy=" + src_cy);}
+		Logcat.d(logLevel, "縮小サイズを計算します.  x=" + x + ", y=" + y + ", src_cx=" + src_cx + ", src_cy=" + src_cy);
 		int dst_cx;
 		int dst_cy;
-		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: src_cx/src_cy=" + ((float)src_cx / (float)src_cy) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));}
+		Logcat.d(logLevel, "src_cx/src_cy=" + ((float)src_cx / (float)src_cy) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));
 		if (crop == BMPCROP_FIT_SCREEN) {
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: BMPCROP_FIT_SCREEN です. src_cx/src_cy=" + ((float)src_cx / (float)src_cy) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));}
+			Logcat.d(logLevel, "BMPCROP_FIT_SCREEN です. src_cx/src_cy=" + ((float)src_cx / (float)src_cy) + ", thum_cx/thum_cy=" + ((float)thum_cx / (float)thum_cy));
 			if ((float)src_cx / src_cy > (float)thum_cx / thum_cy) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 幅に合わせます.  src_cx=" + src_cx + ", src_cx=" + src_cx + ", thum_cx=" + thum_cx + ", thum_cy=" + thum_cy);}
+				Logcat.d(logLevel, "幅に合わせます.  src_cx=" + src_cx + ", src_cx=" + src_cx + ", thum_cx=" + thum_cx + ", thum_cy=" + thum_cy);
 				// 幅に合わせる
 				dst_cx = thum_cx;
 				dst_cy = src_cy * thum_cx / src_cx;
 			}
 			else {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 高さに合わせます.  src_cx=" + src_cx + ", src_cx=" + src_cx + ", thum_cx=" + thum_cx + ", thum_cy=" + thum_cy);}
+				Logcat.d(logLevel, " 高さに合わせます.  src_cx=" + src_cx + ", src_cx=" + src_cx + ", thum_cx=" + thum_cx + ", thum_cy=" + thum_cy);
 				// 高さに合わせる
 				dst_cx = src_cx * thum_cy / src_cy;
 				dst_cy = thum_cy;
 			}
 		}
 		else {
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: BMPCROP_FIT_SCREEN ではありません.");}
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 高さに合わせます.  src_cx=" + src_cx + ", src_cx=" + src_cx + ", thum_cx=" + thum_cx + ", thum_cy=" + thum_cy);}
+			Logcat.d(logLevel, "BMPCROP_FIT_SCREEN ではありません.");
+			Logcat.d(logLevel, "高さに合わせます.  src_cx=" + src_cx + ", src_cx=" + src_cx + ", thum_cx=" + thum_cx + ", thum_cy=" + thum_cy);
 			// 幅に合わせる
 			dst_cx = src_cx * thum_cy / src_cy;
 			dst_cy = thum_cy;
@@ -509,68 +509,65 @@ public class ImageAccess {
 		if (scale_y * src_cy < 1) {
 			scale_y = 1.0f / src_cy;
 		}
-		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 縮小サイズを計算しました. dst_cx=" + dst_cx + ", dst_cy=" + dst_cy);}
+		Logcat.d(logLevel, "縮小サイズを計算しました. dst_cx=" + dst_cx + ", dst_cy=" + dst_cy);
 
 //		if (src_cy > dst_cy) {
 		Matrix matrix = new Matrix();
 		matrix.postScale(scale_x, scale_y);
 		try {
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: ビットマップをリサイズします. x=" + x + ", y=" + y + ", width=" + src_cx + ", height=" + src_cy + ", m=(" + scale_x + ", " + scale_x + ")");}
+			Logcat.d(logLevel, "ビットマップをリサイズします. x=" + x + ", y=" + y + ", width=" + src_cx + ", height=" + src_cy + ", m=(" + scale_x + ", " + scale_x + ")");
 			bm = Bitmap.createBitmap(bm, x, y, src_cx, src_cy, matrix, true);
 			if (bm == null) {
-				Log.e("ImageAccess", "resizeTumbnailBitmap: ビットマップをリサイズできませんでした.");
+				Logcat.e(logLevel, "r ビットマップをリサイズできませんでした.");
 				return null;
 			}
-			//Log.d("ImageAccess", "resizeTumbnailBitmap: ビットマップをリサイズしました. width=" + bm.getWidth() + ", height=" + bm.getHeight());
+			//Logcat.d(logLevel, "ビットマップをリサイズしました. width=" + bm.getWidth() + ", height=" + bm.getHeight());
 		}
 		catch (Exception e) {
 			// 異常なサイズのときに落ちる不具合のため
-			Log.e("ImageAccess", "resizeTumbnailBitmap: リサイズでエラーになりました.");
-			if (e.getLocalizedMessage() != null) {
-				Log.e("ImageAccess", "resizeTumbnailBitmap エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "リサイズでエラーになりました.", e);
 			return null;
 		}
 
 		int bmp_cx = bm.getWidth();
 		if (bmp_cx > thum_cx) {
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 横幅に合わせて画像を切り取ります.");}
+			Logcat.d(logLevel, "横幅に合わせて画像を切り取ります.");
 			if (dst_cy > bm.getHeight()) {
 				dst_cy = bm.getHeight();
 			}
 			if (crop == BMPCROP_NONE) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 切り取り=BMPCROP_NONE");}
+				Logcat.d(logLevel, "切り取り=BMPCROP_NONE");
 				// なにもしない
 			}
 			if (crop == BMPCROP_CENTER) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 切り取り=BMPCROP_CENTER");}
+				Logcat.d(logLevel, "切り取り=BMPCROP_CENTER");
 				// 中央
 				x = (bmp_cx - thum_cx) / 2;
 				bm = Bitmap.createBitmap(bm, x, 0, thum_cx, dst_cy);
 			}
 			else if (crop == BMPCROP_LEFT) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 切り取り=BMPCROP_LEFT");}
+				Logcat.d(logLevel, "切り取り=BMPCROP_LEFT");
 				// 左側
 				bm = Bitmap.createBitmap(bm, 0, 0, thum_cx, dst_cy);
 			}
 			else if (crop == BMPCROP_RIGHT) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 切り取り=BMPCROP_RIGHT");}
+				Logcat.d(logLevel, "切り取り=BMPCROP_RIGHT");
 				// 右側
 				x = bmp_cx - thum_cx;
 				bm = Bitmap.createBitmap(bm, x, 0, thum_cx, dst_cy);
 			}
 			else if (crop == BMPCROP_FIT_SCREEN) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 切り取り=BMPCROP_FIT_SCREEN");}
+				Logcat.d(logLevel, "切り取り=BMPCROP_FIT_SCREEN");
 				// なにもしない
 			}
 			else if (crop == BMPCROP_AUTO_COVER) {
-				if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 切り取り=BMPCROP_AUTO_COVER");}
+				Logcat.d(logLevel, "切り取り=BMPCROP_AUTO_COVER");
 				if ( (float) dst_cx / (float) dst_cy < 1.3 ){
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 右側を表示します.");}
+					Logcat.d(logLevel, "右側を表示します.");
 					x = bmp_cx - thum_cx;
 				}
 				else {
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 中央左を表示します.");}
+					Logcat.d(logLevel, "中央左を表示します.");
 					// 中央左（背表紙を避ける）
 					x = (int) ((bmp_cx / 2d) - (thum_cx * 1.05));
 					if (x < 0) {
@@ -579,25 +576,22 @@ public class ImageAccess {
 					}
 				}
 				try {
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: ビットマップを切り取ります. x=" + x + ", y=0, width=" + dst_cx + ", height=" + dst_cy);}
+					Logcat.d(logLevel, "ビットマップを切り取ります. x=" + x + ", y=0, width=" + dst_cx + ", height=" + dst_cy);
 					bm = Bitmap.createBitmap(bm, x, 0, thum_cx, dst_cy);
-					if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: ビットマップを切り取りました.");}
+					Logcat.d(logLevel, "ビットマップを切り取りました.");
 				}
 				catch (Exception e) {
-					Log.e("ImageAccess", "resizeTumbnailBitmap: ビットマップの切り取りでエラーになりました.");
-					if (e.getLocalizedMessage() != null) {
-						Log.e("ImageAccess", "resizeTumbnailBitmap エラーメッセージ. " + e.getLocalizedMessage());
-					}
+					Logcat.e(logLevel, "ビットマップの切り取りでエラーになりました.", e);
 					return null;
 				}
 			}
 		}
 		if (bm.getConfig() != Config.RGB_565) {
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: RGB_565に変換します.");}
+			Logcat.d(logLevel, "RGB_565に変換します.");
 			bm = bm.copy(Config.RGB_565, true);
-			if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: RGB_565に変換しました.");}
+			Logcat.d(logLevel, "RGB_565に変換しました.");
 		}
-		if (debug) {Log.d("ImageAccess", "resizeTumbnailBitmap: 終了します. width=" + bm.getWidth() + ", height=" + bm.getHeight());}
+		Logcat.d(logLevel, "終了します. width=" + bm.getWidth() + ", height=" + bm.getHeight());
 		return bm;
 	}
 
@@ -608,6 +602,7 @@ public class ImageAccess {
 
 	// ベクターxmlファイルからアイコンを作成(比率不定)
 	public static Bitmap createIcon(@NonNull Resources res, @DrawableRes int resid, int sizeW, int sizeH, @ColorInt Integer drawcolor) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Bitmap bm = null;
 		try {
 			Drawable drawable = ResourcesCompat.getDrawable(res, resid, null);
@@ -630,11 +625,8 @@ public class ImageAccess {
 		}
 		catch (Exception e) {
 			// 読み込み失敗
-			Log.e("ImageAccess", "createIcon: ビットマップの作成でエラーになりました.");
-			if (e.getLocalizedMessage() != null) {
-				Log.e("ImageAccess", "createIcon: error message. " + e.getLocalizedMessage());
-				return null;
-			}
+			Logcat.e(logLevel, "ビットマップの作成でエラーになりました.", e);
+			return null;
 		}
 
 		return bm;
@@ -649,6 +641,7 @@ public class ImageAccess {
 	 * Bitmapデータの色を変更する。
 	 */
 	public static Bitmap setColor(Bitmap bitmap, @ColorInt int color) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Bitmap mutableBitmap = null;
 		try {
 			//mutable化する
@@ -665,11 +658,8 @@ public class ImageAccess {
 			myCanvas.drawBitmap(mutableBitmap, 0, 0, pnt);
 		}
 		catch (Exception e) {
-			Log.e("ImageAccess", "setColor: 色の変更でエラーになりました.");
-			if (e.getLocalizedMessage() != null) {
-				Log.e("ImageAccess", "createIcon: error message. " + e.getLocalizedMessage());
-				return null;
-			}
+			Logcat.e(logLevel, "色の変更でエラーになりました.", e);
+			return null;
 		}
 		return mutableBitmap;
 	}
@@ -686,8 +676,8 @@ public class ImageAccess {
 
 	// デバッグ用に画像をファイル出力する
 	public static int SaveFile (Bitmap bitmap) {
-		boolean debug = false;
-		if (debug) {Log.d("ImageManager", "SaveFile: 開始します. bitmap=[" + bitmap.getWidth() + ", " + bitmap.getHeight() + "]");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. bitmap=[" + bitmap.getWidth() + ", " + bitmap.getHeight() + "]");
 		try {
 			// sdcardフォルダを指定
 			File root = Environment.getExternalStorageDirectory();
@@ -706,7 +696,7 @@ public class ImageAccess {
 			// 保存処理終了
 			fos.close();
 		} catch (Exception e) {
-			Log.e("ImageManager", "SaveFile: エラーが発生しました." + e.toString());
+			Logcat.e(logLevel, "エラーが発生しました.", e);
 		}
 		return 0;
 	}

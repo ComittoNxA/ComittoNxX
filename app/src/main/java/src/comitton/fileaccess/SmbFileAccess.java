@@ -32,16 +32,17 @@ import jcifs.smb.SmbFileOutputStream;
 import jcifs.smb.SmbRandomAccessFile;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.FileData;
 
 public class SmbFileAccess {
 	private static final String TAG = "SmbFileAccess";
 
 	private static String[] parseUri(@NonNull final String uri) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "parseUrl: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
-		String url = uri.toString();
+		String url = uri;
 		// [0]=host, [1]=share, [2]=path
 		String[] urlData = new String[3];
 		urlData[0] = "";
@@ -75,13 +76,13 @@ public class SmbFileAccess {
 			}
 		}
 
-		if(debug) {Log.d(TAG, "parseUrl: host=" + urlData[0] + ", share=" + urlData[1] + ", path=" + urlData[2]);}
+		Logcat.d(logLevel, "host=" + urlData[0] + ", share=" + urlData[1] + ", path=" + urlData[2]);
 		return urlData;
 	}
 
 	private static String[] parseUser(@NonNull final String user) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "parseUser: 開始します. user=" + user);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. user=" + user);
 
 		// [0]=domain, [1]=user
 		String[] userData = new String[2];
@@ -101,13 +102,13 @@ public class SmbFileAccess {
 			userData[1] = user;
 		}
 
-		if(debug) {Log.d(TAG, "parseUser: domain=" + userData[0] + ", user=" + userData[1]);}
+		Logcat.d(logLevel, "domain=" + userData[0] + ", user=" + userData[1]);
 		return userData;
 	}
 
 	// SMB認証
 	public static SmbFile smbFile(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		SmbFile sfile = null;
 		NtlmPasswordAuthenticator smbAuth;
@@ -143,7 +144,7 @@ public class SmbFileAccess {
 			SingletonContext.init(prop);
 		} catch (CIFSException e) {
 			// 既に認証している
-			if (debug) {Log.d(TAG, "smbFile: " + e.getLocalizedMessage());}
+			Logcat.d(logLevel, "", e);
 		}
 
 		String[] userData = parseUser(user);
@@ -171,14 +172,14 @@ public class SmbFileAccess {
             sfile = new SmbFile(uri, context);
         } catch (MalformedURLException e) {
 			// 認証できない
-			Log.e(TAG,": smbFile: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
         }
         return sfile;
 	}
 
 	public static String filename(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "parent: uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri);
 
 		if (uri.isEmpty()) {
 			return "";
@@ -192,8 +193,8 @@ public class SmbFileAccess {
 	}
 
 	public static long length(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "length: uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri);
 		long length;
         try {
             length = smbFile(uri, user, pass).length();
@@ -204,16 +205,16 @@ public class SmbFileAccess {
 	}
 
 	public static String parent(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "parent: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		String result = uri.replaceFirst("([^/]+?)?/*$", "");
-		if (debug) {Log.d(TAG, "parent: 終了します. uri=" + uri + ", result=" + result);}
+		Logcat.d(logLevel, "終了します. uri=" + uri + ", result=" + result);
 		return result;
 	}
 
 	public static String relativePath(@NonNull final String base, @NonNull final String target) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "relativePath: 開始します. base=" + base + ", target=" + target);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. base=" + base + ", target=" + target);
 
 		String result;
 		String tmp;
@@ -221,11 +222,11 @@ public class SmbFileAccess {
 		if (target.startsWith("smb://")) {
 			// targetがsmb://で始まるならそのまま返す
 			result = target;
-			if (debug) {Log.d(TAG, "relativePath: target が smb:// で始まっています. result=" + result);}
+			Logcat.d(logLevel, "target が smb:// で始まっています. result=" + result);
 		} else {
 			// targetがsmb://で始まらないならbaseとtargetを連結する
 			result = base + target;
-			if (debug) {Log.d(TAG, "relativePath: target が smb:// で始まっていません. result=" + result);}
+			Logcat.d(logLevel, "target が smb:// で始まっていません. result=" + result);
 		}
 
 		// 連続するスラッシュは1つにまとめる
@@ -246,13 +247,13 @@ public class SmbFileAccess {
 			// resultがbaseの子孫じゃなければ空文字列を返す
 			result = "";
 		}
-		if (debug) {Log.d(TAG, "relativePath: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static ParcelFileDescriptor openParcelFileDescriptor(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass, @Nullable final Handler handler) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: uri=" + uri + ", user=" + user + ", pass=" + pass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri + ", user=" + user + ", pass=" + pass);
 
 		ParcelFileDescriptor parcelFileDescriptor = null;
 
@@ -272,8 +273,8 @@ public class SmbFileAccess {
 
 	// ユーザ認証付きSambaストリーム
 	public static SmbRandomAccessFile openRandomAccessFile(@NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final String mode) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "smbAccessFile: uri=" + uri + ", user=" + user + ", pass=" + pass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri + ", user=" + user + ", pass=" + pass);
 		//if (debug) {DEF.StackTrace(TAG, "smbAccessFile: ");}
 		SmbRandomAccessFile stream;
 		try {
@@ -307,7 +308,7 @@ public class SmbFileAccess {
 			try {
 				stream = future.get();
 			} catch (Exception e) {
-				Log.e(TAG, "smbAccessFile: Can not get SmbRandomAccessFile.");
+				Logcat.e(logLevel, "Can not get SmbRandomAccessFile.", e);
 				throw new FileAccessException(TAG + ": smbAccessFile: Can not get SmbRandomAccessFile.");
 			}
 		}
@@ -316,20 +317,20 @@ public class SmbFileAccess {
 	}
 
 	public static SmbFileInputStream getInputStream(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getInputStream: uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri);
 		try {
 			SmbFile orgfile = smbFile(uri, user, pass);
 			return new SmbFileInputStream(orgfile);
 		} catch (SmbException e) {
-			Log.e(TAG, "getInputStream: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			throw new FileAccessException(TAG + ": getInputStream: " + e.getLocalizedMessage());
 		}
 	}
 
 	public static SmbFileOutputStream getOutputStream(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getOutputStream: uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri);
 		try {
 			SmbFile orgfile = smbFile(uri, user, pass);
 			if (!orgfile.exists()) {
@@ -338,15 +339,15 @@ public class SmbFileAccess {
 			}
 			return new SmbFileOutputStream(orgfile);
 		} catch (SmbException e) {
-			Log.e(TAG, "getOutputStream: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			throw new FileAccessException(TAG + ": getOutputStream: " + e.getLocalizedMessage());
 		}
 	}
 
 	// ファイル存在チェック
 	public static boolean exists(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "exists: uri=" + uri + ", user=" + user + ", pass=" + pass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri + ", user=" + user + ", pass=" + pass);
 		boolean result = false;
 
 		if (!DEF.isUiThread()) {
@@ -383,7 +384,7 @@ public class SmbFileAccess {
 			try {
 				result = future.get();
 			} catch (Exception e) {
-				Log.e(TAG, "exists: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				throw new FileAccessException(TAG + ": exists: " + e.getLocalizedMessage());
 			}
 		}
@@ -392,8 +393,8 @@ public class SmbFileAccess {
 	}
 
 	public static boolean isDirectory(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "isDirectory: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		boolean result = false;
 
 		// SMBの場合
@@ -428,18 +429,18 @@ public class SmbFileAccess {
 			try {
 				result = future.get();
 			} catch (Exception e) {
-				Log.e(TAG, "isDirectory: File not found.");
+				Logcat.e(logLevel, "File not found.", e);
 			}
 		}
 
-		if (debug) {Log.d(TAG, "isDirectory: 終了します. uri=" + uri + ", result=" + result);}
+		Logcat.d(logLevel, "終了します. uri=" + uri + ", result=" + result);
 		return result;
 	}
 
 	@SuppressLint("SuspiciousIndentation")
     public static ArrayList<FileData> listFiles(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass, @Nullable Handler handler) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "listFiles: 開始します. uri=" + uri + ", user=" + user + ", pass=" + pass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", user=" + user + ", pass=" + pass);
 		boolean isLocal;
 
 		String[] urlData = parseUri(uri);
@@ -478,15 +479,12 @@ public class SmbFileAccess {
 					length = smbFiles.length;
 				}
 			} catch (SmbException e) {
-				Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 				DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
 				return fileList;
 			}
 
-			if (debug) {Log.d(TAG, "listFiles: length=" + length);}
+			Logcat.d(logLevel, "length=" + length);
 
 			// FileData型のリストを作成
 			boolean isDir;
@@ -508,10 +506,7 @@ public class SmbFileAccess {
 						size = smbFiles[i].length();
 						date = smbFiles[i].lastModified();
 					} catch (SmbException e) {
-						Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-						if (e.getLocalizedMessage() != null) {
-							Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-						}
+						Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 						DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
 						return fileList;
 					}
@@ -527,7 +522,7 @@ public class SmbFileAccess {
 				FileData fileData = new FileData(activity, name, size, date);
 				fileList.add(fileData);
 
-				if (debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
+				Logcat.d(logLevel, "index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());
 			}
 
 			if (!fileList.isEmpty()) {
@@ -569,15 +564,12 @@ public class SmbFileAccess {
 							length = smbFiles.length;
 						}
 					} catch (SmbException e) {
-						Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-						if (e.getLocalizedMessage() != null) {
-							Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-						}
+						Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 						DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
 						return fileList;
 					}
 
-					if (debug) {Log.d(TAG, "listFiles: length=" + length);}
+					Logcat.d(logLevel, "length=" + length);
 
 					// FileData型のリストを作成
 					boolean isDir;
@@ -599,10 +591,7 @@ public class SmbFileAccess {
 								size = smbFiles[i].length();
 								date = smbFiles[i].lastModified();
 							} catch (SmbException e) {
-								Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-								if (e.getLocalizedMessage() != null) {
-									Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-								}
+								Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 								DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
 								return fileList;
 							}
@@ -618,7 +607,7 @@ public class SmbFileAccess {
 						FileData fileData = new FileData(activity, name, size, date);
 						fileList.add(fileData);
 
-						if (debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
+						Logcat.d(logLevel, "index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());
 					}
 
 					if (!fileList.isEmpty()) {
@@ -630,10 +619,7 @@ public class SmbFileAccess {
 			try {
 				fileList = future.get();
 			} catch (Exception e) {
-				Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 				DEF.sendMessage(activity.getString(R.string.SmbAccessError) + ":\n" + e.getLocalizedMessage(), Toast.LENGTH_LONG, handler);
 				return fileList;
 			}
@@ -642,8 +628,8 @@ public class SmbFileAccess {
 	}
 
 	public static boolean renameTo(@NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "renameTo: uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile + ", user=" + user + ", pass=" + pass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile + ", user=" + user + ", pass=" + pass);
 		if (tofile.indexOf('/') > 0) {
 			throw new FileAccessException(TAG + ": renameTo: Invalid file name.");
 		}
@@ -655,11 +641,11 @@ public class SmbFileAccess {
 				orgfile = SmbFileAccess.smbFile(uri + fromfile, user, pass);
 				if (!orgfile.exists()) {
 					// 変更前ファイルが存在しなければエラー
-					Log.e(TAG, "renameTo: File not found.");
+					Logcat.e(logLevel, "File not found.");
 					throw new FileAccessException(TAG + ": renameTo: File not found.");
 				}
 			} catch (SmbException e) {
-				Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 			}
 
@@ -668,11 +654,11 @@ public class SmbFileAccess {
 				dstfile = SmbFileAccess.smbFile(uri + tofile, user, pass);
 				if (dstfile.exists()) {
 					// 変更後ファイルが存在すればエラー
-					Log.e(TAG, "renameTo: File access error.");
+					Logcat.e(logLevel, "File access error.");
 					throw new FileAccessException(TAG + ": renameTo: File access error.");
 				}
 			} catch (SmbException e) {
-				Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 			}
 
@@ -681,7 +667,7 @@ public class SmbFileAccess {
 				orgfile.renameTo(dstfile);
 				return dstfile.exists();
 			} catch (SmbException e) {
-				Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 			}
 		}
@@ -697,11 +683,11 @@ public class SmbFileAccess {
 						orgfile = SmbFileAccess.smbFile(uri + fromfile, user, pass);
 						if (!orgfile.exists()) {
 							// 変更前ファイルが存在しなければエラー
-							Log.e(TAG, "renameTo: File not found.");
+							Logcat.e(logLevel, "File not found.");
 							throw new FileAccessException(TAG + ": renameTo: File not found.");
 						}
 					} catch (SmbException e) {
-						Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "", e);
 						throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 					}
 
@@ -710,11 +696,11 @@ public class SmbFileAccess {
 						dstfile = SmbFileAccess.smbFile(uri + tofile, user, pass);
 						if (dstfile.exists()) {
 							// 変更後ファイルが存在すればエラー
-							Log.e(TAG, "renameTo: File access error.");
+							Logcat.e(logLevel, "File access error.");
 							throw new FileAccessException(TAG + ": renameTo: File access error.");
 						}
 					} catch (SmbException e) {
-						Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "", e);
 						throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 					}
 
@@ -723,7 +709,7 @@ public class SmbFileAccess {
 						orgfile.renameTo(dstfile);
 						return dstfile.exists();
 					} catch (SmbException e) {
-						Log.e(TAG, "renameTo: " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "", e);
 						throw new FileAccessException(TAG + ": renameTo: " + e.getLocalizedMessage());
 					}
 				}
@@ -738,22 +724,22 @@ public class SmbFileAccess {
 
 	// タイムスタンプ
 	public static long date(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "date: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		try {
 			SmbFile smbFile = SmbFileAccess.smbFile(uri, user, pass);
 			return smbFile.lastModified();
 		} catch (SmbException e) {
-			Log.e(TAG, "date: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 		return 0L;
 	}
 
 	// ファイル削除
 	public static boolean delete(@NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "delete: 開始します. uri=" + uri + ", user=" + user + ", pass=" + pass );}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", user=" + user + ", pass=" + pass );
 
 		if (!DEF.isUiThread()) {
 			// UIスレッドではない時はそのまま実行
@@ -792,8 +778,8 @@ public class SmbFileAccess {
 
 	// ディレクトリ作成
 	public static boolean mkdir(@NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final String item) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "mkdir: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 
 		boolean result = false;
 		if (!DEF.isUiThread()) {
@@ -809,10 +795,7 @@ public class SmbFileAccess {
 				}
 			} catch (SmbException e) {
 				result = false;
-				Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "mkdir: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 			}
 		} else {
 			// UIスレッドの時は新しいスレッド内で実行
@@ -831,10 +814,7 @@ public class SmbFileAccess {
 							return smbFile.exists();
 						}
 					} catch (SmbException e) {
-						Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
-						if (e.getLocalizedMessage() != null) {
-							Log.e(TAG, "mkdir: エラーメッセージ. " + e.getLocalizedMessage());
-						}
+						Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 						return false;
 					}
 				}
@@ -843,10 +823,7 @@ public class SmbFileAccess {
 				result = future.get();
 			} catch (Exception e) {
 				result = false;
-				Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "mkdir: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 			}
 		}
 		return result;
@@ -854,8 +831,8 @@ public class SmbFileAccess {
 
 	// ファイル作成
 	public static boolean createFile(@NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final String item) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 
 		boolean result = false;
 		if (!DEF.isUiThread()) {
@@ -871,10 +848,7 @@ public class SmbFileAccess {
 				}
 			} catch (SmbException e) {
 				result = false;
-				Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "createFile: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 			}
 		} else {
 			// UIスレッドの時は新しいスレッド内で実行
@@ -893,10 +867,7 @@ public class SmbFileAccess {
 							return smbFile.exists();
 						}
 					} catch (SmbException e) {
-						Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri);
-						if (e.getLocalizedMessage() != null) {
-							Log.e(TAG, "createFile: エラーメッセージ. " + e.getLocalizedMessage());
-						}
+						Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 						return false;
 					}
 				}
@@ -905,10 +876,7 @@ public class SmbFileAccess {
 				result = future.get();
 			} catch (Exception e) {
 				result = false;
-				Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "createFile: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 			}
 		}
 		return result;

@@ -33,7 +33,7 @@ public class OperationPreference extends DialogPreference implements OnClickList
 	public int mMaxValue;
 
 	private Spinner mRateSel;
-	private SelectIconView mSelIcon[];
+	private SelectIconView[] mSelIcon;
 	private int mSelIndex;
 
 	public OperationPreference(Context context, AttributeSet attrs) {

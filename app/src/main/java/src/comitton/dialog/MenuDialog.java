@@ -5,6 +5,7 @@ import java.util.EventListener;
 import java.util.List;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.view.MenuItemView;
 
 
@@ -205,10 +206,12 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 	private MenuItemView mSelectView;
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+
 		// タッチイベント
 		int action = event.getAction();
 
-//		Log.d("onTouch", v.toString() + "," + action + " (" + event.getX() + ", " + event.getY() + "), " + mScrlView.getScrollY());
+//		Logcat.d(logLevel, v.toString() + "," + action + " (" + event.getX() + ", " + event.getY() + "), " + mScrlView.getScrollY());
 		if (mScrlView == v) {
 			if (action == MotionEvent.ACTION_DOWN) {
 				mScrlPos = mScrlView.getScrollY();
@@ -225,10 +228,10 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 						 }
 					 }
 				}
-//				Log.d("scrlPos", "" + mScrlPos);
+//				Logcat.d(logLevel, "" + mScrlPos);
 			}
 			else if (action == MotionEvent.ACTION_MOVE) {
-//				Log.d("scrlPos", "" + mScrlView.getScrollY());
+//				Logcat.d(logLevel, "" + mScrlView.getScrollY());
 				int scrlY = (int)mScrlView.getScrollY();
 				int x = (int)event.getX();
 				int y = (int)event.getY();
@@ -254,7 +257,7 @@ public class MenuDialog extends ImmersiveDialog implements OnTouchListener, OnDi
 		}
 		else if (mLinear != v) {
 			if (action == MotionEvent.ACTION_DOWN) {
-//				Log.d("onTouch", v.toString() + ", " + action);
+//				Logcat.d(logLevel, v.toString() + ", " + action);
 				MenuItemView itemview  = (MenuItemView)v;
 				if (itemview.getType() == MenuItemView.TYPE_ITEM) {
 					mSelectView = itemview;

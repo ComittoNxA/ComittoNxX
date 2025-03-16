@@ -7,14 +7,14 @@ public class TextFormatter {
 		if (str == null) {
 			return new String[0];
 		}
-		float result[] = new float[str.length()];
+		float[] result = new float[str.length()];
 		text.getTextWidths(str, result);
 
 		int i;
 		int lastpos = 0;
 		int line = 0;
 		float sum = 0.0f;
-		int pos[] = new int[maxline];
+		int[] pos = new int[maxline];
 
 		float dotwidth = text.measureText("...");
 
@@ -46,7 +46,7 @@ public class TextFormatter {
 			}
 		}
 
-		String strSep[] = new String[line + 1];
+		String[] strSep = new String[line + 1];
 		int st = 0;
 		// 文字列の切り出し
 		for (i = 0; i <= line; i++) {

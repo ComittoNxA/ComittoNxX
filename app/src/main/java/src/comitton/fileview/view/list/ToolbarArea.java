@@ -19,15 +19,15 @@ import android.view.MotionEvent;
 public class ToolbarArea {
 	private final int BUTTON_NUM = 6;
 
-	private final int ICON_ID[] =
+	private final int[] ICON_ID =
 	{
 			R.drawable.toolbar_back, R.drawable.toolbar_refresh, R.drawable.toolbar_mode, R.drawable.toolbar_search, R.drawable.add_directory, R.drawable.toolbar_exit
 	};
-	private final int TEXT_ID[] = { R.string.toolbar00, R.string.toolbar01, R.string.toolbar02, R.string.toolbar03, R.string.toolbar04, R.string.toolbar05 };
+	private final int[] TEXT_ID = { R.string.toolbar00, R.string.toolbar01, R.string.toolbar02, R.string.toolbar03, R.string.toolbar04, R.string.toolbar05 };
 
-	private Bitmap mBitmap[];
+	private Bitmap[] mBitmap;
 	private int mTouchIndex;
-	private String mNameText[];
+	private String[] mNameText;
 
 	int mColorShadow;
 
@@ -86,8 +86,8 @@ public class ToolbarArea {
 		int cy = mAreaHeight;
 
 		// グラデーション幅算出
-		int bmp_x[] = new int[BUTTON_NUM];
-		int bmp_y[] = new int[BUTTON_NUM];
+		int[] bmp_x = new int[BUTTON_NUM];
+		int[] bmp_y = new int[BUTTON_NUM];
 		int line1, line2;
 
 		for (int i = 0; i < BUTTON_NUM; i++) {
@@ -181,7 +181,7 @@ public class ToolbarArea {
 		}
 
 		// タッチしたボタンのインデックスを求める
-		if (inArea == false) {
+		if (!inArea) {
 			index = -1;
 		}
 		else if (cx > cy) {

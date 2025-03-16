@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 
 public class WorkStream extends InputStream {
 	private static final String TAG = "WorkStream";
@@ -28,8 +29,8 @@ public class WorkStream extends InputStream {
 	private final static int SLEEP_MILLIS = 10;
 
 	public WorkStream(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final Handler handler) throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "WorkStream: 開始します. uri=" + uri + ", user=" + user + ", pass=" + pass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", user=" + user + ", pass=" + pass);
 		mActivity = activity;
 		mURI = uri;
 		mUser = user;
@@ -39,8 +40,8 @@ public class WorkStream extends InputStream {
 	}
 
 	private void Open() throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "Open: 開始します. uri=" + mURI + ", user=" + mUser + ", pass=" + mPass);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + mURI + ", user=" + mUser + ", pass=" + mPass);
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "OPEN");
 
 		try {
@@ -69,8 +70,8 @@ public class WorkStream extends InputStream {
 
 	@Override
 	public void close() throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "close: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "CLOSE");
 		if (mFileAccess != null) {
 			mFileAccess.close();
@@ -86,8 +87,8 @@ public class WorkStream extends InputStream {
 
 	@Override
 	public int read(byte[] b, int off, int size) throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, MessageFormat.format("read: 開始します. pos={0}, off={1}, size={2}, pos+off+size={3}, length={4}", new Object[]{mPos, off, size, mPos+off+size, length()}));}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, MessageFormat.format("開始します. pos={0}, off={1}, size={2}, pos+off+size={3}, length={4}", new Object[]{mPos, off, size, mPos+off+size, length()}));
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "READ");
 
 		mPos += off;
@@ -99,27 +100,27 @@ public class WorkStream extends InputStream {
 			}
 		}
 		catch (Exception e) {
-			Log.w(TAG, "read: Exception: " + e.getLocalizedMessage());
+			Logcat.w(logLevel, "", e);
 			reOpen();
 			ret = mFileAccess.read(b, off, size);
 			if (ret > 0) {
 				mPos += ret;
 			}
 		}
-		if(debug) {Log.d(TAG, MessageFormat.format("read: 終了します. ret={0}, off={1}, mPos={2}, length={3}", new Object[]{ret, off, mPos, length()}));}
+		Logcat.d(logLevel, MessageFormat.format("終了します. ret={0}, off={1}, mPos={2}, length={3}", new Object[]{ret, off, mPos, length()}));
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "");
 		return ret;
 	}
 
 	public void seek(long pos) throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, MessageFormat.format("seek: 開始します. pos={0}", new Object[]{pos}));}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, MessageFormat.format("開始します. pos={0}", new Object[]{pos}));
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "SEEK");
 		try {
 			mFileAccess.seek(pos);
 		}
 		catch (Exception e) {
-			Log.e(TAG, MessageFormat.format("seek:  Catch Exception. pos={0} {1}", new Object[]{pos, e.getLocalizedMessage()}));
+			Logcat.e(logLevel, MessageFormat.format("Catch Exception. pos={0} {1}", new Object[]{pos, e.toString()}));
 		}
 		mPos = pos;
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "");
@@ -127,8 +128,8 @@ public class WorkStream extends InputStream {
 
 
 	public long getFilePointer() throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "getFilePointer: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "GET_FILEPOINTER");
 
 		long result = 0L;
@@ -136,7 +137,7 @@ public class WorkStream extends InputStream {
 			result = mFileAccess.getFilePointer();
 		}
 		catch (Exception e) {
-			Log.e(TAG, "getFilePointer: Catch Exception." + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			reOpen();
 			result = mFileAccess.getFilePointer();
 		}
@@ -145,21 +146,21 @@ public class WorkStream extends InputStream {
 	}
 
 	public long length() throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "length: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, " 開始します.");
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "LENGTH");
 
 		long length = 0;
 		try {
 			length = mFileAccess.length();
-			if(debug) {Log.d(TAG, MessageFormat.format("length: 終了します. length={0}", new Object[]{length}));}
+			Logcat.d(logLevel, MessageFormat.format("終了します. length={0}", new Object[]{length}));
 		}
 		catch (Exception e) {
-			Log.e(TAG, "length: Catch Exception. " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			reOpen();
 			length = mFileAccess.length();
 		}
-		if(debug) {Log.d(TAG, MessageFormat.format("length: 終了します. length={0}", new Object[]{length}));}
+		Logcat.d(logLevel, MessageFormat.format("終了します. length={0}", new Object[]{length}));
 		DEF.sendMessage(mHandler, DEF.HMSG_WORKSTREAM, 0, 0, "");
 		return length;
 	}

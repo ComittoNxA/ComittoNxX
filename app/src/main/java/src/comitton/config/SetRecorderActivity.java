@@ -139,7 +139,7 @@ public class SetRecorderActivity extends PreferenceActivity implements OnSharedP
 
 	// 表示するリストを返す
 	public static short[] getListTypes(SharedPreferences sharedPreferences) {
-		boolean listflag[] = {false, false, false, false, false};
+		boolean[] listflag = {false, false, false, false, false};
 		int listnum = 0;
 		listflag[0] = getDirectoryView(sharedPreferences);
 		listflag[1] = getServerView(sharedPreferences);
@@ -150,7 +150,7 @@ public class SetRecorderActivity extends PreferenceActivity implements OnSharedP
 			listnum += listflag[i] ? 1 : 0;
 		}
 
-		short listtype[] = new short[listnum + 1];
+		short[] listtype = new short[listnum + 1];
 		int index = 1;
 		listtype[0] = RecordList.TYPE_FILELIST;
 		for (int i = 0 ; i < listflag.length ; i ++) {

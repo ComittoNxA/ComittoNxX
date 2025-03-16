@@ -26,6 +26,7 @@ import java.util.Arrays;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
+import src.comitton.common.Logcat;
 import src.comitton.imageview.PageSelectListener;
 
 @SuppressLint("NewApi")
@@ -129,9 +130,10 @@ public class ToolbarDialog extends ImmersiveDialog implements
 		}
 	}
 
-	protected void onCreate(Bundle savedInstanceState){
+	@SuppressLint("SuspiciousIndentation")
+    protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		// 一度ダイアログを表示すると画面回転時に呼び出される
         Window win = getWindow();
@@ -212,7 +214,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 		mBtnEditButton.setOnClickListener(this);
 
 		boolean[] states = ToolbarEditDialog.loadToolbarState(mActivity);
-		if (debug) {Log.d("ToolbarDialog", "onCreate: states[]=" + Arrays.toString(states));}
+		Logcat.d(logLevel, "states[]=" + Arrays.toString(states));
 
 		for (int i = 0; i < states.length; ++i) {
 			switch (ToolbarEditDialog.COMMAND_ID[i]) {
@@ -453,7 +455,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 
 	@Override
 	public void onClick(View v) {
-		boolean debug  = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		// ボタンクリック
 
 		if (mBtnBookLeft == v) {
@@ -524,71 +526,71 @@ public class ToolbarDialog extends ImmersiveDialog implements
 		else {
 			// ページ選択の場合
 			int page = calcProgress(mSeekPage.getProgress());
-			if(debug) {Log.d("ToolbarDialog", "onClick: 現在ページ=" + page + ", mReverse=" + mReverse);}
+			Logcat.d(logLevel, "現在ページ=" + page + ", mReverse=" + mReverse);
 
 			if (mBtnLeftMost == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeftMost");}
+				Logcat.d(logLevel, "v=mBtnLeftMost");
 				if (mReverse) {
 					page = mMaxPage - 1;
 				} else {
 					page = 0;
 				}
 			} else if (mBtnLeft100 == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeft100");}
+				Logcat.d(logLevel, "v=mBtnLeft100");
 				if (mReverse) {
 					page += 100;
 				} else {
 					page -= 100;
 				}
 			} else if (mBtnLeft10 == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeft10");}
+				Logcat.d(logLevel, "v=mBtnLeft10");
 				if (mReverse) {
 					page += 10;
 				} else {
 					page -= 10;
 				}
 			} else if (mBtnLeft1 == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnLeft1");}
+				Logcat.d(logLevel, "v=mBtnLeft1");
 				if (mReverse) {
 					page += 1;
 				} else {
 					page -= 1;
 				}
 			} else if (mBtnRight1 == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRight1");}
+				Logcat.d(logLevel, "v=mBtnRight1");
 				if (mReverse) {
 					page -= 1;
 				} else {
 					page += 1;
 				}
 			} else if (mBtnRight10 == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRight10");}
+				Logcat.d(logLevel, "v=mBtnRight10");
 				if (mReverse) {
 					page -= 10;
 				} else {
 					page += 10;
 				}
 			} else if (mBtnRight100 == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRight100");}
+				Logcat.d(logLevel, "v=mBtnRight100");
 				if (mReverse) {
 					page -= 100;
 				} else {
 					page += 100;
 				}
 			} else if (mBtnRightMost == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnRightMost");}
+				Logcat.d(logLevel, "v=mBtnRightMost");
 				if (mReverse) {
 					page = 0;
 				} else {
 					page = mMaxPage - 1;
 				}
 			} else if (mBtnPageReset == v) {
-				if(debug) {Log.d("ToolbarDialog", "onClick: v=mBtnPageReset");}
+				Logcat.d(logLevel, "v=mBtnPageReset");
 				// ページ選択をリセット
 				page = mPage;
 			}
 
-			if(debug) {Log.d("ToolbarDialog", "onClick: 変更後ページ=" + page);}
+			Logcat.d(logLevel, "変更後ページ=" + page);
 
 			if (page < 0) {
 				page = 0;
@@ -605,8 +607,8 @@ public class ToolbarDialog extends ImmersiveDialog implements
 	}
 
 	protected void setProgress(int pos, boolean fromThumb) {
-		boolean debug  = false;
-		if(debug) {Log.d("ToolbarDialog", "setProgress: pos=" + pos);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "pos=" + pos);
 		//if (debug) {DEF.StackTrace("ToolbarDialog", "setProgress:");}
 		int convpos;
 
@@ -616,7 +618,7 @@ public class ToolbarDialog extends ImmersiveDialog implements
 		else {
 			convpos = mSeekPage.getMax() - pos;
 		}
-		if(debug) {Log.d("ToolbarDialog", "setProgress: convpos=" + convpos);}
+		Logcat.d(logLevel, "convpos=" + convpos);
 		mSeekPage.setProgress(convpos);
 	}
 
@@ -634,8 +636,8 @@ public class ToolbarDialog extends ImmersiveDialog implements
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int page, boolean fromUser) {
-		boolean debug  = true;
-		if(debug) {Log.d("ToolbarDialog", "onProgressChanged: page=" + page + ", fromUser=" + fromUser);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "page=" + page + ", fromUser=" + fromUser);
 		// 変更
 		if (fromUser) {
 			int cnvpage = calcProgress(page);

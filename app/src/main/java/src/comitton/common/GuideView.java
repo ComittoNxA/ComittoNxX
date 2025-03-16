@@ -812,7 +812,8 @@ public class GuideView {
 
 	// キャッシュ読み込み通知
 	public void setCacheMark(int mark) {
-//		Log.d("setCacheMark", "mark=" + mark);
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "mark=" + mark);
 		if (mCacheMark != mark) {
 			mCacheMark = mark;
 			invalidate();

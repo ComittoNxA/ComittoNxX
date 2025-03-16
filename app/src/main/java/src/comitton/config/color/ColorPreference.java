@@ -213,7 +213,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 	}
 
 	private String getSummaryString(int value, int index) {
-		String str[] = {"Red  ", "Green", "Blue "};
+		String[] str = {"Red  ", "Green", "Blue "};
 		int val;
 		if (index == 0) {
 			val = (value >> 16) & 0x000000FF;
@@ -228,7 +228,7 @@ public class ColorPreference extends DialogPreference implements SeekBar.OnSeekB
 	}
 
 	private String getSepSummaryString(int val, int index) {
-		String str[] = {"Red  ", "Green", "Blue "};
+		String[] str = {"Red  ", "Green", "Blue "};
 		return str[index] + " : " + String.format("%1$3d(%2$02X)", val, val);  
 	}
 }

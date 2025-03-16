@@ -26,6 +26,7 @@ import java.util.EventListener;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileaccess.SafFileAccess;
 import src.comitton.fileview.filelist.ServerSelect;
 
@@ -35,7 +36,7 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 
 	private final int SELLIST_SERVER_TYPE = 0;
 
-	public static final int Servertype[] = { R.string.serverTypeSMB, R.string.serverTypeSAF, R.string.serverTypePicker};
+	public static final int[] Servertype = { R.string.serverTypeSMB, R.string.serverTypeSAF, R.string.serverTypePicker};
 
 	private ListDialog mListDialog;
 	private int mSelectMode;
@@ -72,7 +73,7 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 
 	public EditServerDialog(AppCompatActivity activity, @StyleRes int themeResId, @NonNull int index, SearchListener listener) {
 		super(activity, themeResId, true);
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		setCanceledOnTouchOutside(true);
 		setOnDismissListener(this);
@@ -89,7 +90,7 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 		mPass = mServer.getPass(index);
 		mProvider = mServer.getProvider(index);
 
-		if (debug) {Log.d(TAG, "EditServerDialog: index=" + mIndex + ", accessType=" + mAccessType + ", name=" + mName + ", host=" + mHost + ", user=" + mUser + ", pass=" + mPass + ", provider=" + mProvider);}
+		Logcat.d(logLevel, "index=" + mIndex + ", accessType=" + mAccessType + ", name=" + mName + ", host=" + mHost + ", user=" + mUser + ", pass=" + mPass + ", provider=" + mProvider);
 
 		mListener = listener;
 
@@ -168,9 +169,9 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 
 	@Override
 	public void onClick(View v) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (v == mBtnOK) {
-			if (debug) {Log.d(TAG, "onClick: v == mBtnOK");}
+			Logcat.d(logLevel, "v == mBtnOK");
 			String name = "";
 			String host = "";
 			String user = "";
@@ -202,12 +203,12 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 				dispName = SafFileAccess.getPathName(mActivity, mProvider);
 			}
 
-			if (debug) {Log.d(TAG, "onClick: index=" + mIndex + ", accessType=" + mAccessType + ", name=" + name + ", host=" + host + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);}
+			Logcat.d(logLevel, "index=" + mIndex + ", accessType=" + mAccessType + ", name=" + name + ", host=" + host + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);
 			mListener.onSearch(mAccessType, name, host, user, pass, path, provider, dispName);
 			dismiss();
 		}
 		else if (v == mBtnClear) {
-			if (debug) {Log.d(TAG, "onClick: v == mBtnClear");}
+			Logcat.d(logLevel, "v == mBtnClear");
 			// クリアクリック
 			mEditName.setText("");
 			mEditHost.setText("");
@@ -217,18 +218,18 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 			mBtnProvider.setText(R.string.svProviderUnselected);
 		}
 		else if (v == mBtnCancel) {
-			if (debug) {Log.d(TAG, "onClick: v == mBtnCancel");}
+			Logcat.d(logLevel, "v == mBtnCancel");
 			// キャンセルクリック
 			mListener.onCancel();
 			dismiss();
 		}
 		else if (v == mBtnAccessType) {
-			if (debug) {Log.d(TAG, "onClick: v == mBtnAccessType");}
+			Logcat.d(logLevel, "v == mBtnAccessType");
 			// サーバタイプ
 			showSelectList(SELLIST_SERVER_TYPE);
 		}
 		else if (v == mBtnProvider) {
-			if (debug) {Log.d(TAG, "ServerSelect: v == mBtnProvider");}
+			Logcat.d(logLevel, "v == mBtnProvider");
 			// パスクリック
 			if (mAccessType == DEF.ACCESS_TYPE_SAF) {
 				// ストレージアクセスフレームワーク
@@ -257,8 +258,8 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 	}
 
 	public void setProvider(@NonNull final String provider) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "setProvider: provider=" + provider);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "provider=" + provider);
 		mProvider = provider;
 		if (mProvider.isEmpty()) {
 			mBtnProvider.setText(R.string.svProviderUnselected);
@@ -278,7 +279,7 @@ public class EditServerDialog extends ImmersiveDialog implements OnClickListener
 				name = mEditName.getText().toString().trim();
 			}
 
-			if (debug) {Log.d(TAG, "onClick: index=" + mIndex + ", accessType=" + mAccessType + ", name=" + name + ", host=" + host + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);}
+			Logcat.d(logLevel, "index=" + mIndex + ", accessType=" + mAccessType + ", name=" + name + ", host=" + host + ", user=" + user + ", pass=" + pass + ", provider=" + provider + ", dispName=" + dispName);
 			mListener.onSearch(mAccessType, name, host, user, pass, path, provider, dispName);
 			dismiss();
 		}

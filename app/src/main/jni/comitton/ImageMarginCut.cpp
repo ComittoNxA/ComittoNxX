@@ -38,16 +38,16 @@ void *ImageMarginCut_ThreadFunc(void *param)
     int		yy;	// サイズ変更後のy座標
 
     for (yy = stindex ; yy < edindex ; yy ++) {
-//		LOGD("ImageMarginCut : loop yy=%d", yy);
+//		LOGD("ImageMarginCut: loop yy=%d", yy);
         if (gCancel[index]) {
-//			LOGD("ImageRotate : cancel.");
+//			LOGD("ImageMarginCut: cancel.");
 //			ReleaseBuff(Page, 1, Half);
             return (void*)ERROR_CODE_USER_CANCELED;
         }
 
         // バッファ位置
         buffptr = gSclLinesPtr[index][yy];
-//		LOGD("ImageRotate : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
+//		LOGD("ImageMarginCut: buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
         orgbuff1 = gLinesPtr[index][yy + CutT + HOKAN_DOTS / 2];
         memcpy(buffptr, &orgbuff1[CutL + HOKAN_DOTS / 2], ReturnWidth * sizeof(LONG));
@@ -64,6 +64,10 @@ void *ImageMarginCut_ThreadFunc(void *param)
 // 上下左右の端のラインの色の最頻値を調べる
 int GetModeColor(int index, int Page, int Half, int Index, int StartH, int StartW, LONG *ColorL, LONG *ColorR, LONG *ColorT, LONG *ColorB) {
 
+#ifdef DEBUG
+    LOGD("getModeColor: index=%d, Page=%d, Half=%d, Index=%d, StartH=%d, StartW=%d", index, Page, Half, Index, StartH, StartW);
+#endif
+
     IMAGEDATA *pData = &gImageData[index][Page];
     const int OrgWidth  = pData->OrgWidth;
     const int OrgHeight = pData->OrgHeight;
@@ -73,7 +77,7 @@ int GetModeColor(int index, int Page, int Half, int Index, int StartH, int Start
     // 元データ配列化
     ret = SetLinesPtr(index, Page, Half, Index, OrgWidth, OrgHeight);
     if (ret < 0) {
-        LOGE("GetModeColor 元データ配列化に失敗しました. return=%d", ret);
+        LOGE("GetModeColor: 元データ配列化に失敗しました. return=%d, OrgWidth=%d, OrgHeight=%d", ret, OrgWidth, OrgHeight);
         return ret;
     }
 #ifdef DEBUG
@@ -91,7 +95,7 @@ int GetModeColor(int index, int Page, int Half, int Index, int StartH, int Start
     std::vector<LONG> ColorVectorB(OrgWidth);
 
 #ifdef DEBUG
-    LOGD("getModeColor Page=%d, Half=%d, index=%d, gLinesPtr[%d]=%ld, sizeof(gLinesPtr[%d])=%ld", Page, Half, index, index, (long)(gLinesPtr[index]), index, sizeof(gLinesPtr[index]));
+    LOGD("getModeColor: Page=%d, Half=%d, Index=%d, gLinesPtr[%d]=%ld, sizeof(gLinesPtr[%d])=%ld", Page, Half, Index, index, (long)(gLinesPtr[index]), index, sizeof(gLinesPtr[index]));
 #endif
     // 上下左右の端のラインの色の最頻値を調べる
     // 配列に左右端のラインの色を代入
@@ -245,7 +249,7 @@ int GetMarginSize(int index, int Page, int Half, int Index, int Margin, int Marg
     int OrgWidth  = pData->OrgWidth;
     int OrgHeight = pData->OrgHeight;
 #ifdef DEBUG
-    LOGD("GetMarginSize Page=%d, Half=%d, 元サイズ Index=%d, OrgWidth=%d, OrgHeight=%d, Margin=%d, MarginColor=%d", Page, Half, Index, OrgWidth, OrgHeight, Margin, MarginColor);
+    LOGD("GetMarginSize: Page=%d, Half=%d, 元サイズ Index=%d, OrgWidth=%d, OrgHeight=%d, Margin=%d, MarginColor=%d", Page, Half, Index, OrgWidth, OrgHeight, Margin, MarginColor);
 #endif
     int ret = 0;
 
@@ -354,23 +358,23 @@ int GetMarginSize(int index, int Page, int Half, int Index, int Margin, int Marg
 #endif
         ret = GetModeColor(index, Page, Half, Index, startH, startW, &ColorL, &ColorR, &ColorT, &ColorB);
         if (ret < 0) {
-            LOGE("GetMarginSize 色の最頻値取得に失敗しました. return=%d", ret);
+            LOGE("GetMarginSize: 色の最頻値取得に失敗しました. return=%d, OrgWidth=%d, OrgHeight=%d", ret, OrgWidth, OrgHeight);
             return ret;
         }
         else {
 #ifdef DEBUG
-            LOGD("GetMarginSize 色の最頻値取得に成功しました.");
+            LOGD("GetMarginSize: 色の最頻値取得に成功しました.");
 #endif
         }
     }
     else {
 #ifdef DEBUG
-        LOGD("GetMarginSize 白か黒を余白とします.");
+        LOGD("GetMarginSize: 白か黒を余白とします.");
 #endif
     }
 
 #ifdef DEBUG
-    LOGD("GetMarginSize Page=%d, Half=%d, 配列化準備", Page, Half);
+    LOGD("GetMarginSize: Page=%d, Half=%d, 配列化準備", Page, Half);
 #endif
     if (Margin > 0) {
         // 元データ配列化
@@ -380,7 +384,7 @@ int GetMarginSize(int index, int Page, int Half, int Index, int Margin, int Marg
         }
     }
 #ifdef DEBUG
-    LOGD("GetMarginSize Page=%d, Half=%d, 配列化成功", Page, Half);
+    LOGD("GetMarginSize: Page=%d, Half=%d, 配列化成功", Page, Half);
 #endif
     LONG *buffptr = nullptr;
     LONG *orgbuff1;
@@ -620,7 +624,7 @@ int GetMarginSize(int index, int Page, int Half, int Index, int Margin, int Marg
     }
 
 #ifdef DEBUG
-    LOGD("GetMarginSize Page=%d, Half=%d, 横カット値 左=%d, 右=%d", Page, Half, left, right);
+    LOGD("GetMarginSize: Page=%d, Half=%d, 横カット値 左=%d, 右=%d", Page, Half, left, right);
 #endif
 
     if(left <= startW){left = 0;}
@@ -633,7 +637,7 @@ int GetMarginSize(int index, int Page, int Half, int Index, int Margin, int Marg
     top = top * space / 100;
     bottom = bottom * space / 100;
 #ifdef DEBUG
-    LOGD("GetMarginSize Page=%d, Half=%d, カット率反映 CutLeft=%d, CutRight=%d, CutTop=%d, CutBottom=%d", Page, Half, left, right, top, bottom);
+    LOGD("GetMarginSize: Page=%d, Half=%d, カット率反映 CutLeft=%d, CutRight=%d, CutTop=%d, CutBottom=%d", Page, Half, left, right, top, bottom);
 #endif
     if (left + right <= 0 && top + bottom <= 0) {
         // 余白無し
@@ -657,7 +661,7 @@ int ImageMarginCut(int index, int Page, int Half, int Count, int left, int right
     int OrgHeight = *pReturnHeight;
 
 #ifdef DEBUG
-    LOGD("ImageMarginCut : index=%d, Page=%d, Half=%d, 開始します. Count=%d, OrgWidth=%d, OrgHeight=%d, left=%d, right=%d, top=%d, bottom=%d, Margin=%d, MarginColor=%d", index, Page, Half, Count, OrgWidth, OrgHeight, left, right, top, bottom, Margin, MarginColor);
+    LOGD("ImageMarginCut: index=%d, Page=%d, Half=%d, 開始します. Count=%d, OrgWidth=%d, OrgHeight=%d, left=%d, right=%d, top=%d, bottom=%d, Margin=%d, MarginColor=%d", index, Page, Half, Count, OrgWidth, OrgHeight, left, right, top, bottom, Margin, MarginColor);
 #endif
     int ret = 0;
 
@@ -666,7 +670,7 @@ int ImageMarginCut(int index, int Page, int Half, int Count, int left, int right
     int ReturnHeight = OrgHeight - top - bottom;
 
 #ifdef DEBUG
-    LOGD("ImageMarginCut : index=%d, Page=%d, Half=%d, 出力サイズ ReturnWidth=%d, ReturnHeight=%d", index, Page, Half, ReturnWidth, ReturnHeight);
+    LOGD("ImageMarginCut: index=%d, Page=%d, Half=%d, 出力サイズ ReturnWidth=%d, ReturnHeight=%d", index, Page, Half, ReturnWidth, ReturnHeight);
 #endif
 		// 縮小画像から取得
 	int linesize  = ReturnWidth + HOKAN_DOTS;

@@ -63,7 +63,7 @@ public class Recorder implements Runnable {
 				AudioFormat.ENCODING_PCM_16BIT,
 				bufferMinSize);
 
-		short tempBuffer[] = new short[bufferSize];
+		short[] tempBuffer = new short[bufferSize];
 		recordInstance.startRecording();
 		while (this.isRecording) {
 			// Are we paused?
@@ -94,7 +94,7 @@ public class Recorder implements Runnable {
 //			long sum = 0;
 			short val, max;
 			
-			int avg[] = new int[bufferCount];
+			int[] avg = new int[bufferCount];
 			for (int idx = 0 ; idx < avg.length ; idx ++){
 //				sum = 0;
 				max = 0;

@@ -43,6 +43,7 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.Logcat;
 
 @SuppressLint("NewApi")
 public class Information implements DialogInterface.OnDismissListener {
@@ -114,6 +115,7 @@ public class Information implements DialogInterface.OnDismissListener {
 	}
 
 	public void setDownloadsMessage() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		if (mDownLoadsDialog != null) {
 			if (mDownloadsMessage != null) {
@@ -123,13 +125,13 @@ public class Information implements DialogInterface.OnDismissListener {
 			}
 		}
 		else {
-			Log.e(TAG, "setDownloadsMessage: mDownLoadsDialog が null です.");
+			Logcat.e(logLevel, "mDownLoadsDialog が null です.");
 		}
 	}
 
 	public void showRecentRelease() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "showRecentRelease: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (!mManually) {
 			// 自動実行ならダイアログを表示した時刻を保存する
@@ -138,8 +140,8 @@ public class Information implements DialogInterface.OnDismissListener {
 			ed.putLong(DEF.KEY_TIME_CHECK_RELEASE, System.currentTimeMillis());
 			ed.apply();
 		}
-		if (debug) {Log.d(TAG, "AboutDialog: AboutDialog: mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);}
-		if (debug) {Log.d(TAG, "AboutDialog: AboutDialog: BuildConfig.VERSION_NAME=" + BuildConfig.VERSION_NAME + ", DEF.BUILD_DATE=" + DEF.BUILD_DATE);}
+		Logcat.d(logLevel, "mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);
+		Logcat.d(logLevel, "BuildConfig.VERSION_NAME=" + BuildConfig.VERSION_NAME + ", DEF.BUILD_DATE=" + DEF.BUILD_DATE);
 
 		long recent_time = 0L;
 		try {
@@ -157,8 +159,8 @@ public class Information implements DialogInterface.OnDismissListener {
 			;
 		}
 
-		if (debug) {Log.d(TAG, "AboutDialog: BUILD_DATE = " + (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())).format(BuildConfig.BUILD_DATE));}
-		if (debug) {Log.d(TAG, "AboutDialog: recent_time = " + (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())).format(recent_time));}
+		Logcat.d(logLevel, "BUILD_DATE = " + (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())).format(BuildConfig.BUILD_DATE));
+		Logcat.d(logLevel, "recent_time = " + (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())).format(recent_time));
 
 		if (!mRecentVersion.equals(BuildConfig.VERSION_NAME) && recent_time > BuildConfig.BUILD_DATE) {
 			// 1.リリースバージョンとアプリのバージョンが違う
@@ -170,8 +172,8 @@ public class Information implements DialogInterface.OnDismissListener {
 	}
 
 	public void checkRecentRelease(Handler handler, boolean manually) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "checkRecentRelease: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		// 新しいリリースのチェック
 		mTurnOff = !manually;
@@ -217,8 +219,8 @@ public class Information implements DialogInterface.OnDismissListener {
 
 		public NoticeDialog(AppCompatActivity activity, int themeResId) {
 			super(activity, themeResId, true);
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "NoticeDialog: NoticeDialog: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 
 			Window dlgWindow = getWindow();
 			// タイトルなし
@@ -253,8 +255,8 @@ public class Information implements DialogInterface.OnDismissListener {
 
 		public AboutDialog(AppCompatActivity activity, int themeResId) {
 			super(activity, themeResId, true);
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "AboutDialog: AboutDialog: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 
 			Window dlgWindow = getWindow();
 
@@ -273,7 +275,7 @@ public class Information implements DialogInterface.OnDismissListener {
 			webView.setWebViewClient(new WebViewClient() {
 				@Override
 				public boolean shouldOverrideUrlLoading(WebView view, String url) {
-					if(debug) {Log.d(TAG, "AboutDialog: AboutDialog: url=" + url);}
+					Logcat.d(logLevel, "url=" + url);
 					// ブラウザ起動
 					view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
 					return true;
@@ -303,8 +305,8 @@ public class Information implements DialogInterface.OnDismissListener {
 
 		public RecentReleaseDialog(AppCompatActivity activity, int themeResId) {
 			super(activity, themeResId, true);
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "RecentReleaseDialog: RecentReleaseDialog: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 
 			Window dlgWindow = getWindow();
 
@@ -360,6 +362,7 @@ public class Information implements DialogInterface.OnDismissListener {
 	}
 
 	private String loadHtml(String filename) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		AssetManager am = mActivity.getAssets();
 		StringBuilder stringBuilder = new StringBuilder();
 		try {
@@ -370,7 +373,7 @@ public class Information implements DialogInterface.OnDismissListener {
 				stringBuilder.append(line + "\n");
 			}
 		} catch (IOException e) {
-			Log.e("MODULE", "loadHtml: ファイルが読み込めませんでした. filename=" + filename);
+			Logcat.e(logLevel, "ファイルが読み込めませんでした. filename=" + filename);
 		}
 		return stringBuilder.toString();
 	}
@@ -384,21 +387,22 @@ public class Information implements DialogInterface.OnDismissListener {
 		}
 
 		public void run() {
-			boolean debug = false;
+			int logLevel = Logcat.LOG_LEVEL_WARN;
 			boolean result = getRecentVersion();
 			if (result) {
-				if (debug) {Log.d(TAG, "RecentVersionLoad: run: mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);}
+				Logcat.d(logLevel, "mRecentVersion=" + mRecentVersion + ", mRecentDate=" + mRecentDate + ", mRecentHtml=" + mRecentHtml);
 				// 終了通知
 				Message message = new Message();
 				message.what = DEF.HMSG_RECENT_RELEASE;
 				handler.sendMessage(message);
 			}
 			else {
-				Log.e(TAG, "RecentVersionLoad: run: バージョン情報の取得に失敗しました.");
+				Logcat.e(logLevel, "バージョン情報の取得に失敗しました.");
 			}
 		}
 
 		private boolean getRecentVersion() {
+			int logLevel = Logcat.LOG_LEVEL_WARN;
 			try {
 				URL url = new URL(DEF.API_RECENT_RELEASE);
 				HttpURLConnection con = (HttpURLConnection)url.openConnection();
@@ -406,17 +410,18 @@ public class Information implements DialogInterface.OnDismissListener {
 				return InputStreamToString(con.getInputStream());
 			}
 			catch (MalformedURLException e) {
-				Log.e(TAG, "getRecentVersion: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				return false;
 			}
 			catch (IOException e) {
-				Log.e(TAG, "getRecentVersion: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				return false;
 			}
 		}
 
 		// InputStream -> String
 		private boolean InputStreamToString(InputStream is) throws IOException {
+			int logLevel = Logcat.LOG_LEVEL_WARN;
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			StringBuilder sb = new StringBuilder();
 			String line;
@@ -434,7 +439,7 @@ public class Information implements DialogInterface.OnDismissListener {
 				mRecentDate = jsonObject.getString("published_at");
 				return true;
 			} catch (JSONException e) {
-				Log.e(TAG, "InputStreamToString: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				return false;
 			}
 		}
@@ -449,14 +454,14 @@ public class Information implements DialogInterface.OnDismissListener {
 		}
 
 		public void run() {
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "DownloadsLoad: run: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 			getDownloads();
 		}
 
 		private void getDownloads() {
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "getDownloads: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 			try {
 				URL url = new URL(DEF.APP_DOWNLOADS);
 				HttpURLConnection con = (HttpURLConnection)url.openConnection();
@@ -464,11 +469,11 @@ public class Information implements DialogInterface.OnDismissListener {
 				setMessage(con.getInputStream());
 			}
 			catch (MalformedURLException e) {
-				Log.e(TAG, "getDownloads: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				mDownloadsMessage = mActivity.getString(R.string.GetError);
 			}
 			catch (IOException e) {
-				Log.e(TAG, "getDownloads: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				mDownloadsMessage = mActivity.getString(R.string.GetError);
 			}
 			Message message = new Message();
@@ -479,8 +484,8 @@ public class Information implements DialogInterface.OnDismissListener {
 
 		// InputStream -> String
 		private void setMessage(InputStream is) throws IOException {
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "setMessage: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			StringBuilder sb = new StringBuilder();
@@ -510,7 +515,7 @@ public class Information implements DialogInterface.OnDismissListener {
 				}
 
 			} catch (JSONException e) {
-				Log.e(TAG, "setMessage: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 				mDownloadsMessage = mActivity.getString(R.string.ParseError);
 			}
 		}

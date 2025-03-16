@@ -9,6 +9,7 @@ import android.util.Log;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
+import src.comitton.common.Logcat;
 import src.comitton.fileaccess.FileAccess;
 
 
@@ -127,9 +128,9 @@ public class FileData {
 	}
 
 	public static short getType(Context context, String filepath) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String filename = FileAccess.filename(context, filepath);
-		if(debug) {Log.d(TAG, "getType: 開始します. filepath=" + filepath + ", filename=" + filename);}
+		Logcat.d(logLevel, "開始します. filepath=" + filepath + ", filename=" + filename);
 
 		if (filename.equals("..")) {
 			return FILETYPE_PARENT;

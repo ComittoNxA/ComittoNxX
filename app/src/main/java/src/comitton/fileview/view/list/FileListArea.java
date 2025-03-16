@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
+import src.comitton.common.Logcat;
 import src.comitton.common.TextFormatter;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.filelist.RecordList;
@@ -93,6 +94,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	private Paint mLinePaint;
 	private Paint mNamePaint;
 	private Paint mInfoPaint;
+	private Paint mReadPaint;
 	private Rect mSrcRect;
 	private Rect mDstRect;
 
@@ -100,6 +102,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 	private String[][] mTitleSep;
 	private String[][] mInfoSep;
+	private String[] mReadInfo;
 
 	private int mTileSize;
 	private int mTileAscent;
@@ -147,6 +150,9 @@ public class FileListArea extends ListArea implements Handler.Callback {
 		mInfoPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mInfoPaint.setTypeface(Typeface.MONOSPACE);
 		mInfoPaint.setTextAlign(Paint.Align.LEFT);
+		mReadPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mReadPaint.setTypeface(Typeface.MONOSPACE);
+		mReadPaint.setTextAlign(Paint.Align.LEFT);
 
 		mSrcRect = new Rect();
 		mDstRect = new Rect();
@@ -173,8 +179,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	// タイルモード時の描画
 	@SuppressLint("SuspiciousIndentation")
     private void drawTileItems(Canvas canvas, int baseX, int baseY) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "drawTileItems: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 //		int cx = mAreaWidth;
 		int cy = mAreaHeight;
@@ -320,15 +326,15 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							int dstWidth = 0;
 							int dstHeight = 0;
 
-							if (debug) {Log.d(TAG, "drawTileItems: width/height=" + ((float)width / (float)height) + ", mIconWidth/mIconHeight=" + ((float)mIconWidth / (float)mIconHeight));}
+							Logcat.d(logLevel, "width/height=" + ((float)width / (float)height) + ", mIconWidth/mIconHeight=" + ((float)mIconWidth / (float)mIconHeight));
 							if ((float)width / height > (float)mIconWidth / mIconHeight) {
-								if (debug) {Log.d(TAG, "drawTileItems: 幅に合わせます. width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
+								Logcat.d(logLevel, "幅に合わせます. width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);
 								// 幅に合わせる
 								dstWidth = mIconWidth;
 								dstHeight = height * mIconWidth / width;
 							}
 							else {
-								if (debug) {Log.d(TAG, "drawTileItems: 高さに合わせます. width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);}
+								Logcat.d(logLevel, "高さに合わせます. width=" + width + ", height=" + height + ", mIconWidth=" + mIconWidth + ", mIconHeight=" + mIconHeight);
 								// 高さに合わせる
 								dstWidth = width * mIconHeight / height;
 								dstHeight = mIconHeight;
@@ -350,7 +356,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							if (bmMark != null) {
 								canvas.drawBitmap(bmMark, x + mIconWidth - mMarkSizeW, y + mIconHeight - mMarkSizeH, mBitmapPaint);
 							}
-							if (debug) {Log.d(TAG,"run: fd.getState()=" + fd.getState() + ", fd.getMaxpage()=" + fd.getMaxpage() + ", fd.getName()=" + fd.getName());}
+							Logcat.d(logLevel,"fd.getState()=" + fd.getState() + ", fd.getMaxpage()=" + fd.getMaxpage() + ", fd.getName()=" + fd.getName());
 							drawPagerate(canvas, fd, mIconWidth, mIconHeight, x, y, color);
 						}
 						else {
@@ -463,7 +469,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 							}
 						}
 					}
-					//Log.d("comitton", "FileListArea drawTileItems name[0]=\"" + name[0] + "\", name[1]=\"" + name[1] + "\", name[2]=\"" + name[2] + "\", name[3]=\"" + name[3] + "\"");
+					//Logcat.d("logLevel", "name[0]=\"" + name[0] + "\", name[1]=\"" + name[1] + "\", name[2]=\"" + name[2] + "\", name[3]=\"" + name[3] + "\"");
 
 					mText[0][index] = TextFormatter.getMultiLine(name[0], mItemWidth - mItemMargin * 2, mNamePaint, mMaxLines);
 					if (mSplitFilename) {
@@ -506,14 +512,14 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			}
 		}
 //		long clockTerm = SystemClock.uptimeMillis() - clockSt;
-//		Log.d(TAG, "top=" + mTopRow + ", pos=" + mTopPos + ", clock=" + clockTerm);
+//		Logcat.d(logLevel, "top=" + mTopRow + ", pos=" + mTopPos + ", clock=" + clockTerm);
 		return;
 	}
 
 	@SuppressLint("SuspiciousIndentation")
     private void drawListItems(Canvas canvas, int baseX, int baseY) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "drawListItems: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_DEBUG;
+		Logcat.d(logLevel, "開始します.");
 
 		int cx = mAreaWidth;
 		int cy = mAreaHeight;
@@ -532,6 +538,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 		int ypos = mTopPos;
 		for (int iy = mTopRow ; ypos < cy ; iy ++) {
 			index = iy;
+			Logcat.d(logLevel, "index=" + index + ", listnum=" + listnum);
 			if (index >= listnum) {
 				break;
 			}
@@ -653,15 +660,15 @@ public class FileListArea extends ListArea implements Handler.Callback {
 						int dstWidth = 0;
 						int dstHeight = 0;
 
-						if (debug) {Log.d(TAG, "drawListItems: width/height=" + ((float)width / (float)height) + ", iconWidth/iconHeight=" + ((float)iconWidth / (float)iconHeight));}
+						Logcat.d(logLevel, "width/height=" + ((float)width / (float)height) + ", iconWidth/iconHeight=" + ((float)iconWidth / (float)iconHeight));
 						if ((float)width / height > (float)iconWidth / iconHeight) {
-							if (debug) {Log.d(TAG, "drawListItems: 幅に合わせます. width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
+							Logcat.d(logLevel, "幅に合わせます. width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);
 							// 幅に合わせる
 							dstWidth = iconWidth;
 							dstHeight = height * iconWidth / width;
 						}
 						else {
-							if (debug) {Log.d(TAG, "drawListItems: 高さに合わせます. width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);}
+							Logcat.d(logLevel, "高さに合わせます. width=" + width + ", height=" + height + ", iconWidth=" + iconWidth + ", iconHeight=" + iconHeight);
 							// 高さに合わせる
 							dstWidth = width * iconHeight / height;
 							dstHeight = iconHeight;
@@ -810,6 +817,10 @@ public class FileListArea extends ListArea implements Handler.Callback {
 					canvas.drawText(mInfoSep[index][i], x, y + ty + mInfoAscent, mInfoPaint);
 					ty += (mInfoSize + mInfoDescent);
 				}
+
+				mReadPaint.setColor(color);
+				mReadPaint.setTextSize(mInfoSize);
+				canvas.drawText(mReadInfo[index], x, y + ty + mInfoAscent, mReadPaint);
 			}
 
 //			if (mIconHeight > ty) {
@@ -1045,8 +1056,8 @@ public class FileListArea extends ListArea implements Handler.Callback {
 	}
 
 	private void requestLayout(boolean isRefresh) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG,"requestLayout: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します.");
 
 		int width;
 		int columnNum = 0;
@@ -1083,6 +1094,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 				mTitleSep = new String[listSize][];
 				mInfoSep = new String[listSize][];
+				mReadInfo = new String[listSize];
 
 				// 項目高さを求める
 				int height = (mTitleSize + mTitleDescent) + (mInfoSize + mInfoDescent);
@@ -1106,9 +1118,9 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 				// 項目の高さ(タイルは固定)
 				mItemHeight = (short)(mIconHeight + (mTileSize + mTileDescent) * mMaxLines + mItemMargin * 3);
-				if (debug) {Log.d(TAG,"requestLayout: 開始します. mTileSize=" + mTileSize + ", mTileDescent=" + mTileDescent + ", mMaxLines=" + mMaxLines);}
+				Logcat.d(logLevel,"開始します. mTileSize=" + mTileSize + ", mTileDescent=" + mTileDescent + ", mMaxLines=" + mMaxLines);
 				disprange = (int)(Math.ceil((double) mAreaHeight / (mItemHeight + 2))) * columnNum;
-				if (debug) {Log.d(TAG,"requestLayout: 開始します. disprange=" + disprange + ", mAreaHeight=" + mAreaHeight + ", mItemHeight=" + mItemHeight + ", columnNum=" + columnNum);}
+				Logcat.d(logLevel,"開始します. disprange=" + disprange + ", mAreaHeight=" + mAreaHeight + ", mItemHeight=" + mItemHeight + ", columnNum=" + columnNum);
 			}
 
 			// 項目の幅
@@ -1156,6 +1168,24 @@ public class FileListArea extends ListArea implements Handler.Callback {
 				mTitleSep[index] = getMultiLine(fd.getName(), tcx, MAXLINE_TITLE, mNamePaint);
 
 				String info = fd.getFileInfo();
+
+				mReadInfo[index] = "";
+				if ((fd.getState() >= 0) && (fd.getMaxpage() > 0)) {
+					// 読書率
+					float rate = (float) (fd.getState() + 1) / (float) fd.getMaxpage();
+					mReadInfo[index] = (int)(rate * 100) + "% Read.";
+
+				}
+				else if (fd.getState() == DEF.PAGENUMBER_READ) {
+					mReadInfo[index] = "100% Read.";
+				}
+				else if (fd.getState() == DEF.PAGENUMBER_UNREAD) {
+					mReadInfo[index] = "Unread.";
+				}
+				else if (fd.getState() != DEF.PAGENUMBER_UNREAD && fd.getMaxpage() == DEF.PAGENUMBER_NONE) {
+					mReadInfo[index] = "??% Read.";
+				}
+
 				if (info != null) {
 					float[] result = new float[info.length()];
 					float[] len = { 0, 0 };
@@ -1171,8 +1201,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 					if (tcx >= (int) Math.ceil(len[0])) {
 						mInfoSep[index] = new String[1];
 						mInfoSep[index][0] = info;
-					}
-					else {
+					} else {
 						// 更新日時とサイズを分割
 						mInfoSep[index] = new String[2];
 						mInfoSep[index][0] = info.substring(0, DATETIME_LENGTH);
@@ -1186,7 +1215,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 			}
 
 			// 項目高さを求める
-			height = (mTitleSize + mTitleDescent) * mTitleSep[index].length + (mInfoSize + mInfoDescent) * mInfoSep[index].length;
+			height = (mTitleSize + mTitleDescent) * mTitleSep[index].length + (mInfoSize + mInfoDescent) * (mInfoSep[index].length + 1);
 			// ビットマップ表示のサイズ確保
             if (mThumbFlag && height < mListIconHeight) {
                 height = mListIconHeight;

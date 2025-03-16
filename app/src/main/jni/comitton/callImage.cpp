@@ -267,7 +267,7 @@ JNIEXPORT jint JNICALL Java_src_comitton_jni_CallImgLibrary_ImageInitialize (JNI
     // 空いているキャッシュindexを取得する
     int index;
     for (index = 0; index < MAX_BUFFER_INDEX; ++index) {
-        if (gLoadBuffer[index] == nullptr) {
+        if (gIsInit[index] == false) {
             break;
         }
     }

@@ -1,77 +1,232 @@
 package src.comitton.common;
 
-import android.os.Build;
-import android.os.DeadSystemException;
 import android.util.Log;
 import androidx.annotation.Nullable;
 
-import java.net.UnknownHostException;
-import java.util.Arrays;
-
 public class Logcat {
 
+    public static final int LOG_LEVEL_VERBOSE = 1;
+    public static final int LOG_LEVEL_DEBUG = 2;
+    public static final int LOG_LEVEL_INFO = 3;
+    public static final int LOG_LEVEL_WARN = 4;
+    public static final int LOG_LEVEL_ERROR = 5;
+    public static final int LOG_LEVEL_NONE = 6;
 
-    public static String Concat(String tag, String msg, Exception e) {
+    public static int global_log_level = LOG_LEVEL_NONE;
 
-        String ret = "";
-        if (tag != null) {
-            ret += tag + ": ";
-        }
-        if (msg != null) {
-            ret += msg + ": ";
-        }
-        if (e != null) {
-            ret += e.toString();
-        }
-        return ret;
+    /**
+     * {@code Exception} に入れる文字列を返す<br>
+     * @param msg ログメッセージ
+     * @return クラス名: メソッド名: {@code msg} (ファイル名:行番号) エラー名: エラーメッセージ
+     */
+    public static String msg(@Nullable String msg, @Nullable Throwable e) {
+        Throwable throwable = new Throwable("msg");
+        StackTraceElement[] ste = throwable.getStackTrace();
+        String[] className = ste[1].getClassName().split("\\.");
+        String tag = className[className.length - 1];
+        String message = tag + ": " + ste[1].getMethodName() + ": " + msg + " (" + ste[1].getFileName() + ":" + ste[1].getLineNumber() + ") " + e;
+        return message;
     }
 
-    public static void v(@Nullable String tag, @Nullable String msg) {
-        verbose(true, tag, msg, null, false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(@Nullable String msg) {
+        verbose(LOG_LEVEL_NONE, true, msg, null, false);
     }
 
-    public static void v(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        verbose(true, tag, msg, tr,false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(@Nullable String msg, @Nullable Throwable tr) {
+        verbose(LOG_LEVEL_NONE, true, msg, tr,false);
     }
 
-    public static void v(@Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        verbose(true, tag, msg, null, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(@Nullable String msg, boolean stackTrace) {
+        verbose(LOG_LEVEL_NONE, true, msg, null, stackTrace);
     }
 
-    public static void v(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        verbose(true, tag, msg, tr, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(@Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        verbose(LOG_LEVEL_NONE, true, msg, tr, stackTrace);
     }
 
-    public static void v(boolean enable, @Nullable String tag, @Nullable String msg) {
-        if (enable) {
-            verbose(true, tag, msg, null, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(boolean enable, @Nullable String msg) {
+        verbose(LOG_LEVEL_NONE, enable, msg, null, false);
     }
 
-    public static void v(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        if (enable) {
-            verbose(true, tag, msg, tr, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(boolean enable, @Nullable String msg, @Nullable Throwable tr) {
+        verbose(LOG_LEVEL_NONE, enable, msg, tr, false);
     }
 
-    public static void v(boolean enable, @Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        if (enable) {
-            verbose(true, tag, msg, null, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(boolean enable, @Nullable String msg, boolean stackTrace) {
+        verbose(LOG_LEVEL_NONE, enable, msg, null, stackTrace);
     }
 
-    public static void v(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
-            verbose(true, tag, msg, tr, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        verbose(LOG_LEVEL_NONE, enable, msg, tr, stackTrace);
     }
 
-    private static void verbose(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(int logLevel, @Nullable String msg) {
+        verbose(logLevel, false, msg, null, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(int logLevel, @Nullable String msg, @Nullable Throwable tr) {
+        verbose(logLevel, false, msg, tr, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(int logLevel, @Nullable String msg, boolean stackTrace) {
+        verbose(logLevel, false, msg, null, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void v(int logLevel, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        verbose(logLevel, false, msg, tr, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    private static void verbose(int logLevel, boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        if (global_log_level <= LOG_LEVEL_VERBOSE || (global_log_level == LOG_LEVEL_NONE && (enable || logLevel <= LOG_LEVEL_VERBOSE))) {
             // enable の時だけログを出力する
             Throwable throwable = new Throwable("verbose");
             StackTraceElement[] ste = throwable.getStackTrace();
-            String message = msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
+            String[] className = ste[2].getClassName().split("\\.");
+            String tag = className[className.length - 1];
+            String message = ste[2].getMethodName() + ": " + msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
 
             if (!stackTrace) {
                 if (tr != null) {
@@ -97,48 +252,199 @@ public class Logcat {
         }
     }
 
-    public static void d(@Nullable String tag, @Nullable String msg) {
-        debug(true, tag, msg, null, false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(@Nullable String msg) {
+        debug(LOG_LEVEL_NONE, true, msg, null, false);
     }
 
-    public static void d(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        debug(true, tag, msg, tr,false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(@Nullable String msg, @Nullable Throwable tr) {
+        debug(LOG_LEVEL_NONE, true, msg, tr,false);
     }
 
-    public static void d(@Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        debug(true, tag, msg, null, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(@Nullable String msg, boolean stackTrace) {
+        debug(LOG_LEVEL_NONE, true, msg, null, stackTrace);
     }
 
-    public static void d(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        debug(true, tag, msg, tr, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(@Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        debug(LOG_LEVEL_NONE, true, msg, tr, stackTrace);
     }
 
-    public static void d(boolean enable, @Nullable String tag, @Nullable String msg) {
-        if (enable) {
-            debug(true, tag, msg, null, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(boolean enable, @Nullable String msg) {
+        debug(LOG_LEVEL_NONE, enable, msg, null, false);
     }
 
-    public static void d(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        if (enable) {
-            debug(true, tag, msg, tr, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(boolean enable, @Nullable String msg, @Nullable Throwable tr) {
+        debug(LOG_LEVEL_NONE, enable, msg, tr, false);
     }
 
-    public static void d(boolean enable, @Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        if (enable) {
-            debug(true, tag, msg, null, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(boolean enable, @Nullable String msg, boolean stackTrace) {
+        debug(LOG_LEVEL_NONE, enable, msg, null, stackTrace);
     }
 
-    public static void d(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
-            debug(true, tag, msg, tr, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        debug(LOG_LEVEL_NONE, enable, msg, tr, stackTrace);
     }
 
-    private static void debug(boolean enable, @Nullable String tag1, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(int logLevel, @Nullable String msg) {
+        debug(logLevel, false, msg, null, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(int logLevel, @Nullable String msg, @Nullable Throwable tr) {
+        debug(logLevel, false, msg, tr, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(int logLevel, @Nullable String msg, boolean stackTrace) {
+        debug(logLevel, false, msg, null, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void d(int logLevel, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        debug(logLevel, false, msg, tr, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    private static void debug(int logLevel, boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        if (global_log_level <= LOG_LEVEL_DEBUG || (global_log_level == LOG_LEVEL_NONE && (enable || logLevel <= LOG_LEVEL_DEBUG))) {
             // enable の時だけログを出力する
             Throwable throwable = new Throwable("debug");
             StackTraceElement[] ste = throwable.getStackTrace();
@@ -170,53 +476,205 @@ public class Logcat {
         }
     }
 
-
-    public static void i(@Nullable String tag, @Nullable String msg) {
-        info(true, tag, msg, null, false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(@Nullable String msg) {
+        info(LOG_LEVEL_NONE, true, msg, null, false);
     }
 
-    public static void i(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        info(true, tag, msg, tr,false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(@Nullable String msg, @Nullable Throwable tr) {
+        info(LOG_LEVEL_NONE, true, msg, tr,false);
     }
 
-    public static void i(@Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        info(true, tag, msg, null, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(@Nullable String msg, boolean stackTrace) {
+        info(LOG_LEVEL_NONE, true, msg, null, stackTrace);
     }
 
-    public static void i(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        info(true, tag, msg, tr, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(@Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        info(LOG_LEVEL_NONE, true, msg, tr, stackTrace);
     }
 
-    public static void i(boolean enable, @Nullable String tag, @Nullable String msg) {
-        if (enable) {
-            info(true, tag, msg, null, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(boolean enable, @Nullable String msg) {
+        info(LOG_LEVEL_NONE, enable, msg, null, false);
     }
 
-    public static void i(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        if (enable) {
-            info(true, tag, msg, tr, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(boolean enable, @Nullable String msg, @Nullable Throwable tr) {
+        info(LOG_LEVEL_NONE, enable, msg, tr, false);
     }
 
-    public static void i(boolean enable, @Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        if (enable) {
-            info(true, tag, msg, null, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(boolean enable, @Nullable String msg, boolean stackTrace) {
+        info(LOG_LEVEL_NONE, enable, msg, null, stackTrace);
     }
 
-    public static void i(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
-            info(true, tag, msg, tr, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        info(LOG_LEVEL_NONE, enable, msg, tr, stackTrace);
     }
 
-    private static void info(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(int logLevel, @Nullable String msg) {
+        info(logLevel, false, msg, null, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(int logLevel, @Nullable String msg, @Nullable Throwable tr) {
+        info(logLevel, false, msg, tr, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(int logLevel, @Nullable String msg, boolean stackTrace) {
+        info(logLevel, false, msg, null, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void i(int logLevel, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        info(logLevel, false, msg, tr, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    private static void info(int logLevel, boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        if (global_log_level <= LOG_LEVEL_INFO || (global_log_level == LOG_LEVEL_NONE && (enable || logLevel <= LOG_LEVEL_INFO))) {
             // enable の時だけログを出力する
-            Throwable throwable = new Throwable("info");
+            Throwable throwable = new Throwable("debug");
             StackTraceElement[] ste = throwable.getStackTrace();
-            String message = msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
+            String[] className = ste[2].getClassName().split("\\.");
+            String tag = className[className.length - 1];
+            String message = ste[2].getMethodName() + ": " + msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
 
             if (!stackTrace) {
                 if (tr != null) {
@@ -242,52 +700,205 @@ public class Logcat {
         }
     }
 
-    public static void w(@Nullable String tag, @Nullable String msg) {
-        warn(true, tag, msg, null, false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(@Nullable String msg) {
+        warn(LOG_LEVEL_NONE, true, msg, null, false);
     }
 
-    public static void w(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        warn(true, tag, msg, tr,false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(@Nullable String msg, @Nullable Throwable tr) {
+        warn(LOG_LEVEL_NONE, true, msg, tr,false);
     }
 
-    public static void w(@Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        warn(true, tag, msg, null, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(@Nullable String msg, boolean stackTrace) {
+        warn(LOG_LEVEL_NONE, true, msg, null, stackTrace);
     }
 
-    public static void w(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        warn(true, tag, msg, tr, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(@Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        warn(LOG_LEVEL_NONE, true, msg, tr, stackTrace);
     }
 
-    public static void w(boolean enable, @Nullable String tag, @Nullable String msg) {
-        if (enable) {
-            warn(true, tag, msg, null, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(boolean enable, @Nullable String msg) {
+        warn(LOG_LEVEL_NONE, enable, msg, null, false);
     }
 
-    public static void w(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        if (enable) {
-            warn(true, tag, msg, tr, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(boolean enable, @Nullable String msg, @Nullable Throwable tr) {
+        warn(LOG_LEVEL_NONE, enable, msg, tr, false);
     }
 
-    public static void w(boolean enable, @Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        if (enable) {
-            warn(true, tag, msg, null, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(boolean enable, @Nullable String msg, boolean stackTrace) {
+        warn(LOG_LEVEL_NONE, enable, msg, null, stackTrace);
     }
 
-    public static void w(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
-            warn(true, tag, msg, tr, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        warn(LOG_LEVEL_NONE, enable, msg, tr, stackTrace);
     }
 
-    private static void warn(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(int logLevel, @Nullable String msg) {
+        warn(logLevel, false, msg, null, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(int logLevel, @Nullable String msg, @Nullable Throwable tr) {
+        warn(logLevel, false, msg, tr, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(int logLevel, @Nullable String msg, boolean stackTrace) {
+        warn(logLevel, false, msg, null, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void w(int logLevel, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        warn(logLevel, false, msg, tr, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    private static void warn(int logLevel, boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        if (global_log_level <= LOG_LEVEL_WARN || (global_log_level == LOG_LEVEL_NONE && (enable || logLevel <= LOG_LEVEL_WARN))) {
             // enable の時だけログを出力する
-            Throwable throwable = new Throwable("warn");
+            Throwable throwable = new Throwable("debug");
             StackTraceElement[] ste = throwable.getStackTrace();
-            String message = msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
+            String[] className = ste[2].getClassName().split("\\.");
+            String tag = className[className.length - 1];
+            String message = ste[2].getMethodName() + ": " + msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
 
             if (!stackTrace) {
                 if (tr != null) {
@@ -313,52 +924,205 @@ public class Logcat {
         }
     }
 
-    public static void e(@Nullable String tag, @Nullable String msg) {
-        error(true, tag, msg, null, false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(@Nullable String msg) {
+        error(LOG_LEVEL_NONE, true, msg, null, false);
     }
 
-    public static void e(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        error(true, tag, msg, tr,false);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(@Nullable String msg, @Nullable Throwable tr) {
+        error(LOG_LEVEL_NONE, true, msg, tr,false);
     }
 
-    public static void e(@Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        error(true, tag, msg, null, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(@Nullable String msg, boolean stackTrace) {
+        error(LOG_LEVEL_NONE, true, msg, null, stackTrace);
     }
 
-    public static void e(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        error(true, tag, msg, tr, stackTrace);
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(@Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        error(LOG_LEVEL_NONE, true, msg, tr, stackTrace);
     }
 
-    public static void e(boolean enable, @Nullable String tag, @Nullable String msg) {
-        if (enable) {
-            error(true, tag, msg, null, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(boolean enable, @Nullable String msg) {
+        error(LOG_LEVEL_NONE, enable, msg, null, false);
     }
 
-    public static void e(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
-        if (enable) {
-            error(true, tag, msg, tr, false);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(boolean enable, @Nullable String msg, @Nullable Throwable tr) {
+        error(LOG_LEVEL_NONE, enable, msg, tr, false);
     }
 
-    public static void e(boolean enable, @Nullable String tag, @Nullable String msg, boolean stackTrace) {
-        if (enable) {
-            error(true, tag, msg, null, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(boolean enable, @Nullable String msg, boolean stackTrace) {
+        error(LOG_LEVEL_NONE, enable, msg, null, stackTrace);
     }
 
-    public static void e(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
-            error(true, tag, msg, tr, stackTrace);
-        }
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        error(LOG_LEVEL_NONE, enable, msg, tr, stackTrace);
     }
 
-    private static void error(boolean enable, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
-        if (enable) {
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(int logLevel, @Nullable String msg) {
+        error(logLevel, false, msg, null, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(int logLevel, @Nullable String msg, @Nullable Throwable tr) {
+        error(logLevel, false, msg, tr, false);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(int logLevel, @Nullable String msg, boolean stackTrace) {
+        error(logLevel, false, msg, null, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    public static void e(int logLevel, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        error(logLevel, false, msg, tr, stackTrace);
+    }
+
+    /**
+     * Logcat にログを出力する<br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_VERBOSE} から {@code LOG_LEVEL_ERROR} までの値のとき、
+     * {@code global_log_level} より重要度が高いログを出力する.<br><br>
+     * クラス変数 {@code int global_log_level} が {@code LOG_LEVEL_NONE} のとき、
+     * 引数 {@code int logLevel} より重要度が高いログまたは 引数 {@code boolean enable} が {@code true} のときログを出力する.<br><br>
+     * タグには自動的にクラス名がセットされる<br>
+     * メッセージは自動的に「メソッド名: {@code msg} (ファイル名:行番号) エラーメッセージ」がセットされる<br>
+     * 引数 {@code boolean stackTrace} が {@code true} のときスタックトレースを出力する.
+     * @param msg ログメッセージ
+     */
+    private static void error(int logLevel, boolean enable, @Nullable String msg, @Nullable Throwable tr, boolean stackTrace) {
+        if (global_log_level <= LOG_LEVEL_ERROR || (global_log_level == LOG_LEVEL_NONE && (enable || logLevel <= LOG_LEVEL_ERROR))) {
             // enable の時だけログを出力する
-            Throwable throwable = new Throwable("error");
+            Throwable throwable = new Throwable("debug");
             StackTraceElement[] ste = throwable.getStackTrace();
-            String message = msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
+            String[] className = ste[2].getClassName().split("\\.");
+            String tag = className[className.length - 1];
+            String message = ste[2].getMethodName() + ": " + msg + " (" + ste[2].getFileName() + ":" + ste[2].getLineNumber() + ")";
 
             if (!stackTrace) {
                 if (tr != null) {

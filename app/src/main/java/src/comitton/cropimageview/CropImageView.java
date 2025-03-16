@@ -21,6 +21,8 @@ import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 import static java.lang.Math.abs;
 
+import src.comitton.common.Logcat;
+
 public class CropImageView extends ImageView{
     private Paint mPaintGuide;
     private Paint mPaintMask;
@@ -86,6 +88,7 @@ public class CropImageView extends ImageView{
     }
 
     public void Crop(String path) {
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         try {
             Bitmap bmDest = Bitmap.createBitmap(mBitmap, mFrameRect.left, mFrameRect.top, mFrameRect.width(), mFrameRect.height());
             FileOutputStream os = new FileOutputStream(path);
@@ -93,7 +96,7 @@ public class CropImageView extends ImageView{
             os.flush();
             os.close();
         } catch (Exception e) {
-            Log.e("Thumbnail/cacheSave", e.getLocalizedMessage());
+            Logcat.e(logLevel, "" , e);
         }
     }
 

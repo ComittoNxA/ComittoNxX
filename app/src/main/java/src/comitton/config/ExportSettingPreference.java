@@ -104,7 +104,7 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 		String fontpath = DEF.getConfigDirectory();
 		List<String> items = new ArrayList<String>();
 
-		File files[] = new File(fontpath).listFiles(getFileExtensionFilter(DEF.EXTENSION_SETTING));
+		File[] files = new File(fontpath).listFiles(getFileExtensionFilter(DEF.EXTENSION_SETTING));
 		if (files != null) {
 			// 設定
 			for (File file : files) {
@@ -183,7 +183,7 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 					// キーをソートする
 					keys = new TreeSet<String>(keys);
 					for (String key : keys) {
-						if (DEF.checkExportKey(key) == false) {
+						if (!DEF.checkExportKey(key)) {
 							continue;
 						}
 						// NxT専用キーチェック
@@ -192,15 +192,15 @@ public class ExportSettingPreference extends DialogPreference implements OnItemC
 						Object value = keyMap.get(key);
 						String className = value.getClass().getName();
 						if (className.equals("java.lang.String")) {
-							line = (ex ? "s:" : "S:") + key + "=" + value.toString();
+							line = (ex ? "s:" : "S:") + key + "=" + value;
 						} else if (className.equals("java.lang.Boolean")) {
-							line = (ex ? "b:" : "B:") + key + "=" + value.toString();
+							line = (ex ? "b:" : "B:") + key + "=" + value;
 						} else if (className.equals("java.lang.Float")) {
-							line = (ex ? "f:" : "F:") + key + "=" + value.toString();
+							line = (ex ? "f:" : "F:") + key + "=" + value;
 						} else if (className.equals("java.lang.Integer")) {
-							line = (ex ? "i:" : "I:") + key + "=" + value.toString();
+							line = (ex ? "i:" : "I:") + key + "=" + value;
 						} else if (className.equals("java.lang.Long")) {
-							line = (ex ? "l:" : "L:") + key + "=" + value.toString();
+							line = (ex ? "l:" : "L:") + key + "=" + value;
 						} else {
 							continue;
 						}

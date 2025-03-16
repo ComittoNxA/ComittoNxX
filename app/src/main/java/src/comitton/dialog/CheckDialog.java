@@ -179,7 +179,7 @@ public class CheckDialog extends ImmersiveDialog implements OnClickListener, OnD
 
 	public interface CheckListener extends EventListener {
 	    // メニュー選択された
-	    public void onSelected(boolean states[]);
+	    public void onSelected(boolean[] states);
 	    public void onClose();
 	}
 }

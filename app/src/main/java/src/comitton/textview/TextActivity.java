@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.Logcat;
 import src.comitton.config.SetCacheActivity;
 import src.comitton.fileaccess.FileAccess;
 import src.comitton.helpview.HelpActivity;
@@ -337,7 +338,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		// 回転
 		mInitFlg = 0;
@@ -439,8 +440,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		// バックグラウンドでの実行を許可すると復帰時にonCreate()が呼ばれる
 		// ビュワーを開いた後でintentに上書きしても効果がない
 
-		if (debug) {Log.d(TAG, "onCreate: mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath + ", mUser=" + mUser + ", mPass=" + mPass
-				+ ", mFileName=" + mFileName + ", mTextName=" + mTextName);}
+		Logcat.d(logLevel, "mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath + ", mUser=" + mUser + ", mPass=" + mPass
+				+ ", mFileName=" + mFileName + ", mTextName=" + mTextName);
 
 		if (mTextName.equals("META-INF/container.xml")) {
 			mFileType = FileData.FILETYPE_EPUB;
@@ -470,14 +471,14 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		// 続きから開く設定を記録
 		saveLastFile();
 
-		if (debug) {Log.d(TAG, "onCreate: 既読位置を取得します.");}
+		Logcat.d(logLevel, "既読位置を取得します.");
 		if (mFileType == FileData.FILETYPE_EPUB) {
 			mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
-			if (debug) {Log.d(TAG, "onCreate: mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mUriTextPath, mUser, mPass));}
+			Logcat.d(logLevel, "mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mUriTextPath, mUser, mPass));
 		}
 		else {
 			mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mUriTextPath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
-			if (debug) {Log.d(TAG, "onCreate: mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mUriTextPath, mUser, mPass));}
+			Logcat.d(logLevel, "mRestorePage=" + mRestorePage + ", Url=" + DEF.createUrl(mUriTextPath, mUser, mPass));
 		}
 
 		mTextView.setOnTouchListener(this);
@@ -577,9 +578,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		public TextLoad(Handler handler, TextActivity activity) {
 			super();
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "new TextLoad: 開始します.");}
-			//if (debug) {DEF.StackTrace(TAG, "TextLoad: ");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 
 			this.handler = handler;
 			this.mActivity = activity;
@@ -587,10 +587,10 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		}
 
 		public void run() {
-			boolean debug = false;
-			if (debug) {Log.d(TAG, "TextLoad: run: 開始します.");}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
 			// ファイルリストの読み込み
-			if (debug) {Log.d(TAG, "TextLoad: run: mUriPath=" + mUriPath + ", mFileName=" + mFileName + ", mTextName=" + mTextName);}
+			Logcat.d(logLevel, "mUriPath=" + mUriPath + ", mFileName=" + mFileName + ", mTextName=" + mTextName);
 			mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler, true, ImageManager.OPENMODE_TEXTVIEW, 1);
 			//mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
 			mImageMgr.LoadImageList(0, 0, 0);
@@ -610,7 +610,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			if (mCurrentPage == DEF.PAGENUMBER_READ)	mCurrentPage = mRestoreMaxPage - 1;
 			if (mCurrentPage == DEF.PAGENUMBER_UNREAD)	mCurrentPage = 0;
 			mCurrentPageRate = (float)mCurrentPage / (float)mRestoreMaxPage;
-			if(debug) {Log.d(TAG, "TextLoad: run: mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage + ", mCurrentPageRate=" + mCurrentPageRate);}
+			Logcat.d(logLevel, "mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage + ", mCurrentPageRate=" + mCurrentPageRate);
 
 			/*
 			String imagePath;
@@ -678,7 +678,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 //				//
 //				cx = mTextView.getWidth();
 //				cy = hardSize.y - dispSize.y + mTextView.getHeight();
-//				Log.d("screen size", "hard=(" + hardSize.x + "," + hardSize.y + ") disp(" + dispSize.x + "," + dispSize.y + ") view(" + mTextView.getWidth() + "," + mTextView.getHeight() + ")");
+//				Logcat.d(logLevel, "hard=(" + hardSize.x + "," + hardSize.y + ") disp(" + dispSize.x + "," + dispSize.y + ") view(" + mTextView.getWidth() + "," + mTextView.getHeight() + ")");
 //			}
 //			else {
 				cx = mTextView.getWidth();
@@ -858,7 +858,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	// スレッドからの通知取得
 	@SuppressLint("SuspiciousIndentation")
     public boolean handleMessage(Message msg) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		if (DEF.ToastMessage(mActivity, msg)) {
 			// HMSG_TOASTならトーストを表示して終了
@@ -1049,7 +1049,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					finish();
 				}
 
-				Log.d(TAG, "handlerMessage: MSG_READ_END: mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage + ", mCurrentPageRate=" + mCurrentPageRate);
+				Logcat.d(logLevel, "MSG_READ_END: mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage + ", mCurrentPageRate=" + mCurrentPageRate);
 				// 既読の場合は最終ページ
 				if (mTextMgr.length() == 0) {
 					mCurrentPage = 0;
@@ -1063,7 +1063,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				else {
 					mCurrentPage = (int)(mCurrentPageRate * mTextMgr.length());
 				}
-				Log.d(TAG, "handlerMessage: MSG_READ_END: mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage + ", mCurrentPageRate=" + mCurrentPageRate);
+				Logcat.d(logLevel, "MSG_READ_END: mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage + ", mCurrentPageRate=" + mCurrentPageRate);
 
 				// テキストの設定
 				char[] textbuff = mTextMgr.getTextBuffer();
@@ -1289,7 +1289,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		if (mImmEnable) {
 			if (action == MotionEvent.ACTION_DOWN) {
-//				Log.d("touchDown", "x=" + x + ", y=" + y);
+//				Logcat.d(logLevel, "x=" + x + ", y=" + y);
 				if (y <= mImmCancelRange || y >= cy - mImmCancelRange) {
 					// IMMERSIVEモードの発動時にタッチ処理を無視する
 					mImmCancel = true;
@@ -1725,7 +1725,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 								float sx = mTouchPoint[2].x - mTouchPoint[i - 1].x;
 								float sy = mTouchPoint[2].y - mTouchPoint[i - 1].y;
 								long term = mTouchPointTime[2] - mTouchPointTime[i - 1];
-//								Log.d("moment_up", "i=" + i + ", sx=" + sx + ", sy=" + sy + ", term=" + term);
+//								Logcat.d(logLevel, "i=" + i + ", sx=" + sx + ", sy=" + sy + ", term=" + term);
 								mTextView.momentiumStart(x, y, mScroll, sx, sy, (int)term, mMomentMode);
 							}
 						}
@@ -2076,7 +2076,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 	// メニューを開く
 	private void openChapterMenu() {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (mTextMgr == null || mTextView == null || mMenuDialog != null) {
 			return;
 		}
@@ -2085,7 +2085,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 		TabDialogFragment mMenuDialog = new TabDialogFragment(this, R.style.MyDialog, true, false, false, true, this);
 
 		int size = mTextMgr.getMidashiSize();
-		if (debug) {Log.d(TAG, "openChapterMenu: size=" + size);}
+		Logcat.d(logLevel, "size=" + size);
 
 		if (mFileType == FileData.FILETYPE_EPUB) {
 			// 見出しの追加
@@ -2097,7 +2097,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					int page = md.getPage();
 					int type = md.getType();
 					if ((type == MidashiData.FILE_TITLE) && page >= 0) {
-						if (debug) {Log.d(TAG, "openChapterMenu: page=" + page + ", text=" + md.getText());}
+						Logcat.d(logLevel, "page=" + page + ", text=" + md.getText());
 						mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 					}
 				}
@@ -2112,7 +2112,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 					int page = md.getPage();
 					int type = md.getType();
 					if ((type == MidashiData.EPUB_TOC) && page >= 0) {
-						if (debug) {Log.d(TAG, "openChapterMenu: page=" + page + ", text=" + md.getText());}
+						Logcat.d(logLevel, "page=" + page + ", text=" + md.getText());
 						mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 					}
 				}
@@ -2128,7 +2128,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				int page = md.getPage();
 				int type = md.getType();
 				if ((type == MidashiData.HEADING_LARGE || type == MidashiData.HEADING_MIDDLE || type == MidashiData.HEADING_SMALL) && page >= 0) {
-					if (debug) {Log.d(TAG, "openChapterMenu: page=" + page + ", text=" + md.getText());}
+					Logcat.d(logLevel, "page=" + page + ", text=" + md.getText());
 					mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 				}
 			}
@@ -2143,7 +2143,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 				int page = md.getPage();
 				int type = md.getType();
 				if (type == MidashiData.CAPTION && page >= 0) {
-					if (debug) {Log.d(TAG, "openChapterMenu: page=" + page + ", text=" + md.getText());}
+					Logcat.d(logLevel, "page=" + page + ", text=" + md.getText());
 					mMenuDialog.addItem(DEF.MENU_CHAPTER + page, md.getText(), "P." + (page + 1));
 				}
 			}
@@ -2933,15 +2933,15 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 	}
 
 	private void prevPage() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "prevPage: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		// 前ページへ
 		if (mTextView.prevPage()) {
-			if (debug) {Log.d(TAG, "prevPage: 前ページへ移動できました.");}
+			Logcat.d(logLevel, "前ページへ移動できました.");
 			startVibrate();
 		}
 		else {
-			if (debug) {Log.d(TAG, "prevPage: 前ページへ移動できませんでした.");}
+			Logcat.d(logLevel, "前ページへ移動できませんでした.");
 			// 先頭ページ
 			if (mLastMsg == DEF.LASTMSG_DIALOG) {
 				showCloseDialog(CloseDialog.LAYOUT_TOP);
@@ -3009,8 +3009,8 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 
 	private void saveCurrentPage() {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "saveCurrentPage: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		mCurrentPage = mTextView.getPage();
 
 		// 現在ページ情報を保存
@@ -3031,7 +3031,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 
 		long maxpage = mTextMgr.length();
 		if (mTextName.equals("META-INF/container.xml")) {
-			Log.d(TAG,"mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
+			Logcat.d(logLevel,"mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", (int)maxpage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
 
@@ -3040,7 +3040,7 @@ public class TextActivity extends AppCompatActivity implements OnTouchListener, 
 			}
 		}
 		else {
-			Log.d(TAG,"mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
+			Logcat.d(logLevel,"mUriTextPath=" + mUriTextPath + ", savePage=" + savePage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass) + "#maxpage", (int)maxpage);
 			ed.putInt(DEF.createUrl(mUriTextPath, mUser, mPass), savePage);
 

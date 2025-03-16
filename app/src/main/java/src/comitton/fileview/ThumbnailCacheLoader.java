@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
+import src.comitton.common.Logcat;
 import src.comitton.common.ThumbnailLoader;
 import src.comitton.common.WaitFor;
 import src.comitton.config.SetEpubActivity;
@@ -32,8 +33,6 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
     private static SharedPreferences mSp;
 
     private FileThumbnailLoader mFileThumbnailLoader;
-    private ImageManager mImageMgr;
-    private TextManager mTextMgr;
     private FileRangeComparator mComparator;
     private FileData mCurrentFile;
 
@@ -43,8 +42,8 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
 
     public ThumbnailCacheLoader(AppCompatActivity activity, FileThumbnailLoader loader, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, boolean hidden, int crop, int margin, boolean epubViewer) {
         super(activity, uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
-        boolean debug = false;
-        if (debug) {Log.d(TAG, "ThumbnailCacheLoader: 開始します.");}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel, "開始します.");
 
         mSp = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mSkip = false;
@@ -57,10 +56,10 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
         mWaitFor = new WaitFor(60000);
 
         // スレッド起動
-        if (debug) {Log.d(TAG, "ThumbnailCacheLoader: スレッドを開始します.");}
+        Logcat.d(logLevel, "スレッドを開始します.");
         Thread thread = new Thread(this);
         thread.start();
-        if (debug) {Log.d(TAG, "ThumbnailCacheLoader: 終了します.");}
+        Logcat.d(logLevel, "終了します.");
     }
 
     // 解放
@@ -69,31 +68,14 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
 
     // スレッド停止
     public void breakThread() {
-        boolean debug = false;
-        if (debug) {Log.d(TAG, "breakThread: 開始します.");}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel, "開始します.");
         super.breakThread();
     }
 
-    // ImageManager と TextManager を解放する
-    private void releaseManager() {
-        // 意図的にExceptionを発生させるためスレッドセーフにしない
-        if (mImageMgr != null) {
-            try {
-                mImageMgr.close();
-            } catch (IOException e) {
-                ;
-            }
-            mImageMgr = null;
-        }
-        if (mTextMgr != null) {
-            mTextMgr.release();
-            mTextMgr = null;
-        }
-    }
-
     protected void interruptThread() {
-        boolean debug = false;
-        if (debug) {Log.d(TAG,"interruptThread: 開始します.");}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel,"開始します.");
         mSkip = true;
         if (mWaitFor != null) {
             mWaitFor.interrupt();
@@ -102,8 +84,8 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
 
     // 表示中の範囲を設定
     public void setDispRange(int firstindex, int lastindex) {
-        boolean debug = false;
-        if (debug) {Log.d(TAG,"setDispRange: 開始します. firstindex=" + firstindex + ", lastindex=" + lastindex);}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel,"開始します. firstindex=" + firstindex + ", lastindex=" + lastindex);
 
         if (mFirstIndex != firstindex || mLastIndex != lastindex) {
             // スクロール位置に変化があったら実行する
@@ -137,26 +119,26 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
                 });
             }
         }
-        if (debug) {Log.d(TAG,"setDispRange: 終了します.");}
+        Logcat.d(logLevel,"終了します.");
     }
 
     // スレッド開始
     public void run() {
-        boolean debug = false;
-        if (debug) {Log.d(TAG, "run: 開始します. mPath=" + mPath);}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel, "開始します. mPath=" + mPath);
 
         if (mFiles.isEmpty()) {
             return;
         }
 
         while(!mThreadBreak) {
-            if (debug) {Log.d(TAG,"run: while: 開始します. mFirstIndex=" + mFirstIndex + ", mLastIndex=" + mLastIndex);}
+            Logcat.d(logLevel,"while: 開始します. mFirstIndex=" + mFirstIndex + ", mLastIndex=" + mLastIndex);
 
             mSleep = false;
             mSkip = false;
 
             for (int i = 0; i < mFiles.size() && !mThreadBreak && !mSkip; ++i) {
-                if (debug) {Log.d(TAG,"run: while: for(" + i + " < "+ mFiles.size() + "): 開始します.");}
+                Logcat.d(logLevel,"while: for(" + i + " < "+ mFiles.size() + "): 開始します.");
 
                 if (CallImgLibrary.ThumbnailCheckAll(mID) == 0) {
                     // メモリキャッシュに全部入り切れたら
@@ -168,10 +150,10 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
                 boolean isChanged;
                 mCurrentFile = mFiles.get(i);
 
-                if (debug) {Log.d(TAG,"run: while: for(" + i + "): index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());}
+                Logcat.d(logLevel,"while: for(" + i + "): index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());
                 if (CallImgLibrary.ThumbnailCheck(mID, mCurrentFile.getIndex()) > 0) {
                     // 既に読み込み済み
-                    if (debug) {Log.d(TAG,"run: while: for(" + i + "): メモリキャッシュに格納されています. index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());}
+                    Logcat.d(logLevel,"while: for(" + i + "): メモリキャッシュに格納されています. index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());
                     continue;
                 }
 
@@ -179,16 +161,15 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
                     isChanged = loadCache(mCurrentFile);
                 }
                 catch (CacheException e) {
-                    if (debug) {Log.d(TAG,"run: while: for(" + i + "): CacheException: ループを抜けます.  index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());}
+                    Logcat.d(logLevel,"while: for(" + i + "): CacheException: ループを抜けます.  index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());
                     mSleep = true;
                     break;
                 }
 
-                if (debug) {Log.d(TAG,"run: while: for(" + i + "): isChanged=" + isChanged + ", index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());}
+                Logcat.d(logLevel,"while: for(" + i + "): isChanged=" + isChanged + ", index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());
 
                 if (isChanged) {
-                    if (debug) {Log.d(TAG,"run: while: for(" + i + "): 変更を通知します. index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());}
-                    //Log.i(TAG,"run: while: for(" + i + "): index=" + mCurrentFile.getIndex() + ", filename=" + mCurrentFile.getName());
+                    Logcat.d(logLevel,"while: for(" + i + "): 変更を通知します. index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());
                     DEF.sendMessage(mHandler, DEF.HMSG_THUMBNAIL, mCurrentFile.getIndex(), 0, mCurrentFile.getName());
                 }
 
@@ -197,17 +178,17 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
                     break;
                 }
 
-                if (debug) {Log.d(TAG,"run: while: for(" + i + "): 次のファイルを実行します. index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());}
+                Logcat.d(logLevel,"while: for(" + i + "): 次のファイルを実行します. index=" + mCurrentFile.getIndex() + ", mCurrentFile=" + mCurrentFile.getName());
             }
 
             if (mSleep) {
                 // メモリキャッシュが空けられなかったかファイルを最後まで処理したら
                 // スクロールするかファイルキャッシュが更新されるまで待機する
-                if (debug) {Log.d(TAG,"run: while: スリープします.");}
+                Logcat.d(logLevel,"while: スリープします.");
                 mWaitFor.sleep();
-                if (debug) {Log.d(TAG,"run: while: スリープを解除します.");}
+                Logcat.d(logLevel,"while: スリープを解除します.");
             }
-            if (debug) {Log.d(TAG,"run: while: 先頭に戻ります.");}
+            Logcat.d(logLevel,"while: 先頭に戻ります.");
         }
 
     }
@@ -219,24 +200,24 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
      * @exception CacheException メモリキャッシュが空けられなかった場合
      */
     private boolean loadCache(FileData fileData) throws CacheException {
-        boolean debug = false;
-        if (debug) {Log.d(TAG, "loadCache: 開始します. fileData=" + fileData.getName());}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel, "開始します. fileData=" + fileData.getName());
 
         String uri = DEF.relativePath(mActivity, mURI, mPath, fileData.getName());
         String pathcode = DEF.makeCode(uri, mThumbSizeW, mThumbSizeH);
         Bitmap bm;
-        if (debug) {Log.d(TAG, "loadCache: uri=" + uri);}
+        Logcat.d(logLevel, "uri=" + uri);
 
         // キャッシュから読込
         if (checkThumbnailCache(pathcode)) {
             bm = loadThumbnailCache(pathcode);
             if (bm == null) {
-                if (debug) {Log.d(TAG,"loadCache: ファイルキャッシュが空でした.スキップします. fileData=" + fileData.getName());}
+                Logcat.d(logLevel,"ファイルキャッシュが空でした.スキップします. fileData=" + fileData.getName());
                 return false;
             }
             else {
-                if (debug) {Log.d(TAG,"loadCache: ファイルキャッシュがありました. fileData=" + fileData.getName());}
-                if (debug) {
+                Logcat.d(logLevel,"ファイルキャッシュがありました. fileData=" + fileData.getName());
+                if (logLevel <= Logcat.LOG_LEVEL_DEBUG) {
                     bm = ImageAccess.setText(bm, String.valueOf(fileData.getIndex()), Color.RED, DEF.ALIGN_TOP);
                 }
                 return loadMemory(fileData, bm);

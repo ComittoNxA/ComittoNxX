@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.config.SetImageTextDetailActivity;
 import src.comitton.fileaccess.FileAccess;
 import src.comitton.fileview.data.FileData;
@@ -13,26 +14,19 @@ import src.comitton.dialog.LoadingDialog;
 import src.comitton.imageview.ImageManager;
 import src.comitton.textview.TextManager;
 import src.comitton.config.SetTextActivity;
-import src.comitton.imageview.MyImageView;
 
 import android.graphics.Point;
-import android.graphics.Rect;
-import android.view.Window;
-import android.view.WindowMetrics;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 @SuppressLint("DefaultLocale")
 public class FileSelectList implements Runnable, Callback, DialogInterface.OnDismissListener {
@@ -102,8 +96,8 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 	// パス
 	public void setPath(String uri, String path, String user, String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "setPath: 開始します. uri=" + uri + ", path=" + path);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", path=" + path);
 		//if (debug) {DEF.StackTrace(TAG, "setPath: ");}
 
 		mURI = uri;
@@ -212,7 +206,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	@SuppressLint("SuspiciousIndentation")
     @Override
 	public void run() {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		Thread thread = mThread;
 		boolean hidden = mHidden;
@@ -232,7 +226,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 			if (fileList.isEmpty()) {
 				// ファイルがない場合
-				Log.d(TAG, "run ファイルがありません.");
+				Logcat.d(logLevel, "ファイルがありません.");
 				fileList = new ArrayList<FileData>();
 				String uri = FileAccess.parent(mActivity, mPath);
 				FileData fileData;
@@ -244,7 +238,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				}
 
 				// ローカルの初期フォルダより上のフォルダの場合
-				if(debug) {Log.d(TAG, "run: mStaticRootDir=" + mStaticRootDir + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);}
+				Logcat.d(logLevel, "mStaticRootDir=" + mStaticRootDir + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
 				if (mStaticRootDir.startsWith(currentPath) && !mStaticRootDir.equals(currentPath)) {
 					int pos = mStaticRootDir.indexOf("/", mPath.length());
 					String dir = mStaticRootDir.substring(mPath.length(), pos + 1);
@@ -293,16 +287,8 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 			}
 		}
 		catch (Exception e) {
-			String s = null;
-            s = e.getLocalizedMessage();
-            if (s != null) {
-                Log.e(TAG, s);
-            }
-            else {
-                s = "error.";
-            }
-            e.printStackTrace();
-			sendResult(false, s, thread);
+			Logcat.e(logLevel, "", e);
+			sendResult(false, e.toString(), thread);
 			return;
 		}
 
@@ -406,83 +392,6 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 		fileData.setMaxpage(maxpage);
 		fileData.setState(state);
-	}
-
-	public static void SetReadConfig(SharedPreferences msp, TextManager manager) {
-		mSpaceW = SetTextActivity.getSpaceW(msp);
-		mSpaceH = SetTextActivity.getSpaceH(msp);
-		mHeadSizeOrg = SetTextActivity.getFontTop(msp);	// 見出し
-		mBodySizeOrg = SetTextActivity.getFontBody(msp);	// 本文
-		mRubiSizeOrg = SetTextActivity.getFontRubi(msp);	// ルビ
-		mInfoSizeOrg = SetTextActivity.getFontInfo(msp);	// ページ情報など
-		mMarginWOrg = SetTextActivity.getMarginW(msp);	// 左右余白(設定値)
-		mMarginHOrg = SetTextActivity.getMarginH(msp);	// 上下余白(設定値)
-		mDensity = mActivity.getResources().getDisplayMetrics().scaledDensity;
-		mHeadSize = DEF.calcFontPix(mHeadSizeOrg, mDensity);	// 見出し
-		mBodySize = DEF.calcFontPix(mBodySizeOrg, mDensity);	// 本文
-		mRubiSize = DEF.calcFontPix(mRubiSizeOrg, mDensity);	// ルビ
-		mInfoSize = DEF.calcFontPix(mInfoSizeOrg, mDensity);	// ページ情報など
-		mPicSize = SetTextActivity.getPicSize(msp);	// 挿絵サイズ
-
-		mMarginW = DEF.calcDispMargin(mMarginWOrg);				// 左右余白
-		mMarginH = mInfoSize + DEF.calcDispMargin(mMarginHOrg);	// 上下余白
-		mAscMode = SetTextActivity.getAscMode(msp);
-
-		String fontname = SetTextActivity.getFontName(msp);
-		if (fontname != null && fontname.length() > 0) {
-			String path = DEF.getFontDirectory();
-			mFontFile = path + fontname;
-		}
-		else {
-			mFontFile = null;
-		}
-
-		mPaperSel = SetTextActivity.getPaper(msp);	// 用紙サイズ
-		mNotice = SetTextActivity.getNotice(msp);	// ステータスバーを隠す
-		mImmEnable = SetImageTextDetailActivity.getImmEnable(msp);	// ナビゲーションバーを隠す
-		mViewRota = SetTextActivity.getViewRota(msp);
-
-		int resourceId = mActivity.getResources().getIdentifier("status_bar_height", "dimen", "android");
-		int statusBarHeight = mActivity.getResources().getDimensionPixelSize(resourceId);
-		resourceId = mActivity.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-		int navigationBarHeight = mActivity.getResources().getDimensionPixelSize(resourceId);
-
-		if (mPaperSel == DEF.PAPERSEL_SCREEN) {
-			Point point = new Point();
-			mActivity.getWindowManager().getDefaultDisplay().getRealSize(point);
-			int cx = point.x;
-			int cy = point.y;
-
-			if (cx < cy) {
-				mTextWidth = cx;
-				mTextHeight = cy;
-			}
-			else {
-				mTextWidth = cy;
-				mTextHeight = cx;
-			}
-
-			if (!mImmEnable) {
-				mTextHeight -= navigationBarHeight;
-			}
-			if (!mNotice) {
-				if (mViewRota == 0 || mViewRota == 1 || mViewRota == 3) {
-					// 『回転あり』または『縦固定』または『縦固定(90°回転)』
-					mTextHeight -= statusBarHeight;
-				}
-				else {
-					// 『横固定』
-					mTextWidth -= statusBarHeight;
-				}
-
-			}
-
-		}
-		else {
-			mTextWidth = DEF.PAPERSIZE[mPaperSel][0];
-			mTextHeight = DEF.PAPERSIZE[mPaperSel][1];
-		}
-		manager.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
 	}
 
 	public class MyComparator implements Comparator<FileData> {

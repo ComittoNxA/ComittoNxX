@@ -12,10 +12,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Semaphore;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.Build;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,6 +29,7 @@ import android.view.Menu;
 import android.widget.Toast;
 
 import androidx.annotation.StringRes;
+import androidx.core.app.ActivityCompat;
 
 import jp.dip.muracoro.comittonx.BuildConfig;
 import src.comitton.fileaccess.FileAccess;
@@ -969,7 +973,7 @@ public class DEF {
 			return hexString.toString();
 
 		} catch (NoSuchAlgorithmException e) {
-			Log.e("makeCode", "NoSuchAlgorithmException");
+			Logcat.e("NoSuchAlgorithmException");
 		}
 		return "";
 	}
@@ -1465,8 +1469,8 @@ public class DEF {
 	}
 
 	static public int compareFileName(final String str1, final String str2, final boolean sortByFileType) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG,"compareFileName: 開始します. str1=" + str1 + ", str2=" + str2 + ", sortByFileType=" + sortByFileType);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します. str1=" + str1 + ", str2=" + str2 + ", sortByFileType=" + sortByFileType);
 
 		String name1 = str1;
 		String name2 = str2;
@@ -1497,8 +1501,8 @@ public class DEF {
 				ext2 = "";
 			}
 		}
-		if (debug) {Log.d(TAG,"compareFileName: ext1=" + ext1 + ", ext2=" + ext2 + ", sortByFileType=" + sortByFileType);}
-		if (debug) {Log.d(TAG,"compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
+		Logcat.d(logLevel,"ext1=" + ext1 + ", ext2=" + ext2 + ", sortByFileType=" + sortByFileType);
+		Logcat.d(logLevel,"name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);
 
 		while (!flag1 && !flag2) {
 			// 最上位ディレクトリとそれ以外に分ける
@@ -1533,14 +1537,14 @@ public class DEF {
 				flag2 = true;
 			}
 
-			if (debug) {Log.d(TAG,"compareFileName: dir1=" + dir1 + ", dir2=" + dir2 + ", sortByFileType=" + sortByFileType);}
-			if (debug) {Log.d(TAG,"compareFileName: name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);}
+			Logcat.d(logLevel,"dir1=" + dir1 + ", dir2=" + dir2 + ", sortByFileType=" + sortByFileType);
+			Logcat.d(logLevel,"name1=" + name1 + ", name2=" + name2 + ", sortByFileType=" + sortByFileType);
 			// ファイル優先ならファイルをディレクトリより優先
 			if (sortByFileType && file1 && !file2) {
-				if (debug) {Log.d(TAG,"compareFileName: dir1 はファイルです.");}
+				Logcat.d(logLevel,"dir1 はファイルです.");
 				return -1;
 			} else if (sortByFileType && !file1 && file2) {
-				if (debug) {Log.d(TAG,"compareFileName: dir2 はファイルです.");}
+				Logcat.d(logLevel,"dir2 はファイルです.");
 				return 1;
 			} else {
 				// ディレクトリ同士を比較
@@ -1570,7 +1574,7 @@ public class DEF {
 	}
 
 	static public int compareText(final String str1, final String str2) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		String name1 = str1;
 		String name2 = str2;
@@ -1585,7 +1589,7 @@ public class DEF {
 			return -1;
 		}
 
-		if (debug) {Log.d(TAG,"compareFileName: 開始します. name1=" + name1 + ", name2=" + name2);}
+		Logcat.d(logLevel,"開始します. name1=" + name1 + ", name2=" + name2);
 
 		int i1, i2;
 		char ch1, ch2;
@@ -1607,7 +1611,7 @@ public class DEF {
 		int len2 = name2.length();
 
 		for (i1 = i2 = 0; i1 < len1 && i2 < len2; i1++, i2++) {
-			if (debug) {Log.d(TAG,"compareFileName: ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);}
+			Logcat.d(logLevel,"ループを実行します. i1=" + i1 + ", i2=" + i2 + ", name1=" + name1 + ", name2=" + name2);
 			ch1 = name1.charAt(i1);
 			ch2 = name2.charAt(i2);
 			ct1 = getCharType(ch1);
@@ -1688,7 +1692,7 @@ public class DEF {
 			}
 
 			if (ct1 != ct2) {
-				if (debug) {Log.d(TAG,"compareFileName: 文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);}
+				Logcat.d(logLevel,"文字種が違います. ch1=" + ch1 + ", ch2=" + ch2);
 				// 文字種が違う場合
 				char tmp1, tmp2;
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
@@ -1722,7 +1726,7 @@ public class DEF {
 
 			if (SORT_BY_NATURAL_NUMBERS) {
 				if (ct1 == CHTYPE_NUM) {
-					//Log.d(TAG,"compareFileName 文字1=" + ch1 + ", 文字2=" + ch2);
+					//Logcat.d(logLevel, "文字1=" + ch1 + ", 文字2=" + ch2);
 					String num1 = getNumbers(name1, i1);
 					String num2 = getNumbers(name2, i2);
 					int nlen1 = num1.length();
@@ -1744,7 +1748,7 @@ public class DEF {
 						// num1が大きい
 						return 1;
 					} else {
-						//Log.d(TAG,"compareFileName 数字1=" + num1 + ", 数字2=" + num2);
+						//Logcat.d(logLevel, "数字1=" + num1 + ", 数字2=" + num2);
 						//小数点の位置
 						int index_dot1 = num1.indexOf(".");
 						int index_dot2 = num2.indexOf(".");
@@ -1771,10 +1775,10 @@ public class DEF {
 						for (int i = -1; i >= col_diff; i--) {
 							num1 = num1 + "0";
 						}
-						//Log.d(TAG,"compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
+						//Logcat.d(logLevel, "数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
 						num1 = num1.replace(".", "");
 						num2 = num2.replace(".", "");
-						//Log.d(TAG,"compareFileName 数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
+						//Logcat.d(logLevel, "数字1=" + num1 + ", 数字2=" + num2 + ", 小数点位置1=" + index_dot1 + ", 小数点位置2=" + index_dot2 + ", 小数桁1=" + col_dec1 + ", 小数桁2=" + col_dec2);
 
 						int num_len1 = num1.length();
 						int num_len2 = num2.length();
@@ -1815,7 +1819,7 @@ public class DEF {
 									}
 								}
 							} else {
-								if (debug) {Log.d(TAG, "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
+								Logcat.d(logLevel, "長さが違います。 num1=" + num1 + ", num2=" + num2);
 							}
 						} else {
 							// どちらも負の数
@@ -1857,7 +1861,7 @@ public class DEF {
 									}
 								}
 							} else {
-								if (debug) {Log.d(TAG, "compareFileName: 長さが違います。 num1=" + num1 + ", num2=" + num2);}
+								Logcat.d(logLevel, "長さが違います。 num1=" + num1 + ", num2=" + num2);
 							}
 						}
 						i1 += nlen1 - 1;
@@ -1869,18 +1873,18 @@ public class DEF {
 
 			if (SORT_BY_KANJI_NUMERALS) {
 				if (ct1 == CHTYPE_KANJI_NUMERALS) {
-					if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);}
+					Logcat.d(logLevel, "漢数字を比較します. ch1=" + ch1 + ", ch2=" + ch2);
 					String num1 = getKanjiNumerals(name1, i1);
 					String num2 = getKanjiNumerals(name2, i2);
 					int nlen1 = num1.length();
 					int nlen2 = num2.length();
-					if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. num1=" + num1 + ", num2=" + num2);}
+					Logcat.d(logLevel, "漢数字を比較します. num1=" + num1 + ", num2=" + num2);
 					if (nlen1 < nlen2) {
 						int difflen = nlen2 - nlen1;
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num2.charAt(i)) != 0) {
 								// num2の方が大きい
-								if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. num1が小さいです.");}
+								Logcat.d(logLevel, "漢数字を比較します. num1が小さいです.");
 								return -1;
 							}
 						}
@@ -1891,7 +1895,7 @@ public class DEF {
 						for (int i = 0; i < difflen; i++) {
 							if (getKanjiNumeral(num1.charAt(i)) > 0) {
 								// num1の方が大きい
-								if (debug) {Log.d(TAG, "compareFileName: 漢数字を比較します. num2が小さいです.");}
+								Logcat.d(logLevel, "漢数字を比較します. num2が小さいです.");
 								return 1;
 							}
 						}
@@ -1903,10 +1907,8 @@ public class DEF {
 						int diff = getKanjiNumeral(num1.charAt(i)) - getKanjiNumeral(num2.charAt(i));
 						if (diff != 0) {
 							// num1の方が大きい
-							if (debug) {
-								if (diff>0) {Log.d(TAG, "compareFileName: 漢数字を比較します. num2が小さいです.");}
-								else {Log.d(TAG, "compareFileName: 漢数字を比較します. num1が小さいです.");}
-							}
+							if (diff>0) {Logcat.d(logLevel, "漢数字を比較します. num2が小さいです.");}
+							else {Logcat.d(logLevel, "漢数字を比較します. num1が小さいです.");}
 							return diff;
 						}
 					}
@@ -2299,33 +2301,34 @@ public class DEF {
 	}
 
 	static private int getCharType(char ch) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		boolean debug = false;
 		if (SORT_BY_SYMBOL && getSymbolBefore(ch) >= 0) {
-			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_SYMBOL_BEFORE");}
+			Logcat.d(logLevel, "TYPE=CHTYPE_SYMBOL_BEFORE");
 			return CHTYPE_SYMBOL_BEFORE;
 		}
 
 		if (SORT_BY_SYMBOL && getSymbolAfter(ch) >= 0) {
-			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_SYMBOL_AFTER");}
+			Logcat.d(logLevel, "TYPE=CHTYPE_SYMBOL_AFTER");
 			return CHTYPE_SYMBOL_AFTER;
 		}
 
 		if (SORT_BY_NATURAL_NUMBERS && (('0' <= ch && ch <= '9') || '.' == ch || ',' == ch)) {
-			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_NUM");}
+			Logcat.d(logLevel, "TYPE=CHTYPE_NUM");
 			return CHTYPE_NUM;
 		}
 
 		if (SORT_BY_JAPANESE_VOLUME_NAME && getJapaneseVolumeName(ch) >= 0) {
-			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_JAPANESE_VOLUME_NAME");}
+			Logcat.d(logLevel, "TYPE=CHTYPE_JAPANESE_VOLUME_NAME");
 			return CHTYPE_JAPANESE_VOLUME_NAME;
 		}
 
 		if (SORT_BY_KANJI_NUMERALS && getKanjiNumeral(ch) >= 0) {
-			if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_KANJI_NUMERALS");}
+			Logcat.d(logLevel, "TYPE=CHTYPE_KANJI_NUMERALS");
 			return CHTYPE_KANJI_NUMERALS;
 		}
 
-		if (debug) {Log.d(TAG, "getCharType: TYPE=CHTYPE_CHAR");}
+		Logcat.d(logLevel, "TYPE=CHTYPE_CHAR");
 		return CHTYPE_CHAR;
 	}
 
@@ -2415,43 +2418,46 @@ public class DEF {
 
 	// 定義からフラグ読み込み
 	static public boolean getBoolean(SharedPreferences sp, String key, boolean defval) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		boolean intval = defval;
 		try {
 			// 読み込み
 			intval = sp.getBoolean(key, defval);
 		} catch (Exception e) {
-			Log.e("DEF.getBoolean", "getBoolean: error(key=" + key + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "error(key=" + key + "):", e);
 		}
 		return intval;
 	}
 
 	// 定義から数値読み込み
 	static public int getInt(SharedPreferences sp, String key, int defval) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		int intval = defval;
 		try {
 			// 読み込み
 			intval = sp.getInt(key, defval);
 		} catch (Exception e) {
-			Log.e("DEF.getInt", "getInt: error(key=" + key + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "getInt: error(key=" + key + "): ", e);
 		}
 		return intval;
 	}
 
 	// 定義から文字列読み込み
 	static public int getInt(SharedPreferences sp, String key, String defval) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String strval = defval;
 		int intval = 0;
 		try {
 			strval = sp.getString(key, defval);
 		} catch (Exception e) {
-			Log.e("DEF.getInt", "getInt: error(key=" + key + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "error(key=" + key + "): ", e);
 		}
 
 		try {
 			// 読み込み
 			intval = Integer.parseInt(strval);
 		} catch (Exception e) {
-			Log.e("DEF.getInt", "getInt: parseInt error(key=" + key + ", str=" + strval + "): " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "parseInt error(key=" + key + ", str=" + strval + "): ", e);
 		}
 		return intval;
 	}
@@ -2469,6 +2475,7 @@ public class DEF {
 
 	// Url文字列作成
 	public static String createUrl(String url, String user, String pass) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (url == null) {
 			return "";
 		}
@@ -2486,7 +2493,7 @@ public class DEF {
 				ret += ":" + URLEncoder.encode(pass, "UTF-8");
 			}
 		} catch (UnsupportedEncodingException e) {
-			Log.e(TAG, "createUrl: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 		ret += "@" + url.substring(6);
 		return ret;
@@ -2516,7 +2523,7 @@ public class DEF {
 	}
 
 	public static String toUTF8(byte[] bytes, int offset, int length) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String encoding = "UTF-8";
 		String dst;
 
@@ -2529,17 +2536,17 @@ public class DEF {
 			tmp_length = length - 1;
 		}
 
-		if (debug) {Log.d(TAG, "toUTF8: 文字コードを自動判定します.");}
+		Logcat.d(logLevel, "文字コードを自動判定します.");
 		encoding = CharDetecter(bytes, tmp_offset, tmp_length);
 
 		dst = new String(bytes, tmp_offset, tmp_length, Charset.forName(encoding));
-		if(debug) {Log.d(TAG, "toUTF8: Stringを出力します. dst=" + dst);}
+		Logcat.d(logLevel, "Stringを出力します. dst=" + dst);
 		return dst;
 	}
 
 	public static String CharDetecter(byte[] bytes, int offset, int length) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "CharDetecter: 文字コードを判定します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "文字コードを判定します.");
 
 		String encoding = null;
 		int tmp_offset = offset;
@@ -2566,42 +2573,40 @@ public class DEF {
 			if (encoding != null) {
 				if("WINDOWS-1252".equals(encoding)) {
 					// 判定された文字コードがWindows-1252の場合は誤判定ではないか確認する
-					if (debug) {Log.d(TAG, "CharDetecter: 判定結果が WINDOWS-1252 なので誤判定かどうか確認します.");}
+					Logcat.d(logLevel, "判定結果が WINDOWS-1252 なので誤判定かどうか確認します.");
 					byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
 					String charset = (CHARSET.equals("Shift_JIS") ? "MS932" : CHARSET);
 					if (Arrays.equals(src, new String(src, Charset.forName(charset)).getBytes(Charset.forName(charset)))) {
-						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは " + charset + " です.");}
+						Logcat.d(logLevel, "文字コードは " + charset + " です.");
 						encoding = charset;
 						return encoding;
 					} else {
-						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは " + charset + " ではありません.");}
+						Logcat.d(logLevel, "文字コードは " + charset + " ではありません.");
 					}
 					if (Arrays.equals(src, new String(src, Charset.forName("MS932")).getBytes(Charset.forName("MS932")))) {
-						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは MS932 です.");}
+						Logcat.d(logLevel, "文字コードは MS932 です.");
 						encoding = "MS932";
 					} else {
-						if (debug) {Log.d(TAG, "CharDetecter: 文字コードは MS932 ではありません.");}
+						Logcat.d(logLevel, "文字コードは MS932 ではありません.");
 					}
 				}
 				// 判定された文字コードがShift_JISの場合は、MS932としてデータを読み込む
 				if("Shift_JIS".equals(encoding)) {
 					encoding = "MS932";
 				}
-				if (debug) {Log.d(TAG, "CharDetecter: 文字コードを判定しました. encoding=" + encoding);}
+				Logcat.d(logLevel, "文字コードを判定しました. encoding=" + encoding);
 			} else {
-				if (debug) {Log.d(TAG, "CharDetecter: 文字コードを判定できませんでした.");}
+				Logcat.d(logLevel, "文字コードを判定できませんでした.");
 				byte[] src = Arrays.copyOfRange(bytes, tmp_offset, tmp_offset + tmp_length);
 
-				if (debug) {
-					Log.d(TAG, "CharDetecter: 文字コードを自動判定できませんでした.");
-				}
+				Logcat.d(logLevel, "文字コードを自動判定できませんでした.");
 				// 文字コード判定に失敗したので中国国家標準規格かどうか再度確認する
-				if (debug) {Log.d(TAG, "CharDetecter: 文字コードが GB18030 かどうか判定します.");}
+				Logcat.d(logLevel, "文字コードが GB18030 かどうか判定します.");
 				if (Arrays.equals(src, new String(src, Charset.forName("GB18030")).getBytes(Charset.forName("GB18030")))) {
-					if (debug) {Log.d(TAG, "CharDetecter: 文字コードは GB18030 です.");}
+					Logcat.d(logLevel, "文字コードは GB18030 です.");
 					encoding = "GB18030";
 				} else {
-					if (debug) {Log.d(TAG, "CharDetecter: 文字コードは GB18030 ではありません.");}
+					Logcat.d(logLevel, "文字コードは GB18030 ではありません.");
 				}
 			}
 		}
@@ -2609,7 +2614,7 @@ public class DEF {
 		if (encoding == null) {
 			// 判定できなかったら共通の操作設定設定で設定した文字コードに設定する
 			String charset = (CHARSET.equals("Shift_JIS") ? "MS932" : CHARSET);
-			if (debug) {Log.d(TAG, "CharDetecter: 文字コードを設定画面で設定した " + charset + " に設定します.");}
+			Logcat.d(logLevel, "文字コードを設定画面で設定した " + charset + " に設定します.");
 			encoding = charset;
 		}
 		return encoding;
@@ -2684,6 +2689,50 @@ public class DEF {
 				return message + "\n" + message2 + " : " + workMessage;
 			}
 		}
+	}
+
+	public static String getMemoryString(Activity activity) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
+
+		int memoryClass = ((ActivityManager) activity.getSystemService(activity.ACTIVITY_SERVICE)).getMemoryClass();
+		int largeMemoryClass = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+			largeMemoryClass = ((ActivityManager) activity.getSystemService(activity.ACTIVITY_SERVICE)).getLargeMemoryClass();
+		}
+
+		// メモリ情報を取得
+		ActivityManager activityManager = (ActivityManager)activity.getSystemService(activity.ACTIVITY_SERVICE);
+		ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+		activityManager.getMemoryInfo(memoryInfo);
+
+		int avaliMem = (int) (memoryInfo.availMem / 1024 / 1024);
+		int threshold = (int) (memoryInfo.threshold / 1024 / 1024);
+		boolean lowMemory = memoryInfo.lowMemory;
+
+		int nativeAllocate = (int) (Debug.getNativeHeapAllocatedSize() / 1024 / 1024);
+		int dalvikTotal = (int) (Runtime.getRuntime().totalMemory() / 1024 / 1024);
+		int dalvikFree = (int) (Runtime.getRuntime().freeMemory() / 1024 / 1024);
+
+		int javaAllocate = dalvikTotal - dalvikFree;
+		int totalAllocate = nativeAllocate + javaAllocate;
+
+		int ratio = (int)((double) totalAllocate / memoryClass * 100);
+		int largeRatio = (int)((double) totalAllocate / largeMemoryClass * 100);
+
+		return Build.BRAND + " " + Build.MODEL + " Android " + Build.VERSION.RELEASE + "\n"
+				+ "使用可能メモリ = " + String.valueOf(memoryClass) + " MB\n"
+				+ "使用可能メモリ(large) = " + largeMemoryClass + " MB\n"
+				+ "native割当済み = " + nativeAllocate + " MB\n"
+				+ "java割当済み = " + javaAllocate + " MB\n"
+				+ "total割当済み = " + totalAllocate + " MB\n"
+				+ "使用率 = " + ratio + "%\n"
+				+ "使用率(large) = " + largeRatio + "%\n"
+				+ "(dalvik最大メモリ = " + dalvikTotal + " MB)\n"
+				+ "(dalvik空きメモリ = " + dalvikFree + " MB)\n"
+				+ "availMem = " + avaliMem + " MB\n"
+				+ "threshold = " + threshold + " MB\n"
+				+ "lowMemory = " + lowMemory;
 	}
 
 }

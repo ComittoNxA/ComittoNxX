@@ -9,7 +9,7 @@ def applicationName = "ComittoNxX"
 
 def versionMajor = 2
 def versionMinor = 4
-def versionPatch = 3
+def versionPatch = 4
 
 // アプリに署名するため以下のファイルを作成して signingConfig の設定を記述してください
 apply from:'../signingConfigs/release.gradle', to: android
@@ -100,9 +100,9 @@ android {
             ndk {
                 abiFilters "armeabi-v7a"
             }
-            applicationIdSuffix ".debug"
-            resValue("string", "app_name", "${applicationName}[debug]")
-            resValue("string", "app_launch_name", "${applicationName}[debug]")
+            applicationIdSuffix ".debug32"
+            resValue("string", "app_name", "${applicationName}[debug32]")
+            resValue("string", "app_launch_name", "${applicationName}[deb32]")
             buildConfigField("int", "icon", "jp.dip.muracoro.comittonx.R.drawable.comittonxx_debug")
             manifestPlaceholders = [icon: "@drawable/comittonxx_debug"]
             debuggable true

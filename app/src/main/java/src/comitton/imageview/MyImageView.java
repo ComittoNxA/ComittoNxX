@@ -100,6 +100,8 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 	private Point[] mScrollPos;
 	private Point mScrollPoint;
+	private Point mScrollStartPos = new Point();
+	private long mScrollStart;
 
 	// ルーペ機能
 	private int mZoomView = 300;
@@ -247,7 +249,9 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	}
 
 	public boolean update(boolean unlock) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mDrawLock && !unlock) {
 			return false;
 		}
@@ -261,20 +265,27 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		try {
 			canvas = surfaceHolder.lockCanvas(); // ロックして、書き込み用のcanvasを受け取る
 			if (canvas == null) {
-				if (debug) {Log.d(TAG, "update: canvasが受け取れませんでした.");}
+				Logcat.d(logLevel, "canvasが受け取れませんでした.");
 				return false; // canvasが受け取れてなかったら抜ける
 			}
 
 			draw(canvas, false);
-
-        } finally {
-			if (canvas != null)
+		}
+		catch (Exception e) {
+				Logcat.e(logLevel, "エラーが発生しました.", e);
+		}
+        finally {
+			if (canvas != null) {
 				try {
 					surfaceHolder.unlockCanvasAndPost(canvas); // 例外が出て、canvas受け取ってたらロックはずす
 				}
 				catch (IllegalStateException e) {
 					// Surface has already been released.
 				}
+				catch (IllegalArgumentException e) {
+					;
+				}
+			}
 		}
 		return true;
 	}
@@ -401,19 +412,19 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				if (!pseLand) {
 					if(effectRate > 0) {
 						tx = Math.min(cx * effectRate * -1 + mLastOverScrollX, 0);
-						//Log.d(TAG, "draw() tx=" + tx + ", cx=" + cx + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
+						//Logcat.d(logLevel, "tx=" + tx + ", cx=" + cx + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
 					}
 					else {
-						//Log.d(TAG, "draw()  tx=" + tx + ",cx=" + cx + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
+						//Logcat.d(logLevel, "tx=" + tx + ",cx=" + cx + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
 						tx = Math.max(cx * effectRate * -1 + mLastOverScrollX, 0);
 					}
 				} else {
 					if(effectRate > 0) {
-						//Log.d(TAG, "draw() ty=" + ty + ", cy=" + cy + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
+						//Logcat.d(logLevel, "ty=" + ty + ", cy=" + cy + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
 						ty = Math.min(cy * effectRate * -1 + mLastOverScrollX, 0);
 					}
 					else {
-						//Log.d(TAG, "draw() ty=" + ty + ", cy=" + cy + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
+						//Logcat.d(logLevel, "ty=" + ty + ", cy=" + cy + ", effectRate=" + effectRate + ", mLastOverScrollX=" + mLastOverScrollX);
 						ty = Math.max(cy * effectRate * -1 + mLastOverScrollX, 0);
 					}
 				}
@@ -598,7 +609,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 									dt = (int) drawLeft - prevImage.SclWidth;
 								}
 							}
-//						Log.d(TAG, "draw prevImage page=" + prevPage + ", dl=" + dl + ", dt=" + dt);
+//						Logcat.d(logLevel, "prevImage page=" + prevPage + ", dl=" + dl + ", dt=" + dt);
 							ret = CallImgLibrary.ImageDraw(mActivity, mHandler, mCacheIndex, prevImage.Page, prevImage.HalfMode, dl, dt, mCanvasBitmap);
 							if (ret < 0) {
 								// 描画エラー
@@ -635,7 +646,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 									dt = (int) drawLeft - prevImage.SclWidth - prev2Image.SclWidth;
 								}
 							}
-//						Log.d(TAG, "draw prevImage page=" + prevPage + ", dl=" + dl + ", dt=" + dt);
+//						Logcat.d(logLevel, "prevImage page=" + prevPage + ", dl=" + dl + ", dt=" + dt);
 							ret = CallImgLibrary.ImageDraw(mActivity, mHandler, mCacheIndex, prev2Image.Page, prev2Image.HalfMode, dl, dt, mCanvasBitmap);
 							if (ret < 0) {
 								// 描画エラー
@@ -672,7 +683,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 									dt = (int) drawLeft + drawWidthSum;
 								}
 							}
-//						Log.d(TAG, "draw nextImage page=" + nextPage + ", dl=" + dl + ", dt=" + dt);
+//						Logcat.d(logLevel, "nextImage page=" + nextPage + ", dl=" + dl + ", dt=" + dt);
 							ret = CallImgLibrary.ImageDraw(mActivity, mHandler, mCacheIndex, nextImage.Page, nextImage.HalfMode, dl, dt, mCanvasBitmap);
 							if (ret < 0) {
 								// 描画エラー
@@ -709,7 +720,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 									dt = (int) drawLeft + drawWidthSum + nextImage.SclWidth;
 								}
 							}
-//						Log.d(TAG, "draw nextImage page=" + nextPage + ", dl=" + dl + ", dt=" + dt);
+//						Logcat.d(logLevel, "nextImage page=" + nextPage + ", dl=" + dl + ", dt=" + dt);
 							ret = CallImgLibrary.ImageDraw(mActivity, mHandler, mCacheIndex, next2Image.Page, next2Image.HalfMode, dl, dt, mCanvasBitmap);
 							if (ret < 0) {
 								// 描画エラー
@@ -730,7 +741,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
     					dl = cy - (int)drawTop - (int)drawHeight1;
     					dt = (int)drawLeft;
     				}
-//					Log.d(TAG, "draw mImage[1] page=" + mImage[1].Page + ", dl=" + dl + ", dt=" + dt);
+//					Logcat.d(logLevel, "mImage[1] page=" + mImage[1].Page + ", dl=" + dl + ", dt=" + dt);
     				ret = CallImgLibrary.ImageDraw(mActivity, mHandler, mCacheIndex, mImage[1].Page, mImage[1].HalfMode, dl, dt, mCanvasBitmap);
     				if (ret < 0) {
     					// 描画エラー
@@ -750,7 +761,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
     					dl = cy - (int)drawTop - (int)drawHeight0;
     					dt = (int)drawLeft + drawWidthSum - drawWidth0;
     				}
-//					Log.d(TAG, "draw mImage[0] page=" + mImage[0].Page + ", dl=" + dl + ", dt=" + dt);
+//					Logcat.d(logLevel, "mImage[0] page=" + mImage[0].Page + ", dl=" + dl + ", dt=" + dt);
     				ret = CallImgLibrary.ImageDraw(mActivity, mHandler, mCacheIndex, mImage[0].Page, mImage[0].HalfMode, dl, dt, mCanvasBitmap);
     				if (ret < 0) {
     					// 描画エラー
@@ -984,7 +995,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
     						paintFill);
 
     				// ズームの描画
-//    				Log.d("zoom", "left=" + rcDst.left + ", top=" + rcDst.top + ", right=" + rcDst.right + ", bottom=" + rcDst.bottom);
+//    				Logcat.d(logLevel, "left=" + rcDst.left + ", top=" + rcDst.top + ", right=" + rcDst.right + ", bottom=" + rcDst.bottom);
     				drawZoomArea(canvas, rcDst, touchX, touchY);
     			}
 			}
@@ -1101,6 +1112,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	 * @param w, h, oldw, oldh
 	 */
 	protected void onSizeChanged(int w, int h, int oldw, int oldh){
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 /*		// 現在の表示を保存
 		String str_bkup = mTextView.getText().toString();
 		mTextView.setText(mResizingStr);
@@ -1115,7 +1127,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				break;
 			}
 			catch (OutOfMemoryError e) {
-				Log.i("ImageView", "OutOfMemoryError");
+				Logcat.i(logLevel, "", e);
 				System.gc();
 			}
 		}
@@ -1136,7 +1148,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				mCanvasBitmap = Bitmap.createBitmap(w, h, Config.ARGB_8888);
 			}
 			catch (OutOfMemoryError e) {
-				Log.i("ImageView", "OutOfMemoryError");
+				Logcat.i(logLevel, "", e);
 				System.gc();
 			}
 		}
@@ -1427,11 +1439,12 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 	 * @param	flag	オーバースクロールを計算する
 	 */
 	public void scrollMoveAmount(float x, float y, int scroll, boolean flag) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 //		float bx = mScrollBaseX;
 //		float by = mScrollBaseY;
 		scrollMove(x, y, scroll, flag);
-//		Log.d("scrollMoveAmount1", "bx=" + bx + ", by=" + by + " -> bx=" + mScrollBaseX + ", by=" + mScrollBaseY + " (x=" + x + ", y=" + y + ")");
-//		Log.d("scrollMoveAmount2", "left=" + mDrawLeft + ", top=" + mDrawTop + " (x=" + x + ", y=" + y + ")");
+//		Logcat.d(logLevel, "bx=" + bx + ", by=" + by + " -> bx=" + mScrollBaseX + ", by=" + mScrollBaseY + " (x=" + x + ", y=" + y + ")");
+//		Logcat.d(logLevel, "left=" + mDrawLeft + ", top=" + mDrawTop + " (x=" + x + ", y=" + y + ")");
 	}
 
 	/**
@@ -1488,7 +1501,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				if (Math.abs(mOverScrollX) > mOverScrollMax) {
 					mOverScrollX = mOverScrollMax * (mOverScrollX > 0 ? 1 : -1);
 				}
-				//Log.d("overscroll", "overScroll=" + mOverScrollX + ", moveX=" + moveX + ", move=" + (int)(mDrawLeft - orgLeft));
+				//Logcat.d(logLevel, "overScroll=" + mOverScrollX + ", moveX=" + moveX + ", move=" + (int)(mDrawLeft - orgLeft));
 				if (mOverScrollX != 0) {
 					// 減衰開始
 					attenuate();
@@ -1654,13 +1667,16 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 	// 次の位置へスクロールする
 	public boolean setViewPosScroll(int move) {
-		boolean debug = false;
-		Logcat.d(debug, TAG, "saveViewPosScroll: 開始します. move=" + move);
-//		Log.d(TAG, "setViewPosScroll(move=" + move + ", mOverScrollX=" + mOverScrollX +
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. move=" + move);
+
+		mScrollStart = SystemClock.uptimeMillis();
+
+//		Logcat.d(logLevel, "setViewPosScroll(move=" + move + ", mOverScrollX=" + mOverScrollX +
 //				", mPageWay=" + (mPageWay == DEF.PAGEWAY_RIGHT ? "RIGHT" : "LEFT") +
 //				", mDrawLeft=" + mDrawLeft + ", mDrawWidthSum=" + mDrawWidthSum +
 //				", mMgnRight=" + mMgnRight + ", mDispWidth=" + mDispWidth);
-//		Log.d(TAG, "setViewPosScroll(move=" + move +
+//		Logcat.d(logLevel, "setViewPosScroll(move=" + move +
 //				", mDrawLeft + mOverScrollX=" + (mDrawLeft + mOverScrollX) +
 //				", -(mDrawWidthSum + mMgnRight - mDispWidth)=" + (-(mDrawWidthSum + mMgnRight - mDispWidth)));
 		
@@ -1719,8 +1735,9 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		for (int i = 0 ; i < mScrollPos.length ; i++) {
 			int wk_x = (mScrollPos[i].x - (int)(mDrawLeft + mOverScrollX)) * move;
 			int wk_y = (mScrollPos[i].y - (int)mDrawTop) * move;
-			//Log.d(TAG, "setViewPosScroll mScrollPos[" + i +"]=(" + mScrollPos[i].x  + ", " + mScrollPos[i].y + ")" );
-			//Log.d(TAG, "setViewPosScroll wk_x=" + wk_x  + ", wk_y=" + wk_y );
+			mScrollStartPos = new Point(wk_x, wk_y);
+			//Logcat.d(logLevel, "mScrollPos[" + i +"]=(" + mScrollPos[i].x  + ", " + mScrollPos[i].y + ")" );
+			//Logcat.d(logLevel, "wk_x=" + wk_x  + ", wk_y=" + wk_y );
 			if (wk_x >= 0 && wk_y >= 0) {
 				if (min_x == -1 || min_x >= wk_x && min_y >= wk_y) {
 					// 最初のループ又はさらに近い
@@ -1730,7 +1747,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 				}
 			}
 		}
-		//Log.d(TAG, "setViewPosScroll index=" + index + ", min_x=" + min_x  + ", min_y=" + min_y );
+		//Logcat.d(logLevel, "index=" + index + ", min_x=" + min_x  + ", min_y=" + min_y );
 		if (mScrollPos[index].x == (int)(mDrawLeft + mOverScrollX) && mScrollPos[index].y == (int)mDrawTop) {
 			// 丁度その位置なら次へ
 			index += move >= 0 ? 1 : -1;
@@ -1753,16 +1770,44 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		return true;
 	}
 
+	/**
+	 * 	スクロール所要時間が過ぎていればfalse
+	 */
+	public boolean checkScrollTime(int scrlRange) {
+		boolean result = true;
+		long now = SystemClock.uptimeMillis();
+
+		if (mScrollPoint == null || mScrollStartPos == null) {
+			return true;
+		}
+
+		int x_range, x_cnt;
+		int y_range, y_cnt;
+		int move_cnt;
+
+		x_range = mScrollPoint.x - mScrollStartPos.x;
+		y_range = mScrollPoint.y - mScrollStartPos.y;
+
+		x_cnt = (Math.abs(x_range) + scrlRange - 1) / scrlRange;
+		y_cnt = (Math.abs(y_range) + scrlRange - 1) / scrlRange;
+
+		move_cnt = x_cnt > y_cnt ? x_cnt : y_cnt;
+
+		if (now - mScrollStart > (long)move_cnt * DEF.INTERVAL_SCROLL_NEXT) {
+			result = false;
+		}
+		return result;
+	}
+
 	public boolean checkScrollPoint() {
 		return mScrollPoint != null;
 	}
 
 	// 小単位でスクロールしながら目的のポイントへ
 	public boolean moveToNextPoint(int scrlRange){
-		boolean debug = false;
-		Logcat.d(debug, TAG, " 開始します. scrlRange=" + scrlRange);
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, " 開始します. scrlRange=" + scrlRange);
 
-		//Log.d(TAG, "moveToNextPoint(" + scrlRange + ")");
 		int x_range, x_cnt, x_move;
 		int y_range, y_cnt, y_move;
 		int move_cnt;
@@ -1770,6 +1815,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 		boolean result = true;
 		if (mScrollPoint == null) {
 			// 設定なし
+			Logcat.v(logLevel, " 終了します. mScrollPoint == null");
 			return false;
 		}
 
@@ -1812,6 +1858,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 			mScrollPoint = null;
 			result = false;
 		}
+		Logcat.v(logLevel, " 終了します. result=" + result);
 		return result;
 	}
 
@@ -2273,12 +2320,12 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 		Rect rcDrawSrc = new Rect(0, 0, rcDraw.right - rcDraw.left, rcDraw.bottom - rcDraw.top);
 		canvas.drawBitmap(mCanvasBitmap, rcDrawSrc, rcDraw, null);
-//		Log.d("zoom", "left=" + rcDraw.left + ", top=" + rcDraw.top + ", right=" + rcDraw.right + ", bottom=" + rcDraw.bottom);
+//		Logcat.d(logLevel, "left=" + rcDraw.left + ", top=" + rcDraw.top + ", right=" + rcDraw.right + ", bottom=" + rcDraw.bottom);
 	}
 
 	// ズーム用のビットマップを作成
 	public void drawScaling(Canvas canvas, Rect rcDraw, int tch_x, int tch_y, int pinchsel2, boolean pseLand){
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		// 拡大対象位置
 		int src1_cx = 0;	// 元画像でのサイズ
@@ -2576,7 +2623,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					if (debug) {Log.d(TAG,"drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", prevImage.FitWidth=" + prevImage.FitWidth + ", prevImage.FitWidth=" + prevImage.FitHeight);}
+					Logcat.d(logLevel,"pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", prevImage.FitWidth=" + prevImage.FitWidth + ", prevImage.FitWidth=" + prevImage.FitHeight);
 					if (pinch_scale != 0 && prevImage.FitWidth != 0 && prevImage.FitHeight != 0) {
 						// 任意倍率は元画像の何倍なのか
 						float pscale_x = origWidth / prevImage.FitWidth / pinch_scale;
@@ -2630,7 +2677,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					if (debug) {Log.d(TAG,"drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", prev2Image.FitWidth=" + prev2Image.FitWidth + ", prev2Image.FitWidth=" + prev2Image.FitHeight);}
+					Logcat.d(logLevel,"pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", prev2Image.FitWidth=" + prev2Image.FitWidth + ", prev2Image.FitWidth=" + prev2Image.FitHeight);
 					if (pinch_scale != 0 && prev2Image.FitWidth != 0 && prev2Image.FitHeight != 0) {
 						// 任意倍率は元画像の何倍なのか
 						float pscale_x = origWidth / prev2Image.FitWidth / pinch_scale;
@@ -2683,7 +2730,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					if (debug) {Log.d(TAG,"drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", nextImage.FitWidth=" + nextImage.FitWidth + ", nextImage.FitWidth=" + nextImage.FitHeight);}
+					Logcat.d(logLevel,"pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", nextImage.FitWidth=" + nextImage.FitWidth + ", nextImage.FitWidth=" + nextImage.FitHeight);
 					if (pinch_scale != 0 && nextImage.FitWidth != 0 && nextImage.FitHeight != 0) {
 						// 任意倍率は元画像の何倍なのか
 						float pscale_x = origWidth / nextImage.FitWidth / pinch_scale;
@@ -2737,7 +2784,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						rectSrc.offset((cmtn_s - cmtn_d) / 2 * -1, 0);
 					}
 
-					if (debug) {Log.d(TAG,"drawscaling: pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", next2Image.FitWidth=" + next2Image.FitWidth + ", next2Image.FitWidth=" + next2Image.FitHeight);}
+					Logcat.d(logLevel,"pinch_scale=" + pinch_scale + ", origWidth=" + origWidth + ", origHeight=" + origHeight + ", next2Image.FitWidth=" + next2Image.FitWidth + ", next2Image.FitWidth=" + next2Image.FitHeight);
 					if (pinch_scale != 0 && next2Image.FitWidth != 0 && next2Image.FitHeight != 0) {
 						// 任意倍率は元画像の何倍なのか
 						float pscale_x = origWidth / next2Image.FitWidth / pinch_scale;
@@ -2761,7 +2808,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 //		if (pseLand) {
 //			canvas.restore();
 //		}
-//		Log.d("zoom", "left=" + rcDraw.left + ", top=" + rcDraw.top + ", right=" + rcDraw.right + ", bottom=" + rcDraw.bottom);
+//		Logcat.d(logLevel, "left=" + rcDraw.left + ", top=" + rcDraw.top + ", right=" + rcDraw.right + ", bottom=" + rcDraw.bottom);
 	}
 
 	// 表示するルーペのサイズ
@@ -2938,11 +2985,13 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 	@Override
 	public boolean handleMessage(Message msg) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+
 		// 再描画通知
 		switch (msg.what) {
 			case HMSG_ATTENUATE:
 			{
-//				Log.d("handleMsg", "att_count=" + msg.arg1 + ", lastcnt=" + mAttenuateCount);
+//				Logcat.d(logLevel, "att_count=" + msg.arg1 + ", lastcnt=" + mAttenuateCount);
 				if (msg.arg1 == mAttenuateCount) {
 					// 最後に登録したメッセージ
 					if (mOverScrollX > 0) {
@@ -2965,7 +3014,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						nextmsg.arg1 = ++ mAttenuateCount;
 						mHandler.sendMessageAtTime(nextmsg, NextTime);
 					}
-//					Log.d("overscrollMsg", "overScroll=" + mOverScrollX);
+//					Logcat.d(logLevel, "overScroll=" + mOverScrollX);
 				}
 				break;
 			}
@@ -2973,7 +3022,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 			{
 				// 慣性スクロール
 				if (mMomentiumMsg == msg) {
-//					Log.d("moment", "num=" + mMomentiumNum + ", X=" + mMomentiumX + ", Y=" + mMomentiumY);
+//					Logcat.d(logLevel, "num=" + mMomentiumNum + ", X=" + mMomentiumX + ", Y=" + mMomentiumY);
 					long NextTime = SystemClock.uptimeMillis() + MOMENTIUM_TERM;
 					// 最後に登録したメッセージから変化なし
 //					long now = SystemClock.uptimeMillis();
@@ -3036,7 +3085,7 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 						mMomentiumMsg = mHandler.obtainMessage(HMSG_MOMENTIUM, msg.arg1, msg.arg2);
 						mHandler.sendMessageAtTime(mMomentiumMsg, NextTime);
 					}
-//					Log.d("momentiumMsg", "x=" + mMomentiumX + ", y=" + mMomentiumY);
+//					Logcat.d(logLevel, "x=" + mMomentiumX + ", y=" + mMomentiumY);
 				}
 				break;
 			}

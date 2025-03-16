@@ -1,5 +1,6 @@
 package src.comitton.config;
 
+import src.comitton.common.Logcat;
 import src.comitton.helpview.HelpActivity;
 import src.comitton.common.DEF;
 import jp.dip.muracoro.comittonx.R;
@@ -212,7 +213,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 	}
 
 	public static void loadSettings(SharedPreferences sharedPreferences) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		DEF.CHAR_DETECT = sharedPreferences.getBoolean(DEF.KEY_CHAR_DETECT, true);
 		DEF.CHARSET = getCharsetSummary(sharedPreferences);
 
@@ -268,7 +269,7 @@ public class SetCommonActivity extends PreferenceActivity implements OnSharedPre
 		}
 		DEF.PRIORITY_WORDS = priorityWords.toArray(new String[0]);
 
-		if (debug) {Log.d(TAG, "loadSettings: DEF.PRIORITY_WORDS=" + Arrays.toString(DEF.PRIORITY_WORDS));}
+		Logcat.d(logLevel, "DEF.PRIORITY_WORDS=" + Arrays.toString(DEF.PRIORITY_WORDS));
 	}
 	// 終了処理
 	protected void onDestroy() {

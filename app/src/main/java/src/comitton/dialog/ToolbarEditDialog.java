@@ -36,6 +36,7 @@ import java.util.List;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 
 @SuppressLint("NewApi")
 public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListener, SeekBar.OnSeekBarChangeListener {
@@ -47,8 +48,8 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 	private LinearLayout mFooter;
 
 	private String mTitle;
-	private boolean mStates[];
-	private String mItems[];
+	private boolean[] mStates;
+	private String[] mItems;
 
 	private String mDefaultStr;
 	private int mToolbarSize;
@@ -58,7 +59,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 
 	private ItemArrayAdapter mItemArrayAdapter;
 
-	private static final int COMMAND_DRAWABLE[] =
+	private static final int[] COMMAND_DRAWABLE =
 			{
 					R.drawable.arrow_left_to_line,
 					R.drawable.arrow_left_100,
@@ -90,7 +91,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 					R.drawable.pen,
 			};
 
-	public static final int COMMAND_ID[] =
+	public static final int[] COMMAND_ID =
 		{
 			DEF.TOOLBAR_LEFTMOST,
 			DEF.TOOLBAR_LEFT100,
@@ -122,7 +123,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 			DEF.TOOLBAR_EDIT_TOOLBAR,
 		};
 
-	private static final boolean DEFAULT_VALUES[] =
+	private static final boolean[] DEFAULT_VALUES =
 		{
 			true,		// 一番左のページ
 			false,		// 左へ100ページ
@@ -154,7 +155,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 			true,			// ツールバーを編集
 		};
 
-	private static final int COMMAND_RES[] =
+	private static final int[] COMMAND_RES =
 			{
 					R.string.ToolbarLeftmost,		// 一番左のページ
 					R.string.ToolbarLeft100,		// 左へ100ページ
@@ -264,38 +265,34 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 
 	// 設定を読み込み
 	public static boolean[] loadToolbarState(Context context) {
-		boolean debug = false;
-		if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
-		boolean states[] = null;
+		boolean[] states = null;
 		try {
 			Resources res = context.getResources();
 			SharedPreferences sharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
 
-			if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 保存された設定を取得します.");}
+			Logcat.d(logLevel, "保存された設定を取得します.");
 			states = new boolean[COMMAND_ID.length];
 			int count = 0;
 			for (int i = 0; i < states.length; i++) {
 				try {
 					states[i] = sharedPreference.getBoolean(DEF.KEY_PAGE_SELECT_TOOLBAR + COMMAND_ID[i], DEFAULT_VALUES[i]);
-					if (states[i] == true) {
+					if (states[i]) {
 						// 表示する個数
 						count++;
 					}
 				}
 				catch (Exception e) {
-					Log.e("ToolbarEditDialog", "loadToolbarState: ループ1でエラーが発生しました.");
-					if (e.getLocalizedMessage() != null) {
-						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
-					}
-					Log.e("ToolbarEditDialog", "loadToolbarState: i=" + i);
-					Log.e("ToolbarEditDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
+					Logcat.e(logLevel, "ループ1でエラーが発生しました.", e);
+					Logcat.e(logLevel, "COMMAND_ID[" + i + "]=" + COMMAND_ID[i]);
 				}
 			}
 
-			if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 表示するコマンドを設定します.");}
-			int commandId[] = new int[count];
-			String commandStr[] = new String[count];
+			Logcat.d(logLevel, "表示するコマンドを設定します.");
+			int[] commandId = new int[count];
+			String[] commandStr = new String[count];
 			count = 0;
 			for (int i = 0; i < states.length; i++) {
 				try {
@@ -307,32 +304,23 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 					}
 				}
 				catch (Exception e) {
-					Log.e("ToolbarEditDialog", "loadToolbarState: ループ2でエラーが発生しました.");
-					if (e.getLocalizedMessage() != null) {
-						Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
-					}
-					Log.e("ToolbarEditDialog", "loadToolbarState: i=" + i);
-					Log.e("ToolbarEditDialog", "loadToolbarState: COMMAND_ID[i]=" + COMMAND_ID[i]);
+					Logcat.e(logLevel, "ループ2でエラーが発生しました.", e);
+					Logcat.e(logLevel, "COMMAND_ID[" + i + "]=" + COMMAND_ID[i]);
 				}
 			}
-			if (debug) {
-				Log.d("ToolbarEditDialog", "loadToolbarState: 終了します.");
-			}
+			Logcat.d(logLevel, " 終了します.");
 		}
 		catch (Exception e) {
-			Log.e("ToolbarEditDialog", "loadToolbarState: エラーが発生しました.");
-			if (e.getLocalizedMessage() != null) {
-				Log.e("ToolbarEditDialog", "loadToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました.", e);
 		}
-		if (debug) {Log.d("ToolbarEditDialog", "loadToolbarState: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return states;
 	}
 
 	// 設定を保存
-	private void saveToolbarState(Context context, boolean states[]) {
-		boolean debug = false;
-		if (debug) {Log.d("ImageActivity", "saveToolbarState: 開始します. states.length=" + states.length);}
+	private void saveToolbarState(Context context, boolean[] states) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. states.length=" + states.length);
 
 		SharedPreferences sharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor ed = sharedPreference.edit();
@@ -341,15 +329,12 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 				ed.putBoolean(DEF.KEY_PAGE_SELECT_TOOLBAR + COMMAND_ID[i], states[i]);
 			}
 			catch (Exception e) {
-				Log.e("ToolbarEditDialog", "saveToolbarState: エラーが発生しました.");
-				if (e.getLocalizedMessage() != null) {
-					Log.e("ToolbarEditDialog", "saveToolbarState: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました.", e);
 			}
 		}
 		ed.putInt(DEF.KEY_TOOLBAR_SIZE, mSkbBkSize.getProgress());
 		ed.apply();
-		if (debug) {Log.d("ToolbarEditDialog", "saveToolbarState: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	public static float getToolbarRatio(Context context) {
@@ -403,8 +388,8 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 		// 一要素のビューの生成
 		@Override
 		public View getView(int index, View view, ViewGroup parent) {
-			boolean debug = false;
-			if (debug) {Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: 開始します. index=" + index);}
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します. index=" + index);
 
 			// レイアウトの生成
 			CheckBox checkbox;
@@ -467,7 +452,7 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 				});
 			}
 			else {
-				if (debug) {Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: 設定済みのビューを呼び出します. index=" + index);}
+				Logcat.d(logLevel, "設定済みのビューを呼び出します. index=" + index);
 				checkbox = (CheckBox)view.findViewById(0);
 				imageview = (ImageView)view.findViewById(1);
 				textview = (TextView)view.findViewById(2);
@@ -479,16 +464,14 @@ public class ToolbarEditDialog extends ImmersiveDialog implements OnClickListene
 
 			if (imageview != null) {
 				if (0 <= index && index < COMMAND_DRAWABLE.length) {
-					if (debug) {
-						Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: アイコンをセットします. index=" + index);
-					}
+					Logcat.d(logLevel, "アイコンをセットします. index=" + index);
 					drawable = mActivity.getDrawable(COMMAND_DRAWABLE[index]);
 					drawable.setTint(mActivity.getResources().getColor(R.color.white1));
 					imageview.setImageDrawable(drawable);
 				}
 			}
 			else {
-				Log.d("ToolbarEditDialog", "ItemArrayAdapter: getView: ImageViewがnullです. index=" + index);
+				Logcat.d(logLevel, "ImageViewがnullです. index=" + index);
 			}
 
 			textview.setText(mItems[index]);

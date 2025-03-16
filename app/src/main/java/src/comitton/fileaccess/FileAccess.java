@@ -30,6 +30,7 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbRandomAccessFile;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.FileData;
 
 public class FileAccess {
@@ -76,8 +77,8 @@ public class FileAccess {
 
 	// 相対パスを絶対パスに変換
 	public static String filename(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "filename: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		String result = "";
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -93,15 +94,14 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "filename: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// ファイル存在チェック
 	public static String parent(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "parent: 開始します. uri=" + uri);}
-		//if (debug) {DEF.StackTrace(TAG, "parent: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String result = "";
 		switch (accessType(uri)) {
@@ -123,9 +123,8 @@ public class FileAccess {
 
 	// 相対パスを絶対パスに変換
 	public static String relativePath(@NonNull final Context context, @NonNull final String base, @NonNull final String target) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "relativePath: 開始します. base=" + base + ", target=" + target);}
-		//if (debug) {DEF.StackTrace(TAG, "relativePath: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. base=" + base + ", target=" + target);
 
 		String result = target;
 		switch (accessType(base)) {
@@ -142,13 +141,13 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "relativePath: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static long length(@NonNull final Context context, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG,"length: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します. uri=" + uri);
 
 		long length = 0;
 		switch (accessType(uri)) {
@@ -165,38 +164,38 @@ public class FileAccess {
 				break;
 			}
 		}
-		if(debug) {Log.d(TAG, MessageFormat.format("length: 終了します. length={0}", new Object[]{length}));}
+		Logcat.d(logLevel, MessageFormat.format("終了します. length={0}", new Object[]{length}));
 		return length;
 	}
 
 	public long length() throws FileAccessException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG,"length: 開始します. uri=" + mURI);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します. uri=" + mURI);
 
 		long length = 0;
 		switch (accessType(mURI)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
-				if (debug) {Log.d(TAG, "length: LOCAL:");}
+				Logcat.d(logLevel, "LOCAL:");
 				try {
 					if (mRandomAccessFile == null) {
 						open("r");
 					}
 					length = mRandomAccessFile.length();
 				} catch (IOException e) {
-					Log.e(TAG, "length: LOCAL: " + e.getLocalizedMessage());
+					Logcat.e(logLevel, "LOCAL:", e);
 					throw new FileAccessException(TAG + ": length: LOCAL: " + e.getLocalizedMessage());
 				}
 				break;
 			}
 			case DEF.ACCESS_TYPE_SMB: {
-				if (debug) {Log.d(TAG, "length: SMB:");}
+				Logcat.d(logLevel, "SMB:");
 				try {
 					if (mSmbRandomAccessFile == null) {
 						open("r");
 					}
 					length = mSmbRandomAccessFile.length();
 				} catch (IOException e) {
-					Log.e(TAG, "length: SMB: " + e.getLocalizedMessage());
+					Logcat.e(logLevel, "SMB:", e);
 					throw new FileAccessException(TAG + ": length: SMB: " + e.getLocalizedMessage());
 				}
 				break;
@@ -208,13 +207,13 @@ public class FileAccess {
 					}
 					length = mSafRandomAccessFile.length();
 				} catch (IOException e) {
-					Log.e(TAG, "length: SAF: " + e.getLocalizedMessage());
+					Logcat.e(logLevel, "SAF:", e);
 					throw new FileAccessException(TAG + ": length: SAF: " + e.getLocalizedMessage());
 				}
 				break;
 			}
 		}
-		if(debug) {Log.d(TAG, MessageFormat.format("length: 終了します. length={0}", new Object[]{length}));}
+		Logcat.d(logLevel, MessageFormat.format("終了します. length={0}", new Object[]{length}));
 		return length;
 	}
 
@@ -223,8 +222,8 @@ public class FileAccess {
 	}
 
 	public static ParcelFileDescriptor openParcelFileDescriptor(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass, @NonNull final Context context, @Nullable Handler handler) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		ParcelFileDescriptor parcelFileDescriptor = null;
 		switch (accessType(uri)) {
@@ -241,7 +240,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return parcelFileDescriptor;
 	}
 
@@ -251,14 +250,14 @@ public class FileAccess {
 
 	// RandomAccessFile
 	public void openRandomAccessFile(@NonNull final String mode) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openRandomAccessFile: 開始します. uri=" + mURI + ", mode=" + mode);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + mURI + ", mode=" + mode);
 
 		switch (accessType(mURI)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
 				mRandomAccessFile = LocalFileAccess.openRandomAccessFile(mURI, mode);
 				if (mRandomAccessFile == null) {
-					Log.e(TAG, "openRandomAccessFile: LOCAL: mRandomAccessFile == null");
+					Logcat.e(logLevel, "LOCAL: mRandomAccessFile == null");
 					throw new FileAccessException(TAG + "openRandomAccessFile: LOCAL: mRandomAccessFile == null");
 				}
 				break;
@@ -266,7 +265,7 @@ public class FileAccess {
 			case DEF.ACCESS_TYPE_SMB: {
 				mSmbRandomAccessFile = SmbFileAccess.openRandomAccessFile(mURI, mUser, mPass, mode);
 				if (mSmbRandomAccessFile == null) {
-					Log.e(TAG, "openRandomAccessFile: SMB: mSmbRandomAccessFile == null");
+					Logcat.e(logLevel, "SMB: mSmbRandomAccessFile == null");
 					throw new FileAccessException(TAG + "openRandomAccessFile: SMB: mSmbRandomAccessFile == null");
 				}
 				break;
@@ -274,18 +273,18 @@ public class FileAccess {
 			case DEF.ACCESS_TYPE_SAF: {
 				mSafRandomAccessFile = SafFileAccess.openRandomAccessFile(mActivity, mURI, mode);
 				if (mSafRandomAccessFile == null) {
-					Log.e(TAG, "openRandomAccessFile: SAF: mSafRandomAccessFile == null");
+					Logcat.e(logLevel, "SAF: mSafRandomAccessFile == null");
 					throw new FileAccessException(TAG + "openRandomAccessFile: SAF: mSafRandomAccessFile == null");
 				}
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "openRandomAccessFile: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	public void seek(@NonNull final long pos) throws IOException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "seek: 開始します. uri=" + mURI + ", pos=" + pos);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + mURI + ", pos=" + pos);
 		switch (accessType(mURI)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
 				mRandomAccessFile.seek(pos);
@@ -295,11 +294,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {Log.d(TAG, "seek: UIスレッドではありません.");}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					mSmbRandomAccessFile.seek(pos);
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {Log.d(TAG, "seek: UIスレッドです.");}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					executor.submit(new Runnable() {
 						@Override
@@ -315,12 +314,12 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "seek: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	public long getFilePointer() throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "getFilePointer: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		long result = 0l;
 		switch (accessType(mURI)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -332,15 +331,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {
-						Log.d(TAG, "read: UIスレッドではありません.");
-					}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					result = mSmbRandomAccessFile.getFilePointer();
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {
-						Log.d(TAG, "read: UIスレッドです.");
-					}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Long> future = executor.submit(new Callable<Long>() {
 
@@ -353,7 +348,7 @@ public class FileAccess {
 					try {
 						result = future.get();
 					} catch (Exception e) {
-						Log.e(TAG, "read: File read error. " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "File read error.", e);
 						result = 0l;
 					}
 				}
@@ -364,13 +359,13 @@ public class FileAccess {
 				break;
 			}
 		}
-		if(debug) {Log.d(TAG, "getFilePointer: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
 	}
 
 	public int read(@NonNull byte[] buf, int off, int size) throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, MessageFormat.format("read: 開始します. pos={0}, off={1}, size={2}, pos+off+size={3}, length={4}", new Object[]{getFilePointer(), off, size, getFilePointer()+off+size, length()}));}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, MessageFormat.format("開始します. pos={0}, off={1}, size={2}, pos+off+size={3}, length={4}", new Object[]{getFilePointer(), off, size, getFilePointer()+off+size, length()}));
 		int result = 0;
 		switch (accessType(mURI)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -382,15 +377,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {
-						Log.d(TAG, "read: UIスレッドではありません.");
-					}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					result = mSmbRandomAccessFile.read(buf, off, size);
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {
-						Log.d(TAG, "read: UIスレッドです.");
-					}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Integer> future = executor.submit(new Callable<Integer>() {
 
@@ -403,7 +394,7 @@ public class FileAccess {
 					try {
 						result = future.get();
 					} catch (Exception e) {
-						Log.e(TAG, "read: File read error. " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "read: File read error.", e);
 						result = 0;
 					}
 				}
@@ -414,13 +405,13 @@ public class FileAccess {
 				break;
 			}
 		}
-		if(debug) {Log.d(TAG, MessageFormat.format("read: 終了します. ret={0}, off={1}, mPos={2}, length={3}", new Object[]{result, off, getFilePointer(), length()}));}
+		Logcat.d(logLevel, MessageFormat.format("終了します. ret={0}, off={1}, mPos={2}, length={3}", new Object[]{result, off, getFilePointer(), length()}));
 		return result;
 	}
 
 	public void write(@NonNull final byte[] buf, final int off, final int size) throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, MessageFormat.format("write: 開始します. off={0}, size={1}", new Object[]{off, size}));}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, MessageFormat.format("開始します. off={0}, size={1}", new Object[]{off, size}));
 
 		switch (accessType(mURI)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -432,11 +423,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {Log.d(TAG, "write: UIスレッドではありません.");}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					mSmbRandomAccessFile.write(buf, off, size);
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {Log.d(TAG, "write: UIスレッドです.");}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Boolean> future = executor.submit(new Callable<Boolean>() {
 
@@ -450,7 +441,7 @@ public class FileAccess {
 					try {
 						future.get();
 					} catch (Exception e) {
-						Log.e(TAG, "delete: File read error. " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "File read error.", e);
 					}
 				}
 				break;
@@ -460,12 +451,12 @@ public class FileAccess {
 				break;
 			}
 		}
-		if(debug) {Log.d(TAG,"write: 終了します.");}
+		Logcat.d(logLevel,"終了します.");
 	}
 
 	public void close() throws IOException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "close: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		// たまにフリーズするので非同期処理にする
 		ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -495,14 +486,14 @@ public class FileAccess {
 					if (mSafFile != null) {
 						mSafFile = null;
 					}
-					if(debug) {Log.d(TAG, "close: 非同期処理を終了します.");}
+					Logcat.d(logLevel, "非同期処理を終了します.");
 				} catch (Exception e) {
-					Log.e(TAG, "close: Error： " + e.getLocalizedMessage());
+					Logcat.e(logLevel, "", e);
 				}
             }
 		});
 
-		if(debug) {Log.d(TAG, "close: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	// InputStreamを返す
@@ -513,8 +504,8 @@ public class FileAccess {
 
 	// InputStreamを返す
 	public static InputStream getInputStream(@NonNull final Context context, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getInputStream: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		InputStream result = null;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -530,7 +521,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "getInputStream: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
 	}
 
@@ -542,8 +533,8 @@ public class FileAccess {
 
 	// OutputStreamを返す
 	public static OutputStream getOutputStream(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getOutputStream: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		OutputStream result = null;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -559,7 +550,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "getOutputStream: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
 	}
 
@@ -569,8 +560,8 @@ public class FileAccess {
 
 	// ファイル存在チェック
 	public static boolean exists(@NonNull final Context context, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "exists: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		boolean result = false;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -581,15 +572,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {
-						Log.d(TAG, "delete: UIスレッドではありません.");
-					}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					result = SmbFileAccess.exists(uri, user, pass);
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {
-						Log.d(TAG, "delete: UIスレッドです.");
-					}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Boolean> future = executor.submit(new Callable<Boolean>() {
 
@@ -602,7 +589,7 @@ public class FileAccess {
 					try {
 						result = future.get();
 					} catch (Exception e) {
-						Log.e(TAG, "delete: File read error. " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "File read error.", e);
 						result = false;
 					}
 				}
@@ -613,7 +600,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "exists: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
 	}
 
@@ -622,8 +609,8 @@ public class FileAccess {
 	}
 
 	public static boolean isDirectory(@NonNull final Context context, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "isDirectory: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		boolean result = false;
 		switch (accessType(uri)) {
@@ -640,7 +627,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "isDirectory: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
@@ -649,9 +636,8 @@ public class FileAccess {
 	}
 
 	public static ArrayList<FileData> listFiles(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass, @Nullable Handler handler) throws FileAccessException {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "listFiles: 開始します. uri=" + uri + ", user=" + user + ", pass=" + pass);}
-		//if (debug) {DEF.StackTrace(TAG, "listFiles: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", user=" + user + ", pass=" + pass);
 
 		ArrayList<FileData> result = new ArrayList<FileData>(0);
 		switch (accessType(uri)) {
@@ -668,7 +654,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if(debug) {Log.d(TAG, "listFiles: 終了します. result.size()=" + result.size());}
+		Logcat.d(logLevel, "終了します. result.size()=" + result.size());
 		return result;
 	}
 
@@ -677,8 +663,8 @@ public class FileAccess {
 	}
 
 	public static boolean renameTo(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "renameTo: 開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
 		boolean result = false;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -694,7 +680,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "renameTo: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
@@ -704,8 +690,8 @@ public class FileAccess {
 
 	// タイムスタンプ
 	public static long date(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "date: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		long result = 0L;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -716,15 +702,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {
-						Log.d(TAG, "date: UIスレッドではありません.");
-					}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					result = SmbFileAccess.date(uri, user, pass);
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {
-						Log.d(TAG, "date: UIスレッドです.");
-					}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Long> future = executor.submit(new Callable<Long>() {
 
@@ -737,7 +719,7 @@ public class FileAccess {
 					try {
 						result = future.get();
 					} catch (Exception e) {
-						Log.e(TAG, "date: File read error. " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "File read error.", e);
 						result = 0L;
 					}
 				}
@@ -748,7 +730,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "date: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
@@ -758,8 +740,8 @@ public class FileAccess {
 
 	// ファイル削除
 	public static boolean delete(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String user, @NonNull final String pass) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "delete: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		boolean result = false;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -770,15 +752,11 @@ public class FileAccess {
 				// SMBなら
 				if (!DEF.isUiThread()) {
 					// UIスレッドではない時はそのまま実行
-					if (debug) {
-						Log.d(TAG, "delete: UIスレッドではありません.");
-					}
+					Logcat.d(logLevel, "UIスレッドではありません.");
 					result = SmbFileAccess.delete(uri, user, pass);
 				} else {
 					// UIスレッドの時は新しいスレッド内で実行
-					if (debug) {
-						Log.d(TAG, "delete: UIスレッドです.");
-					}
+					Logcat.d(logLevel, "UIスレッドです.");
 					ExecutorService executor = Executors.newSingleThreadExecutor();
 					Future<Boolean> future = executor.submit(new Callable<Boolean>() {
 
@@ -791,7 +769,7 @@ public class FileAccess {
 					try {
 						result = future.get();
 					} catch (Exception e) {
-						Log.e(TAG, "delete: File read error. " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "File read error.", e);
 						result = false;
 					}
 				}
@@ -802,7 +780,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "delete: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
@@ -812,8 +790,8 @@ public class FileAccess {
 
 	// ディレクトリ作成
 	public static boolean mkdir(@NonNull final Context context, @NonNull final String uri, @NonNull final String item, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "mkdir: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 		boolean result = false;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -829,14 +807,14 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "mkdir: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// ファイル作成
 	public static boolean createFile(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String item, @NonNull final String user, @NonNull final String pass) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 		boolean result = false;
 		switch (accessType(uri)) {
 			case DEF.ACCESS_TYPE_LOCAL: {
@@ -852,7 +830,7 @@ public class FileAccess {
 				break;
 			}
 		}
-		if (debug) {Log.d(TAG, "createFile: 終了します. result=" + result);}
+		Logcat.d(logLevel, " 終了します. result=" + result);
 		return result;
 	}
 
@@ -862,12 +840,13 @@ public class FileAccess {
 	 * @return A list of external SD card paths.
 	 */
 	public static String[] getExtSdCardPaths(@NonNull final Context context) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		List<String> paths = new ArrayList<>();
 		for (File file : context.getExternalFilesDirs("external")) {
 			if (file != null) {
 				int index = file.getAbsolutePath().lastIndexOf("/Android/data");
 				if (index < 0) {
-					Log.w(TAG, "getExtSdCardPaths: Unexpected external file dir: " + file.getAbsolutePath());
+					Logcat.w(logLevel, "Unexpected external file dir: " + file.getAbsolutePath());
 				}
 				else {
 					String path = file.getAbsolutePath().substring(0, index);

@@ -21,7 +21,6 @@ import src.comitton.common.ThumbnailLoader;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -46,8 +45,8 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	public FileThumbnailLoader(AppCompatActivity activity, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int filesort, boolean hidden, boolean thumbsort, int crop, int margin, boolean epubThumb, boolean epubViewer) {
 		super(activity, uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "FileThumbnailLoader: 開始します. epubThumb=" + epubThumb);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. epubThumb=" + epubThumb);
 
 		mSkip = false;
 
@@ -86,25 +85,30 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	// 解放
 	public void releaseThumbnail() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		super.releaseThumbnail();
 	}
 
 	// スレッド停止
 	public void breakThread() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "breakThread: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		super.breakThread();
 	}
 
 	// ImageManager を解放する
 	public void releaseManager() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		// 意図的にExceptionを発生させるためスレッドセーフにしない
 		if (mImageMgr != null) {
 			//mImageMgr.setBreakTrigger();
 			try {
+				Logcat.v(logLevel, "mImageMgr.close() cacheIndex=" + mImageMgr.getCacheIndex());
 				mImageMgr.close();
 			} catch (IOException e) {
-				;
+				Logcat.w(logLevel, "mImageMgr.close() cacheIndex=" + mImageMgr.getCacheIndex(), e);
 			}
 			mImageMgr = null;
 		}
@@ -149,8 +153,8 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	// 表示中の範囲を設定
 	public void setDispRange(int firstindex, int lastindex) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG,"setDispRange: 開始します. firstindex=" + firstindex + ", lastindex=" + lastindex);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します. firstindex=" + firstindex + ", lastindex=" + lastindex);
 
 		if (mFirstIndex != firstindex || mLastIndex != lastindex) {
 			// スクロール位置に変化があったら実行する
@@ -173,6 +177,11 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 								// ソートが成功するまでループする
 								try {
 									Collections.sort(mFiles, mComparator);
+									if (logLevel <= Logcat.LOG_LEVEL_VERBOSE) {
+										for (int i = 0; i < mFiles.size(); ++i) {
+											Logcat.v(logLevel, "mFiles[" + i + "]=" + mFiles.get(i).getIndex() + " : " + mFiles.get(i).getName());
+										}
+									}
 									break;
 								} catch (ConcurrentModificationException e) {
 									continue;
@@ -187,12 +196,12 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			});
 		}
 
-		if (debug) {Log.d(TAG,"setDispRange: 終了します.");}
+		Logcat.d(logLevel,"終了します.");
 	}
 
 	protected void interruptThread() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG,"interruptThread: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します.");
 		mSkip = true;
 		releaseManager();
 		if (mWaitFor != null) {
@@ -202,8 +211,8 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	// スレッド開始
 	public void run() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "run: 開始します. mPath=" + mPath);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. mPath=" + mPath);
 
 		if (mFiles.isEmpty()) {
 			return;
@@ -248,41 +257,41 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	@SuppressLint("SuspiciousIndentation")
     private void loadFileCache(FileData file) throws CacheException {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		int index = file.getIndex();
 		String filename = file.getName();
 		String uri = DEF.relativePath(mActivity,mURI, mPath, filename);
 		String pathcode = DEF.makeCode(uri, mThumbSizeW, mThumbSizeH);
 
-		if (debug) {Log.d(TAG,"index=" + index + " loadFileCache: 開始します. filename=" + filename);}
+		Logcat.d(logLevel,"index=" + index + " loadFileCache: 開始します. filename=" + filename);
 
         boolean retCode = searchFileCache(file, uri, pathcode);
 
         if (!retCode) {
 			// ファイルキャッシュの保存に失敗していたらNo Imageを登録する
 			CallImgLibrary.ThumbnailSetNone(mID, index);
-			if (debug) {Log.d(TAG,"index=" + index + " loadFileCache: 空で登録しました.");}
+			Logcat.d(logLevel,"index=" + index + " loadFileCache: 空で登録しました.");
 		}
 
 		if (retCode) {
 			// ファイルキャッシュの保存に成功していたらメモリキャッシュを更新する
 			mThumbnailCacheLoader.interruptThread();
-			if (debug) {Log.d(TAG,"index=" + index + " loadFileCache: 通知しました.");}
+			Logcat.d(logLevel,"index=" + index + " loadFileCache: 通知しました.");
 		}
 
 	}
 
 	private boolean searchFileCache(FileData file, String uri, String pathcode) throws CacheException {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		int index = file.getIndex();
 		String filename = file.getName();
 
-		if (debug) {Log.d(TAG,"index=" + index + " searchFileCache: 開始します. Filename=" + filename);}
+		Logcat.d(logLevel,"index=" + index + " 開始します. Filename=" + filename);
 
 		if (mThreadBreak) {
-			if (debug) {Log.d(TAG, "index=" + index + " searchFileCache: 中断されました.");}
+			Logcat.d(logLevel, "index=" + index + " 中断されました.");
 			throw new CacheException(TAG + ": index=" + index + " searchFileCache: 中断されました.");
 		}
 
@@ -290,19 +299,19 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 		// ディレクトリ(簡易判定)の場合は中のファイルを参照
 		if (FileAccess.isDirectory(mActivity, uri, mUser, mPass)) {
-			if (debug) {Log.d(TAG,"index=" + index + " searchFileCache: ディレクトリの中を検索します.");}
+			Logcat.d(logLevel,"index=" + index + " ディレクトリの中を検索します.");
 			try {
 				inFiles = FileAccess.listFiles(mActivity, uri, mUser, mPass, null);
 			} catch (FileAccessException e) {
-				Log.e(TAG, "saveBitmap: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "saveBitmap: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 				throw new CacheException(TAG + ": index=" + index + " searchFileCache: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 			}
 
 			if (inFiles.isEmpty()) {
-				if (debug) {Log.d(TAG,"index=" + index + " searchFileCache: ディレクトリの中は空でした.");}
+				Logcat.d(logLevel,"index=" + index + " ディレクトリの中は空でした.");
 				return false;
 			}
-			if (debug) {Log.d(TAG,"index=" + index + " searchFileCache: ディレクトリに " + inFiles.size() + " 個のファイルがあります.");}
+			Logcat.d(logLevel,"index=" + index + " ディレクトリに " + inFiles.size() + " 個のファイルがあります.");
 			for (int i = 0; i < inFiles.size(); i++) {
 
 				if (inFiles.get(i).getType() == FileData.FILETYPE_NONE || inFiles.get(i).getType() == FileData.FILETYPE_TXT || inFiles.get(i).getType() == FileData.FILETYPE_EPUB_SUB) {
@@ -310,7 +319,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				}
 
 				if (mThreadBreak) {
-					if (debug) {Log.d(TAG, "index=" + index + " searchFileCache: 中断されました.");}
+					Logcat.d(logLevel, "index=" + index + " 中断されました.");
 					throw new CacheException(TAG + ": index=" + index + " searchFileCache: 中断されました.");
 				}
 
@@ -319,12 +328,12 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				String inUri = DEF.relativePath(mActivity, uri, inFile.getName());
 
 				if (inFile.getType() == FileData.FILETYPE_DIR) {
-					if (debug) {Log.d(TAG,"index=" + index + " searchFileCache: ディレクトリの中にディレクトリがあります. inFilename=" + inFilename);}
+					Logcat.d(logLevel,"index=" + index + " ディレクトリの中にディレクトリがあります. inFilename=" + inFilename);
 					if (searchFileCache(inFile, inUri, pathcode)) {
 							return true;
 					}
 				} else {
-					if (debug) {Log.d(TAG,"index=" + index + " searchFileCache: ディレクトリの中にファイルがあります. inFilename=" + inFilename);}
+					Logcat.d(logLevel,"index=" + index + " ディレクトリの中にファイルがあります. inFilename=" + inFilename);
 					if (saveFileCache(inFile, inUri, pathcode)) {
 						return true;
 					}
@@ -340,18 +349,18 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	}
 
 	private boolean saveFileCache(FileData file, String uri, String pathcode) throws CacheException {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		int index = file.getIndex();
 		String filename = file.getName();
 
-		if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: filename=" + filename);}
+		Logcat.d(logLevel, "index=" + index + ", filename=" + filename);
 		// ビットマップ読み込み
 
 		Bitmap bm;
 
 		if (mThreadBreak) {
-			if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: 中断されました. filename=" + filename);}
+			Logcat.d(logLevel, "index=" + index + ", 中断されました. filename=" + filename);
 			throw new CacheException(TAG + ": saveFileCache: 中断されました.");
 		}
 
@@ -367,7 +376,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			mImageMgr = new ImageManager(mActivity, mUriPath, uri, mUser, mPass, mFileSort, mHandler, mHidden, openmode, 1);
 
 			if (mThreadBreak) {
-				if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: 中断されました. filename=" + filename);}
+				Logcat.d(logLevel, "index=" + index + ", 中断されました. filename=" + filename);
 				throw new CacheException(TAG + ": saveFileCache: 中断されました.");
 			}
 
@@ -375,14 +384,15 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				throw new CacheException("saveFileCache: スキップします.");
 			}
 
-			if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: サムネイル取得します. filename=" + filename);}
+			Logcat.d(logLevel, "index=" + index + ", サムネイル取得します. filename=" + filename);
 			if (mEpubThumb && file.getType() == FileData.FILETYPE_EPUB) {
-				if (debug) {Log.d(TAG, "index=" + index + "saveFileCache: LoadEpubThumbnail を実行します. width=" + mThumbSizeW + ", height=" + mThumbSizeH + " filename=" + filename);}
+				Logcat.d(logLevel, "index=" + index + ", LoadEpubThumbnail を実行します. width=" + mThumbSizeW + ", height=" + mThumbSizeH + " filename=" + filename);
 				bm = mImageMgr.LoadEpubThumbnail(mThumbSizeW, mThumbSizeH);
 			} else {
-				if (debug) {Log.d(TAG, "index=" + index + "saveFileCache: LoadThumbnail を実行します. page=0, width=" + mThumbSizeW + ", height=" + mThumbSizeH + " filename=" + filename);}
+				Logcat.d(logLevel, "index=" + index + ", LoadThumbnail を実行します. page=0, width=" + mThumbSizeW + ", height=" + mThumbSizeH + " filename=" + filename);
 				bm = mImageMgr.LoadThumbnail(0, mThumbSizeW, mThumbSizeH);
 			}
+			Logcat.v(logLevel, "new ImageManager() cacheIndex=" + mImageMgr.getCacheIndex());
 			releaseManager();
 		}
 		catch (CacheException e) {
@@ -391,10 +401,10 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		}
 		catch (Exception e) {
 			releaseManager();
-			Logcat.e(TAG, "index=" + index + " saveFileCache: エラーが発生しました. filename=" + filename, e, true);
+			Logcat.e(logLevel, "index=" + index + ", エラーが発生しました. filename=" + filename, e, true);
 
 			if (mThreadBreak) {
-				if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: 中断されました. filename=" + filename, e);}
+				Logcat.d(logLevel, "index=" + index + ", 中断されました. filename=" + filename, e);
 				throw new CacheException(TAG + ": saveFileCache: 中断されました: " + e);
 			}
 
@@ -410,14 +420,14 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		}
 
 		if (bm != null) {
-			if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: 画像データを取得しました. filename=" + filename);}
+			Logcat.d(logLevel, "index=" + index + ", 画像データを取得しました. filename=" + filename);
 		}
 		else {
-			Log.w(TAG, "index=" + index + " saveFileCache: 画像データを取得できませんでした. filename=" + filename);
+			Logcat.w(logLevel, "index=" + index + ", 画像データを取得できませんでした. filename=" + filename);
 			return false;
 		}
 
-		if (debug) {Log.d(TAG, "index=" + index + " saveFileCache: ファイルキャッシュに登録します. filename=" + filename);}
+		Logcat.d(logLevel, "index=" + index + ", ファイルキャッシュに登録します. filename=" + filename);
 		saveCache(bm, pathcode);
 
 		return true;

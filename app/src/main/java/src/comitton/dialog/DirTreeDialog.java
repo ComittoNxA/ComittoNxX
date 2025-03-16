@@ -26,6 +26,7 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.FileListItem;
 import src.comitton.fileview.view.MenuItemView;
 import src.comitton.fileview.view.list.PageTextView;
@@ -133,7 +134,7 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 	}
 
 	public void addFileList(FileListItem[] fileList) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 
 		ArrayList<MyItem> itemList = new ArrayList<MyItem>(0);
 		String file = "";
@@ -142,7 +143,7 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 			file = fileList[i].name;
 			dir = file.substring(0, file.lastIndexOf('/') + 1);
 			if (!dir.equals(prev_dir)) {
-				if (debug) {Log.d("DirTreeDialog", "addFileList: 新しいディレクトリです. i=" + i + ", length=" + dir.length() + ", dir=" + dir);}
+				Logcat.d(logLevel, "新しいディレクトリです. i=" + i + ", length=" + dir.length() + ", dir=" + dir);
 				int index = 0;
 				while ((index = dir.indexOf('/', index + 1)) >= 0) {
 					boolean exist = false;
@@ -154,7 +155,7 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 						}
 					}
 					if (!exist) {
-						if (debug) {Log.d("DirTreeDialog", "addFileList: リストに追加します. i=" + i + ", sub_dir=" + sub_dir);}
+						Logcat.d(logLevel, "リストに追加します. i=" + i + ", sub_dir=" + sub_dir);
 						itemList.add(new MyItem(i, dir.substring(0, index)));
 					}
 				}
@@ -172,10 +173,10 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 			parentLayout = mLinear;
 			int page = itemList.get(i).getPage();
 			String title = itemList.get(i).getTitle();
-			if (debug) {Log.d("DirTreeDialog", "addFileList: レイアウトに追加します. i=" + i + ", page=" + page + ", title=" + title);}
+			Logcat.d(logLevel, "レイアウトに追加します. i=" + i + ", page=" + page + ", title=" + title);
 			int pre_index = -1;
 			int index = title.indexOf('/');
-			if (debug) {Log.d("DirTreeDialog", "addFileList: 文字列を分割します. index=" + index + ", pre_index=" + pre_index + ", length=" + title.length());}
+			Logcat.d(logLevel, "文字列を分割します. index=" + index + ", pre_index=" + pre_index + ", length=" + title.length());
 			while (index >= 0) {
 				sub_dir = title.substring(pre_index + 1, index);
 				for (int j = 0; j < parentLayout.getChildCount(); j++) {
@@ -184,7 +185,7 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 						parentExpandItem = (LinearLayout) v;
 						parentTitleView = (PageTextView) parentExpandItem.findViewById(R.id.title);
 						if (sub_dir.equals(parentTitleView.getText())) {
-							if (debug) {Log.d("DirTreeDialog", "addFileList: 親に設定します. parentTitleView.getText()=" + parentTitleView.getText());}
+							Logcat.d(logLevel, "親に設定します. parentTitleView.getText()=" + parentTitleView.getText());
 							parentArrow = (ImageView) parentExpandItem.findViewById(R.id.expand_arrow);
 							parentArrow.setImageDrawable(mActivity.getDrawable(R.drawable.expand_arrow));
 							parentLayout = (LinearLayout) parentExpandItem.findViewById(R.id.child_layout);
@@ -193,14 +194,14 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 				}
 				pre_index = index;
 				index = title.indexOf('/', pre_index + 1);
-				if (debug) {Log.d("DirTreeDialog", "addFileList: 文字列を分割します2. index=" + index + ", pre_index=" + pre_index + ", length=" + title.length());}
+				Logcat.d(logLevel, "文字列を分割します2. index=" + index + ", pre_index=" + pre_index + ", length=" + title.length());
 			}
 
 			if (parentLayout.equals(mLinear)) {
-				if (debug) {Log.d("DirTreeDialog", "addFileList: parentLayout=mLinear, dir=" + dir);}
+				Logcat.d(logLevel, "parentLayout=mLinear, dir=" + dir);
 			}
 			else {
-				if (debug) {Log.d("DirTreeDialog", "addFileList: parentLayout=" + parentTitleView.getText() + ", dir=" + dir);}
+				Logcat.d(logLevel, "parentLayout=" + parentTitleView.getText() + ", dir=" + dir);
 			}
 
 			LayoutInflater layoutInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -236,14 +237,14 @@ public class DirTreeDialog extends ImmersiveDialog implements OnTouchListener, O
 	private View mSelectView;
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		// タッチイベント
 		int action = event.getAction();
 
-		String eventName[] = { "DOWN" , "UP" , "MOVE" , "CANCEL" , "OUTSIDE" ,
+		String[] eventName = { "DOWN" , "UP" , "MOVE" , "CANCEL" , "OUTSIDE" ,
 				"POINTER_DOWN" , "POINTER_UP" , "HOVER_MOVE" , "SCROLL" , "HOVER_ENTER" ,
 				"HOVER_EXIT" , "BUTTON_PRESS" , "BUTTON_RELEASE" };
-		if (debug) {Log.d("TabDialogFragment", "onTouch: view=" + v + ", action=" + eventName[action]);}
+		Logcat.d(logLevel, "view=" + v + ", action=" + eventName[action]);
 
 		if (v instanceof PageTextView) {
 			if (action == MotionEvent.ACTION_DOWN) {

@@ -31,14 +31,15 @@ import java.util.List;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.FileData;
 
 public class SafFileAccess {
 	private static final String TAG = "SafFileAccess";
 
 	public static String filename(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "filename: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -51,36 +52,31 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			name = "";
-			Log.e(TAG, "filename: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "filename: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "filename: 終了します. name=" + name);}
+		Logcat.d(logLevel, "終了します. name=" + name);
 		return name;
 	}
 
 	public static String parent(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "parent: 開始します. uri=" + uri);}
-		if (debug) {Log.d(TAG, "parent: サポート外です.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.w(logLevel, "サポート外です.");
 		return "";
 	}
 
 	public static String relativePath(@NonNull final Context context, @NonNull final String base, @NonNull final String target) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "relativePath: 開始します. base=" + base + ", target=" + target);}
-		//if (debug) {DEF.StackTrace(TAG, "relativePath: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. base=" + base + ", target=" + target);
 
 		// baseから末尾のスラッシュを除いた文字列を結果の初期値に代入する
 		String result = base.replaceFirst("/*$", "");
-		if (debug) {Log.d(TAG, "relativePath: 初期化します. result=" + result);}
+		Logcat.d(logLevel, "初期化します. result=" + result);
 
 		if (target.startsWith("content://")) {
 			// targetがcontent://で始まるならtargeを返す
 			result = target;
-			if (debug) {Log.d(TAG, "relativePath: target が content:// で始まっています. result=" + result);}
+			Logcat.d(logLevel, "target が content:// で始まっています. result=" + result);
 		}
 		else {
 			Cursor cursor = null;
@@ -94,22 +90,22 @@ public class SafFileAccess {
 
 				ContentProviderClient contentProviderClient = contentResolver.acquireContentProviderClient(Uri.parse(result));
 				if (contentProviderClient == null) {
-					Log.e(TAG, "relativePath: " + context.getString(R.string.noResponseProvider) + ", base=" + base + ", target=" + target);
+					Logcat.e(logLevel, context.getString(R.string.noResponseProvider) + ", base=" + base + ", target=" + target);
 					return result;
 				}
 
 				Uri uri;
 				for (int i = 0; i < targetArray.length; ++i) {
-					if (debug) {Log.d(TAG, "relativePath: ループを実行します. i=" + i + ", targetArray.length=" + targetArray.length);}
+					Logcat.d(logLevel, "ループを実行します. i=" + i + ", targetArray.length=" + targetArray.length);
 
 					if (targetArray[i].isEmpty()) {
 						// 文字列が空文字列なら次を実行する
-						if (debug) {Log.d(TAG, "relativePath: 文字列が空なのでスキップします. i=" + i + ", targetArray.length=" + targetArray.length);}
+						Logcat.d(logLevel, "文字列が空なのでスキップします. i=" + i + ", targetArray.length=" + targetArray.length);
 						continue;
                     }
 					else if (targetArray[i].equals("..")) {
 						// 文字列が『..』ならエラー
-						Log.e(TAG, "relativePath: 親ディレクトリ指定には対応していません. i=" + i + ", targetArray.length=" + targetArray.length);
+						Logcat.w(logLevel, "親ディレクトリ指定には対応していません. i=" + i + ", targetArray.length=" + targetArray.length);
 						return "";
 					} else {
 						// 文字列が『..』以外なら子を探す
@@ -129,13 +125,13 @@ public class SafFileAccess {
 								null
 						);
 
-						if (debug) {Log.d(TAG, "relativePath: 子要素を検索します. targetArray[" + i + "]=" + targetArray[i]);}
+						Logcat.d(logLevel, "子要素を検索します. targetArray[" + i + "]=" + targetArray[i]);
 						boolean find = false;
 						while (cursor.moveToNext()) {
 							docId = cursor.getString(0);
 							name = cursor.getString(1);
 							mime = cursor.getString(2);
-							if (debug) {Log.d(TAG, "relativePath: 子要素の名前. name=" + name);}
+							Logcat.d(logLevel, "子要素の名前. name=" + name);
 
 							if (targetArray[i].equals(name)) {
 								// ファイル名が一致するなら
@@ -145,23 +141,20 @@ public class SafFileAccess {
 									// 最後の回でディレクトリの場合
 									result += "/";
 								}
-								if (debug) {Log.d(TAG, "relativePath: 子要素を取得しました. i=" + i + ", targetArray[index]=" + targetArray[i] + ", result=" + result);}
+								Logcat.d(logLevel, "子要素を取得しました. i=" + i + ", targetArray[index]=" + targetArray[i] + ", result=" + result);
 								break;
 							}
 						}
 						if (!find) {
 							// 名前が一致しなければエラー
-							Log.w(TAG, "relativePath: ファイルが存在しません. i=" + i + ", targetArray.length=" + targetArray.length + ", name=" + targetArray[i]);
+							Logcat.w(logLevel, "ファイルが存在しません. i=" + i + ", targetArray.length=" + targetArray.length + ", name=" + targetArray[i]);
 							return "";
 						}
 					}
 				}
 			} catch (Exception e) {
 				result = "";
-				Log.e(TAG, "relativePath: エラーが発生しました. base=" + base + ", target=" + target);
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "relativePath: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました. base=" + base + ", target=" + target, e);
 			} finally {
 				if (cursor != null) {
 					try {
@@ -175,13 +168,13 @@ public class SafFileAccess {
 			}
 		}
 
-		if (debug) {Log.d(TAG, "relativePath: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static ParcelFileDescriptor openParcelFileDescriptor(@NonNull final Context context, @NonNull final String uri) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -190,27 +183,24 @@ public class SafFileAccess {
 			ContentResolver contentResolver = context.getContentResolver();
 			result = contentResolver.openFileDescriptor(Uri.parse(rootUri),"r");
 			if (result == null) {
-				Log.e(TAG, "SafRandomAccessFile: エラーが発生しました. ParcelFileDescriptor == null");
+				Logcat.e(logLevel, "エラーが発生しました. ParcelFileDescriptor == null");
 				new FileAccessException(TAG + "SafRandomAccessFile: エラーが発生しました. ParcelFileDescriptor == null");
 			}
 		}
 		catch (Exception e) {
 			result = null;
-			Log.e(TAG, "getParcelFileDescriptor: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getParcelFileDescriptor: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 			new FileAccessException(TAG + "SafRandomAccessFile: エラーが発生しました. " + e.getLocalizedMessage());
 		}
 
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
 	}
 
 	// RandomAccessFile
 	public static SafRandomAccessFile openRandomAccessFile(@NonNull final Context context, @NonNull final String uri, @NonNull final String mode) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openRandomAccessFile: 開始します. ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. ");
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -220,19 +210,16 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = null;
-			Log.e(TAG, "getParcelFileDescriptor: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getParcelFileDescriptor: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
 	}
 
 	public static InputStream getInputStream(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getInputStream: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -243,19 +230,16 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = null;
-			Log.e(TAG, "getInputStream: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getInputStream: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "getInputStream: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static OutputStream getOutputStream(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getOutputStream: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		String rootUri = uri.replaceFirst("/*$", "");
 
 		OutputStream result = null;
@@ -266,20 +250,17 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = null;
-			Log.e(TAG, "getOutputStream: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getOutputStream: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "getOutputStream: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// ファイル存在チェック
 	public static boolean exists(@NonNull final Context context, @NonNull final String uri) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "exists: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -305,53 +286,42 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "exists: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName() + ":" + e.getLocalizedMessage());
-				throw new FileAccessException(TAG + ": exists: " + e.getClass().getSimpleName() + ":" + e.getLocalizedMessage());
-			}
-			else {
-				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName());
-				throw new FileAccessException(TAG + ": exists: " + e.getClass().getSimpleName());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
+			throw new FileAccessException(TAG + ": exists: " + e);
 		}
 
-		if (debug) {Log.d(TAG, "exists: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static boolean isDirectory(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "isDirectory: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
 		boolean result = false;
 		try {
 			result = DocumentsContract.Document.MIME_TYPE_DIR.equals(getMimeType(context, rootUri));
-			if (debug) {Log.d(TAG, "isDirectory: MIME_TYPE_DIR: result=" + result);}
+			Logcat.d(logLevel, "MIME_TYPE_DIR: result=" + result);
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "isDirectory: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "isDirectory: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri);
 		}
 
-		if (debug) {Log.d(TAG, "isDirectory: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static ArrayList<FileData> listFiles(@NonNull final Activity activity, @NonNull final String uri, @Nullable Handler handler) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "listFiles: 開始します. uri=" + uri);}
-		//if (debug) {DEF.StackTrace(TAG, "listFiles: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		ArrayList<FileData> fileList = new ArrayList<FileData>();
 
 		Uri rootUri = Uri.parse(uri.replaceFirst("/*$", ""));
-		if (debug) {Log.d(TAG, "listFiles: rootUri=" + rootUri);}
+		Logcat.d(logLevel, "rootUri=" + rootUri);
 
 		String docId;
 		String childUri;
@@ -365,7 +335,7 @@ public class SafFileAccess {
 
 		ContentProviderClient contentProviderClient = contentResolver.acquireContentProviderClient(rootUri);
 		if (contentProviderClient == null) {
-			Log.e(TAG, "listFiles: " + activity.getString(R.string.noResponseProvider) + ", uri=" + uri);
+			Logcat.e(logLevel, activity.getString(R.string.noResponseProvider) + ", uri=" + uri);
 			DEF.sendMessage(activity, R.string.noResponseProvider, Toast.LENGTH_LONG, handler);
 			return fileList;
 		}
@@ -391,7 +361,7 @@ public class SafFileAccess {
 				size = cursor.getLong(2);
 				date = cursor.getLong(3);
 				mime = cursor.getString(4);
-				if(debug) {Log.d(TAG, MessageFormat.format("listFiles: name={0}, size={1}, date={2}, mime={3}, dicId={4}", new Object[]{name, size, date, mime, docId}));}
+				Logcat.d(logLevel, MessageFormat.format("name={0}, size={1}, date={2}, mime={3}, dicId={4}", new Object[]{name, size, date, mime, docId}));
 
 				FileData fileData;
 				if(DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)) {
@@ -406,17 +376,11 @@ public class SafFileAccess {
 			}
 		}
 		catch (SecurityException e) {
-			Log.e(TAG, "listFiles: エラーが発生しました. " + activity.getString(R.string.permissionDenied) + ", uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "listFiles: エラーメッセージ. SecurityException: " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. " + activity.getString(R.string.permissionDenied) + ", uri=" + uri, e);
 			DEF.sendMessage(activity, R.string.permissionDenied, Toast.LENGTH_LONG, handler);
 		}
 		catch (Exception e) {
-			Log.e(TAG, "listFiles: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "listFiles: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 		finally {
 			if (cursor != null) {
@@ -434,13 +398,13 @@ public class SafFileAccess {
 			Collections.sort(fileList, new FileAccess.FileDataComparator());
 		}
 
-		if (debug) {Log.d(TAG, "listFiles: 終了します. fileList.size()=" + fileList.size());}
+		Logcat.d(logLevel, "終了します. fileList.size()=" + fileList.size());
 		return fileList;
 	}
 
 	public static boolean renameTo(@NonNull final Context context, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "renameTo: 開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -448,30 +412,27 @@ public class SafFileAccess {
 		try {
 			final ContentResolver contentResolver = context.getContentResolver();
 			String path = relativePath(context, rootUri, fromfile);
-			if (debug) {Log.d(TAG, "renameTo: path=" + path + ", tofile=" + tofile);}
+			Logcat.d(logLevel, "path=" + path + ", tofile=" + tofile);
 			if (!path.isEmpty()) {
 				result = (DocumentsContractCompat.renameDocument(contentResolver, Uri.parse(path), tofile) != null);
 			}
 			else {
-				Log.e(TAG, "renameTo: ファイルが存在しません.uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
+				Logcat.e(logLevel, "ファイルが存在しません.uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
 			}
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "renameTo: エラーが発生しました. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "renameTo: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile, e);
 		}
 
-		if (debug) {Log.d(TAG, "renameTo: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// タイムスタンプ
 	public static long date(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "date: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -481,20 +442,17 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = 0L;
-			Log.e(TAG, "filename: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "filename: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "filename: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// ファイル削除
 	public static boolean delete(@NonNull final Context context, @NonNull final String uri) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "delete: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -505,20 +463,17 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "delete: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "delete: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "delete: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// ディレクトリ作成
 	public static boolean mkdir(@NonNull final Context context, @NonNull final String uri, @NonNull final String item) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "mkdir: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -529,20 +484,17 @@ public class SafFileAccess {
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "mkdir: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "mkdir: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 
-		if (debug) {Log.d(TAG, "mkdir: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	// ディレクトリ作成
 	public static boolean createFile(@NonNull final Context context, @NonNull final String uri, @NonNull final String item) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 
 		String rootUri = uri.replaceFirst("/*$", "");
 
@@ -550,7 +502,7 @@ public class SafFileAccess {
 		boolean result = false;
 		try {
 			if (!relativePath(context, uri, item).isEmpty()) {
-				Log.e(TAG, "createFile: ファイルが存在します.");
+				Logcat.e(logLevel, "ファイルが存在します.");
 				return false;
 			}
 
@@ -559,39 +511,33 @@ public class SafFileAccess {
 				item2 = item.substring(0, item.lastIndexOf('.'));
 			}
 			String mimeType = FileData.getMimeType(context, item2);
-			if (debug) {Log.d(TAG, "documentUri: mimeType=" + mimeType);}
+			Logcat.d(logLevel, "mimeType=" + mimeType);
 
 			DocumentFile documentParent = DocumentFile.fromSingleUri(context, Uri.parse(rootUri));
 			result = (documentParent.createFile(mimeType, item) != null);
 		}
 		catch (Exception e) {
 			result = false;
-			Log.e(TAG, "createFile: エラーが発生しました. uri=" + uri + ", item=" + item);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName() + ":" + e.getLocalizedMessage());
-			}
-			else {
-				Log.e(TAG, "exists: エラーメッセージ. " + e.getClass().getSimpleName());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri + ", item=" + item, e);
 		}
 
 
 		if (!relativePath(context, uri, item).isEmpty()) {
-			if (debug) {Log.d(TAG, "createFile: ファイルが存在します.");}
+			Logcat.d(logLevel, "ファイルが存在します.");
 			result = true;
 		}
 		else {
-			Log.e(TAG, "createFile: ファイルが存在しません.");
+			Logcat.e(logLevel, "ファイルが存在しません.");
 			result = true;
 		}
 
-		if (debug) {Log.d(TAG, "createFile: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static String getPathName(@NonNull final Context context, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getPathName: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		// 先頭からパッケージ名までをheaderに格納
 		String header = uri.replaceFirst("^(smb://[^/]+).*/", "$1");
@@ -611,10 +557,7 @@ public class SafFileAccess {
 			}
 		}
 		catch (Exception e) {
-			Log.e(TAG, "getPathName: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getPathName: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
             try {
                 result = URLDecoder.decode(rootUri,"UTF-8");
             } catch (UnsupportedEncodingException ex) {
@@ -625,54 +568,46 @@ public class SafFileAccess {
 		if (!result.startsWith("content://")) {
 			result = header + result;
 		}
-		if (debug) {Log.d(TAG, "getPathName: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static long length(@NonNull final Context context, @NonNull final String uri) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		try {
 			return getLongValue(context, uri, DocumentsContract.Document.COLUMN_SIZE);
 		} catch (Exception e) {
-			Log.e(TAG, "length: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "length: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 		return 0L;
 	}
 
 	public static long getDate(@NonNull final Context context, @NonNull final String uri) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		try {
 			return getLongValue(context, uri, DocumentsContract.Document.COLUMN_LAST_MODIFIED);
 		} catch (Exception e) {
-			Log.e(TAG, "getDate: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getDate: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 		return 0L;
 	}
 
 	public static String getName(@NonNull final Context context, @NonNull final String uri) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		try {
 			return getStringValue(context, uri, DocumentsContract.Document.COLUMN_DISPLAY_NAME);
 		} catch (Exception e) {
-			Log.e(TAG, "getName: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "getName: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 		return "";
 	}
 
 	public static String getMimeType(@NonNull final Context context, @NonNull final String uri) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		try {
 			return getStringValue(context, uri, DocumentsContract.Document.COLUMN_MIME_TYPE);
 		} catch (Exception e) {
-			Log.e(TAG, "GetMimeType: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "GetMimeType: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
 		return "";
 	}
@@ -722,25 +657,25 @@ public class SafFileAccess {
 	}
 
 	private static String getDocumentId(@NonNull final Context context, @NonNull final Uri uri) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String documentId = "";
 		if (DocumentsContractCompat.isDocumentUri(context, uri)) {
 			documentId = DocumentsContractCompat.getDocumentId(uri);
-			if (debug) {Log.d(TAG, "getDocumentId: DOCUMENT: documentId=" + documentId);}
+			Logcat.d(logLevel, "DOCUMENT: documentId=" + documentId);
 		}
 		else if (DocumentsContractCompat.isTreeUri(uri)) {
 			documentId = DocumentsContractCompat.getTreeDocumentId(uri);
-			if (debug) {Log.d(TAG, "getDocumentId: TREE: documentId=" + documentId);}
+			Logcat.d(logLevel, "TREE: documentId=" + documentId);
 		}
 		else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			if (DocumentsContract.isRootsUri(context, uri)) {
 				documentId = DocumentsContract.getRootId(uri);
-				if (debug) {Log.d(TAG, "getDocumentId: ROOT: documentId=" + documentId);}
+				Logcat.d(logLevel, "ROOT: documentId=" + documentId);
 			}
 		}
 		else {
 			documentId = DocumentsContract.getRootId(uri);
-			if (debug) {Log.d(TAG, "getDocumentId: 多分ROOT: documentId=" + documentId);}
+			Logcat.d(logLevel, "多分ROOT: documentId=" + documentId);
 		}
 		return documentId;
 	}

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileaccess.FileAccess;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileaccess.WorkStream;
@@ -53,8 +54,8 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 
 	public DownloadDialog(AppCompatActivity activity, @StyleRes int themeResId, String uri, String path, String user, String pass, String item, String local) {
 		super(activity, themeResId);
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "DownloadDialog: 開始します. uri=" + uri + ", path=" + path + ", item=" + item + ", local=" + local);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", path=" + path + ", item=" + item + ", local=" + local);
 
 		setCanceledOnTouchOutside(false);
 		setOnDismissListener(this);
@@ -117,8 +118,8 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 	// path = ローカルのパス
 	// name = リモートのファイル名
 	public boolean downloadFile(String path, String item) throws Exception {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "downloadFile: 開始します. path=" + path + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. path=" + path + ", item=" + item);
 
 		String ServerFileUri = DEF.relativePath(mActivity, mURI, mPath, path, item);
 		boolean exists = FileAccess.exists(mActivity, ServerFileUri, mUser, mPass);
@@ -161,7 +162,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				String tmpFileUri = DEF.relativePath(mActivity, mLocal, path, tmpfile);
 				if (!FileAccess.createFile(mActivity, DEF.relativePath(mActivity, mLocal, path), tmpfile, "", "")) {
 					sendMessage(MSG_ERRMSG, mActivity.getString(R.string.downErrorMsg), 0, 0);
-					Log.e(TAG, "downloadFile: ファイルの作成に失敗しました. path=" + DEF.relativePath(mActivity, mLocal, path) + ", tmpfile=" + tmpfile);
+					Logcat.e(logLevel, "ファイルの作成に失敗しました. path=" + DEF.relativePath(mActivity, mLocal, path) + ", tmpfile=" + tmpfile);
 					return false;
 				}
 				OutputStream localFile = FileAccess.getOutputStream(mActivity, tmpFileUri, "", "");
@@ -198,7 +199,7 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 					}
 					catch (Exception e) {
 						sendMessage(MSG_ERRMSG, mActivity.getString(R.string.downErrorMsg), 0, 0);
-						Log.e(TAG, "downloadFile: Exception1: " + e.getLocalizedMessage());
+						Logcat.e(logLevel, "Exception1: ", e);
 						return false;
 					}
 					total += size;
@@ -230,13 +231,13 @@ public class DownloadDialog extends ImmersiveDialog implements Runnable, Handler
 				}
 				if (!FileAccess.renameTo(mActivity, DEF.relativePath(mActivity, mLocal, path), tmpfile, dstfile, mUser, mPass)) {
 					// リネーム失敗ならダウンロードしたファイルを削除
-					Log.e(TAG, "downloadFile: ファイル名の変更に失敗しました. path=" + DEF.relativePath(mActivity, mLocal, path) + ", tmpfile=" + tmpfile + ", item=" + item);
+					Logcat.e(logLevel, "ファイル名の変更に失敗しました. path=" + DEF.relativePath(mActivity, mLocal, path) + ", tmpfile=" + tmpfile + ", item=" + item);
 					FileAccess.delete(mActivity, tmpFileUri, mUser, mPass);
 				}
 			}
 			catch (Exception e) {
 				sendMessage(MSG_ERRMSG, mActivity.getString(R.string.downErrorMsg), 0, 0);
-				Log.e(TAG, "downloadFile: Exception2: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "Exception2: ", e);
 				return false;
 			}
 		}

@@ -10,14 +10,15 @@ import android.os.SystemClock;
 import android.view.MotionEvent;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 
 public class MomentScroller implements Callback {
 	// 慣性スクロール
 	private final int MAX_TOUCHPOINT = 5;
 	private final int TERM_MOMENT = 150;
 	private int mTouchPointNum;
-	private PointF mTouchPoint[];
-	private long mTouchPointTime[];
+	private PointF[] mTouchPoint;
+	private long[] mTouchPointTime;
 
 	private final int HMSG_MOMENTIUM = 6001;
 
@@ -55,6 +56,7 @@ public class MomentScroller implements Callback {
 	}
 
 	public boolean sendTouchEvent(int action, float x, float y) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		// イベント処理
 		switch (action) {
 			case MotionEvent.ACTION_DOWN: {
@@ -64,7 +66,7 @@ public class MomentScroller implements Callback {
 				mTouchPoint[0].y = y;
 				mTouchPointTime[0] = SystemClock.uptimeMillis();
 				mTouchPointNum = 1;
-				// Log.d("moment", "x=" + x + ", y=" + y);
+				// Logcat.d(logLevel, "x=" + x + ", y=" + y);
 				break;
 			}
 			case MotionEvent.ACTION_MOVE: {
@@ -81,7 +83,7 @@ public class MomentScroller implements Callback {
 				if (mTouchPointNum < MAX_TOUCHPOINT) {
 					mTouchPointNum ++;
 				}
-				// Log.d("moment", "x=" + x + ", y=" + y);
+				// Logcat.d(logLevel, "x=" + x + ", y=" + y);
 				break;
 			}
 			case MotionEvent.ACTION_UP: {
@@ -117,7 +119,7 @@ public class MomentScroller implements Callback {
     					term = mTouchPointTime[0] - mTouchPointTime[1];
     				}
 					momentiumStart(x, y, sx, sy, (int)term);
-					// Log.d("moment_up", "sx=" + sx + ", sy=" + sy + ", term=" + term + ", l=" + l);
+					// Logcat.d(logLevel, "sx=" + sx + ", sy=" + sy + ", term=" + term + ", l=" + l);
 				}
 				break;
 			}
@@ -152,6 +154,7 @@ public class MomentScroller implements Callback {
 
 	@Override
 	public boolean handleMessage(Message msg) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (msg.what == DEF.HMSG_WORKSTREAM) {
 			// ファイルアクセスの表示
 			return true;
@@ -159,7 +162,7 @@ public class MomentScroller implements Callback {
 		if (msg.what == HMSG_MOMENTIUM) {
     		// 慣性スクロール
     		if (mMomentiumMsg == msg) {
-    //				Log.d("moment", "num=" + mMomentiumNum + ", X=" + mMomentiumX + ", Y=" + mMomentiumY);
+    //				Logcat.d(logLevel, "num=" + mMomentiumNum + ", X=" + mMomentiumX + ", Y=" + mMomentiumY);
     			long NextTime = SystemClock.uptimeMillis() + MOMENTIUM_TERM;
     
     			mMomentiumNum ++;
@@ -200,7 +203,7 @@ public class MomentScroller implements Callback {
     				mMomentiumMsg = mHandler.obtainMessage(HMSG_MOMENTIUM, msg.arg1, msg.arg2);
     				mHandler.sendMessageAtTime(mMomentiumMsg, NextTime);
     			}
-    //				Log.d("momentiumMsg", "x=" + mMomentiumX + ", y=" + mMomentiumY);
+    //				Logcat.d(logLevel, "x=" + mMomentiumX + ", y=" + mMomentiumY);
     		}
 		}
 		return false;

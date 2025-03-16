@@ -41,7 +41,7 @@ public class ImageConfigDialog extends TabDialogFragment implements OnClickListe
 	private final int SELLIST_MARGIN_CUT = 3;
 	private final int SELLIST_MARGIN_CUTCOLOR = 4;
 
-	private final int SCALENAME_ORDER[] = { 0, 1, 6, 2, 3, 7, 4, 5 };
+	private final int[] SCALENAME_ORDER = { 0, 1, 6, 2, 3, 7, 4, 5 };
 
 	private ImageConfigListenerInterface mListener = null;
 

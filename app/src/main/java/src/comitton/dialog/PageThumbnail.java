@@ -1,5 +1,6 @@
 package src.comitton.dialog;
 
+import src.comitton.common.Logcat;
 import src.comitton.imageview.ImageManager;
 import src.comitton.imageview.ThumbnailView;
 import jp.dip.muracoro.comittonx.R;
@@ -64,20 +65,20 @@ public class PageThumbnail extends ToolbarDialog implements OnTouchListener,
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		boolean debug = false;
-		if(debug) {Log.d("Pagethumbnail", "onTouch: View=" + v + ", event=" + event);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "View=" + v + ", event=" + event);
 		if (mThumView == v) {
 			int action = event.getAction();
 			int x = (int) event.getX();
 			switch (action) {
 				case MotionEvent.ACTION_DOWN:
-					if (debug) {Log.d("Pagethumbnail", "onTouch:  MotionEvent=ACTION_DOWN");}
+					Logcat.d(logLevel, "MotionEvent=ACTION_DOWN");
 					break;
 				case MotionEvent.ACTION_UP:
-					if (debug) {Log.d("Pagethumbnail", "onTouch:  MotionEvent=ACTION_UP");}
+					Logcat.d(logLevel, "MotionEvent=ACTION_UP");
 					// ページ選択
 					int page = mThumView.getCurrentPage(x);
-					if (debug) {Log.d("Pagethumbnail", "onTouch:  page=" + page);}
+					Logcat.d(logLevel, "page=" + page);
 					if (page >= 0) {
 						mListener.onSelectPage(page);
 						dismiss();
@@ -107,8 +108,8 @@ public class PageThumbnail extends ToolbarDialog implements OnTouchListener,
 	}
 
 	public void onScrollChanged(int pos) {
-		boolean debug = false;
-		if(debug) {Log.d("Pagethumbnail", "onScrollChanged: calcProgress(mSeekPage.getProgress())=" + calcProgress(mSeekPage.getProgress()) + ", pos=" + pos);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "calcProgress(mSeekPage.getProgress())=" + calcProgress(mSeekPage.getProgress()) + ", pos=" + pos);
 		if (calcProgress(mSeekPage.getProgress()) != pos) {
 			setProgress(pos, true);
 		}

@@ -11,7 +11,7 @@ public class TextDrawData {
 //	public boolean mIsBody;
 	public float mGap;
 	public float mHeight;
-	public char mExData[][];
+	public char[][] mExData;
 	
 	public TextDrawData (boolean istext, boolean isascii, float size, float x, float y, int pos, int len, float gap, float height, char[][] ext) {
 		mIsText = istext;

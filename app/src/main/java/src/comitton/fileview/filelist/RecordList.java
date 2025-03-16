@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.RecordItem;
 
 import android.content.SharedPreferences;
@@ -33,7 +34,7 @@ public class RecordList {
 	public static final int TYPE_MENU = 4;
 	public static final int TYPE_FILELIST = 5;
 	public static final int TYPE_MAXNUM = TYPE_FILELIST;
-	private static final String FILENAME[] = {"directory.dat", "server.dat", "bookmark.dat", "history.dat", "optmenu.dat"};
+	private static final String[] FILENAME = {"directory.dat", "server.dat", "bookmark.dat", "history.dat", "optmenu.dat"};
 	private static final String SEPARATOR = "\t";
 	private static final int INDEX_TYPE = 0;
 	private static final int INDEX_SERVER = 1;
@@ -149,6 +150,8 @@ public class RecordList {
 
 	// ブックマークを読み込み(パス指定あり)
 	public static ArrayList<RecordItem> load(ArrayList<RecordItem> list, int listtype, int server, String path, String name) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+
 		if (list == null) {
 			// なければ新規
 			list = new ArrayList<RecordItem>();
@@ -218,7 +221,7 @@ public class RecordList {
 					}
 				}
 				catch (Exception ex) {
-					Log.e(TAG, "load: " + ex.getMessage());
+					Logcat.e(logLevel, "", ex);
 					continue;
 				}
 				if (server < -1 ||
@@ -232,17 +235,13 @@ public class RecordList {
 			is.close();
 		}
 		catch (Exception ex) {
-			// 例外発生
-			String msg = "";
-			if (ex != null && ex.getMessage() != null) {
-				msg = ex.getMessage();
-			}
-			Log.e(TAG, "load: " + msg);
+			Logcat.e(logLevel, "", ex);
 		}
 		return list;
 	}
 
 	public static void add(int listtype, int type, int server, String path, String file, long date, String image, int page, String name) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		ArrayList<RecordItem>list = load(null, listtype);
 
 		if (name == null) {
@@ -284,7 +283,7 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// ファイル作成失敗
-			Log.e(TAG, "add: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			return;
 		}
 
@@ -302,7 +301,7 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// 書き込みエラー
-			Log.e(TAG, "add: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 
 		try {
@@ -311,12 +310,13 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// クローズエラー
-			Log.e(TAG, "add: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 		return;
 	}
 
 	public static void add(int listtype, int type, int server, String path, String file, long date, String image, int chapter, float pagerate, int page, String name) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		ArrayList<RecordItem>list = load(null, listtype);
 
 		if (name == null) {
@@ -358,7 +358,7 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// ファイル作成失敗
-			Log.e(TAG, "add: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			return;
 		}
 
@@ -368,7 +368,7 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// 書き込みエラー
-			Log.e(TAG, "add: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 
 		try {
@@ -377,11 +377,12 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// クローズエラー
-			Log.e(TAG, "add: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 	}
 
 	public static void update(ArrayList<RecordItem> list, int listtype) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String filepath = getFilePath(listtype);
 		FileOutputStream os;
 		OutputStreamWriter sw;
@@ -407,7 +408,7 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// ファイル作成失敗
-			Log.e(TAG, "update: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			return;
 		}
 		for (int i = 0 ; i < list.size() ; i ++) {
@@ -428,7 +429,7 @@ public class RecordList {
 			}
 			catch (Exception e) {
 				// 書き込みエラー
-				Log.e(TAG, "update: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 			}
 		}
 
@@ -438,19 +439,20 @@ public class RecordList {
 		}
 		catch (Exception e) {
 			// クローズエラー
-			Log.e(TAG, "update: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 		return;
 	}
 
 	private static String getFilePath(int type) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String path = DEF.getBaseDirectory() + "conf/";
 		try {
 			// ディレクトリがなければ作成
 			new File(path).mkdirs();
 		}
 		catch (Exception e) {
-			Log.e(TAG, "getFilePath: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 
 		return path + FILENAME[type];

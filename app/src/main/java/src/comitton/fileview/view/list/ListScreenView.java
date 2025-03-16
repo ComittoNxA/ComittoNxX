@@ -3,6 +3,7 @@ package src.comitton.fileview.view.list;
 import java.util.ArrayList;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.config.SetFileColorActivity;
 import src.comitton.fileview.data.FileData;
 import src.comitton.fileview.data.RecordItem;
@@ -317,6 +318,8 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 	}
 
 	private boolean update(short areatype, Rect rc) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (rc == null) {
 			return false;
@@ -336,9 +339,22 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 			synchronized (surfaceHolder) {
 				draw(canvas, lockRect);
 			}
-		} finally {
-			if (canvas != null)
-				surfaceHolder.unlockCanvasAndPost(canvas); // 例外が出て、canvas受け取ってたらロックはずす
+		}
+		catch (Exception e) {
+			Logcat.e(logLevel, "エラーが発生しました.", e);
+		}
+		finally {
+			if (canvas != null) {
+				try {
+					surfaceHolder.unlockCanvasAndPost(canvas); // 例外が出て、canvas受け取ってたらロックはずす
+				}
+				catch (IllegalStateException e) {
+					// Surface has already been released.
+				}
+				catch (IllegalArgumentException e) {
+					;
+				}
+			}
 		}
 		return true;
 	}
@@ -579,9 +595,8 @@ public class ListScreenView extends SurfaceView implements SurfaceHolder.Callbac
 
 	// 表示するリストを切り変える
 	public void setListIndex(int listindex, int offsetx) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "setListIndex: 開始します. offsetx=" + offsetx);}
-		//if (debug) {DEF.StackTrace(TAG, "setListIndex: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. offsetx=" + offsetx);
 
 		if (mListType == null) {
 			return;

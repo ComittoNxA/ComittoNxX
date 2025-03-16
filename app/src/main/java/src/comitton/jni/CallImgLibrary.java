@@ -8,9 +8,10 @@ import android.widget.Toast;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 
 public class CallImgLibrary {
-	private static final String TAG = "CallImgLibrary";
+	private static int logLevel = Logcat.LOG_LEVEL_WARN;
 
 	static {
 		// JNIライブラリのロード
@@ -65,145 +66,144 @@ public class CallImgLibrary {
 
 	public static int ImageInitialize(Context context, Handler handler, long loadsize, int buffnum, int totalpage, int maxthreadnum){
 		int ret =  ImageInitialize(loadsize, buffnum, totalpage, maxthreadnum);
-		//Log.d(TAG, "ImageInitialize: index=" + ret);
-		checkResult(context, handler, ret, "ImageInitialize:");
+		Logcat.v(logLevel, "index=" + ret);
+		checkResult(context, handler, ret, "ImageInitialize: loadsize=" + loadsize + ", buffnum=" + buffnum + ", totalpage=" + totalpage + ", maxthreadnum=" + maxthreadnum);
 		return ret;
 	}
 
 	public static int ImageTerminate(Context context, Handler handler, int index) {
-		//Log.d(TAG, "ImageTerminate: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageTerminate(index);
 		checkResult(context, handler, ret, "ImageTerminate: index=" + index);
 		return ret;
 	}
 
 	public static int ImageGetFreeSize(Context context, Handler handler, int index) {
-		//Log.d(TAG, "ImageGetFreeSize: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageGetFreeSize(index);
 		checkResult(context, handler, ret, "ImageGetFreeSize: index=" + index);
 		return ret;
 	}
 
 	public static int ImageFree(Context context, Handler handler, int index, int page) {
-		//Log.d(TAG, "ImageFree: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageFree(index, page);
-		checkResult(context, handler, ret, "ImageFree: index=" + index);
+		checkResult(context, handler, ret, "ImageFree: index=" + index + ", page=" + page);
 		return ret;
 	}
 
 	public static int ImageScaleFree(Context context, Handler handler, int index, int page, int half) {
-		//Log.d(TAG, "ImageScaleFree: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageScaleFree(index, page, half);
-		checkResult(context, handler, ret, "ImageScaleFree: index=" + index);
+		checkResult(context, handler, ret, "ImageScaleFree: index=" + index + ", page=" + page);
 		return ret;
 	}
 
 	public static int ImageSetPage(Context context, Handler handler, int index, int page, long size) {
-		//Log.d(TAG, "ImageSetPage: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageSetPage(index, page, size);
-		checkResult(context, handler, ret, "ImageSetPage: index=" + index);
+		checkResult(context, handler, ret, "ImageSetPage: index=" + index + ", page=" + page);
 		return ret;
 	}
 
 	public static int ImageSetData(Context context, Handler handler, int index, byte[] data, int size) {
-		//Log.d(TAG, "ImageSetData: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageSetData(index, data, size);
 		checkResult(context, handler, ret, "ImageSetData: index=" + index);
 		return ret;
 	}
 
 	public static int ImageSetFileSize(Context context, Handler handler, int index, long size) {
-		//Log.d(TAG, "ImageSetFileSize: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageSetFileSize(index, size);
 		checkResult(context, handler, ret, "ImageSetFileSize: index=" + index);
 		return ret;
 	}
 
 	public static int ImageGetSize(Context context, Handler handler, int index, int type, int[] imagesize) {
-		//Log.d(TAG, "ImageGetSize: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageGetSize(index, type, imagesize);
 		checkResult(context, handler, ret, "ImageGetSize: index=" + index);
 		return ret;
 	}
 
 	public static int ImageSetBitmap(Context context, Handler handler, int index, Bitmap bitmap) {
-		//Log.d(TAG, "ImageSetBitmap: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageSetBitmap(index, bitmap);
 		checkResult(context, handler, ret, "ImageSetBitmap: index=" + index);
 		return ret;
 	}
 
 	public static int ImageConvert(Context context, Handler handler, int index, int type, int scale) {
-		//Log.d(TAG, "ImageConvert: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageConvert(index, type, scale);
 		checkResult(context, handler, ret, "ImageConvert: index=" + index);
 		return ret;
 	}
 
 	public static int ImageGetBitmap(Context context, Handler handler, int index, int type, int scale, Bitmap bitmap) {
-		//Log.d(TAG, "ImageGetBitmap: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageGetBitmap(index, type, scale, bitmap);
 		checkResult(context, handler, ret, "ImageGetBitmap: index=" + index);
 		return ret;
 	}
 
 	public static int GetMarginSize(Context context, Handler handler, int index, int Page, int Half, int Index, int Margin, int MarginColor, int[] size) {
-		//Log.d(TAG, "GetMarginSize: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = GetMarginSize(index, Page, Half, Index, Margin, MarginColor, size);
-		checkResult(context, handler, ret, "GetMarginSize: index=" + index);
+		checkResult(context, handler, ret, "GetMarginSize: index=" + index + ", Page=" + Page);
 		return ret;
 	}
 
 	public static int ImageScale(Context context, Handler handler, int index, int page, int half, int width, int height, int left, int right, int top, int bottom, int algorithm, int rotate, int margin, int margincolor, int sharpen, int bright, int gamma, int param, int[] size) {
-		//Log.d(TAG, "ImageScale: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageScale(index, page, half, width, height, left, right, top, bottom, algorithm, rotate, margin, margincolor, sharpen, bright, gamma, param, size);
-		checkResult(context, handler, ret, "ImageScale: index=" + index);
+		checkResult(context, handler, ret, "ImageScale: index=" + index + ", page=" + page);
 		return ret;
 	}
 
 	public static int ImageDraw(Context context, Handler handler, int index, int page, int half, int x, int y, Bitmap bitmap) {
-		//Log.d(TAG, "ImageDraw: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageDraw(index, page, half, x, y, bitmap);
-		checkResult(context, handler, ret, "ImageDraw: index=" + index);
+		checkResult(context, handler, ret, "ImageDraw: index=" + index + ", page=" + page);
 		return ret;
 	}
 
 	public static int ImageScaleDraw(Context context, Handler handler, int index, int page, int rotate, int sx, int sy, int scx, int scy, int dx, int dy, int dcx, int dcy, int psel, Bitmap bm, int cutLeft, int cutRight, int cutTop, int cutBottom) {
-		//Log.d(TAG, "ImageScaleDraw: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageScaleDraw(index, page, rotate, sx, sy, scx, scy, dx, dy, dcx, dcy, psel, bm, cutLeft, cutRight, cutTop, cutBottom);
-		checkResult(context, handler, ret, "ImageScaleDraw: index=" + index);
+		checkResult(context, handler, ret, "ImageScaleDraw: index=" + index + ", page=" + page);
 		return ret;
 	}
 
 
 	public static int ImageCancel(Context context, Handler handler, int index, int flag) {
-		//Log.d(TAG, "ImageCancel: index=" + index);
+		Logcat.v(logLevel, "index=" + index);
 		int ret = ImageCancel(index, flag);
 		checkResult(context, handler, ret, "ImageCancel: index=" + index);
 		return ret;
 	}
 
 	private static void checkResult(Context context, Handler handler, int returnCode, String message) {
-		boolean debug = false;
 		switch (returnCode) {
 			case DEF.ERROR_CODE_MALLOC_FAILURE:
 				DEF.sendMessage(context, R.string.MallocFailure, Toast.LENGTH_LONG, handler);
-				Log.e(TAG, context.getString(R.string.MallocFailure) + ": " + message);
+				Logcat.e(logLevel, context.getString(R.string.MallocFailure) + ": " + message);
 				break;
 
 			case DEF.ERROR_CODE_CACHE_COUNT_LIMIT_EXCEEDED:
 				DEF.sendMessage(context, R.string.CacheLimitExceeded, Toast.LENGTH_LONG, handler);
-				Log.e(TAG, context.getString(R.string.CacheLimitExceeded) + ": " + message);
+				Logcat.e(logLevel, context.getString(R.string.CacheLimitExceeded) + ": " + message);
 				break;
 
 			case DEF.ERROR_CODE_CACHE_INDEX_OUT_OF_RANGE:
 				//DEF.sendMessage(context, R.string.CacheIndexOutOfRange, Toast.LENGTH_LONG, handler);
-				Log.w(TAG, context.getString(R.string.CacheIndexOutOfRange) + ": " + message);
+				Logcat.w(logLevel, context.getString(R.string.CacheIndexOutOfRange) + ": " + message);
 				break;
 
 			case DEF.ERROR_CODE_CACHE_NOT_INITIALIZED:
 				//DEF.sendMessage(context, R.string.CacheNotInitialized, Toast.LENGTH_LONG, handler);
-				Log.e(TAG, context.getString(R.string.CacheNotInitialized) + ": " + message);
+				Logcat.e(logLevel, context.getString(R.string.CacheNotInitialized) + ": " + message);
 				break;
 
 		}

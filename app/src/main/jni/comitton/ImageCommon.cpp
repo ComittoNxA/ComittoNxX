@@ -377,8 +377,8 @@ int MemAlloc(int index, int buffsize)
                 goto ERROREND;
             }
             gBuffMng[index][i].Page = -1;
+            gBuffNum[index] = i;
         }
-        gBuffNum[index] = i;
 
         // 拡大縮小画像領域確保
         gSclBuffMng[index] = (BUFFMNG *) malloc(sizeof(BUFFMNG) * SCLBUFFNUM);
@@ -451,7 +451,17 @@ void MemFree(int index)
         ScaleMemLineFree(index);
         ScaleMemColumnFree(index);
     }
+
     gIsInit[index] = false;
+
+#ifdef __ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__
+    if (__builtin_available(android 28, *)) {
+#else
+    if (__ANDROID_API__ >= 28) {
+#endif
+        //LOGD("MemFree: 解放します.");
+        mallopt(M_PURGE, 0);
+    }
 }
 
 // 拡大縮小用メモリ初期化

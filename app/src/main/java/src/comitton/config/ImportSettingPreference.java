@@ -12,6 +12,7 @@ import java.util.Map;
 
 import jp.dip.muracoro.comittonx.R;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -104,7 +105,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 	@Override
 	protected void onDialogClosed (boolean positiveResult) {
 		super.onDialogClosed(positiveResult);
-		if (positiveResult == true) {
+		if (positiveResult) {
 		}
 	}
 
@@ -112,7 +113,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 		String fontpath = DEF.getConfigDirectory();
 		List<String> items = new ArrayList<String>();
 
-		File files[] = new File(fontpath).listFiles(getFileExtensionFilter(DEF.EXTENSION_SETTING));
+		File[] files = new File(fontpath).listFiles(getFileExtensionFilter(DEF.EXTENSION_SETTING));
 		if (files != null) {
 			// 設定
 			for (File file : files) {
@@ -156,18 +157,18 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 
 	//	@Override
 	public void onClick(View v) {
-		boolean debug = false;
-		if (debug) {Log.d("ImportSettingPreference", "onClick: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (v == mButtonOk) {
 			// OKボタン処理
 			String filename = mEditView.getText().toString();
 			if (filename.length() == 0) {
-				if (debug) {Log.d("ImportSettingPreference", "onClick: ファイルを選択してください.");}
+				Logcat.d(logLevel, "ファイルを選択してください.");
 				Toast.makeText(mContext, R.string.selectFile, Toast.LENGTH_SHORT).show();
 				return;
 			} else if (filename.equals(mNoName)) {
-				if (debug) {Log.d("ImportSettingPreference", "onClick: " + mNoName + " を選択しました.");}
+				Logcat.d(logLevel, mNoName + " を選択しました.");
 				filename = "";
 			}
 
@@ -181,12 +182,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 					return;
 				}
 			} catch (Exception ex) {
-				// 例外発生
-				String msg = "";
-				if (ex != null && ex.getMessage() != null) {
-					msg = ex.getMessage();
-				}
-				Log.e("Bookmark/Load", msg);
+				Logcat.e(logLevel, "", ex);
 				return;
 			}
 
@@ -204,7 +200,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 				Map<String, ?> keys = mSp.getAll();
 				if (keys != null) {
 					for (String key : keys.keySet()) {
-						if (DEF.checkExportKey(key) == true) {
+						if (DEF.checkExportKey(key)) {
 							// 出力対象
 							ed.remove(key);
 						}
@@ -262,12 +258,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 					}
 				}
 			} catch (Exception ex) {
-				// 例外発生
-				String msg = "";
-				if (ex != null && ex.getMessage() != null) {
-					msg = ex.getMessage();
-				}
-				Log.e("Bookmark/Load", msg);
+				Logcat.e(logLevel, "", ex);
 				return;
 			} finally {
 				try {
@@ -287,7 +278,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 					ed.apply();
 				}
 			}
-			if (debug) {Log.d("ImportSettingPreference", "onClick: 設定を読み込みました. " + filepath);}
+			Logcat.d(logLevel, " 設定を読み込みました. " + filepath);
 			Toast.makeText(mContext, mContext.getResources().getString(R.string.LoadConfig) + "\n" + filepath, Toast.LENGTH_SHORT).show();
 			Dialog dialog = getDialog();
 			if (dialog != null) {
@@ -298,7 +289,7 @@ public class ImportSettingPreference extends DialogPreference implements OnItemC
 
 	public class ItemArrayAdapter extends ArrayAdapter<String>
 	{
-		private List<String>	mItems; // ファイル情報リスト
+		private List<String> mItems; // ファイル情報リスト
 
 		// コンストラクタ
 		public ItemArrayAdapter(Context context, int resId, List<String> items)

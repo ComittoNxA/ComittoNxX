@@ -85,6 +85,8 @@ public class ThumbnailLoader {
 
 	public ThumbnailLoader(AppCompatActivity activity, String uri, String path, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int crop, int margin) {
 		super();
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+
 		mActivity = activity;
 		mHandler = handler;
 		mThreadBreak = false;
@@ -114,7 +116,7 @@ public class ThumbnailLoader {
 			new File(mCachePath).mkdirs();
 		}
 		catch (Exception e) {
-			Log.e(TAG, "ThumbnailLoader: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 			mCachePath = null;
 		}
 
@@ -135,6 +137,7 @@ public class ThumbnailLoader {
 
 	//path1のサムネイルをpath2のキャッシュとして割り当て
 	public void setThumbnailCache(String path1, String path2) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		// 他のパスのキャッシュとして保存
 		String pathcode = DEF.makeCode(path1, mThumbSizeW, mThumbSizeH);
 		Bitmap bm = loadThumbnailCache(pathcode);
@@ -148,13 +151,14 @@ public class ThumbnailLoader {
 				cacheSave.flush();
 				cacheSave.close();
 			} catch (Exception e) {
-				Log.e(TAG, "setThumbnailCache: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 			}
 		}
 	}
 
 	//特定のパスにサムネイルキャッシュを割り当てる
 	public void setThumbnailCache(String path, Bitmap bm) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		String pathcode = DEF.makeCode(path, mThumbSizeW, mThumbSizeH);
 		String cacheFile = getThumbnailCacheName(pathcode);
 		if (bm != null) {
@@ -165,12 +169,13 @@ public class ThumbnailLoader {
 				cacheSave.close();
 			}
 			catch (Exception e) {
-				Log.e(TAG, "setThumbnailCache: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "",  e);
 			}
 		}
 	}
 
 	public void saveThumbnailCache(String pathcode, Bitmap bm) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		// キャッシュとして保存
 		String cacheFile = getThumbnailCacheName(pathcode);
 		File file = new File(cacheFile);
@@ -187,7 +192,7 @@ public class ThumbnailLoader {
 				cacheSave.close();
 			}
 			catch (Exception e) {
-				Log.e(TAG, "saveThumbnailCache: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 			}
 		}
 	}
@@ -353,17 +358,17 @@ public class ThumbnailLoader {
 			int distance2 = 0;
 
 			if (file1.getIndex() < mFirstIndex) {
-				distance1 = (int) Math.floor(((double) mFirstIndex - file1.getIndex()) / mRange);
+				distance1 = (int) Math.ceil(((double) mFirstIndex - file1.getIndex()) / mRange);
 			}
 			else if (mLastIndex < file1.getIndex()){
-				distance1 = (int) Math.floor(((double) file1.getIndex() - mLastIndex) / mRange);
+				distance1 = (int) Math.ceil(((double) file1.getIndex() - mLastIndex) / mRange);
 			}
 
 			if (file2.getIndex() < mFirstIndex) {
-				distance2 = (int) Math.floor(((double) mFirstIndex - file2.getIndex()) / mRange);
+				distance2 = (int) Math.ceil(((double) mFirstIndex - file2.getIndex()) / mRange);
 			}
 			else if (mLastIndex < file2.getIndex()){
-				distance2 = (int) Math.floor(((double) file2.getIndex() - mLastIndex) / mRange);
+				distance2 = (int) Math.ceil(((double) file2.getIndex() - mLastIndex) / mRange);
 			}
 
 			if (distance1 != distance2) {
@@ -535,24 +540,24 @@ public class ThumbnailLoader {
 	 * @exception CacheException メモリキャッシュが空けられなかった場合
 	 */
 	public boolean loadMemory(int index, int thum_cx, int thum_cy, Bitmap bm, boolean priority) throws CacheException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "index=" + index + " loadMemory: 開始します. priority=" + priority);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "index=" + index + " 開始します. priority=" + priority);
 
 		int result;
 		boolean save = false;
 
 		if (bm == null) {
-			if (debug) {Log.d(TAG, "index=" + index + " loadMemory: NULLです");}
+			Logcat.d(logLevel, "index=" + index + " NULLです");
 			return false;
 		} else {
-			if (debug) {Log.d(TAG, "index=" + index + " loadMemory: NULLじゃないです.");}
+			Logcat.d(logLevel, "index=" + index + " NULLじゃないです.");
 		}
 
 		// ビットマップをサムネイルサイズぴったりにリサイズする
-		if (debug) {Log.d(TAG, "index=" + index + " loadMemory: リサイズします. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", crop=" + mThumbCrop + ", margin=" + mThumbMargin);}
+		Logcat.d(logLevel, "index=" + index + " リサイズします. thum_cx=" + thum_cx + ", thum_cy=" + thum_cy + ", crop=" + mThumbCrop + ", margin=" + mThumbMargin);
 		bm = ImageAccess.resizeTumbnailBitmap(bm, thum_cx, thum_cy, mThumbCrop, mThumbMargin);
 
-		if (debug) {Log.d(TAG, "index=" + index + " loadMemory: 切り出します.");}
+		Logcat.d(logLevel, "index=" + index + " 切り出します.");
 		int w = bm.getWidth();
 		int h = bm.getHeight();
 		boolean chg = false;
@@ -578,7 +583,7 @@ public class ThumbnailLoader {
 			bm = bm2;
 		}
 
-		if (debug) {
+		if (logLevel <= Logcat.LOG_LEVEL_DEBUG) {
 			bm = ImageAccess.setText(bm, String.valueOf(index), Color.BLUE, DEF.ALIGN_CENTER);
 		}
 
@@ -586,45 +591,46 @@ public class ThumbnailLoader {
 		result = CallImgLibrary.ThumbnailMemorySizeCheck(mID, bm.getWidth(), bm.getHeight());
 		if (result == 0) {
 			// メモリあり
-			if (debug) {Log.d(TAG, "index=" + index + " loadMemory: メモリキャッシュの空きがありました");}
+			Logcat.d(logLevel, "index=" + index + " メモリキャッシュの空きがありました");
 		} else if (result > 0 && priority) {
 			// メモリなしでもpriorityがtrueなら
 			// 表示の中心から外れたものを解放してメモリを空ける
 			result = CallImgLibrary.ThumbnailImageAlloc(mID, result, (mFirstIndex + mLastIndex) / 2);
 			if (result == 0) {
 				// メモリ獲得成功
-				if (debug) {Log.d(TAG, "index=" + index + ", loadMemory: メモリキャッシュの空きを作りました.");}
+				Logcat.d(logLevel, "index=" + index + " メモリキャッシュの空きを作りました.");
 			} else {
 				// メモリなし
-				if (debug) {Log.d(TAG, "index=" + index + ", loadMemory: メモリキャッシュの空きが作れませんでした.");}
+				Logcat.d(logLevel, "index=" + index + " メモリキャッシュの空きが作れませんでした.");
 				mOut_of_memory = true;
 				throw new CacheException("メモリキャッシュの空きが作れませんでした.");
 			}
 		}
 		else {
-			if (debug) {Log.d(TAG, "index=" + index + " loadMemory: メモリキャッシュの空きがありませんでした");}
+			Logcat.d(logLevel, "index=" + index + " メモリキャッシュの空きがありませんでした");
 			return false;
 		}
 
 		result = CallImgLibrary.ThumbnailSave(mID, bm, index);
 		if (result != CallImgLibrary.RESULT_OK) {
 			// メモリ保持失敗
-			if (debug) {Log.d(TAG, "index=" + index + " loadMemory: メモリキャッシュに挿入できませんでした. result=" + result);}
+			Logcat.d(logLevel, "index=" + index + " メモリキャッシュに挿入できませんでした. result=" + result);
 			mOut_of_memory = true;
 			return false;
 		}
 		else {
-			if (debug) {Log.d(TAG, "index=" + index + " loadMemory: メモリキャッシュに挿入しました.");}
+			Logcat.d(logLevel, "index=" + index + " メモリキャッシュに挿入しました.");
 			return true;
 		}
 
 	}
 
 	protected void saveCache(Bitmap bm, String pathcode) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		boolean debug = false;
 
 		if (bm != null) {
-			if (debug) {Log.d(TAG, "saveCache  キャッシュにセーブします pathcode=" + pathcode);}
+			Logcat.d(logLevel, "キャッシュにセーブします pathcode=" + pathcode);
 			saveThumbnailCache(pathcode, bm);
 		}
 	}

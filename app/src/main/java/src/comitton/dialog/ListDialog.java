@@ -3,6 +3,8 @@ package src.comitton.dialog;
 import java.util.EventListener;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.Logcat;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -59,8 +61,8 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		boolean debug = false;
-		if (debug) {Log.d("ListDialog", "onCreate: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		setContentView(R.layout.listdialog);
 
@@ -77,7 +79,7 @@ public class ListDialog extends ImmersiveDialog implements OnClickListener, OnIt
 
 		// デフォルトはしおりを記録する
 		mBtnCancel.setOnClickListener(this);
-		if (debug) {Log.d("ListDialog", "onCreate: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 
 	}
 

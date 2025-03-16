@@ -25,36 +25,37 @@ import java.util.Collections;
 import jp.dip.muracoro.comittonx.R;
 import org.apache.commons.io.FileUtils;
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.data.FileData;
 
 public class LocalFileAccess {
 	private static final String TAG = "LocaFileAccess";
 
 	public static String filename(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "filename: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		return uri.replaceFirst("^.*?(([^/]+)?/?)$", "$1");
 	}
 
 	public static long length(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "length: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		new File(uri);
 		return new File(uri).length();
 	}
 
 	public static String parent(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "parent: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		String result = uri.replaceFirst("([^/]+?)?/*$", "");
-		if (debug) {Log.d(TAG, "parent: 終了します. uri=" + uri + ", result=" + result);}
+		Logcat.d(logLevel, "終了します. uri=" + uri + ", result=" + result);
 		return result;
 	}
 
 	public static String relativePath(@NonNull final String base, @NonNull final String target) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "relativePath: 開始します. base=" + base + ", target=" + target);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. base=" + base + ", target=" + target);
 
 		String result;
 		String tmp;
@@ -81,13 +82,13 @@ public class LocalFileAccess {
 		// 末尾が..なら親ディレクトリを削除
 		result = result.replaceFirst("[^/]+/\\.\\.$", "");
 
-		if (debug) {Log.d(TAG, "relativePath: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static ParcelFileDescriptor openParcelFileDescriptor(@NonNull final String uri) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getParcelFileDescriptor: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		ParcelFileDescriptor parcelFileDescriptor = null;
 
@@ -104,8 +105,8 @@ public class LocalFileAccess {
 
 	// RandomAccessFile
 	public static RandomAccessFile openRandomAccessFile(@NonNull final String uri, @NonNull final String mode) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openRandomAccessFile: 開始します. uri=" + uri + ", mode=" + mode);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", mode=" + mode);
 
 		RandomAccessFile result = null;
         try {
@@ -113,30 +114,27 @@ public class LocalFileAccess {
 		}
 		catch (Exception e) {
 			result = null;
-			Log.e(TAG, "openRandomAccessFile: エラーが発生しました. uri=" + uri);
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "openRandomAccessFile: エラーメッセージ. " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
 		}
-		if (debug) {Log.d(TAG, "openRandomAccessFile: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 		return result;
     }
 
 	public static InputStream getInputStream(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getInputStream: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		try {
 			File orgfile = new File(uri);
 			return new FileInputStream(orgfile);
 		} catch (IOException e) {
-			if(debug) {Log.d(TAG, "getInputStream: " + e.getLocalizedMessage());}
+			Logcat.d(logLevel, "", e);
 		}
 		return null;
 	}
 
 	public static OutputStream getOutputStream(@NonNull final Activity activity, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "getOutputStream: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q) {
 			// Android10(Q) ではない場合
@@ -145,7 +143,7 @@ public class LocalFileAccess {
 				File orgfile = new File(uri);
 				return new FileOutputStream(orgfile);
 			} catch (IOException e) {
-				Log.e(TAG, "getOutputStream: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 			}
 
 		}
@@ -153,7 +151,7 @@ public class LocalFileAccess {
 			// Android10(Q) の場合
 
 			String documentUri = documentUri(activity, uri);
-			Log.d(TAG, "getOutputStream: documentUri=" + documentUri);
+			Logcat.d(logLevel, "documentUri=" + documentUri);
 			return SafFileAccess.getOutputStream(activity, documentUri);
 		}
 
@@ -162,22 +160,22 @@ public class LocalFileAccess {
 
 	// ファイル存在チェック
 	public static boolean exists(@NonNull final String uri) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "exists: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		return new File(uri).exists();
 	}
 
 	public static boolean isDirectory(@NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "isDirectory: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 		boolean result = new File(uri).isDirectory();
-		if (debug) {Log.d(TAG, "isDirectory: 終了します. uri=" + uri + ", result=" + result);}
+		Logcat.d(logLevel, "終了します. uri=" + uri + ", result=" + result);
 		return result;
 	}
 
 	public static ArrayList<FileData> listFiles(@NonNull final Activity activity, @NonNull final String uri) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "listFiles: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		// ファイルリストを取得
 		File[] lfiles;
@@ -191,7 +189,7 @@ public class LocalFileAccess {
 		}
 		length = lfiles.length;
 
-		if(debug) {Log.d(TAG, "listFiles: length=" + length);}
+		Logcat.d(logLevel, "length=" + length);
 
 		// FileData型のリストを作成
 		boolean isDir;
@@ -215,7 +213,7 @@ public class LocalFileAccess {
 			FileData fileData = new FileData(activity, name, size, date);
 			fileList.add(fileData);
 
-			if(debug) {Log.d(TAG, "listFiles: index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());}
+			Logcat.d(logLevel, "index=" + (fileList.size() - 1) + ", name=" + fileData.getName() + ", type=" + fileData.getType() + ", extType=" + fileData.getExtType());
 		}
 
 		if (!fileList.isEmpty()) {
@@ -226,8 +224,8 @@ public class LocalFileAccess {
 	}
 
 	public static boolean renameTo(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String fromfile, @NonNull final String tofile) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "renameTo: 開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", fromfile=" + fromfile + ", tofile=" + tofile);
 		if (tofile.indexOf('/') > 0) {
 			throw new FileAccessException(TAG + ": renameTo: Invalid file name.");
 		}
@@ -248,9 +246,9 @@ public class LocalFileAccess {
 
 			// deleteメソッドを使用してファイル名を変更する
 			if (orgfile.renameTo(dstfile)) {
-				if (debug) {Log.d(TAG, "renameTo: file.renameTo() 成功しました.");}
+				Logcat.d(logLevel, "file.renameTo() 成功しました.");
 			} else {
-				Log.e(TAG, "renameTo: file.renameTo() 失敗しました.");
+				Logcat.e(logLevel, "file.renameTo() 失敗しました.");
 			}
 		}
 		else {
@@ -258,21 +256,21 @@ public class LocalFileAccess {
 
 			// SAFでファイル名を変更する
 			String documentUri = documentUri(activity, uri);
-			Log.d(TAG, "renameTo: documentUri=" + documentUri);
+			Logcat.d(logLevel, "documentUri=" + documentUri);
 			if(!documentUri.isEmpty() && SafFileAccess.renameTo(activity, documentUri, fromfile, tofile)) {
-				if (debug) {Log.d(TAG, "renameTo: SafFileAccess.renameTo() 成功しました.");}
+				Logcat.d(logLevel, "SafFileAccess.renameTo() 成功しました.");
 			} else {
-				Log.e(TAG, "renameTo: SafFileAccess.renameTo() 失敗しました.");
+				Logcat.e(logLevel, "SafFileAccess.renameTo() 失敗しました.");
 			}
 		}
 
 		// 変更後ファイルが存在するかチェック
 		if (dstfile.exists()) {
-			if (debug) {Log.d(TAG, "renameTo: ファイルが存在します.");}
+			Logcat.d(logLevel, "ファイルが存在します.");
 			return true;
 		}
 		else {
-			Log.e(TAG, "renameTo: ファイルが存在しません.");
+			Logcat.e(logLevel, "ファイルが存在しません.");
 		}
 
 		return false;
@@ -280,10 +278,8 @@ public class LocalFileAccess {
 
 	// タイムスタンプ
 	public static long date(@NonNull final Activity activity, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {
-			Log.d(TAG, "date: 開始します. uri=" + uri);
-		}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		File file = new File(uri);
 		return file.lastModified();
@@ -291,15 +287,15 @@ public class LocalFileAccess {
 
 	// ファイル削除
 	public static boolean delete(@NonNull final Activity activity, @NonNull final String uri) throws FileAccessException {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "delete: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		File file = new File(uri);
 
 		// existsメソッドを使用してファイルの存在を確認する
 		if (!file.exists()) {
 			// 最初からファイルが存在しない場合
-			Log.e(TAG, "delete: ファイルが存在しません.");
+			Logcat.e(logLevel, "ファイルが存在しません.");
 			throw new FileAccessException(TAG + ": delete: ファイルが存在しません.");
 		}
 		else {
@@ -312,17 +308,17 @@ public class LocalFileAccess {
 				if (file.isDirectory()) {
 					try {
 						FileUtils.deleteDirectory(file);
-						if (debug) {Log.d(TAG, "delete: FileUtils.deleteDirectory() 成功しました.");}
+						Logcat.d(logLevel, "FileUtils.deleteDirectory() 成功しました.");
 					} catch (IOException e) {
-						Log.e(TAG, "delete: FileUtils.deleteDirectory() 失敗しました.");
+						Logcat.e(logLevel, "FileUtils.deleteDirectory() 失敗しました.", e);
 					}
 
 				}
 				else {
 					if (file.delete()) {
-						if (debug) {Log.d(TAG, "delete: file.delete() 成功しました.");}
+						Logcat.d(logLevel, "file.delete() 成功しました.");
 					} else {
-						Log.e(TAG, "delete: file.delete() 失敗しました.");
+						Logcat.e(logLevel, "file.delete() 失敗しました.");
 					}
 				}
 			}
@@ -331,22 +327,22 @@ public class LocalFileAccess {
 
 				// SAFでファイルを削除する
 				String documentUri = documentUri(activity, uri);
-				Log.d(TAG, "delete: documentUri=" + documentUri);
+				Logcat.d(logLevel, "documentUri=" + documentUri);
 				if(!documentUri.isEmpty() && SafFileAccess.delete(activity, documentUri)) {
-					if (debug) {Log.d(TAG, "delete: SafFileAccess.delete() 成功しました.");}
+					Logcat.d(logLevel, "SafFileAccess.delete() 成功しました.");
 				} else {
-					Log.e(TAG, "delete: SafFileAccess.delete() 失敗しました.");
+					Logcat.e(logLevel, "SafFileAccess.delete() 失敗しました.");
 				}
 			}
 		}
 
 		// 消せたかどうかチェック
 		if (!file.exists()) {
-			if (debug) {Log.d(TAG, "delete: ファイルが存在しません.");}
+			Logcat.d(logLevel, "ファイルが存在しません.");
 			return true;
 		}
 		else {
-			Log.e(TAG, "delete: ファイルが存在します.");
+			Logcat.e(logLevel, "ファイルが存在します.");
 		}
 
 		return false;
@@ -354,8 +350,8 @@ public class LocalFileAccess {
 
 	// ディレクトリ作成
 	public static boolean mkdir(@NonNull final String uri, @NonNull final String item) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "mkdir: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 
 		File orgfile = new File(uri + item);
 		return orgfile.mkdir();
@@ -363,8 +359,8 @@ public class LocalFileAccess {
 
 	// ファイル作成
 	public static boolean createFile(@NonNull final Activity activity, @NonNull final String uri, @NonNull final String item) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "createFile: 開始します. uri=" + uri + ", item=" + item);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri + ", item=" + item);
 
 		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q) {
 			// Android10(Q) ではない場合
@@ -376,7 +372,7 @@ public class LocalFileAccess {
 					return orgfile.createNewFile();
 				}
 			} catch (IOException e) {
-				Log.e(TAG, "createFile: " + e.getLocalizedMessage());
+				Logcat.e(logLevel, "", e);
 			}
 
 		}
@@ -385,11 +381,11 @@ public class LocalFileAccess {
 
 				// SAFでファイルを作成する
 				String documentUri = documentUri(activity, uri);
-				Log.d(TAG, "renameTo: documentUri=" + documentUri);
+				Logcat.d(logLevel, "documentUri=" + documentUri);
 				if(!documentUri.isEmpty() && SafFileAccess.createFile(activity, documentUri, item)) {
-					if (debug) {Log.d(TAG, "renameTo: SafFileAccess.createFile() 成功しました.");}
+					Logcat.d(logLevel, "SafFileAccess.createFile() 成功しました.");
 				} else {
-					Log.e(TAG, "renameTo: SafFileAccess.createFile() 失敗しました.");
+					Logcat.e(logLevel, "SafFileAccess.createFile() 失敗しました.");
 				}
 			}
 
@@ -403,8 +399,8 @@ public class LocalFileAccess {
 	 * @return
 	 */
 	public static String documentUri(@NonNull final Activity activity, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "documentUri: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		String result = "";
 		String id = "";
@@ -422,18 +418,18 @@ public class LocalFileAccess {
 		}
 		base = "content://com.android.externalstorage.documents/tree/" + id + "%3A";
 
-		if (debug) {Log.d(TAG, "documentUri: base=" + base + ", subUri=" + target);}
+		Logcat.d(logLevel, "base=" + base + ", subUri=" + target);
 
 		/*
 		result = SafFileAccess.relativePath(activity, base, target);
 		if (result.isEmpty()) {
 			requestPermission(activity, base);
 		}
-		if (debug) {Log.d(TAG, "documentUri: result=" + result);}
+		Logcat.d(logLevel, "result=" + result);
 		*/
 
 		result = base + "/document/" + id + "%3A" + URLEncoder.encode(target);
-		if (debug) {Log.d(TAG, "documentUri: result=" + result);}
+		Logcat.d(logLevel, "result=" + result);
 
 		try {
 			SafFileAccess.exists(activity, result);
@@ -443,13 +439,13 @@ public class LocalFileAccess {
 			requestPermission(activity, base);
 		}
 
-		if (debug) {Log.d(TAG, "documentUri: 終了します. result=" + result);}
+		Logcat.d(logLevel, "終了します. result=" + result);
 		return result;
 	}
 
 	public static void requestPermission(@NonNull final Activity activity, @NonNull final String uri) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "requestPermission: 開始します. uri=" + uri);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. uri=" + uri);
 
 		// ストレージアクセスフレームワーク
 		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
@@ -462,7 +458,7 @@ public class LocalFileAccess {
 		intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
 		activity.startActivityForResult(Intent.createChooser(intent, activity.getText(R.string.SafChooseTitle)), DEF.REQUEST_CODE_ACTION_OPEN_DOCUMENT_TREE);
 
-		if (debug) {Log.d(TAG, "requestPermission: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 }

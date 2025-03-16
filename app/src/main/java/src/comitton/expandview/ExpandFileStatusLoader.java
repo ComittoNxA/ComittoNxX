@@ -1,8 +1,7 @@
-package src.comitton.fileview;
+package src.comitton.expandview;
 
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
@@ -23,26 +22,25 @@ import src.comitton.fileview.data.FileData;
 import src.comitton.imageview.ImageManager;
 import src.comitton.textview.TextManager;
 
-public class FileStatusLoader extends ThumbnailLoader implements Runnable {
+public class ExpandFileStatusLoader extends ThumbnailLoader implements Runnable {
     private static final String TAG = "FileStatusLoader";
 
     private static SharedPreferences mSp;
 
-    private final String mUser;
-    private final String mPass;
+    private final String mCmpFile;
+    private String mUser;
+    private String mPass;
     private final boolean mHidden;
-    private final boolean mEpubViewer;
-    private final boolean mEpubOrder;
 
     private ImageManager mImageMgr;
     private TextManager mTextMgr;
-    private final FileTypeSortComparator mComparator;
+    private final FileRangeComparator mComparator;
     private FileData mCurrentFile;
 
     private WaitFor mWaitFor;
     private boolean mSkip;
 
-    public FileStatusLoader(AppCompatActivity activity, String uri, String path, String user, String pass, Handler handler, ArrayList<FileData> files, boolean hidden, boolean epubViewer) {
+    public ExpandFileStatusLoader(AppCompatActivity activity, ImageManager imgMgr, String uri, String path, String cmpFile, String user, String pass, Handler handler, ArrayList<FileData> files, boolean hidden) {
         super(activity, uri, path, handler, 0, files, 0, 0, 0, 0, 0);
         int logLevel = Logcat.LOG_LEVEL_WARN;
         Logcat.d(logLevel, "開始します.");
@@ -50,18 +48,18 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
         mSp = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mSkip = false;
 
+        mImageMgr = imgMgr;
+        mCmpFile = cmpFile;
         mUser = user;
         mPass = pass;
         mHidden = hidden;
-        mEpubViewer = epubViewer;
-        mEpubOrder = SetEpubActivity.getEpubOrder(mSp);
 
-        mComparator = new FileTypeSortComparator();
+        mComparator = new FileRangeComparator();
         mComparator.setDispRange(mFirstIndex, mLastIndex);
 
         for (int i = 0; i < files.size(); ++i) {
             // 削除したらindexが変わるのでfilesで検査してmFilesから削除する
-            if (files.get(i).getType() == FileData.FILETYPE_PARENT || files.get(i).getType() == FileData.FILETYPE_IMG) {
+            if (files.get(i).getType() == FileData.FILETYPE_IMG) {
                 removeFile(files.get(i));
             }
         }
@@ -86,20 +84,9 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
         super.breakThread();
     }
 
-    // ImageManager と TextManager を解放する
+    // TextManager を解放する
     private void releaseManager() {
-        int logLevel = Logcat.LOG_LEVEL_WARN;
-        Logcat.d(logLevel, "開始します.");
         // 意図的にExceptionを発生させるためスレッドセーフにしない
-        if (mImageMgr != null) {
-            try {
-                Logcat.v(logLevel, "ImageManager.close() cacheIndex=" + mImageMgr.getCacheIndex());
-                mImageMgr.close();
-            } catch (IOException e) {
-                Logcat.w(logLevel, "mImageMgr.close() cacheIndex=" + mImageMgr.getCacheIndex(), e);
-            }
-            mImageMgr = null;
-        }
         if (mTextMgr != null) {
             mTextMgr.release();
             mTextMgr = null;
@@ -241,49 +228,26 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
 
         String currentPath = DEF.relativePath(mActivity, mURI, mPath);
         String name = fileData.getName();
-        String uri = DEF.createUrl(DEF.relativePath(mActivity, currentPath, name), mUser, mPass);
-        Logcat.d(logLevel,"開始します. uri=" + uri);
+        String uri = DEF.createUrl(DEF.relativePath(mActivity, currentPath, mCmpFile), mUser, mPass);
+        Logcat.v(logLevel,"開始します. uri=" + uri);
 
         SharedPreferences.Editor ed = mSp.edit();
         String dateKey = uri + "#date";
         String maxpageKey;
         String stateKey;
-        String cmpFile;
         String textFile;
-        int openmode;
 
         switch (fileData.getType()) {
             case FileData.FILETYPE_TXT:
-                maxpageKey = uri + "#maxpage";
-                stateKey = uri;
-                cmpFile = "";
+                maxpageKey = uri + name + "#maxpage";
+                stateKey = uri + name;
                 textFile = name;
-                openmode = ImageManager.OPENMODE_TEXTVIEW;
                 break;
-            case FileData.FILETYPE_ARC, FileData.FILETYPE_PDF, FileData.FILETYPE_DIR:
-                maxpageKey = uri + "#maxpage";
-                stateKey = uri;
-                cmpFile = name;
-                textFile = null;
-                openmode = ImageManager.OPENMODE_VIEW;
+            case FileData.FILETYPE_EPUB_SUB:
+                maxpageKey = uri + "META-INF/container.xml" + "#maxpage";
+                stateKey = uri + "META-INF/container.xml";
+                textFile = "META-INF/container.xml";
                 break;
-            case FileData.FILETYPE_EPUB:
-                if (mEpubViewer == DEF.TEXT_VIEWER) {
-                    maxpageKey = uri + "META-INF/container.xml" + "#maxpage";
-                    stateKey = uri + "META-INF/container.xml";
-                    cmpFile = name;
-                    textFile = "META-INF/container.xml";
-                    openmode = ImageManager.OPENMODE_TEXTVIEW;
-                    break;
-                }
-                else {
-                    maxpageKey = uri + "#maxpage";
-                    stateKey = uri;
-                    cmpFile = name;
-                    textFile = null;
-                    openmode = ImageManager.OPENMODE_VIEW;
-                    break;
-                }
             default:
                 // なにもしない
                 return false;
@@ -291,6 +255,7 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
 
         maxpage = mSp.getInt(maxpageKey, DEF.PAGENUMBER_NONE);
         state = mSp.getInt(stateKey, DEF.PAGENUMBER_UNREAD);
+        Logcat.v(logLevel,"開始します. maxpage=" + maxpage + ", state=" + state);
         try {
             if (state != DEF.PAGENUMBER_UNREAD) {
                 // 未読じゃなければ
@@ -298,22 +263,11 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
                 date = fileData.getDate();
                 if (nowdate != date / 1000 || maxpage == DEF.PAGENUMBER_NONE) {
                     // タイムスタンプが変更されているか、maxpageが保存されていなければ
-                    mImageMgr = new ImageManager(mActivity, currentPath, cmpFile, mUser, mPass, 0, mHandler, mHidden, openmode, 1);
-                    if (openmode == ImageManager.OPENMODE_VIEW) {
-                        mImageMgr.setEpubOrder(mEpubOrder);
-                    }
-                    mImageMgr.LoadImageList(0, 0, 0);
-                    Logcat.v(logLevel, "new ImageManager() cacheIndex=" + mImageMgr.getCacheIndex());
+                    mTextMgr = new TextManager(mImageMgr, textFile, mUser, mPass, mHandler, mActivity, fileData.getType());
+                    mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
+                    maxpage = mTextMgr.length();
 
-                    if (openmode == ImageManager.OPENMODE_TEXTVIEW) {
-                        mTextMgr = new TextManager(mImageMgr, textFile, mUser, mPass, mHandler, mActivity, fileData.getType());
-                        mTextMgr.formatTextFile(mTextWidth, mTextHeight, mHeadSize, mBodySize, mRubiSize, mSpaceW, mSpaceH, mMarginW, mMarginH, mPicSize, mFontFile, mAscMode);
-                        maxpage = mTextMgr.length();
-                    } else {
-                        maxpage = mImageMgr.length();
-                    }
-
-                    if (mImageMgr == null || (openmode == ImageManager.OPENMODE_TEXTVIEW && mTextMgr == null)) {
+                    if (mTextMgr == null) {
                         // 結果が壊れている可能性あり
                         return false;
                     }

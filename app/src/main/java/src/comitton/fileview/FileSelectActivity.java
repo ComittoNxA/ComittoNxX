@@ -13,6 +13,7 @@ import java.util.Map;
 
 import jp.dip.muracoro.comittonx.BuildConfig;
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.Logcat;
 import src.comitton.config.SetTextActivity;
 import src.comitton.expandview.ExpandActivity;
 import src.comitton.helpview.HelpActivity;
@@ -265,7 +266,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		super.onCreate(savedInstanceState);
 
 		// 設定の読込
@@ -290,7 +291,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			ed.apply();
 		}
 		catch (Exception e){
-			Log.d(TAG, e.getLocalizedMessage());
+			Logcat.d(logLevel, "", e);
 		}
 
 		mActivity = this;
@@ -355,22 +356,22 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			Bundle extras = intent.getExtras();
 			ComponentName component = intent.getComponent();
 			Uri contentUri = null;
-			if (debug) {Log.d(TAG, "onCreate: Intent解析中. action=" + action + ", type=" + type + ", extras=" + extras + ", component=" + component);}
+			Logcat.d(logLevel, "Intent解析中. action=" + action + ", type=" + type + ", extras=" + extras + ", component=" + component);
 
 			if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_VIEW.equals(action)) {
 				// 他のアプリから呼び出された場合
 
 				if (Intent.ACTION_SEND.equals(action)) {
-					if (debug) {Log.d(TAG, "onCreate: Intent.ACTION_SEND");}
+					Logcat.d(logLevel, "Intent.ACTION_SEND");
 					contentUri = (Uri) intent.getExtras().get(Intent.EXTRA_STREAM);
 					if (contentUri != null) {
-						if (debug) {Log.d(TAG, "onCreate: contentUri=" + contentUri.getPath());}
+						Logcat.d(logLevel, "contentUri=" + contentUri.getPath());
 					}
 				} else if (Intent.ACTION_VIEW.equals(action)) {
-					if (debug) {Log.d(TAG, "onCreate: Intent.ACTION_VIEW");}
+					Logcat.d(logLevel, "Intent.ACTION_VIEW");
 					contentUri = intent.getData();
 					if (contentUri != null) {
-						if (debug) {Log.d(TAG, "onCreate: contentUri=" + contentUri.getPath());}
+						Logcat.d(logLevel, "contentUri=" + contentUri.getPath());
 					}
 				}
 
@@ -390,16 +391,14 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					mURI = mServer.getURI();
 					mPath = path.substring(0, path.lastIndexOf('/') + 1);
 					FileData fileData = new FileData(mActivity, path.substring(path.lastIndexOf('/') + 1));
-					if (debug) {
-						Log.d(TAG, "onCreate: Intent解析中. mPath=" + mPath + ", name=" + fileData.getName());
-					}
+					Logcat.d(logLevel, "Intent解析中. mPath=" + mPath + ", name=" + fileData.getName());
 
 					openFile(fileData, "");
 				}
 			}
 
 		} catch (Exception e) {
-			Log.e(TAG, "onCreate: Intent解析中にエラーが発生しました. " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "Intent解析中にエラーが発生しました.", e);
 		}
 
 		String path = "";
@@ -411,14 +410,14 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			path = savedInstanceState.getString("Path");
 			server = savedInstanceState.getString("Server");
 			serverSelect = savedInstanceState.getInt("ServerSelect", -2);
-			if (debug) {Log.d(TAG, "onCreate: レジューム復帰. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
+			Logcat.d(logLevel, "レジューム復帰. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);
 		}
 		else {
 			// ショートカットから起動
 			path = intent.getStringExtra("Path");
 			server = intent.getStringExtra("Server");
 			serverSelect = intent.getIntExtra("ServerSelect", -2);
-			if (debug) {Log.d(TAG, "onCreate: ショートカットから起動. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
+			Logcat.d(logLevel, "ショートカットから起動. path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);
 
 			// 起動処理終了を保存
 			if (mInitialize != 0) {
@@ -514,48 +513,48 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		ArrayList<String> permissions = new ArrayList<String>(0);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			if (debug) {Log.d(TAG, "onCreate: Android11(R)以降のバージョンです.");}
+			Logcat.d(logLevel, "Android11(R)以降のバージョンです.");
 			//==== パーミッション承認状態判定(外部ストレージ) ====//
 			if (!Environment.isExternalStorageManager()){
-				if (debug) {Log.d(TAG, "onCreate: 外部ストレージアクセス権限がありません.");}
+				Logcat.d(logLevel, "外部ストレージアクセス権限がありません.");
 				//==== ユーザに自分で権限リストを設定してもらう ====//
 				intent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + BuildConfig.APPLICATION_ID));
 				startActivityForResult(intent, DEF.APP_STORAGE_ACCESS_REQUEST_CODE);
 			}else{
-				if (debug) {Log.d(TAG, "onCreate: 外部ストレージアクセス権限があります.");}
+				Logcat.d(logLevel, "外部ストレージアクセス権限があります.");
 			}
 		} else {
-			if (debug) {Log.d(TAG, "onCreate: Android10(Q)以前のバージョンです.");}
+			Logcat.d(logLevel, "Android10(Q)以前のバージョンです.");
 
 			//==== パーミッション承認状態判定(読み込み) ====//
 			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
 			{
-				if (debug) {Log.d(TAG, "onCreate: READ_EXTERNAL_STORAGE 権限がありません.");}
+				Logcat.d(logLevel, "READ_EXTERNAL_STORAGE 権限がありません.");
 				//==== 承認要求する権限リストに追加 ====//
 				permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
 			}
 			else {
-				if (debug) {Log.d(TAG, "onCreate: READ_EXTERNAL_STORAGE 権限があります.");}
+				Logcat.d(logLevel, "READ_EXTERNAL_STORAGE 権限があります.");
 			}
 
 			//==== パーミッション承認状態判定(書き込み) ====//
 			if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-				if (debug) {Log.d(TAG, "onCreate: WRITE_EXTERNAL_STORAGE 権限がありません.");}
+				Logcat.d(logLevel, "WRITE_EXTERNAL_STORAGE 権限がありません.");
 				//==== 承認要求する権限リストに追加 ====//
 				permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 			} else {
-				if (debug) {Log.d(TAG, "onCreate: WRITE_EXTERNAL_STORAGE 権限があります.");}
+				Logcat.d(logLevel, "WRITE_EXTERNAL_STORAGE 権限があります.");
 			}
 		}
 
 		//==== パーミッション承認状態判定(マイク使用) ====//
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
 		{
-			if (debug) {Log.d(TAG, "onCreate: RECORD_AUDIO 権限がありません.");}
+			Logcat.d(logLevel, "RECORD_AUDIO 権限がありません.");
 			//==== 承認要求する権限リストに追加 ====//
 			permissions.add(Manifest.permission.RECORD_AUDIO);
 		} else {
-			if (debug) {Log.d(TAG, "onCreate: RECORD_AUDIO 権限があります.");}
+			Logcat.d(logLevel, "RECORD_AUDIO 権限があります.");
 		}
 
 		if (permissions.size() > 0) {
@@ -611,13 +610,13 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	@Override
 	protected void onNewIntent(Intent intent) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onNewIntent: 開始します");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します");
 		super.onNewIntent(intent);
 		String path = intent.getStringExtra("Path");
 		String server = intent.getStringExtra("Server");
 		int serverSelect = intent.getIntExtra("ServerSelect", -2);
-		if (debug) {Log.d(TAG, "onNewIntent: path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);}
+		Logcat.d(logLevel, "path=" + path + ", server=" + server + ", serverSelect=" + serverSelect);
 
 		if (path == null || !path.isEmpty()) {
 			mPath = path;
@@ -673,8 +672,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	// 画面遷移が戻ってきた時の通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onActivityResult: 開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. requestCode=" + requestCode + ", resultCode=" + resultCode);
 
 		switch (requestCode) {
 			case DEF.REQUEST_CODE_ACTION_OPEN_DOCUMENT:
@@ -683,9 +682,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					Uri uri = null;
 					if (data != null) {
 						uri = data.getData();
-						if (debug) {
-							Log.d(TAG, "onActivityResult: DEF.DOCUMENT_PROVIDER_REQUEST_CODE uri=" + uri);
-						}
+						Logcat.d(logLevel, "DEF.DOCUMENT_PROVIDER_REQUEST_CODE uri=" + uri);
 						// 権限の永続化
 						Intent intent = getIntent();
 						final int takeFlags =
@@ -695,9 +692,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						// Check for the freshest data.
 						getContentResolver().takePersistableUriPermission(uri, takeFlags);
 						if (mEditServerDialog != null) {
-							if (debug) {
-								Log.d(TAG, "onActivityResult: mEditServerDialog != null");
-							}
+							Logcat.d(logLevel, "mEditServerDialog != null");
 							mEditServerDialog.setProvider(uri.toString());
 						}
 
@@ -705,9 +700,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						mPath = "";
 						FileData fileData = new FileData(mActivity, mURI);
 
-						if (debug) {
-							Log.d(TAG, "onActivityResult: ファイルをオープンします. mURI=" + mURI + ", name=" + fileData.getName());
-						}
+						Logcat.d(logLevel, "ファイルをオープンします. mURI=" + mURI + ", name=" + fileData.getName());
 						openFile(fileData, "");
 
 					}
@@ -720,9 +713,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					Uri uri = null;
 					if (data != null) {
 						uri = data.getData();
-						if (debug) {
-							Log.d(TAG, "onActivityResult: DEF.REQUEST_CODE_ACTION_OPEN_DOCUMENT_TREE uri=" + uri);
-						}
+						Logcat.d(logLevel, "DEF.REQUEST_CODE_ACTION_OPEN_DOCUMENT_TREE uri=" + uri);
 						// 権限の永続化
 						Intent intent = getIntent();
 						final int takeFlags =
@@ -732,9 +723,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						// Check for the freshest data.
 						getContentResolver().takePersistableUriPermission(uri, takeFlags);
 						if (mEditServerDialog != null) {
-							if (debug) {
-								Log.d(TAG, "onActivityResult: mEditServerDialog != null");
-							}
+							Logcat.d(logLevel, "mEditServerDialog != null");
 							mEditServerDialog.setProvider(uri.toString());
 						}
 					}
@@ -769,21 +758,21 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				mInformation.checkRecentRelease(mHandler, false);
 
 				if (requestCode == DEF.REQUEST_IMAGE || requestCode == DEF.REQUEST_TEXT || requestCode == DEF.REQUEST_EPUB || requestCode == DEF.REQUEST_EXPAND) {
-					if (debug) {Log.d(TAG, "onActivityResult: REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EPUB || REQUEST_EXPAND");}
+					Logcat.d(logLevel, "REQUEST_IMAGE || REQUEST_TEXT || REQUEST_EPUB || REQUEST_EXPAND");
 					if (resultCode == RESULT_OK && data != null) {
 
-						if (debug) {Log.d(TAG, "onActivityResult: RESULT_OK. ビュワーから復帰しました.");}
+						Logcat.d(logLevel, "RESULT_OK. ビュワーから復帰しました.");
 						// ビュワーからの復帰
 						int nextopen = data.getExtras().getInt("NextOpen", -1);
 						String file = data.getExtras().getString("LastFile");
 						String path = data.getExtras().getString("LastPath");
-						if (debug) {Log.d(TAG, "onActivityResult: nextopen=" + nextopen + ", file=" + file + ", path=" + path);}
+						Logcat.d(logLevel, "nextopen=" + nextopen + ", file=" + file + ", path=" + path);
 
 						if (nextopen != CloseDialog.CLICK_CLOSE) {
 							// 次のファイルを開く場合
-							if (debug) {Log.d(TAG, "onActivityResult: nextopen != CloseDialog.CLICK_CLOSE");}
+							Logcat.d(logLevel, "nextopen != CloseDialog.CLICK_CLOSE");
 							if (mIsLoading || mFileList.getFileList(mMarker, mFilter, mApplyDir) == null) {
-								if (debug) {Log.d(TAG, "onActivityResult: mIsLoading == true");}
+								Logcat.d(logLevel, "mIsLoading == true");
 								// リストデータがない場合は読み込むまで待つ
 								mLoadListNextOpen = nextopen;
 								mLoadListNextPath = path;
@@ -791,7 +780,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								mLoadListNextInFile = "";
 								return;
 							} else if (path != null && !path.equals(mPath)) {
-								if (debug) {Log.d(TAG, "onActivityResult: mIsLoading == false, path.equals(mPath) == false");}
+								Logcat.d(logLevel, "mIsLoading == false, path.equals(mPath) == false");
 								// パス移動後読み込み終了まで待つ
 								moveFileSelect(mURI, path, file, true);
 								mLoadListNextOpen = nextopen;
@@ -800,7 +789,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								mLoadListNextInFile = "";
 								return;
 							} else {
-								if (debug) {Log.d(TAG, "onActivityResult: nextFileOpen");}
+								Logcat.d(logLevel, "nextFileOpen");
 								if (nextFileOpen(nextopen, path, file, "", RecordItem.TYPE_NONE, DEF.PAGENUMBER_NONE)) {
 									// オープンできた
 									return;
@@ -808,9 +797,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							}
 						} else {
 							// 次のファイルを開かない場合
-							if (debug) {
-								Log.d(TAG, "onActivityResult: nextopen == CloseDialog.CLICK_CLOSE");
-							}
+							Logcat.d(logLevel, "nextopen == CloseDialog.CLICK_CLOSE");
 							moveFileSelect(mURI, path, file, true);
 						}
 					}
@@ -818,21 +805,21 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 				// オープンしない場合とオープンできなかった場合
 				if (!mIsLoading && mFileList.getFileList(mMarker, mFilter, mApplyDir) != null) {
-					if (debug) {Log.d(TAG, "onActivityResult: mIsLoading == false");}
+					Logcat.d(logLevel, "mIsLoading == false");
 					// 他画面から戻ったときは設定＆リスト更新
 					// サムネイル解放
 					releaseThumbnail();
 
 					// 画面遷移によって設定反映
 					if (checkConfigChange()) {
-						if (debug) {Log.d(TAG, "onActivityResult: checkConfigChange() == true");}
+						Logcat.d(logLevel, "checkConfigChange() == true");
 						// 変更されている
 						// 設定の読込
 						// スクロール位置は最初に戻る
 						readConfig();
 						refreshFileSelect();
 					} else {
-						if (debug) {Log.d(TAG, "onActivityResult: checkConfigChange() == false");}
+						Logcat.d(logLevel, "checkConfigChange() == false");
 						// 設定は変更されていない
 						updateListView();
 						loadThumbnail(true);
@@ -842,10 +829,11 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		}
 
-		if(debug) {Log.d(TAG, "onActivityResult: 終了します");}
+		Logcat.d(logLevel, "終了します");
 	}
 
 	public void setThumb(Uri uri) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Bitmap bm = null;
 		long thumbID = System.currentTimeMillis();
 		int thumH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
@@ -871,7 +859,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			if(bm == null)
 				return;
 		}catch(Exception e){
-			Log.e("ImageActivity", "setThumb error");
+			Logcat.e(logLevel, "setThumb error", e);
 		}
 
 		bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
@@ -885,8 +873,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	// 次のファイルを開く
 	private boolean nextFileOpen(int nextopen, String path, String file, String infile, int type, int page) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "nextFileOpen: 開始します. nextopen=" + nextopen + ", path=" + path + ", file=" + file + ", infile=" + infile + ", type=" + type + ", page=" + page);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. nextopen=" + nextopen + ", path=" + path + ", file=" + file + ", infile=" + infile + ", type=" + type + ", page=" + page);
 		// 次のファイル検索
 		FileData nextfile = searchNextFile(mFileList.getFileList(mMarker, mFilter, mApplyDir), file, nextopen);
 
@@ -941,7 +929,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		if (nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE) {
 			if(nextfile != null || nextopen == CloseDialog.CLICK_BOOKMARK || nextopen == CloseDialog.CLICK_HISTORY || nextopen == CloseDialog.CLICK_LASTOPEN) {
-				if (debug) {Log.d(TAG, "nextFileOpen: nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");}
+				Logcat.d(logLevel, "nextopen != CloseDialog.CLICK_CANCEL && nextopen != CloseDialog.CLICK_CLOSE");
 				if (openFile(nextfile, infile)) {
 					// サムネイル解放
 					releaseThumbnail();
@@ -955,8 +943,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	// 設定の読み込み
 	private void readConfig() {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "readConfig: 開始します");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します");
 
 		// 色の設定
 		mDirColor = SetFileColorActivity.getDirColor(mSharedPreferences);
@@ -1016,7 +1004,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		// mSelectorShow =
 		// SetRecorderActivity.getShowSelector(mSharedPreferences); // セレクタ表示
 		mListType = SetRecorderActivity.getListTypes(mSharedPreferences);
-		if(debug) {Log.d(TAG, "mListType.length=" + mListType.length);}
+		Logcat.d(logLevel, "mListType.length=" + mListType.length);
 
 		mHistCount = DEF.calcSaveNum(SetRecorderActivity.getHistNum(mSharedPreferences));
 		mLocalSave = SetRecorderActivity.getRecLocal(mSharedPreferences);
@@ -1033,11 +1021,15 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		mImageViewRota = SetImageActivity.getViewRota(mSharedPreferences);
 		mImageTopSingle = SetImageActivity.getTopSingle(mSharedPreferences);
 
+		// リストモードの設定
+		mListMode = (short) mSharedPreferences.getInt(DEF.KEY_LISTMODE, FileListArea.LISTMODE_LIST);
+		mThumbnail = mSharedPreferences.getBoolean(DEF.KEY_THUMBNAIL, false);
+
 		if (!mListRotaChg) {
 			// 手動で切り替えていない
 			DEF.setRotation(this, mListRota);
 		}
-		if(debug) {Log.d(TAG, "readConfig: 終了します");}
+		Logcat.d(logLevel, "終了します");
 	}
 
 	// 設定の変更チェック
@@ -1192,6 +1184,15 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		if (mUseThumbnailTap != SetFileListActivity.getThumbnailTap(mSharedPreferences)) {
 			return true;
 		}
+
+		// リストモードの設定
+		if (mListMode != (short) mSharedPreferences.getInt(DEF.KEY_LISTMODE, FileListArea.LISTMODE_LIST)){
+			return true;
+		}
+		if (mThumbnail != mSharedPreferences.getBoolean(DEF.KEY_THUMBNAIL, false)) {
+			return true;
+		}
+
 		return false;
 	}
 
@@ -1405,7 +1406,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	// ActivityクラスのonCreateDialogをオーバーライド
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Dialog dialog = null;
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.MyDialog);
 		switch (id) {
@@ -1419,12 +1420,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							String user = mServer.getUser();
 							String pass = mServer.getPass();
 							String uri = DEF.relativePath(mActivity, mURI, mPath, mFileData.getName());
-							if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除します: " + uri);}
+							Logcat.d(logLevel, "ファイルを削除します: " + uri);
 							try {
 								boolean isDeleted = FileAccess.delete(mActivity, uri, user, pass);
 								if (isDeleted) {
 									// 削除できていたら画面から消す
-									if (debug) {Log.d(TAG, "onCreateDialog: ファイルを削除できました。");}
+									Logcat.d(logLevel, "ファイルを削除できました。");
 									int topindex = mListScreenView.mFileListArea.getTopIndex();
 									loadListView(topindex);
 									String file = DEF.createUrl(uri, user, pass);
@@ -1438,7 +1439,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 									ThumbnailLoader.deleteThumbnailCache(uri, mThumbSizeW, mThumbSizeH);
 								}
 								else {
-									Log.e(TAG, "onCreateDialog: " + getResources().getString(R.string.delErrorMsg));
+									Logcat.e(logLevel, getResources().getString(R.string.delErrorMsg));
 									Toast.makeText(mActivity, mActivity.getText(R.string.delErrorMsg) + "\n" + DEF.relativePath(mActivity, mURI, mPath, mFileData.getName()), Toast.LENGTH_LONG).show();
 								}
 							} catch (FileAccessException e) {
@@ -1639,7 +1640,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 							}
 							try {
 								String uri = DEF.relativePath(mActivity, mURI, mPath);
-								if (debug) {Log.d(TAG, "onCreateDialog: ファイル名を変更します: uri=" + uri);}
+								Logcat.d(logLevel, "ファイル名を変更します: uri=" + uri);
 								boolean ret = FileAccess.renameTo(mActivity, uri, fromfile, filename, user, pass);
 								if (filetype == FileData.FILETYPE_DIR) {
 									filename = filename + "/";
@@ -1686,7 +1687,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 									ThumbnailLoader.renameThumbnailCache(fromUri, toUri, mThumbSizeW, mThumbSizeH);
 								}
 								else {
-									Log.e(TAG, "onCreateDialog: " + getResources().getString(R.string.renameErrorMsg) + ": " + DEF.relativePath(mActivity, mURI, mPath, fromfile));
+									Logcat.e(logLevel, mActivity.getText(R.string.renameErrorMsg) + ": " + DEF.relativePath(mActivity, mURI, mPath, fromfile));
 									Toast.makeText(mActivity, mActivity.getText(R.string.renameErrorMsg) + "\n" + DEF.relativePath(mActivity, mURI, mPath, fromfile), Toast.LENGTH_LONG).show();
 								}
 							} catch (FileAccessException e) {
@@ -1728,7 +1729,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					server.select(svrindex);
 					uri = server.getURI();
 				}
-				if (debug) {Log.d(TAG, "onCreateDialog: DEF.MESSAGE_RESUME: uri=" + uri + ", lastView=" + lastView + ", path=" + path + ", lastFile=" + lastFile + ", lastText=" + lastText + ", lastImage=" + lastImage);}
+				Logcat.d(logLevel, "DEF.MESSAGE_RESUME: uri=" + uri + ", lastView=" + lastView + ", path=" + path + ", lastFile=" + lastFile + ", lastText=" + lastText + ", lastImage=" + lastImage);
 
 				Resources res = getResources();
 				String msg = res.getString(R.string.rsMsg) + "\n\n" + uri + path + lastFile;
@@ -1803,7 +1804,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				break;
 			}
 			case DEF.MESSAGE_RESETLOCAL:{
-				if(debug) {Log.d(TAG, "onCreateDialog: ローカルのパスリセットのダイアログを表示します.");}
+				Logcat.d(logLevel, "ローカルのパスリセットのダイアログを表示します.");
 				int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
 				ServerSelect server = new ServerSelect(mSharedPreferences, this);
 
@@ -1831,7 +1832,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				break;
 			}
 			case DEF.MESSAGE_EDITSERVER:{
-				if(debug) {Log.d(TAG, "onCreateDialog: サーバ情報の編集ダイアログを表示します.");}
+				Logcat.d(logLevel, "サーバ情報の編集ダイアログを表示します.");
 				int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
 				mEditServerDialog = new EditServerDialog(mActivity, R.style.MyDialog, serverindex, new EditServerDialog.SearchListener() {
 					@Override
@@ -1876,6 +1877,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	// ActivityクラスのonCreateDialogをオーバーライド
 	@Override
 	protected void onPrepareDialog(final int id, final Dialog dialog) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		// 一度ダイアログを表示すると二回目に表示するときは中身だけ書き換える
 		switch (id) {
 			case DEF.MESSAGE_FILE_DELETE: // ファイル削除
@@ -1883,7 +1885,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			case DEF.MESSAGE_FILE_RENAME: // リネーム
 				ArrayList<FileData> files = mFileList.getFileList(mMarker, mFilter, mApplyDir);
 				if (files != null) {
-					String title = new String(mFileData.getName());
+					String title = mFileData.getName();
 					dialog.setTitle(title);
 				}
 				break;
@@ -1892,10 +1894,10 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					String title;
 					int listtype = mListScreenView.getListType();
 					if (listtype == RecordList.TYPE_BOOKMARK) {
-						title = new String(mSelectRecord.getDispName());
+						title = mSelectRecord.getDispName();
 					}
 					else {
-						title = new String(mSelectRecord.getPath());
+						title = mSelectRecord.getPath();
 					}
 					dialog.setTitle(title);
 				}
@@ -2121,8 +2123,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルリストの再読み込み
 	 */
 	private void loadListView() {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "loadListView: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (mFileList.mDialog != null) {
 			// 読み込み中であれば二重実行しない
@@ -2162,8 +2164,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルリスト読み込み後のリスト設定
 	 */
 	private void loadListViewAfter() {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "loadListViewAfter: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		// 読み込み中フラグOFF
 		mIsLoading = false;
@@ -2213,8 +2215,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルリストの更新
 	 */
 	private void updateListView() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "updateListView: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		mFileList.updateListView(null);
 		ArrayList<FileData> files = mFileList.getFileList(mMarker, mFilter, mApplyDir);
@@ -2227,8 +2229,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * マーカーの更新
 	 */
 	private void updateMarker(String text, boolean filter, boolean applyDir) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "updateMarker: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 
 		String prev_marker = mMarker;
@@ -2520,8 +2522,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルリストの長押し選択表示
 	 */
 	private void showFileLongClickDialog() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "showFileLongClickDialog: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (mListDialog != null) {
 			return;
@@ -2890,14 +2892,14 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		});
 		mListDialog.show();
 
-		if (debug) {Log.d(TAG, "showFileLongClickDialog: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	/**
 	 * 履歴系リストの長押し選択表示
 	 */
 	private void showRecordLongClickDialog() {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (mListDialog != null) {
 			return;
 		}
@@ -2932,15 +2934,15 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			mListDialog.show();
 		}
 		else if (listtype == RecordList.TYPE_SERVER) {
-			if(debug) {Log.d(TAG, "showRecordLongClickDialog: サーバリストのアイテムが長押しされました.");}
+			Logcat.d(logLevel, "サーバリストのアイテムが長押しされました.");
 			// サーバリストのアイテムが長押しされた
 			int serverindex = mSelectRecord.getServer(); // サーバのキーインデックス
 			if (serverindex == DEF.INDEX_LOCAL) {
-				if(debug) {Log.d(TAG, "showRecordLongClickDialog: ローカルを選択しました.");}
+				Logcat.d(logLevel, "ローカルを選択しました.");
 				showDialog(DEF.MESSAGE_RESETLOCAL);
 			}
 			else {
-				if(debug) {Log.d(TAG, "showRecordLongClickDialog: ローカル以外のサーバを選択しました.");}
+				Logcat.d(logLevel, "ローカル以外のサーバを選択しました.");
 				showDialog(DEF.MESSAGE_EDITSERVER);
 			}
 		}
@@ -3025,7 +3027,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						Map<String, ?> keys = mSharedPreferences.getAll();
 						if (keys != null) {
 							for (String key : keys.keySet()) {
-							    //Log.i("Key Check",key);
+							    //Logcat.i(logLevel,key);
 								if (item == 3) {
 									String user = mServer.getUser();
 									String pass = mServer.getPass();
@@ -3298,8 +3300,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * パスの移動
 	 */
 	private boolean moveFileSelectFromServer(int svrindex, String path) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "moveFileSelectFromServer: svrindex=" + svrindex  + ", path=" + path);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "svrindex=" + svrindex  + ", path=" + path);
 		ServerSelect server = new ServerSelect(mSharedPreferences, this);
 		if (svrindex != DEF.INDEX_LOCAL) {
 			server.select(svrindex);
@@ -3340,8 +3342,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルリスト画面を作り直す
 	 */
 	private void refreshFileSelect() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "refreshFileSelect: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		Intent intent = new Intent(FileSelectActivity.this, FileSelectActivity.class);
 		intent.putExtra("Path", mPath);
@@ -3375,12 +3377,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ファイルオープン
 	 */
 	private boolean openFile(FileData fd, String infile) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (fd == null) {
-			if (debug) {Log.d(TAG, "openFile: 開始します. mPath=" + mPath + ", fd=null" + ", infile=" + infile);}
+			Logcat.d(logLevel, "開始します. mPath=" + mPath + ", fd=null" + ", infile=" + infile);
 		}
 		else {
-			if (debug) {Log.d(TAG, "openFile: 開始します. mPath=" + mPath + ", name=" + fd.getName() + ", infile=" + infile);}
+			Logcat.d(logLevel, "開始します. mPath=" + mPath + ", name=" + fd.getName() + ", infile=" + infile);
 		}
 
 		// ファイルを表示
@@ -3389,27 +3391,27 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			//	return false;
 			//}
 			if (infile == null || infile.isEmpty()) {
-				if (debug) {Log.d(TAG, "openFile: openImageDir: mPath=" + mPath + ", infile=" + infile);}
+				Logcat.d(logLevel, "openImageDir: mPath=" + mPath + ", infile=" + infile);
 				// 前回の続きでディレクトリオープン
 				openImageDir("");
 			}
 			else {
-				if (debug) {Log.d(TAG, "openFile: openImageDir: mPath=" + mPath + ", infile=" + infile);}
+				Logcat.d(logLevel, "openImageDir: mPath=" + mPath + ", infile=" + infile);
 				openImageFile(infile);
 			}
 		}
 		else {
 			switch (fd.getType()) {
 				case FileData.FILETYPE_DIR:
-					if (debug) {Log.d(TAG, "openFile: FILETYPE_DIR: mPath=" + mPath + ", name=" + fd.getName());}
+					Logcat.d(logLevel, "FILETYPE_DIR: mPath=" + mPath + ", name=" + fd.getName());
 					openImageDir(fd.getName());
 					break;
 				case FileData.FILETYPE_IMG:
-					if (debug) {Log.d(TAG, "openFile: FILETYPE_IMG: mPath=" + mPath + ", name=" + fd.getName());}
+					Logcat.d(logLevel, "FILETYPE_IMG: mPath=" + mPath + ", name=" + fd.getName());
 					openImageFile(fd.getName());
 					break;
 				case FileData.FILETYPE_ARC:
-					if (debug) {Log.d(TAG, "openFile: FILETYPE_ARC: mPath=" + mPath + ", name=" + fd.getName() + ", infile=" + infile);}
+					Logcat.d(logLevel, "FILETYPE_ARC: mPath=" + mPath + ", name=" + fd.getName() + ", infile=" + infile);
 					if (FileData.isEpubSub(infile)) {
 						openEpubFile(fd.getName());
 					}
@@ -3423,15 +3425,15 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					}
 					break;
 				case FileData.FILETYPE_TXT:
-					if (debug) {Log.d(TAG, "openFile: FILETYPE_TXT: mPath=" + mPath + ", name=" + fd.getName());}
+					Logcat.d(logLevel, "FILETYPE_TXT: mPath=" + mPath + ", name=" + fd.getName());
 					openTextFile("", fd.getName());
 					break;
 				case FileData.FILETYPE_PDF:
-					if (debug) {Log.d(TAG, "openFile: FILETYPE_PDF: mPath=" + mPath + ", name=" + fd.getName());}
+					Logcat.d(logLevel, "FILETYPE_PDF: mPath=" + mPath + ", name=" + fd.getName());
 					openCompFile(fd.getName());
 					break;
 				case FileData.FILETYPE_EPUB:
-					if (debug) {Log.d(TAG, "openFile: FILETYPE_EPUB: mPath=" + mPath + ", name=" + fd.getName());}
+					Logcat.d(logLevel, "FILETYPE_EPUB: mPath=" + mPath + ", name=" + fd.getName());
 					if (FileData.isEpubSub(infile)) {
 						openEpubFile(fd.getName());
 					}
@@ -3444,11 +3446,11 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					}
 					else {
 						if (DEF.TEXT_VIEWER == mEpubViewer) {
-							Log.d(TAG, "openFile: DEF.EPUB_VIEWER");
+							Logcat.d(logLevel, "DEF.EPUB_VIEWER");
 							// Epubビューワーで開く
 							openEpubFile(fd.getName());
 						} else {
-							Log.d(TAG, "openFile: DEF.IMAGE_VIEWER");
+							Logcat.d(logLevel, "DEF.IMAGE_VIEWER");
 							// zipのイメージ表示
 							openCompFile(fd.getName());
 						}
@@ -3463,8 +3465,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * Epubファイルオープン
 	 */
 	private void openEpubFile(String name) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openEpubFile: 開始します. name=" + name);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. name=" + name);
 
 		Toast.makeText(this, FileAccess.filename(mActivity, name), Toast.LENGTH_SHORT).show();
 
@@ -3488,9 +3490,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * テキストファイルオープン
 	 */
 	private void openTextFile(String file, String name) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openTextFile: 開始します. file=" + file + ", name=" + name);}
-		//if (debug) {DEF.StackTrace(TAG, "openTextFile:");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. file=" + file + ", name=" + name);
 
 		if (name.equals("META-INF/container.xml")) {
 			Toast.makeText(this, FileAccess.filename(mActivity, file), Toast.LENGTH_SHORT).show();
@@ -3519,8 +3520,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * 画像ファイルオープン
 	 */
 	private void openImageFile(String name) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openImageFile: 開始します. name=" + name);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. name=" + name);
 
 		Toast.makeText(this, mPath + FileAccess.filename(mActivity, name), Toast.LENGTH_SHORT).show();
 
@@ -3566,8 +3567,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * ディレクトリ内のイメージ表示
 	 */
 	private void openImageDir(String name) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openImageDir: 開始します. name=" + name);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. name=" + name);
 
 		Toast.makeText(this, mPath + FileAccess.filename(mActivity, name), Toast.LENGTH_SHORT).show();
 
@@ -3591,8 +3592,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	 * 圧縮ファイルオープン
 	 */
 	private void openCompFile(String name) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "openCompFile: 開始します. name=" + name);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. name=" + name);
 
 		Toast.makeText(this, FileAccess.filename(mActivity, name), Toast.LENGTH_SHORT).show();
 
@@ -3646,8 +3647,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	// Bitmap読込のスレッドからの通知取得
 	public boolean handleMessage(Message msg) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "handleMessage: what=" + msg.what);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "what=" + msg.what);
 
 		if (DEF.ToastMessage(mActivity, msg)) {
 			// HMSG_TOASTならトーストを表示して終了
@@ -3691,7 +3692,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				// Bitmapの通知
 				String name = (String) msg.obj;
 				int bmIndex = msg.arg1;
-				//Log.i(TAG, "handleMessage: HMSG_THUMBNAIL: bmIndex=" + bmIndex + ", name=" + name);
+				//Logcat.i(logLevel, "HMSG_THUMBNAIL: bmIndex=" + bmIndex + ", name=" + name);
 				if (name != null) {
 					ArrayList<FileData> files = mFileList.getFileList(mMarker, mFilter, mApplyDir);
 					if (files != null) {
@@ -3715,8 +3716,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	}
 
 	public void loadFileState(boolean reload) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "loadFileState: 開始します. reload=" + reload);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. reload=" + reload);
 
 		if (!mThumbnail) {
 			return;
@@ -3724,35 +3725,36 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		int listtype = mListScreenView.getListType();
 		if(listtype != RecordList.TYPE_FILELIST) {
-			if(debug) {Log.d(TAG, "loadFileState: TYPE_FILELISTではありません.");}
+			Logcat.d(logLevel, "TYPE_FILELISTではありません.");
 			return;
 		}
-		if(debug) {Log.d(TAG, "loadFileState: TYPE_FILELISTです.");}
+		Logcat.d(logLevel, "TYPE_FILELISTです.");
 
-		if(debug) {Log.d(TAG, "loadFileState: mFileStatusLoader=" + (mFileStatusLoader == null ? "停止中" : "実行中"));}
+		Logcat.d(logLevel, "mFileStatusLoader=" + (mFileStatusLoader == null ? "停止中" : "実行中"));
 		if (reload && mFileStatusLoader != null) {
 			// 既存のスレッドを停止
-			if(debug) {Log.d(TAG, "loadFileState: スレッドを停止します.");}
+			Logcat.d(logLevel, "スレッドを停止します.");
 			mFileStatusLoader.breakThread();
 			mFileStatusLoader = null;
 		}
 
 		if (mFileStatusLoader == null) {
-			if(debug) {Log.d(TAG, "loadFileState: スレッドを開始します.");}
+			Logcat.d(logLevel, "スレッドを開始します.");
 			String user = mServer.getUser();
 			String pass = mServer.getPass();
 
 			ArrayList<FileData> files = mFileList.getFileList(mMarker, mFilter, mApplyDir);
 			if (files != null) {
 				mFileStatusLoader = new FileStatusLoader(mActivity, mURI, mPath, user, pass, mHandler, mFileList.getFileList(mMarker, mFilter, mApplyDir), mHidden, mEpubViewer);
+				//mListScreenView.mFileListArea.sendDispRange();
 				mFileStatusLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
 			}
 		}
 	}
 
 	public void loadThumbnail(boolean reload) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "loadThumbnail: 開始します. reload=" + reload);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. reload=" + reload, true);
 
 		loadFileState(reload);
 
@@ -3763,21 +3765,21 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		int listtype = mListScreenView.getListType();
 		if(listtype != RecordList.TYPE_FILELIST) {
-			if(debug) {Log.d(TAG, "loadThumbnail: TYPE_FILELISTではありません.");}
+			Logcat.d(logLevel, "TYPE_FILELISTではありません.");
 			return;
 		}
-		if(debug) {Log.d(TAG, "loadThumbnail: TYPE_FILELISTです.");}
+		Logcat.d(logLevel, "TYPE_FILELISTです.");
 
-		if(debug) {Log.d(TAG, "loadThumbnail: mThumbnailLoader=" + (mThumbnailLoader == null ? "停止中" : "実行中"));}
+		Logcat.d(logLevel, "mThumbnailLoader=" + (mThumbnailLoader == null ? "停止中" : "実行中"));
 		if (reload && mThumbnailLoader != null) {
 			// 既存のスレッドを停止
-			if(debug) {Log.d(TAG, "loadThumbnail: スレッドを停止します.");}
+			Logcat.d(logLevel, "スレッドを停止します.");
 			mThumbnailLoader.breakThread();
 			mThumbnailLoader = null;
 		}
 
 		if (mThumbnailLoader == null) {
-			if(debug) {Log.d(TAG, "loadThumbnail: スレッドを開始します.");}
+			Logcat.d(logLevel, "スレッドを開始します.");
 			mThumbID = System.currentTimeMillis();
 			String user = mServer.getUser();
 			String pass = mServer.getPass();
@@ -3786,7 +3788,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 			ArrayList<FileData> files = mFileList.getFileList(mMarker, mFilter, mApplyDir);
 			if (files != null) {
 				mThumbnailLoader = new FileThumbnailLoader(this, mURI, mPath, user, pass, mHandler, mThumbID, mFileList.getFileList(mMarker, mFilter, mApplyDir), mThumbSizeW, mThumbSizeH, mThumbNum, filesort, mHidden, mThumbSort, mThumbCrop, mThumbMargin, mEpubThumb, mEpubViewer);
-				mThumbnailLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
+				mListScreenView.mFileListArea.sendDispRange();
+				//mThumbnailLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
 				// 現在時をIDに設定
 				mListScreenView.mFileListArea.setThumbnailId(mThumbID);
 			}
@@ -3825,8 +3828,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	}
 
 	public FileData searchNextFile(ArrayList<FileData> files, String file, int nextopen) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "searchNextFile: 開始します. file=" + file + ", nextopen=" + nextopen);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. file=" + file + ", nextopen=" + nextopen);
 		if (files == null || file == null || file.isEmpty()) {
 			return null;
 		}
@@ -3976,25 +3979,25 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	@Override
 	public void onScrollChanged(int listtype, int firstindex, int lastindex) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG,"setDispRange: 開始します. listtype=" + listtype + ", firstindex=" + firstindex + ", lastindex=" + lastindex);}
-		//if (debug) {DEF.StackTrace(TAG, "onScrollChanged: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します. listtype=" + listtype + ", firstindex=" + firstindex + ", lastindex=" + lastindex);
 
 		// スクロール位置変更
 		if (listtype == RecordList.TYPE_FILELIST) {
-    		// ファイルリスト
-			if (mFileFirstIndex != firstindex || mFileLastIndex != lastindex) {
-				mFileFirstIndex = firstindex;
-				mFileLastIndex = lastindex;
-				if (mThumbnailLoader != null) {
-    				// リストボックスの位置が変わったときに通知
-    				mThumbnailLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
-    			}
-				if (mFileStatusLoader != null) {
-					// リストボックスの位置が変わったときに通知
-					mFileStatusLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
-				}
-    		}
+			// ファイルリスト
+			Logcat.v(logLevel,"TYPE_FILELIST");
+			mFileFirstIndex = firstindex;
+			mFileLastIndex = lastindex;
+			if (mThumbnailLoader != null) {
+				// リストボックスの位置が変わったときに通知
+				Logcat.v(logLevel,"mThumbnailLoader != null");
+				mThumbnailLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
+			}
+			if (mFileStatusLoader != null) {
+				// リストボックスの位置が変わったときに通知
+				Logcat.v(logLevel,"mFileStatusLoader != null");
+				mFileStatusLoader.setDispRange(mFileFirstIndex, mFileLastIndex);
+			}
 		}
 	}
 
@@ -4028,9 +4031,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 	@Override
 	public void onItemClick(int listtype, int listpos, Point point) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onItemClick: 開始します. listtype=" + listtype);}
-		//if (debug) {DEF.StackTrace(TAG, "onItemClick: ");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. listtype=" + listtype);
 
 		if (listtype == RecordList.TYPE_FILELIST) {
 			ArrayList<FileData> files = mFileList.getFileList(mMarker, mFilter, mApplyDir);
@@ -4093,7 +4095,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		}
 		else {
 			// ディレクトリ一覧 or サーバ一覧 or ブックマーク一覧 or 履歴
-			if (debug) {Log.d(TAG, "onItemClick: listtype=" + listtype);}
+			Logcat.d(logLevel, "listtype=" + listtype);
 			RecordItem rd = mListScreenView.getRecordItem(listtype, listpos);
 
 			if (rd != null) {
@@ -4104,36 +4106,36 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				String infile = rd.getImage();
 				int type = rd.getType();
 				int page = rd.getPage();
-				if (debug) {Log.d(TAG, "onItemClick: server=" + server + ", file=" + file + ", path=" + path + ", infile=" + infile + ", type=" + type + ", page=" + page);}
+				Logcat.d(logLevel, "server=" + server + ", file=" + file + ", path=" + path + ", infile=" + infile + ", type=" + type + ", page=" + page);
 
 				mLoadListNextType = type;
 				mLoadListNextPage = page;
 
 				if (type == RecordItem.TYPE_COMPTEXT) {
-					if (debug) {Log.d(TAG, "onItemClick: 圧縮ファイル内のテキストファイル閲覧.");}
+					Logcat.d(logLevel, "圧縮ファイル内のテキストファイル閲覧.");
 					if (!FileAccess.isDirectory(mActivity, path, mServer.getUser(server), mServer.getPass(server))) {
 						// path がディレクトリ以外の場合、親ディレクトリとファイル名に分割
-						if (debug) {Log.d(TAG, "onItemClick: 圧縮ファイルのパスがファイルです.");}
+						Logcat.d(logLevel, "圧縮ファイルのパスがファイルです.");
 						mLoadListNextFile = FileAccess.filename(mActivity, path);
 						mLoadListNextPath = FileAccess.parent(mActivity, path);
 						mLoadListNextInFile = file;
 					}
 					else {
-						if (debug) {Log.d(TAG, "onItemClick: 圧縮ファイルのパスがディレクトリです.");}
+						Logcat.d(logLevel, "圧縮ファイルのパスがディレクトリです.");
 						mLoadListNextPath = path;
 						mLoadListNextFile = file;
 						mLoadListNextInFile = infile;
 					}
 				}
 				else if (type == RecordItem.TYPE_IMAGE) {
-					if (debug) {Log.d(TAG, "onItemClick: ディレクトリ内のイメージファイル閲覧.");}
+					Logcat.d(logLevel, "ディレクトリ内のイメージファイル閲覧.");
 					// ディレクトリか圧縮ファイルの画像オープン
 					mLoadListNextPath = path;
 					mLoadListNextFile = file;
 					mLoadListNextInFile = "";
 				}
 				else if (type == RecordItem.TYPE_TEXT || type == RecordItem.TYPE_IMAGEDIRECT) {
-					if (debug) {Log.d(TAG, "onItemClick: テキストまたはイメージ直接指定.");}
+					Logcat.d(logLevel, "テキストまたはイメージ直接指定.");
 					// 画像直接かテキストファイルファイルオープン
 					mLoadListNextPath = path;
 					mLoadListNextFile = file;
@@ -4157,33 +4159,33 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				}
 
 				if (listtype == RecordList.TYPE_DIRECTORY){
-					if (debug) {Log.d(TAG, "onItemClick: ディレクトリ一覧.");}
+					Logcat.d(logLevel, "ディレクトリ一覧.");
 					switchFileList(); // ファイルリストをアクティブ化
 				}
 				else if (listtype == RecordList.TYPE_SERVER) {
-					if (debug) {Log.d(TAG, "onItemClick: サーバ一覧.");}
+					Logcat.d(logLevel, "サーバ一覧.");
 					if (!rd.getServerName().isEmpty()) {
 						if (rd.getAccessType() == DEF.ACCESS_TYPE_PICKER) {
-							if (debug) {Log.d(TAG, "onItemClick: ファイルピッカー.");}
+							Logcat.d(logLevel, "ファイルピッカー.");
 							mLoadListNextOpen = CloseDialog.CLICK_NONE;
 							mSelectRecord = rd;
 							showDialog(DEF.MESSAGE_EDITSERVER);
 						}
 						else {
-							if (debug) {Log.d(TAG, "onItemClick: ファイルピッカー以外.");}
+							Logcat.d(logLevel, "ファイルピッカー以外.");
 							mLoadListNextOpen = CloseDialog.CLICK_CLOSE;
 							switchFileList(); // ファイルリストをアクティブ化
 						}
 					}
 				}
-				if (debug) {Log.d(TAG, "onItemClick: " +
+				Logcat.d(logLevel, "onItemClick: " +
 						", mLoadListNextOpen=" + mLoadListNextOpen +
 						", mLoadListNextPath=" + mLoadListNextPath +
 						", mLoadListNextFile=" + mLoadListNextFile +
 						", mLoadListNextInFile=" + mLoadListNextInFile +
 						", mLoadListNextType=" + mLoadListNextType +
 						", mLoadListNextPage=" + mLoadListNextPage
-				);}
+				);
 
 			}
 		}

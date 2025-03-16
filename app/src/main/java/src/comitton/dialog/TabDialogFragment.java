@@ -28,6 +28,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.ArrayList;
 
 import jp.dip.muracoro.comittonx.R;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.view.MenuItemView;
 
 public class TabDialogFragment extends ImmersiveDialogFragment implements View.OnTouchListener {
@@ -91,8 +92,8 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     }
 
     private void TabDialogFragmentProc(AppCompatActivity activity, boolean isclose, boolean halfview, boolean top, boolean wide, MenuDialog.MenuSelectListener listener) {
-        boolean debug = false;
-        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: isclose=" + isclose + ", halfview=" + halfview + ", top=" + top + ", wide=" + wide);}
+        int logLevel = Logcat.LOG_LEVEL_WARN;
+        Logcat.d(logLevel, "isclose=" + isclose + ", halfview=" + halfview + ", top=" + top + ", wide=" + wide);
 
         mActivity = activity;
         mScale = mActivity.getResources().getDisplayMetrics().scaledDensity;
@@ -116,7 +117,7 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
         View mRootView = mActivity.getWindow().getDecorView().findViewById(android.R.id.content);
         int cx = mRootView.getWidth();
         int cy = mRootView.getHeight();
-        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: cx=" + cx + ", cy=" + cy);}
+        Logcat.d(logLevel, "cx=" + cx + ", cy=" + cy);
 
         if (mHalfView) {
             mWidth = Math.min(cx, cy) * 20 / 100;
@@ -124,13 +125,13 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
             mWidth = Math.min(cx, cy) * 80 / 100;
         }
         int maxWidth = (int) (20 * mScale * 16);
-        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: mWidth=" + mWidth);}
+        Logcat.d(logLevel, "mWidth=" + mWidth);
         if (!mWide) {
             mWidth = Math.min(mWidth, maxWidth);
         }
         mHeight = cy * 80 / 100;
 
-        if (debug) {Log.d("TabDialogFragment", "TabDialogFragmentProc: mWidth=" + mWidth + ", mHeight=" + mHeight);}
+        Logcat.d(logLevel, "mWidth=" + mWidth + ", mHeight=" + mHeight);
     }
 
     @Override
@@ -198,14 +199,14 @@ public class TabDialogFragment extends ImmersiveDialogFragment implements View.O
     private MenuItemView mSelectView;
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        boolean debug = false;
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         // タッチイベント
         int action = event.getAction();
 
         String[] eventName = { "DOWN" , "UP" , "MOVE" , "CANCEL" , "OUTSIDE" ,
                 "POINTER_DOWN" , "POINTER_UP" , "HOVER_MOVE" , "SCROLL" , "HOVER_ENTER" ,
                 "HOVER_EXIT" , "BUTTON_PRESS" , "BUTTON_RELEASE" };
-        if (debug) {Log.d("TabDialogFragment", "onTouch: view=" + v + ", action=" + eventName[action]);}
+        Logcat.d(logLevel, "view=" + v + ", action=" + eventName[action]);
 
         if (action == MotionEvent.ACTION_DOWN) {
             mSelectView = (MenuItemView)v;

@@ -2,6 +2,7 @@ package src.comitton.imageview;
 
 import src.comitton.common.DEF;
 import src.comitton.common.ImageAccess;
+import src.comitton.common.Logcat;
 import src.comitton.common.WaitFor;
 import src.comitton.dialog.PageThumbnail;
 import src.comitton.jni.CallImgLibrary;
@@ -174,33 +175,36 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	}
 
 	private Rect drawBitmap(Canvas canvas, int page, int x, int y, float rate, int flag) {
-		boolean debug = false;
-		if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 開始します. canvas=[" + canvas.getWidth() + ", " + canvas.getHeight() + "], x=" + x + ", y=" + y + ", rate=" + rate + ", flag=" + flag);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "page=" + page + " 開始します. canvas=[" + canvas.getWidth() + ", " + canvas.getHeight() + "], x=" + x + ", y=" + y + ", rate=" + rate + ", flag=" + flag);
 		page = calcReversePage(page);
 
 		int retValue;
 
-		if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " キャッシュの画像サイズを取得します.");}
+		Logcat.d(logLevel, "page=" + page + " キャッシュの画像サイズを取得します.");
 		retValue = CallImgLibrary.ThumbnailImageSize(mThumID, page);
 		if (retValue <= 0) {
-			if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " キャッシュの画像サイズが取得できませんでした.");}
+			Logcat.d(logLevel, "page=" + page + " キャッシュの画像サイズが取得できませんでした.");
 		}
 		else {
 			int w = retValue >> 16;
 			int h = retValue & 0xFFFF;
-			if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " キャッシュの画像サイズを取得しました. w=" + w + ", h=" + h);}
+			Logcat.d(logLevel, "page=" + page + " キャッシュの画像サイズを取得しました. w=" + w + ", h=" + h);
 			try {
-				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 空のビットマップを作成します. width=" + w + ", height=" + h);}
+				Logcat.d(logLevel, "page=" + page + " 空のビットマップを作成します. width=" + w + ", height=" + h);
 				mDrawBitmap = Bitmap.createBitmap(w, h, Config.RGB_565);
-				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 空のビットマップを作成しました.");}
+				Logcat.d(logLevel, "page=" + page + " 空のビットマップを作成しました.");
 			}
 			catch (Exception e) {
-				if (debug) {Log.e("ThumbnailView", "drawBitmap: page=" + page + " 空のビットマップの作成でエラーになりました.");}
+				Logcat.e(logLevel, "page=" + page + " 空のビットマップの作成でエラーになりました.", e);
 				return null;
 			}
 		}
 
-		retValue = CallImgLibrary.ThumbnailDraw(mThumID, mDrawBitmap, page);
+		if	(retValue > 0)	{
+			// キャッシュの画像サイズが取得できている場合のみサムネイル描画
+			retValue = CallImgLibrary.ThumbnailDraw(mThumID, mDrawBitmap, page);
+		}
 		Rect rcSrc;
 		Rect rcDst;
 
@@ -214,21 +218,21 @@ public class ThumbnailView extends View implements Runnable, Callback {
 			int tmpHeight = 0;
 			int dstWidth = 0;
 			int dstHeight = 0;
-			if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + ", w/h=" + ((float)w / (float)h) + ", mThumW/mThumH=" + ((float)mThumW / (float)mThumH));}
+			Logcat.d(logLevel, "page=" + page + ", w/h=" + ((float)w / (float)h) + ", mThumW/mThumH=" + ((float)mThumW / (float)mThumH));
 			if ((float)w / h > (float)mThumW / mThumH) {
-				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 幅に合わせます. w=" + w + ", h=" + h + ", mThumW=" + mThumW + ", mThumH=" + mThumH);}
+				Logcat.d(logLevel, "page=" + page + " 幅に合わせます. w=" + w + ", h=" + h + ", mThumW=" + mThumW + ", mThumH=" + mThumH);
 				tmpWidth = mThumW;
 				tmpHeight = h2 * mThumW / w2;
 			} else {
-				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 高さに合わせます. w=" + w + ", h=" + h + ", mThumW=" + mThumW + ", mThumH=" + mThumH);}
+				Logcat.d(logLevel, "page=" + page + " 高さに合わせます. w=" + w + ", h=" + h + ", mThumW=" + mThumW + ", mThumH=" + mThumH);
 				tmpWidth = w2 * mThumH / h2;
 				tmpHeight = mThumH;
 			}
-			if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " サイズを取得しました. w=" + w + ", h=" + h + ", w2=" + w2 + ", h2=" + h2 + ", mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
+			Logcat.d(logLevel, "page=" + page + " サイズを取得しました. w=" + w + ", h=" + h + ", w2=" + w2 + ", h2=" + h2 + ", mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);
 
 			// 余白を半透明な背景で埋める
 			if (mPageWidth > tmpWidth || mThumH > tmpHeight) {
-				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 背景を半透明化します. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
+				Logcat.d(logLevel, "page=" + page + " 背景を半透明化します. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);
 
 				int posx = 0;
 				int posy = 0;
@@ -236,22 +240,22 @@ public class ThumbnailView extends View implements Runnable, Callback {
 				dstHeight = mThumH;
 
 				if (mPageWidth > tmpWidth) {
-					if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 幅が不足しています. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
+					Logcat.d(logLevel, "page=" + page + " 幅が不足しています. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);
 					posx = (int) ((mPageWidth - tmpWidth) / 2);
 					dstWidth = mPageWidth;
 				} else {
-					if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 幅が不足していません. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
+					Logcat.d(logLevel, "page=" + page + " 幅が不足していません. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);
 					posx = 0;
 					dstWidth = tmpWidth;
 				}
 				if (mThumH > tmpHeight) {
-					if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 高さが不足しています. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
+					Logcat.d(logLevel, "page=" + page + " 高さが不足しています. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);
 					posy = (int) ((mThumH - tmpHeight) / 2);
 				} else {
-					if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 高さが不足していません. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);}
+					Logcat.d(logLevel, "page=" + page + " 高さが不足していません. mThumW=" + mThumW + ", mThumH=" + mThumH + ", tmpWidth=" + tmpWidth + ", tmpHeight=" + tmpHeight);
 					posy = 0;
 				}
-				if (debug) {Log.d("ThumbnailView", "drawBitmap: page=" + page + " 完成サイズを取得しました. posx=" + posx + ", posy=" + posy + ", dstWidth=" + dstWidth + ", dstHeight=" + dstHeight);}
+				Logcat.d(logLevel, "page=" + page + " 完成サイズを取得しました. posx=" + posx + ", posy=" + posy + ", dstWidth=" + dstWidth + ", dstHeight=" + dstHeight);
 
 				rcSrc = new Rect(0, 0, w, h);
 				rcDst = new Rect(posx, posy, dstWidth - posx, dstHeight - posy);
@@ -469,10 +473,10 @@ public class ThumbnailView extends View implements Runnable, Callback {
 	}
 
 	// スレッド開始
-	public void run() {
-		boolean debug = false;
-		// Log.d("thumb", "Thread - start page:" + mCurPage + ", disp:" +
-		// mDispPage);
+	@SuppressLint("SuspiciousIndentation")
+    public void run() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		// Logcat.d(logLevel, "Thread - start page:" + mCurPage + ", disp:" + mDispPage);
 
 		// 初期化(2回目以降は無視される)
 		CallImgLibrary.ThumbnailInitialize(mThumID, DEF.THUMBNAIL_PAGESIZE, DEF.THUMBNAIL_MAXPAGE, mImageMgr.length());
@@ -483,7 +487,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 		
 		int firstindex = -1;
 
-		while (mBreakThread == false) {
+		while (!mBreakThread) {
 			firstindex = mDispPage;
 		
 			int count;
@@ -495,7 +499,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 					break;
 				}
 				for (int way = 0 ; way < 2 && firstindex == mDispPage ; way ++) {
-					if (mBreakThread == true) {
+					if (mBreakThread) {
 						// スレッド終了
 						return;
 					}
@@ -522,14 +526,14 @@ public class ThumbnailView extends View implements Runnable, Callback {
             		if (page >= 0 && page < mMaxPage && CallImgLibrary.ThumbnailCheck(mThumID, page) == 0) {
             			// ビットマップ読み込み
             			Bitmap bm = null;
-            			// Log.d("thumb", "Loop - index:" + index + ", page:" + page);
+            			// Logcat.d(logLevel, "Loop - index:" + index + ", page:" + page);
             
             			try {
             				synchronized (mLock) {
-								if (debug) {Log.d("ThumbnailView", "run: page=" + page + " LoadThumbnailを実行します. width=" + thumDataW + ", height=" + thumDataH);}
+								Logcat.d(logLevel, "page=" + page + " LoadThumbnailを実行します. width=" + thumDataW + ", height=" + thumDataH);
 								// 読み込み処理とは排他する
 								bm = mImageMgr.LoadThumbnail(page, thumDataW, thumDataH);
-								if (debug) {Log.d("ThumbnailView", "run: page=" + page + " LoadThumbnailを実行しました. width=" + bm.getWidth() + ", height=" + bm.getHeight());}
+								Logcat.d(logLevel, "page=" + page + " LoadThumbnailを実行しました. width=" + bm.getWidth() + ", height=" + bm.getHeight());
             				}
             			} catch (Exception ex) {
             				;
@@ -538,14 +542,14 @@ public class ThumbnailView extends View implements Runnable, Callback {
             			// ビットマップをサムネイルサイズぴったりにリサイズする
             			if (bm != null) {
             				bm = ImageAccess.resizeTumbnailBitmap(bm, thumDataW, thumDataH, ImageAccess.BMPCROP_FIT_SCREEN, ImageAccess.BMPMARGIN_NONE);
-							if (debug) {Log.d("ThumbnailView", "run: page=" + page + " resizeTumbnailBitmapを実行しました. width=" + bm.getWidth() + ", height=" + bm.getHeight());}
+							Logcat.d(logLevel, "page=" + page + " resizeTumbnailBitmapを実行しました. width=" + bm.getWidth() + ", height=" + bm.getHeight());
             			}
 
             			boolean save = false;
             			if (bm != null) {
             				// 空きメモリがあるかをチェック
             				int result = CallImgLibrary.ThumbnailMemorySizeCheck(mThumID, bm.getWidth(), bm.getHeight());
-//            				Log.d("thview_run", "sizecheck:page=" + page + ", result=" + result);
+//            				Logcat.d(logLevel, "sizecheck: page=" + page + ", result=" + result);
             				if (result == 0) {
             					// メモリあり
             					save = true;
@@ -553,7 +557,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
             				else if (result > 0 && Math.abs(page - mDispPage) < 20) {
             					// 表示の中心から外れたものを解放してメモリを空ける
             					result = CallImgLibrary.ThumbnailImageAlloc(mThumID, result, mDispPage);
-//                				Log.d("thview_run", "imagealloc:page=" + page + ", disppage=" + mDispPage + ", result=" + result);
+//                				Logcat.d(logLevel, "imagealloc: page=" + page + ", disppage=" + mDispPage + ", result=" + result);
             					if (result == 0) {
             						// メモリ獲得成功
             						save = true;	
@@ -561,17 +565,17 @@ public class ThumbnailView extends View implements Runnable, Callback {
             				}
             			}
             			if (bm != null && save) {
-//            				Log.d("thview_run", "save:page=" + page);
+//            				Logcat.d(logLevel, "save: page=" + page);
 							if (bm.getConfig() != Config.RGB_565) {
 								bm= bm.copy(Config.RGB_565, true);
 							}
-							if (debug) {Log.d("ThumbnailView", "run: ThumbnailSaveを実行します. width=" + bm.getWidth() + ", height=" + bm.getHeight() + ", page=" + page);}
+							Logcat.d(logLevel, "ThumbnailSaveを実行します. width=" + bm.getWidth() + ", height=" + bm.getHeight() + ", page=" + page);
 							if (CallImgLibrary.ThumbnailSave(mThumID, bm, page) < 0) {
-								if (debug) {Log.e("ThumbnailView", "run: ThumbnailSaveの実行に失敗しました.");}
+								Logcat.e(logLevel, "ThumbnailSaveの実行に失敗しました.");
 								bm = null;
 							}
 							else {
-								if (debug) {Log.d("ThumbnailView", "run: ThumbnailSaveを実行しました.");}
+								Logcat.d(logLevel, "ThumbnailSaveを実行しました.");
 							}
             			}
         
@@ -592,7 +596,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 			}
 			else if (count >= range || (prevflag && nextflag) || firstindex == mDispPage) {
 				// ページ選択待ちに入る
-//				Log.d("thview_run", "sleep");
+//				Logcat.d(logLevel, "sleep");
 				mWaitFor.sleep();
 			}
 		}
@@ -631,7 +635,7 @@ public class ThumbnailView extends View implements Runnable, Callback {
 				range2 = wk;
 			}
 			if (range1 <= msg.arg2 && msg.arg2 <= range2) {
-//				Log.d("thview_Loaded", "msg.arg2=" + msg.arg2 + ", top=" + range1 + ", last=" + range2);
+//				Logcat.d(logLevel, "msg.arg2=" + msg.arg2 + ", top=" + range1 + ", last=" + range2);
 				invalidate();
 			}
 		}

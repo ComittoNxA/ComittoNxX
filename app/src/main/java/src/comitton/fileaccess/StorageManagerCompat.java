@@ -19,6 +19,8 @@ import androidx.annotation.RequiresApi;
 
 import java.io.IOException;
 
+import src.comitton.common.Logcat;
+
 /**
  * @author Fung Gwo (fythonx@gmail.com)
  */
@@ -39,6 +41,7 @@ public final class StorageManagerCompat {
 
     @NonNull
     public ParcelFileDescriptor openProxyFileDescriptor(int mode, @NonNull ProxyFileDescriptorCallbackCompat callback, @NonNull Handler handler) throws IOException {
+        int logLevel = Logcat.LOG_LEVEL_WARN;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return mStorageManager.openProxyFileDescriptor(
                     mode,
@@ -66,12 +69,12 @@ public final class StorageManagerCompat {
                                 os.write(buf);
                                 callback.onRelease();
                             } catch (IOException | ErrnoException e) {
-                                Log.e(TAG, "Failed to read file.", e);
+                                Logcat.e(logLevel, "Failed to read file.", e);
 
                                 try {
                                     pipe[1].closeWithError(e.getLocalizedMessage());
                                 } catch (IOException exc) {
-                                    Log.e(TAG, "Can't even close PFD with error.", exc);
+                                    Logcat.e(logLevel, "Can't even close PFD with error.", exc);
                                 }
                             }
                         }
@@ -90,12 +93,12 @@ public final class StorageManagerCompat {
                                 callback.onWrite(0, buf.length, buf);
                                 callback.onRelease();
                             } catch (IOException | ErrnoException e) {
-                                Log.e(TAG, "Failed to write file.", e);
+                                Logcat.e(logLevel, "Failed to write file.", e);
 
                                 try {
                                     pipe[0].closeWithError(e.getLocalizedMessage());
                                 } catch (IOException exc) {
-                                    Log.e(TAG, "Can't even close PFD with error.", exc);
+                                    Logcat.e(logLevel, "Can't even close PFD with error.", exc);
                                 }
                             }
                         }

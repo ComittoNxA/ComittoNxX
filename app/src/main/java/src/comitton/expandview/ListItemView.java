@@ -1,6 +1,7 @@
 package src.comitton.expandview;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.jni.CallImgLibrary;
 
 import android.annotation.SuppressLint;
@@ -30,6 +31,7 @@ public class ListItemView extends View {
 	private int mBakColor;
 	private int mCurColor;
 	private int mSummaryColor;
+	private int mReadColor;
 
 	private long mThumbId;
 	private int mThumbIndex;
@@ -42,6 +44,7 @@ public class ListItemView extends View {
 	private String mSummary;
 //	private String mSummaryDot;
 	private String[] mSummarySep;
+	private String mReadInfo;
 	private int mTitleSize;
 	private int mSummarySize;
 	private int mItemMargin;
@@ -78,8 +81,8 @@ public class ListItemView extends View {
 	@SuppressLint("SuspiciousIndentation")
     @Override
 	protected void onDraw(Canvas canvas) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG,"onDraw: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します.");
 
 		//		super.onDraw(canvas);
 		int cx = getWidth();
@@ -139,15 +142,15 @@ public class ListItemView extends View {
 					int dstWidth = 0;
 					int dstHeight = 0;
 
-					if (debug) {Log.d(TAG, "onDraw: width/height=" + ((float)width / (float)height) + ", draw_cx/draw_cy=" + ((float)draw_cx / (float)draw_cy));}
+					Logcat.d(logLevel, "width/height=" + ((float)width / (float)height) + ", draw_cx/draw_cy=" + ((float)draw_cx / (float)draw_cy));
 					if ((float)width / height > (float)draw_cx / draw_cy) {
-						if (debug) {Log.d(TAG, "onDraw: 幅に合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
+						Logcat.d(logLevel, "幅に合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);
 						// 幅に合わせる
 						dstWidth = draw_cx;
 						dstHeight = height * draw_cx / width;
 					}
 					else {
-						if (debug) {Log.d(TAG, "onDraw: 高さに合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);}
+						Logcat.d(logLevel, "高さに合わせます.  width=" + width + ", height=" + height + ", draw_cx=" + draw_cx + ", draw_cy=" + draw_cy);
 						// 高さに合わせる
 						dstWidth = width * draw_cy / height;
 						dstHeight = draw_cy;
@@ -221,6 +224,14 @@ public class ListItemView extends View {
 				y += mSummarySize + mSummaryDecent;
 			}
 		}
+
+		if (!mReadInfo.isEmpty()) {
+			mTextPaint.setColor(mReadColor);
+			mTextPaint.setTextSize(mSummarySize);
+			mTextPaint.setTypeface(Typeface.MONOSPACE);
+			mTextPaint.setTextAlign(Paint.Align.LEFT);
+			canvas.drawText(mReadInfo, x, y + mSummaryAscent, mTextPaint);
+		}
 		return;
 	}
 	
@@ -286,6 +297,9 @@ public class ListItemView extends View {
 		if (mSummarySize > 0) {
 			cy += (mSummarySize + mSummaryDecent) * mSummarySep.length;
 		}
+		if (!mReadInfo.isEmpty()) {
+			cy += (mSummarySize + mSummaryDecent);
+		}
 		// ビットマップ表示のサイズ確保
 		if (mThumbnail && cy < mThumbSizeH) {
 			cy = mThumbSizeH;
@@ -301,9 +315,10 @@ public class ListItemView extends View {
 	}
 
 	// 描画設定
-	public void setDrawInfo(int textColor, int rectColor, int summColor, int size1, int size2, boolean thumb, int tsizew, int tsizeh, int margin) {
+	public void setDrawInfo(int textColor, int rectColor, int summColor, int readColor, int size1, int size2, boolean thumb, int tsizew, int tsizeh, int margin) {
 		mTextColor = textColor;
 		mSummaryColor = summColor;
+		mReadColor = readColor;
 		mTitleSize = size1;
 		mSummarySize = size2;
 		mThumbnail = thumb;
@@ -319,7 +334,7 @@ public class ListItemView extends View {
 	}
 
 	// パスの設定
-	public void setFileInfo(long thumbId, int bmIndex, boolean bmView, String title, String summary, boolean showext) {
+	public void setFileInfo(long thumbId, int bmIndex, boolean bmView, String title, String summary, String readInfo, boolean showext) {
 		// サムネイルなし
 		mThumbId = thumbId;
 		mThumbIndex = bmIndex;
@@ -334,6 +349,7 @@ public class ListItemView extends View {
 		mTitleSep = null;
 		mSummary = summary;
 		mSummarySep = null;
+		mReadInfo = readInfo;
 		requestLayout();
 	}
 

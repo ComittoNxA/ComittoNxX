@@ -1,6 +1,7 @@
 package src.comitton.fileview.view.list;
 
 import src.comitton.common.DEF;
+import src.comitton.common.Logcat;
 import src.comitton.fileview.view.list.MomentScroller.ScrollMoveListener;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -197,6 +198,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 
 	private boolean mFirstScroll;
 	public int sendTouchEvent(int action, float x, float y) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (mListSize <= 0) {
 			return -1;
 		}
@@ -276,7 +278,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 				break;
 			}
 			case MotionEvent.ACTION_MOVE: {
-				// Log.d("scrlPos", "" + mScrlView.getScrollY());
+				// Logcat.d(logLevel, "" + mScrlView.getScrollY());
 				if (mTouchState == STATE_FIRST) {
     				if (Math.abs(mStartY - y) > mRangeCancel /* || Math.abs(mStartX - x) > mRangeCancel*/) {
     					mTouchIndex = -1;
@@ -569,6 +571,13 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		}
 	}
 
+	public void sendDispRange() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します. mListType=" + mListType + ", mTopRow=" + mTopRow + ", mColumnNum=" + mColumnNum + ", mDispRange=" + mDispRange);
+		// リスト最終項目を返す
+		mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, mTopRow * mColumnNum + mDispRange);
+	}
+
 	protected short getRowHeight(int row) {
 		// long st = SystemClock.uptimeMillis();
 		if (mRowHeight == null || row < 0 || row >= mRowHeight.length) {
@@ -580,7 +589,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			h = calcRowHeight(row);
 			mRowHeight[row] = h;
 		}
-		// Log.d("getRowHeight", "proctime=" + (SystemClock.uptimeMillis() -
+		// Logcat.d(logLevel, "proctime=" + (SystemClock.uptimeMillis() -
 		// st));
 		return h;
 	}
@@ -620,7 +629,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	
 	@Override
 	public boolean handleMessage(Message msg) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		if (msg.what == DEF.HMSG_WORKSTREAM) {
 			// ファイルアクセスの表示
 			return true;
@@ -678,7 +687,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 					mHandler.sendMessageAtTime(mLongClickMsg, NextTime);
 				}
 				else {
-					Log.d("ListArea", "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));
+					Logcat.d(logLevel, "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));
 					mLongClickMsg = null;
 					mTouchIndex = -1;
 					mTouchDraw = false;
@@ -686,7 +695,7 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 					mListNoticeListener.onItemLongClick(mListType, msg.arg1);
 				}
 				*/
-				if(debug) {Log.d("ListArea", "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));}
+				Logcat.d(logLevel, "ロングタッチを検出しました. タッチ時間=" + (SystemClock.uptimeMillis() - mTouchTime));
 				mLongClickMsg = null;
 				mTouchIndex = -1;
 				mTouchDraw = false;

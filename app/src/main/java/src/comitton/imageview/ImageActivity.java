@@ -70,7 +70,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import androidx.preference.PreferenceManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -503,8 +502,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onCreate: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.i(logLevel, "開始します.");
 
 		// 回転
 		mInitFlg = 0;
@@ -603,9 +602,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		// ビュワーを開いた後でintentにページ位置を上書きしても効果がない
 		// mImageNameはファイルから開いたかディレクトリを開いたかの判定に使用する
 
-		if (debug) {Log.d(TAG, "onCreate: mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
+		Logcat.d(logLevel, "mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
 				+ ", mUser=" + mUser + ", mPass=" + mPass
-				+ ", mFileName=" + mFileName + ", mImageName=" + mImageName);}
+				+ ", mFileName=" + mFileName + ", mImageName=" + mImageName);
 
 		if (mPath == null) {
 			return;
@@ -620,11 +619,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mFilePath = mUriPath;
 		}
 		mTimestamp = FileAccess.date(mActivity, mFilePath, mUser, mPass);
-		if (debug) {Log.d(TAG, "onCreate: mUriPath=" + mUriPath + ", mFilePath=" + mFilePath);}
+		Logcat.d(logLevel, "mUriPath=" + mUriPath + ", mFilePath=" + mFilePath);
 
 		saveLastFile();
 
-		if (debug) {Log.d(TAG, "onCreate: 既読位置を取得します.");}
+		Logcat.d(logLevel, "既読位置を取得します.");
 		mRestorePage = mSharedPreferences.getInt(DEF.createUrl(mFilePath, mUser, mPass), DEF.PAGENUMBER_UNREAD);
 
 		mImageView.setOnTouchListener(this);
@@ -662,6 +661,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		mZipLoad = new ZipLoad(mHandler, this);
 		mZipThread = new Thread(mZipLoad);
 		mZipThread.start();
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	/**
@@ -670,8 +670,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	@Override
 	protected void onPause() {
 		super.onPause();
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onPause: 開始します. mCurrentPage=" + mCurrentPage);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
 
 		if (!mFinishActivity && mSavePage && !mReadBreak) {
 			saveCurrentPage();
@@ -679,6 +679,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mNoiseSwitch != null) {
 			mNoiseSwitch.recordPause(true);
 		}
+		Logcat.v(logLevel, "終了します.");
 	}
 
 	/**
@@ -687,8 +688,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	@Override
 	protected void onStop() {
 		super.onStop();
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onStop: 開始します. mCurrentPage=" + mCurrentPage);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
 
 		if (!mFinishActivity) {
 			saveHistory();
@@ -697,6 +698,34 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mNoiseSwitch != null) {
 			mNoiseSwitch.recordPause(true);
 		}
+		Logcat.v(logLevel, "終了します.");
+	}
+
+	/**
+	 * @Override アクティビティ終了時に呼び出される
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.i(logLevel, "開始します.");
+
+		if (mNoiseSwitch != null) {
+			mNoiseSwitch.recordStop();
+			mNoiseSwitch = null;
+		}
+
+		if (mSourceImage[0] != null) {
+			mSourceImage[0] = null;
+		}
+		if (mSourceImage[1] != null) {
+			mSourceImage[1] = null;
+		}
+		if (mImageView != null) {
+			mImageView.setImageBitmap(mSourceImage);
+		}
+		System.gc();
+		Logcat.i(logLevel, "終了します.");
 	}
 
 	/**
@@ -705,8 +734,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	@Override
 	public void onRestart(){
 		super.onRestart();
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onRestart: 開始します. mCurrentPage=" + mCurrentPage);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
 
 		if (mImmEnable && mSdkVersion >= 19) {
 			int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
@@ -714,6 +743,46 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			uiOptions |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 			getWindow().getDecorView().setSystemUiVisibility(uiOptions);
 		}
+		Logcat.v(logLevel, "終了します.");
+	}
+
+	/**
+	 * @Override アクティビティ初回起動時や再開時に呼び出される
+	 */
+	@Override
+	public void onStart(){
+		super.onStart();
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
+		Logcat.v(logLevel, "終了します.");
+	}
+
+	/**
+	 * @Override アクティビティ初回起動時や再開時に画面が表示される時に呼び出される
+	 */
+	@Override
+	public void onResume() {
+		super.onResume();
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
+
+		if (mNoiseSwitch != null) {
+			mNoiseSwitch.recordPause(false);
+		}
+		if (mImageView != null) {
+			mImageView.update(true);
+		}
+
+		if (mBitmapLoading) {
+			// なぜか固まることがあるので暫定で実施
+			long now = SystemClock.uptimeMillis();
+			int t = (int) (now - mEffectStart);
+			if (t >= mEffectTime) {
+				// エフェクト中でない場合は mBitmapLoading を終了させる
+				startViewTimer(DEF.HMSG_EVENT_EFFECT_NEXT);
+			}
+		}
+		Logcat.v(logLevel, "終了します.");
 	}
 
 	public class ZipLoad implements Runnable {
@@ -727,13 +796,15 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		public void run() {
-			boolean debug = false;
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
+
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
-			if(debug) {Log.d(TAG, "ZipLoad: run: メモリ利用状況.\n" + getMemoryString());}
+			Logcat.d(logLevel, "メモリ利用状況.\n" + getMemoryString());
 			setMgrConfig(true);
 			mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
-			if(debug) {Log.d(TAG, "ZipLoad: run: メモリ利用状況.(2回目)\n" + getMemoryString());}
+			Logcat.d(logLevel, "メモリ利用状況.(2回目)\n" + getMemoryString());
 			// mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode,
 			// mNoExpand, mAlgoMode, mRotate, mWAdjust, mImgScale, mPageWay,
 			// mMgnCut);
@@ -751,7 +822,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mCurrentPage = mRestorePage;
 			if (mCurrentPage == DEF.PAGENUMBER_READ)	mCurrentPage = mRestoreMaxPage - 1;
 			if (mCurrentPage == DEF.PAGENUMBER_UNREAD)	mCurrentPage = 0;
-			if(debug) {Log.d(TAG, "ZipLoad: run: mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage);}
+			Logcat.d(logLevel, "mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage);
 
 			// 終了通知
 			Message message = new Message();
@@ -760,35 +831,11 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 	}
 
-	/**
-	 * @Override アクティビティ終了時に呼び出される
-	 */
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onDestroy: 開始します. mCurrentPage=" + mCurrentPage);}
-
-		if (mNoiseSwitch != null) {
-			mNoiseSwitch.recordStop();
-			mNoiseSwitch = null;
-		}
-
-		if (mSourceImage[0] != null) {
-			mSourceImage[0] = null;
-		}
-		if (mSourceImage[1] != null) {
-			mSourceImage[1] = null;
-		}
-		if (mImageView != null) {
-			mImageView.setImageBitmap(mSourceImage);
-		}
-		System.gc();
-	}
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		/*
 		 * if (hasFocus) { if (mInitFlg == 0) { // 起動直後のみ呼び出し mInitFlg = 1;
@@ -819,6 +866,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 */
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		if (mWAdjust != 100) {
 			mImageView.setImageBitmap(null);
 		}
@@ -863,7 +912,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 			if (mAutoPlay) {
 				// オートプレイ中は解除
@@ -980,7 +1030,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	String mWorkMessage = "";
 	// スレッドからの通知取得
 	public boolean handleMessage(Message msg) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. msg.what=" + msg.what);
+
 		// 次のイベント時間
 		long now = SystemClock.uptimeMillis();
 		int t = (int) (now - mEffectStart);
@@ -1065,6 +1117,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				// 読込中の表示
 				synchronized (this) {
 					if (!isFinishing() && mReadDialog != null) {
+						Logcat.v(logLevel, "HMSG_WORKSTREAM: mReadDialog != null");
 						mWorkMessage = msg.obj.toString();
 						mReadDialog.setMessage(DEF.ProgressMessage(mMessage, mMessage2, mWorkMessage));
 					}
@@ -1072,7 +1125,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				return true;
 
 			case DEF.HMSG_EVENT_TOUCH_ZOOM:
-//				Log.d("long touch", "handle : msg=" + msg.what + ", arg1=" + msg.arg1 + ", count" + mLongTouchCount);
+//				Logcat.d(logLevel, "msg=" + msg.what + ", arg1=" + msg.arg1 + ", count" + mLongTouchCount);
 
 				if (mLongTouchCount == msg.arg1) {
 					// 最新のタイマーの時だけ処理
@@ -1090,7 +1143,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				return true;
 			case DEF.HMSG_EVENT_TOUCH_TOP:
 			case DEF.HMSG_EVENT_TOUCH_BOTTOM:
-//				Log.d("long touch", "handle : msg=" + msg.what + ", arg1=" + msg.arg1 + ", count" + mLongTouchCount);
+//				Logcat.d(logLevel, "msg=" + msg.what + ", arg1=" + msg.arg1 + ", count" + mLongTouchCount);
 
 				if (mLongTouchCount == msg.arg1) {
 					// 最新のタイマーの時だけ処理
@@ -1104,10 +1157,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			case DEF.HMSG_EVENT_EFFECT:
 			case DEF.HMSG_EVENT_EFFECT_NEXT:
 				// 稼働中のみ次のイベント登録
-				if (debug) {
+				if (logLevel <= Logcat.LOG_LEVEL_DEBUG) {
 					String now_ms = (new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())).format(now);
 					String effect_ms = (new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())).format(mEffectStart);
-					Log.d(TAG, "handleMessage: EVENT_EFFECT: now=" + now_ms + ", mEffectStart=" + effect_ms + ", mEffectTime=" + mEffectTime + ", t=" + t);
+					Logcat.v(logLevel, "EVENT_EFFECT: now=" + now_ms + ", mEffectStart=" + effect_ms + ", mEffectTime=" + mEffectTime + ", t=" + t);
 				}
 				if (t >= mEffectTime) {
 					// mEffectTimeミリ秒を超えている
@@ -1124,7 +1177,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				// エフェクト位置
 				mImageView.setEffectRate(mEffectRate);
 
-				if (debug) {Log.d(TAG, "handleMessage: EVENT_EFFECT: mEffectRate=" + mEffectRate);}
+				Logcat.v(logLevel, "EVENT_EFFECT: mEffectRate=" + mEffectRate);
 				if (mEffectRate != 0.0f) {
 					// エフェクト中は次のイベントを登録
 					startViewTimer(DEF.HMSG_EVENT_EFFECT_NEXT);
@@ -1132,7 +1185,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				else {
 					// エフェクト無しのときはそのまま修了
 					mLoadingNext = true;
-					if (debug) {Log.d(TAG, "handleMessage: EVENT_EFFECT: SET mBitmapLoading = false");}
+					Logcat.v(logLevel, "EVENT_EFFECT: SET mBitmapLoading = false");
 					mBitmapLoading = false;
 					if (mAutoPlay) {
 						startViewTimer(DEF.HMSG_EVENT_AUTOPLAY);
@@ -1142,7 +1195,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 			case DEF.HMSG_EVENT_SCROLL:
 			case DEF.HMSG_EVENT_SCROLL_NEXT:
-				if (debug) {Log.d(TAG, "handleMessage: HMSG_EVENT_SCROLL:");}
+				Logcat.v(logLevel, "HMSG_EVENT_SCROLL:");
 				// スクロールで移動
 				if (mImageView.moveToNextPoint(mVolScrl)) {
 					// エフェクト中は次のイベントを登録
@@ -1173,7 +1226,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 
 			case DEF.HMSG_LOAD_END: // 画像読み込み終了
-				if (debug) {Log.d(TAG, "handleMessage: HMSG_LOAD_END: mEffectRate=" + mEffectRate);}
+				Logcat.v(logLevel, "HMSG_LOAD_END: mEffectRate=" + mEffectRate);
 				if (mBitmapLoading) {
 					// Loading中を消去
 					if (mSourceImage[0] != null) {
@@ -1249,7 +1302,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					if (mNextPage != -1 && !mBitmapLoading) {
 						// ページ選択
 						if (mCurrentPage != mNextPage) {
-							Log.d("PageSelect", "current:" + mCurrentPage + ", next:" + mNextPage + " (LoadEnd)");
+							Logcat.d(logLevel, "current:" + mCurrentPage + ", next:" + mNextPage + " (LoadEnd)");
 							mCurrentPage = mNextPage;
 
 							// ページ変更時に振動
@@ -1375,36 +1428,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		return false;
 	}
 
-	/**
-	 * @Override アクティビティ初回起動時や再開時に画面が表示される時に呼び出される
-	 */
-	@Override
-	public void onResume() {
-		super.onResume();
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onResume: 開始します. mCurrentPage=" + mCurrentPage);}
-
-		if (mNoiseSwitch != null) {
-			mNoiseSwitch.recordPause(false);
-		}
-		if (mImageView != null) {
-			mImageView.update(true);
-		}
-
-		if (mBitmapLoading) {
-			// なぜか固まることがあるので暫定で実施
-			long NextTime = SystemClock.uptimeMillis();
-			int t = (int) (NextTime - mEffectStart);
-			if (t >= mEffectTime) {
-				// エフェクト中でない場合は mBitmapLoading を終了させる
-				startViewTimer(DEF.HMSG_EVENT_EFFECT_NEXT);
-			}
-		}
-
-	}
-
 	public void setBitmapImage() {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageMgr == null || mImageMgr.length() - 1 < mCurrentPage) {
 			return;
 		}
@@ -1413,7 +1440,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		if (mBitmapLoading) {
 			return;
 		}
-		if (debug) {Log.d(TAG, "setBitmapImage: SET mBitmapLoading = true");}
 		mBitmapLoading = true;
 
 		mImageView.lockDraw();
@@ -1457,6 +1483,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 
 		public void run() {
+			int logLevel = Logcat.LOG_LEVEL_WARN;
+			Logcat.d(logLevel, "開始します.");
+
 			// 0: 現在のページ, 1: 2ページ目, 2: 前のページ, 3: 前の2ページ目, 4: 次のページ, 5: 次の2ページ目
 			//ImageData bm[] = { null, null, null, null, null, null };
 
@@ -1604,6 +1633,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// Bitmapを読み込む
 	private ImageData loadBitmap(int page, boolean notice) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		ImageData bm = null;
 
 		try {
@@ -1622,6 +1654,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * View がクリックされた時に発生します。
 	 */
 	public void ChangeScale(int mode) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mScaleMode = mode;
 
 		setMgrConfig(true);
@@ -1643,6 +1678,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * ページ並びを逆順にする
 	 */
 	public void reverseOrder() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mReverseOrder = !mReverseOrder;
 		mImageMgr.reverseOrder();
 		setMgrConfig(false);
@@ -1655,6 +1693,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	//指定したページをクロップして書庫／フォルダのサムネイルに設定
 	public void setThumbCropped(int page) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		String path = mImageMgr.decompFile(page, null);
 		if (path != null && path.length() >= 5) {
 			int thumbH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
@@ -1670,6 +1711,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	public void setThumb(Uri uri) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		Bitmap bm = null;
 		long thumbID = System.currentTimeMillis();
 		int thumH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
@@ -1696,7 +1740,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			if(bm == null)
 				return;
 		}catch(IOException e){
-			Log.e(TAG, "setThumb error");
+			Logcat.e(logLevel, "error");
 			Toast.makeText(mActivity, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -1712,6 +1756,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	//指定したページを書庫／フォルダのサムネイルに設定
 	public void setThumb(int page) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		long thumbID = System.currentTimeMillis();
 		int thumH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
 		int thumW = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeW(mSharedPreferences));
@@ -1719,12 +1766,12 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		try {
 			Object lock = mImageMgr.getLockObject();
 			synchronized (lock) {
-				Log.d(TAG, "setThumb: Call LoadThumbnail(" + page + ", " + thumW + ", " + thumH + ") start.");
+				Logcat.d(logLevel, "Call LoadThumbnail(" + page + ", " + thumW + ", " + thumH + ") start.");
 				// 読み込み処理とは排他する
 				bm = mImageMgr.LoadThumbnail(page, thumW, thumH);
 			}
 		} catch (Exception e) {
-			Log.e(TAG, "setThumb error");
+			Logcat.e(logLevel, "error");
 		}
 		if (bm != null) {
 			bm = ImageAccess.resizeTumbnailBitmap(bm, thumW, thumH, ImageAccess.BMPCROP_NONE, ImageAccess.BMPMARGIN_NONE);
@@ -1737,20 +1784,27 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 	}
 	public void toggleCenterMargin() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mCMargin = !mCMargin;
 		setViewConfig();
 		setBitmapImage();
 	}
 
 	public void toggleCenterShadow() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mCShadow = !mCShadow;
 		setViewConfig();
 		setBitmapImage();
 	}
 
 	private void setMgrConfig(boolean scaleinit) {
-		boolean debug = false;
-		if(debug) {Log.d(TAG, "setMgrConfig: 開始します. scaleinit=" + scaleinit);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. scaleinit=" + scaleinit);
+
 		if (mImageMgr != null) {
 			mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode, mNoExpand, mAlgoMode, mRotate, mWAdjust
 					, mWidthScale, mImgScale, mPageWay, mMgnCut, mMgnCutColor, 0, mBright, mGamma, mSharpen, mInvert, mGray, mPseLand, mMoire, mTopSingle, scaleinit, mEpubOrder, mZoomType);
@@ -1764,10 +1818,13 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				ImageScaling();
 			}
 		}
-		if(debug) {Log.d(TAG, "setMgrConfig: 終了します.");}
+		Logcat.d(logLevel, "setMgrConfig: 終了します.");
 	}
 
 	private void setViewConfig() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageView != null) {
 			mImageView.setConfig(this, mMgnColor, mCenColor, mTopColor1, mViewPoint, mMargin, mCenter, mShadow, mZoomType, mPageWay, mScrlWay, mScrlRngW, mScrlRngH, mPrevRev, mNoExpand, mFitDual,
 					mCMargin, mCShadow, mPseLand, mEffect, mScrlNext, mViewNext, mNextFilter);
@@ -1790,22 +1847,22 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * @return タッチ操作を他の View へ伝搬しないなら true。する場合は false。
 	 */
 	public boolean onTouch(View v, MotionEvent event) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onTouch: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (mAutoPlay) {
-			if (debug) {Log.d(TAG, "onTouch: mAutoPlay");}
+			Logcat.v(logLevel, "mAutoPlay");
 			// オートプレイ中は解除
 			setAutoPlay(false);
 		}
 
 		if (mListLoading) {
-			if (debug) {Log.d(TAG, "onTouch: mListLoading");}
+			Logcat.v(logLevel, "mListLoading");
 			// ファイル一覧の読み込み中はページ操作しない
 			return true;
 		}
 		if (mImageMgr == null || mImageMgr.length() == 0) {
-			if (debug) {Log.d(TAG, "onTouch: mImageMgr == null || mImageMgr.length() == 0");}
+			Logcat.v(logLevel, "mImageMgr == null || mImageMgr.length() == 0");
 			if (mImageMgr != null) {
 				// 読み込み停止
 				mImageMgr.setBreakTrigger();
@@ -1818,7 +1875,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 		if (mBitmapLoading) {
 			// ビットマップ読込中は操作不可
-			if (debug) {Log.d(TAG, "onTouch: IF mBitmapLoading == true");}
+			Logcat.v(logLevel, "mBitmapLoading == true");
 
 			long now = SystemClock.uptimeMillis();
 			int t = (int) (now - mEffectStart);
@@ -2010,7 +2067,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		if (mImmEnable) {
 			if (action == MotionEvent.ACTION_DOWN) {
-//				Log.d("touchDown", "x=" + x + ", y=" + y);
+//				Logcat.d(logLevel, "x=" + x + ", y=" + y);
 				if (y <= mImmCancelRange || y >= cy - mImmCancelRange) {
 					// IMMERSIVEモードの発動時にタッチ処理を無視する
 					mImmCancel = true;
@@ -2028,7 +2085,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
-				if (debug) {Log.d(TAG, "onTouch: ACTION_DOWN");}
+				Logcat.v(logLevel, "ACTION_DOWN");
 				// 押下状態を設定
 				mGuideView.eventTouchDown((int)x, (int)y, cx, cy, mImmEnable ? false : true);
 
@@ -2087,8 +2144,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 
 			case MotionEvent.ACTION_MOVE:
-				if (debug) {Log.d(TAG, "onTouch: ACTION_MOVE");}
-				// Log.d("action_move", "x=" + x + ", y=" + y);
+				Logcat.v(logLevel, "ACTION_MOVE");
+				// Logcat.d(logLevel, "x=" + x + ", y=" + y);
 				// 移動位置設定
 				mGuideView.eventTouchMove((int)x, (int)y);
 
@@ -2170,7 +2227,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 //						// 縦フリックメニュー表示処理
 //						if (this.mTouchFirst && (Math.abs(this.mTouchBeginY - y) > mMoveRange && Math.abs(this.mTouchBeginY - y) > Math.abs(this.mTouchBeginX - x) * 2)) {
 //						// タッチ後に範囲を超えたときに、縦の移動が横の移動の2倍を超えている場合は縦フリックモードへ
-//							mVerticalSwipe = true;					
+//							mVerticalSwipe = true;
 //						}
 						// ページ戻or進、スクロール処理
 						if (this.mTouchFirst && ((Math.abs(this.mTouchBeginX - x) > mMoveRange || Math.abs(this.mTouchBeginY - y) > mMoveRange))) {
@@ -2205,7 +2262,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				break;
 
 			case MotionEvent.ACTION_CANCEL:
-				if (debug) {Log.d(TAG, "onTouch: ACTION_CANCEL");}
+				Logcat.v(logLevel, "ACTION_CANCEL");
 				if (mLongTouchMode) {
 					// ズーム表示解除
 					mImageView.setZoomMode(false);
@@ -2223,7 +2280,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				mGuideView.setGuideIndex(GuideView.GUIDE_NONE);
 				break;
 			case MotionEvent.ACTION_UP:
-				if (debug) {Log.d(TAG, "onTouch: ACTION_UP");}
+				Logcat.v(logLevel, "ACTION_UP");
 //				if (mVerticalSwipe) {
 //					// 縦フリックの指を離した
 //					//Toast.makeText(this, "メニューを表示します", Toast.LENGTH_SHORT).show();
@@ -2500,18 +2557,21 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					mLongTouchMode = false;
 				}
 				else if (mOperation == TOUCH_OPERATION) {
-					if (debug) {Log.d(TAG, "onTouch: 通常タップ");}
+					Logcat.v(logLevel, "通常タップ");
 					// ■■■ タップ終了なら
 					if (this.mTouchFirst) {
+						Logcat.v(logLevel, "mTouchFirst");
 						this.mTouchFirst = false;
 						mPageBack = false;
 						boolean next = checkTapDirectionNext(x, y, cx, cy);
 						if (mTapScrl) {
+							Logcat.v(logLevel, "タップでスクロール");
 							// タップでスクロール
 							int move = next ? 1 : -1;
 							// 読込中の表示
 							startScroll(move);
 						} else {
+							Logcat.v(logLevel, "タップでスクロールしない");
 							// タップでスクロールしない
 							// 普通のタッチでページ遷移
 							if (next) {
@@ -2530,6 +2590,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 						}
 					}
 					else {
+						Logcat.v(logLevel, "スクロール終了");
 						// ■■■ スクロール終了なら
 						int flickPage = mImageView.checkFlick();
 						if (mFlickPage && flickPage != 0) {
@@ -2565,7 +2626,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 								float sx = mTouchPoint[2].x - mTouchPoint[i - 1].x;
 								float sy = mTouchPoint[2].y - mTouchPoint[i - 1].y;
 								long term = mTouchPointTime[2] - mTouchPointTime[i - 1];
-								// Log.d("moment_up", "i=" + i + ", sx=" + sx +
+								// Logcat.d(logLevel, "i=" + i + ", sx=" + sx +
 								// ", sy=" + sy + ", term=" + term);
 								mImageView.momentiumStart(x, y, mScroll, sx, sy, (int) term, mMomentMode);
 							}
@@ -2582,6 +2643,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// タップが前/次どちらか判定
 	private boolean checkTapDirectionNext(float x, float y, int cx, int cy) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		boolean next = false;
 
 		float rate = mTapRate + 1;
@@ -2607,6 +2671,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	private int mSelectMode;
 
 	private void showSelectList(int index) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mListDialog != null) {
 			return;
 		}
@@ -2814,7 +2881,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void showImageConfigDialog(int command_id) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (mImageConfigDialog != null) {
 			return;
@@ -2915,6 +2983,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void showCheckList() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mCheckDialog != null) {
 			return;
 		}
@@ -2962,35 +3033,31 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 上部メニューの設定を読み込み
 	private boolean[] loadTopMenuState() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "loadTopMenuState: 開始します.");}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
-		boolean states[] = null;
+		boolean[] states = null;
 		try {
 			Resources res = getResources();
 
-			if (debug) {Log.d(TAG, "loadTopMenuState: 保存された設定を取得します.");}
+			Logcat.d(logLevel, "保存された設定を取得します.");
 			states = new boolean[COMMAND_INDEX.length];
 			int count = 0;
 			for (int i = 0; i < states.length; i++) {
 				try {
 					states[i] = mSharedPreferences.getBoolean(DEF.KEY_TOPMENU + COMMAND_INDEX[i], COMMAND_INDEX[i] < 4 ? true : false);
-					if (states[i] == true) {
+					if (states[i]) {
 						// 表示する個数
 						count++;
 					}
 				}
 				catch (Exception e) {
-					Log.e(TAG, "loadTopMenuState: ループ1でエラーが発生しました.");
-					if (e.getLocalizedMessage() != null) {
-						Log.e(TAG, "loadTopMenuState: エラーメッセージ. " + e.getLocalizedMessage());
-					}
-					Log.e(TAG, "loadTopMenuState: i=" + i);
-					Log.e(TAG, "loadTopMenuState: COMMAND_INDEX[i]=" + COMMAND_INDEX[i]);
+					Logcat.e(logLevel, "ループ1でエラーが発生しました.", e);
+					Logcat.e(logLevel, "COMMAND_INDEX[" + i + "]=" + COMMAND_INDEX[i]);
 				}
 			}
 
-			if (debug) {Log.d(TAG, "loadTopMenuState: 表示するコマンドを設定します.");}
+			Logcat.d(logLevel, "表示するコマンドを設定します.");
 			mCommandId = new int[count];
 			mCommandStr = new String[count];
 			count = 0;
@@ -3004,32 +3071,23 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 					}
 				}
 				catch (Exception e) {
-					Log.e(TAG, "loadTopMenuState: ループ2でエラーが発生しました.");
-					if (e.getLocalizedMessage() != null) {
-						Log.e(TAG, "loadTopMenuState: エラーメッセージ. " + e.getLocalizedMessage());
-					}
-					Log.e(TAG, "loadTopMenuState: i=" + i);
-					Log.e(TAG, "loadTopMenuState: COMMAND_INDEX[i]=" + COMMAND_INDEX[i]);
+					Logcat.e(logLevel, "ループ2でエラーが発生しました.", e);
+					Logcat.e(logLevel, "COMMAND_INDEX[" + i + "]=" + COMMAND_INDEX[i]);
 				}
 			}
-			if (debug) {
-				Log.d(TAG, "loadTopMenuState: 終了します.");
-			}
+			Logcat.d(logLevel, "終了します.");
 		}
 		catch (Exception e) {
-			Log.e(TAG, "loadTopMenuState: エラーが発生しました.");
-			if (e.getLocalizedMessage() != null) {
-				Log.e(TAG, "loadTopMenuState: エラーメッセージ. " + e.getLocalizedMessage());
-			}
+			Logcat.e(logLevel, "エラーが発生しました.", e);
 		}
-		if (debug) {Log.d(TAG, "loadTopMenuState: 終了します.");}
+		Logcat.d(logLevel, " 終了します.");
 		return states;
 	}
 
 	// 上部メニューの設定を保存
-	private void saveTopMenuState(boolean states[]) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "saveTopMenuState: 開始します. states.length=" + states.length);}
+	private void saveTopMenuState(boolean[] states) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. states.length=" + states.length);
 
 		Editor ed = mSharedPreferences.edit();
 		for (int i = 0 ; i < states.length ; i ++) {
@@ -3037,18 +3095,18 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				ed.putBoolean(DEF.KEY_TOPMENU + COMMAND_INDEX[i], states[i]);
 			}
 			catch (Exception e) {
-				Log.e(TAG, "saveTopMenuState: エラーが発生しました.");
-				if (e.getLocalizedMessage() != null) {
-					Log.e(TAG, "saveTopMenuState: エラーメッセージ. " + e.getLocalizedMessage());
-				}
+				Logcat.e(logLevel, "エラーが発生しました.", e);
 			}
 		}
 		ed.apply();
-		if (debug) {Log.d(TAG, "saveTopMenuState: 終了します.");}
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	// 座標から選択するページを求める
 	private int calcSelectPage(float x) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		int page = mCurrentPage;
 		int pagecnt = 0;
 		int range = (int) Math.abs((x - mTouchBeginX)); // 絶対値
@@ -3072,6 +3130,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// ページ選択時に表示する文字列を作成
 	private float calcPageSelectRange(int page) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		int pagecnt = Math.abs(mCurrentPage - page); // ページの差の絶対値
 		int range = 0;
 
@@ -3095,6 +3156,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * 画像と表示領域を比較し、はみ出る量を算出します。
 	 */
 	public void setImageConfig() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageMgr != null) {
 			mImageMgr.setViewSize(mViewWidth, mViewHeight);
 			setMgrConfig(false);
@@ -3108,7 +3172,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * 画像と表示領域を比較し、はみ出る量を算出します。
 	 */
 	public void setImageViewSize(int width, int height) {
-		// if (mViewWidth != width || mViewHeight != height) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mViewWidth = width;
 		mViewHeight = height;
 		if (mImageMgr != null) {
@@ -3125,11 +3191,12 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				}
 			}
 		}
-		// }
-		return;
 	}
 
 	private void ImageScaling() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		int page1 = -1;
 		int page2 = -1;
 		int half1 = ImageData.HALF_NONE;
@@ -3149,6 +3216,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	 * 画像と表示領域を比較し、はみ出る量を算出します。
 	 */
 	private void updateOverSize(boolean isResize) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// ルーペの大きさを再設定
 		mImageView.updateZoomView();
 
@@ -3165,6 +3235,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 戻る操作
 	private void operationBack() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mGuideView.getOperationMode()) {
 			mGuideView.setOperationMode(false);
 			return;
@@ -3197,6 +3270,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// メニューを開く
 	private void openMenu() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageMgr == null || mImageView == null || mMenuDialog != null) {
 			return;
 		}
@@ -3299,6 +3375,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// メニューを開く
 	private void openDirTreeMenu() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageMgr == null || mImageView == null || mMenuDialog != null) {
 			return;
 		}
@@ -3321,6 +3400,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// メニューを開く
 	private void openBookmarkMenu() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageMgr == null || mImageView == null || mMenuDialog != null) {
 			return;
 		}
@@ -3357,6 +3439,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public void onSelectMenuDialog(int id) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mMenuDialog = null;
 
 		execCommand(id);
@@ -3364,6 +3449,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public void onCloseMenuDialog() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// メニュー終了
 		mMenuDialog = null;
 		// 情報表示クリア
@@ -3373,6 +3461,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void execCommand(int id) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// メニュー選択
 		// ページ戻りにはしない
 
@@ -3676,7 +3767,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public void onSelectPage(int page) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (!mListLoading && !mBitmapLoading && !mScrolling) {
 			if (mCurrentPage != page) {
 				// ページ選択
@@ -3699,11 +3792,13 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		// 文書情報を更新
 		mGuideView.setPageText(mImageMgr.createPageStr(mCurrentPage));
 
-		if(debug) {Log.d(TAG, "onSelectPage: currentPage=" + mCurrentPage + ", nextPage=" + mNextPage);}
+		Logcat.d(logLevel, "onSelectPage: currentPage=" + mCurrentPage + ", nextPage=" + mNextPage);
 	}
 
 	@Override
 	public void onSelectPageSelectDialog(int menuId) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		switch (menuId) {
 			case DEF.TOOLBAR_DISMISS: {
@@ -3929,6 +4024,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 他アクティビティからの復帰通知
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mPageBack = false;
 
 		// バックグラウンドでのキャッシュ読み込み再開
@@ -3981,7 +4079,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 設定の読み込み
 	private void ReadSetting(SharedPreferences sharedPreferences) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// 設定値取得
 		try {
 			mFileSort = SetImageActivity.getFileSort(sharedPreferences);
@@ -3998,15 +4098,15 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mWAdjust = DEF.calcWAdjust(SetImageDetailActivity.getWAdjust(sharedPreferences));
 			mWidthScale = DEF.calcWScaling(SetImageDetailActivity.getWScaling(sharedPreferences));
 			mImgScale = DEF.calcScaling(SetImageDetailActivity.getScaling(sharedPreferences));
-			if (debug) {Log.d(TAG, "ReadSetting mWidthScale=" + mWidthScale + ", mImgScale=" + mImgScale);}
-			
+			Logcat.d(logLevel, "mWidthScale=" + mWidthScale + ", mImgScale=" + mImgScale);
+
 			mEffectTime = DEF.calcEffectTime(SetImageTextDetailActivity.getEffectTime(sharedPreferences));
 			mAutoPlayTerm = DEF.calcAutoPlay(SetImageDetailActivity.getAutoPlay(sharedPreferences));
 			mPageSelect = SetImageText.getPageSelect(sharedPreferences);
 
 			if (SetImageActivity.getCenterMargin(sharedPreferences)) {
 				mCenter = SetImageTextDetailActivity.getCenter(sharedPreferences);
-			} 
+			}
 			else {
 				mCenter = 0;
 			}
@@ -4168,19 +4268,25 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mEpubOrder = SetEpubActivity.getEpubOrder(sharedPreferences);
 		}
 		catch (Exception e) {
-			Log.e(TAG, "ReadSetting error.");
+			Logcat.e(logLevel, "error.");
 		}
 		return;
 	}
 
 	// 拡大位置の座標補正 & 設定
 	private void callZoomAreaDraw(float x, float y) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// 2011/11/18 ルーペ機能
 		mImageView.setZoomPos((int) x, (int) y);
 		return;
 	}
 
 	private void startVibrate() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		long nowTime = System.currentTimeMillis();
 
 		if (mVibFlag) {
@@ -4193,6 +4299,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void changePage(int move) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (move >= 0) {
 			// 次ページ
 			nextPage();
@@ -4205,6 +4314,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	public void nextPage() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// 次ページへ
 		if ((mCurrentPage >= mImageMgr.length() - 1 && (!mCurrentPageHalf || (mCurrentPageHalf && mHalfPos == HALFPOS_2ND))) || (mCurrentPage >= mImageMgr.length() - 2 && mCurrentPageDual)) {
 			// 分割表示中は最終ページの2ページ目なら次ページに遷移しない
@@ -4269,6 +4381,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	public void prevPage() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// 前ページへ
 		if (mCurrentPage <= 0 && (!mCurrentPageHalf || (mCurrentPageHalf && mHalfPos != HALFPOS_2ND))) {
 			// 先頭ページかつ分割表示中かつ2ページ目でないなら前ページはない
@@ -4326,6 +4441,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 1ページずらし
 	private void shiftPage(int way) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (isDualView()) {
 			// 見開きモードの時だけ
 			if (way < 0) {
@@ -4351,6 +4469,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 現在見開き表示中かを返す
 	private boolean isDualView() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mDispMode == DEF.DISPMODE_IM_DUAL) {
 			return true;
 		}
@@ -4370,6 +4491,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 現在単ページ表示中かを返す
 	private boolean isHalfView() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mDispMode == DEF.DISPMODE_IM_HALF) {
 			return true;
 		}
@@ -4385,7 +4509,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void startScroll(int move) {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します. mListLoading=" + mListLoading + ", mBitmapLoading=" + mBitmapLoading + ", mScrolling=" + mScrolling);
+
 		if (!mListLoading && !mBitmapLoading && !mScrolling) {
 			if (!mImageView.setViewPosScroll(move)) {
 				// スクロールする余地がなければ次ページ
@@ -4399,10 +4525,19 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 				startViewTimer(DEF.HMSG_EVENT_SCROLL);
 			}
 		}
+		else {
+			// なぜかスクロールが完了していない場合にスクロールを再開させる
+			if (!mImageView.checkScrollTime(mVolScrl)) {
+				startViewTimer(DEF.HMSG_EVENT_SCROLL_NEXT);
+			}
+		}
 	}
 
 	// 長押しタイマー開始
 	public boolean startLongTouchTimer(int longtouch_event) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		int longtaptime;
 		if (longtouch_event == DEF.HMSG_EVENT_TOUCH_ZOOM) {
 			longtaptime = mLongTapZoom;
@@ -4425,12 +4560,15 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		long NextTime = SystemClock.uptimeMillis() + longtaptime;
 
 		mHandler.sendMessageAtTime(msg, NextTime);
-//		Log.d("long touch", "send : msg=" + longtouch_event + ", count=" + mLongTouchCount);
+//		Logcat.d(logLevel, "msg=" + longtouch_event + ", count=" + mLongTouchCount);
 		return true;
 	}
 
 	// 起動時のプログレスダイアログ表示
 	public boolean startDialogTimer(int time) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		mReadTimerMsg = mHandler.obtainMessage(DEF.HMSG_EVENT_READTIMER);
 		long NextTime = SystemClock.uptimeMillis() + time;
 
@@ -4440,8 +4578,8 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// タイマー開始
 	public void startViewTimer(int event) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "startViewTimer: 開始します. event=" + event);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します. event=" + event);
 
 		Message msg = mHandler.obtainMessage(event);
 		long NextTime = SystemClock.uptimeMillis();
@@ -4464,6 +4602,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			NextTime += DEF.INTERVAL_EFFECT_NEXT;
 		}
 		else if (event == DEF.HMSG_EVENT_SCROLL) {
+			Logcat.v(logLevel, "HMSG_EVENT_SCROLL.");
 			// スクロール開始
 			if (!mImageView.moveToNextPoint(mVolScrl)) {
 				return;
@@ -4472,6 +4611,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mScrolling = true;
 		}
 		else if (event == DEF.HMSG_EVENT_SCROLL_NEXT) {
+			Logcat.v(logLevel, "HMSG_EVENT_SCROLL_NEXT.");
 			// スクロール進行
 			NextTime += DEF.INTERVAL_SCROLL_NEXT;
 		}
@@ -4494,14 +4634,20 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			NextTime += DEF.INTERVAL_DEFAULT;
 		}
 
-		if (debug) {
+		if (logLevel <= Logcat.LOG_LEVEL_VERBOSE) {
 			String next_ms = (new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())).format(NextTime);
-			Log.d(TAG, "startViewTimer: NextTime=" + next_ms);
+			Logcat.v(logLevel, "NextTime=" + next_ms);
 		}
-		mHandler.sendMessageAtTime(msg, NextTime);
+
+		if(!mHandler.sendMessageAtTime(msg, NextTime)) {
+			Logcat.w(logLevel, "失敗しました. sendMessageAtTime(msg=" + msg + ", NextTime=" + NextTime +")");
+		}
 	}
 
 	private void setAutoPlay(boolean mode) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		Window window = getWindow();
 		if (mode) {
 			// 画面をスリープしないように設定
@@ -4516,6 +4662,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void showCloseDialog(int layout) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mCloseDialog != null) {
 			return;
 		}
@@ -4541,18 +4690,20 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	@Override
 	public void onAddBookmark(String name) {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "onAddBookmark: mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
-				+ ", mFileName=" + mFileName + ", mImageName=" + mImageName + ", mCurrentPage=" + mCurrentPage);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
+		Logcat.d(logLevel, "mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
+				+ ", mFileName=" + mFileName + ", mImageName=" + mImageName + ", mCurrentPage=" + mCurrentPage);
 		// ブックマーク追加
 		if ((mFileName == null || mFileName.isEmpty()) && (mImageName != null && !mImageName.isEmpty())) {
-			if (debug) {Log.d(TAG, "onAddBookmark: 画像ファイル指定.");}
+			Logcat.d(logLevel, "画像ファイル指定.");
 				// 画像ファイル直接指定
 			RecordList.add(RecordList.TYPE_BOOKMARK, RecordItem.TYPE_IMAGEDIRECT, mServer, mPath, mFileName
 					, new Date().getTime(), mImageMgr.mFileList[mCurrentPage].name, mCurrentPage, name);
 		}
 		else {
-			if (debug) {Log.d(TAG, "onAddBookmark: ディレクトリまたは圧縮ファイル.");}
+			Logcat.d(logLevel, "ディレクトリまたは圧縮ファイル.");
 			// ディレクトリまたは圧縮ファイル
 			RecordList.add(RecordList.TYPE_BOOKMARK, RecordItem.TYPE_IMAGE, mServer, mPath, mFileName
 					, new Date().getTime(), mImageMgr.mFileList[mCurrentPage].name, mCurrentPage, name);
@@ -4564,6 +4715,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	public void finishActivity(int select, boolean resume, boolean mark) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		// 続きから読み込みの設定
 		if (!resume) {
 			removeLastFile();
@@ -4650,18 +4804,19 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 現在ページ情報を保存
 	private void saveCurrentPage() {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 
 		if (mImageMgr != null) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
 			int savePage = mCurrentPage;
 			int	maxpage = mImageMgr.length();
-			if (debug) {Log.d(TAG, "saveCurrentPage: Url=" + DEF.createUrl(mFilePath, mUser, mPass));}
+			Logcat.d(logLevel, "Url=" + DEF.createUrl(mFilePath, mUser, mPass));
 
 			if (maxpage > 0) {
 				// ページ数が0でないときは保存する
-				if (debug) {Log.d(TAG, "saveCurrentPage: page=" + savePage + ", maxpage=" + maxpage);}
+				Logcat.d(logLevel, "page=" + savePage + ", maxpage=" + maxpage);
 				Intent intent = getIntent();
 				intent.putExtra("Page", savePage);
 
@@ -4682,6 +4837,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 	// 起動時のページ情報に戻す
 	private void restoreCurrentPage() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		if (mImageMgr != null && mImageMgr.length() > 0) {
 			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 			Editor ed = sp.edit();
@@ -4707,7 +4865,9 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void saveLastFile() {
-		boolean debug = false;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		Editor ed = mSharedPreferences.edit();
 		ed.putInt("LastServer", mServer);
 		ed.putString("LastUri", mURI);
@@ -4721,26 +4881,31 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 	}
 
 	private void removeLastFile() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
 		Editor ed = mSharedPreferences.edit();
 		ed.putInt("LastOpen", DEF.LASTOPEN_NONE);
 		ed.apply();
 	}
 
 	private void saveHistory() {
-		boolean debug = false;
-		if (debug) {Log.d(TAG, "saveHistory: mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
-				+ ", mFileName=" + mFileName + ", mImageName=" + mImageName + ", mCurrentPage=" + mCurrentPage);}
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
+
+		Logcat.d(logLevel, "mServer=" + mServer + ", mURI=" + mURI + ", mPath=" + mPath
+				+ ", mFileName=" + mFileName + ", mImageName=" + mImageName + ", mCurrentPage=" + mCurrentPage);
 		// 履歴追加
 		if (!mReadBreak && mImageMgr != null && mImageMgr.length() > 0) {
 			if ((mFileName == null || mFileName.isEmpty()) && (mImageName != null && !mImageName.isEmpty())) {
-				if (debug) {Log.d(TAG, "saveHistory: 画像ファイル指定.");}
+				Logcat.d(logLevel, "画像ファイル指定.");
 				// 画像ファイル直接指定
 				RecordList.add(RecordList.TYPE_HISTORY, RecordItem.TYPE_IMAGEDIRECT
 						, mServer, mPath, mFileName, new Date().getTime()
 						, mImageMgr.mFileList[mCurrentPage].name, mCurrentPage, null);
 			}
 			else {
-				if (debug) {Log.d(TAG, "saveHistory: ディレクトリまたは圧縮ファイル.");}
+				Logcat.d(logLevel, "ディレクトリまたは圧縮ファイル.");
 				// ディレクトリまたは圧縮ファイル
 				RecordList.add(RecordList.TYPE_HISTORY, RecordItem.TYPE_IMAGE
 						, mServer, mPath, mFileName, new Date().getTime()
@@ -4749,7 +4914,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		}
 	}
 
-	private String getMemoryString() {
+	public String getMemoryString() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.v(logLevel, "開始します.");
+
 		int memoryClass = ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getMemoryClass();
 		int largeMemoryClass = 0;
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {

@@ -5,6 +5,11 @@ include(GNUInstallDirs)
 
 set(CMAKE_BUILD_TYPE Release)
 
+add_definitions(
+        "-D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__"
+        "-Werror=unguarded-availability"
+)
+
 # ローカルソースのリスト
 set(
   COMITTON_SOURCES

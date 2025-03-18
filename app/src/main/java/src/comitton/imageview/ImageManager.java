@@ -608,7 +608,12 @@ public class ImageManager extends InputStream implements Runnable {
 				}
 			}
 		} catch (Exception e) {
-			Logcat.e(logLevel, "圧縮ファイルの解析でエラーになりました. count=" + count, e);
+			if (mCloseFlag) {
+				Logcat.w(logLevel, "圧縮ファイルの解析がキャンセルされました. count=" + count, e);
+			}
+			else {
+				Logcat.e(logLevel, "圧縮ファイルの解析でエラーになりました. count=" + count, e);
+			}
 		}
 
 		sort(list);
@@ -1219,7 +1224,7 @@ public class ImageManager extends InputStream implements Runnable {
 
 		FileAccess fileAccess = new FileAccess(mActivity, mFilePath, mUser, mPass, mHandler);
         try {
-            fileAccess.open("rw");
+            fileAccess.open("r");
         } catch (FileAccessException e) {
 			Logcat.e(logLevel, "ファイルオープンに失敗しました.", e);
         }
@@ -2213,7 +2218,12 @@ public class ImageManager extends InputStream implements Runnable {
 			}
 		}
 		catch (Exception e) {
-			Logcat.e(logLevel, "", e);
+			if (mCloseFlag) {
+				Logcat.w(logLevel, "キャンセルされました.", e);
+			}
+			else {
+				Logcat.e(logLevel, "", e);
+			}
 
 			if (!mThreadLoading) {
 				// ユーザ操作による読み込みの場合
@@ -2576,7 +2586,12 @@ public class ImageManager extends InputStream implements Runnable {
 				mWorkStream.seek(pos);
 			}
 			else {
-				Logcat.e(logLevel, "mWorkStream == null");
+				if (mCloseFlag) {
+					Logcat.w(logLevel, "キャンセルされました. mWorkStream == null");
+				}
+				else {
+					Logcat.e(logLevel, "mWorkStream == null");
+				}
 				throw new IOException();
 			}
 		}
@@ -3121,7 +3136,12 @@ public class ImageManager extends InputStream implements Runnable {
 				}
 			}
 			catch (IOException e) {
-				Logcat.e(logLevel, "エラーになりました.", e);
+				if (mCloseFlag) {
+					Logcat.w(logLevel, "キャンセルされました.", e);
+				}
+				else {
+					Logcat.e(logLevel, "エラーになりました.", e);
+				}
 				fError = true;
 			}
 
@@ -3755,14 +3775,19 @@ public class ImageManager extends InputStream implements Runnable {
 			}
 		}
 		catch (IOException e) {
-			Logcat.e(logLevel, "Catch IOException: " + e.getLocalizedMessage());
+			if (mCloseFlag) {
+				Logcat.w(logLevel, "キャンセルされました.", e);
+			}
+			else {
+				Logcat.e(logLevel, "", e);
+			}
 		}
 
 		try {
 			setLoadBitmapEnd();
 		}
 		catch (Exception e) {
-			Logcat.e(logLevel, "Catch Exception: " + e.getLocalizedMessage());
+			Logcat.e(logLevel, "", e);
 		}
 
 		if (bm != null && bm.getConfig() != Config.RGB_565) {

@@ -70,6 +70,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		for (int i = 0; i < files.size(); ++i) {
 			// 削除したらindexが変わるのでfilesで検査してmFilesから削除する
 			if (files.get(i).getType() == FileData.FILETYPE_PARENT || files.get(i).getType() == FileData.FILETYPE_TXT) {
+				CallImgLibrary.ThumbnailSetNone(mID, files.get(i).getIndex());
 				removeFile(files.get(i));
 			}
 		}
@@ -94,6 +95,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 	public void breakThread() {
 		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.d(logLevel, "開始します.");
+		mThumbnailCacheLoader.breakThread();
 		super.breakThread();
 	}
 
@@ -157,6 +159,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		Logcat.d(logLevel,"開始します. firstindex=" + firstindex + ", lastindex=" + lastindex);
 
 		if (mFirstIndex != firstindex || mLastIndex != lastindex) {
+			Logcat.v(logLevel,"表示範囲に変化があります.");
 			// スクロール位置に変化があったら実行する
 			mFirstIndex = firstindex;
 			mLastIndex = lastindex;
@@ -252,7 +255,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 		// サムネイルのファイルキャッシュ削除
 		deleteThumbnailCache(mThumbCacheNum);
-
+		Logcat.d(logLevel, "終了します.");
 	}
 
 	@SuppressLint("SuspiciousIndentation")
@@ -401,7 +404,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		}
 		catch (Exception e) {
 			releaseManager();
-			Logcat.e(logLevel, "index=" + index + ", エラーが発生しました. filename=" + filename, e, true);
+			Logcat.w(logLevel, "index=" + index + ", エラーが発生しました. filename=" + filename, e);
 
 			if (mThreadBreak) {
 				Logcat.d(logLevel, "index=" + index + ", 中断されました. filename=" + filename, e);

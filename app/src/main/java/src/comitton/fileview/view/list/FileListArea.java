@@ -518,7 +518,7 @@ public class FileListArea extends ListArea implements Handler.Callback {
 
 	@SuppressLint("SuspiciousIndentation")
     private void drawListItems(Canvas canvas, int baseX, int baseY) {
-		int logLevel = Logcat.LOG_LEVEL_DEBUG;
+		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.d(logLevel, "開始します.");
 
 		int cx = mAreaWidth;

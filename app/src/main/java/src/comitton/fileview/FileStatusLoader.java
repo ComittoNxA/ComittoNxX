@@ -41,6 +41,7 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
 
     private WaitFor mWaitFor;
     private boolean mSkip;
+    private boolean mSorting;
 
     public FileStatusLoader(AppCompatActivity activity, String uri, String path, String user, String pass, Handler handler, ArrayList<FileData> files, boolean hidden, boolean epubViewer) {
         super(activity, uri, path, handler, 0, files, 0, 0, 0, 0, 0);
@@ -49,6 +50,7 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
 
         mSp = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mSkip = false;
+        mSorting = false;
 
         mUser = user;
         mPass = pass;
@@ -158,29 +160,33 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
             mLastIndex = lastindex;
             mComparator.setDispRange(mFirstIndex, mLastIndex);
 
-            // 中でループさせたいので非同期処理にする
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (mFileListLock) {
-                        if (mFiles != null && !mFiles.isEmpty()) {
-                            while(true) {
-                                // ソートが成功するまでループする
-                                try {
-                                    Collections.sort(mFiles, mComparator);
-                                    break;
-                                } catch (ConcurrentModificationException e) {
-                                    continue;
+            if (!mSorting) {
+                // 中でループさせたいので非同期処理にする
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mFileListLock) {
+                            mSorting = true;
+                            if (mFiles != null && !mFiles.isEmpty()) {
+                                while (true) {
+                                    // ソートが成功するまでループする
+                                    try {
+                                        Collections.sort(mFiles, mComparator);
+                                        break;
+                                    } catch (ConcurrentModificationException e) {
+                                        continue;
+                                    }
+                                }
+                                if (mComparator.compare(mFiles.get(0), mCurrentFile) < 0) {
+                                    interruptThread();
                                 }
                             }
-                            if (mComparator.compare(mFiles.get(0), mCurrentFile) < 0) {
-                                interruptThread();
-                            }
+                            mSorting = false;
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         Logcat.d(logLevel,"終了します.");

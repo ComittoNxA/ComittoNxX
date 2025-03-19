@@ -39,6 +39,7 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
     private WaitFor mWaitFor;
     private boolean mSkip;
     private boolean mSleep;
+    private boolean mSorting;
 
     public ThumbnailCacheLoader(AppCompatActivity activity, FileThumbnailLoader loader, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, boolean hidden, int crop, int margin, boolean epubViewer) {
         super(activity, uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
@@ -48,6 +49,7 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
         mSp = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mSkip = false;
         mSleep = false;
+        mSorting = false;
 
         mFileThumbnailLoader = loader;
         mComparator = new FileRangeComparator();
@@ -94,30 +96,34 @@ public class ThumbnailCacheLoader extends ThumbnailLoader implements Runnable {
             mLastIndex = lastindex;
             mComparator.setDispRange(mFirstIndex, mLastIndex);
 
-            // 中でループさせたいので非同期処理にする
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (mFileListLock) {
-                        if (mFiles != null && !mFiles.isEmpty()) {
-                            while(true) {
-                                // ソートが成功するまでループする
-                                try {
-                                    Collections.sort(mFiles, mComparator);
-                                    break;
-                                } catch (ConcurrentModificationException e) {
-                                    continue;
+            if (!mSorting) {
+                // 中でループさせたいので非同期処理にする
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mFileListLock) {
+                            mSorting = true;
+                            if (mFiles != null && !mFiles.isEmpty()) {
+                                while (true) {
+                                    // ソートが成功するまでループする
+                                    try {
+                                        Collections.sort(mFiles, mComparator);
+                                        break;
+                                    } catch (ConcurrentModificationException e) {
+                                        continue;
+                                    }
+                                }
+                                if (CallImgLibrary.ThumbnailCheckAll(mID) != 0) {
+                                    // メモリキャッシュに全部入り切れていない時は実行する
+                                    interruptThread();
                                 }
                             }
-                            if (CallImgLibrary.ThumbnailCheckAll(mID) != 0) {
-                                // メモリキャッシュに全部入り切れていない時は実行する
-                                interruptThread();
-                            }
+                            mSorting = false;
                         }
                     }
-                }
-            });
+                });
+            }
         }
         Logcat.d(logLevel,"終了します.");
     }

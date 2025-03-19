@@ -30,7 +30,8 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
     private String mUser;			    // SMB認証用
     private String mPass;			    // SMB認証用
     private String mCropPath;           // 画像を切り取るファイル名
-    private Handler mHandler;
+    private int mPage;                  // 画像を切り取るページ
+
 
     private CropImageView mCropImageView;
     private ProgressDialog mProgress;
@@ -53,6 +54,7 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
             mFile = intent.getStringExtra("File");  // ZIPファイル名
             mUser = intent.getStringExtra("User");  // SMB認証用
             mPass = intent.getStringExtra("Pass");  // SMB認証用
+            mPage = intent.getIntExtra("Page", 0);  // ページ番号
         }
 //        mUri = Uri.parse("file://" + uri);
         mAspectRatio = intent.getFloatExtra("aspectRatio", 3.0f / 4.0f);
@@ -143,7 +145,7 @@ public class CropImageActivity extends AppCompatActivity implements Runnable, Te
         if(mCropPath == null) {
             imageMgr = new ImageManager(this, mPath, mFile, mUser, mPass, ImageManager.FILESORT_NAME_UP, handler,true, ImageManager.OPENMODE_THUMBSORT, 1);
             imageMgr.LoadImageList(0, 0, 0);
-            mCropPath = imageMgr.decompFile(0, null);
+            mCropPath = imageMgr.decompFile(mPage, null);
         }
         if(mCropPath != null) {
             try {

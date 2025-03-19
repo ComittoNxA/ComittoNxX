@@ -1693,18 +1693,17 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.d(logLevel, "開始します.");
 
-		String path = mImageMgr.decompFile(page, null);
-		if (path != null && path.length() >= 5) {
-			int thumbH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
-			int thumbW = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeW(mSharedPreferences));
-			Intent intent = new Intent(mActivity, CropImageActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra("uri", path);
-			intent.putExtra("aspectRatio", (float)thumbW / (float)thumbH);
-			startActivityForResult(intent, DEF.REQUEST_CROP);
-		}else{
-			Toast.makeText(mActivity, "Failed to open file", Toast.LENGTH_SHORT).show();
-		}
+		int thumbH = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeH(mSharedPreferences));
+		int thumbW = DEF.calcThumbnailSize(SetFileListActivity.getThumbSizeW(mSharedPreferences));
+		Intent intent = new Intent(mActivity, CropImageActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra("Path", mUriPath);
+		intent.putExtra("File", mFileName);
+		intent.putExtra("User", mUser);
+		intent.putExtra("Pass", mPass);
+		intent.putExtra("Page", page);
+		intent.putExtra("aspectRatio", (float)thumbW / (float)thumbH);
+		startActivityForResult(intent, DEF.REQUEST_CROP);
 	}
 
 	public void setThumb(Uri uri) {

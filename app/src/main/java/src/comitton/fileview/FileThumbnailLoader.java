@@ -42,6 +42,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 
 	private WaitFor mWaitFor;
 	private boolean mSkip;
+	private boolean mSorting;
 
 	public FileThumbnailLoader(AppCompatActivity activity, String uri, String path, String user, String pass, Handler handler, long id, ArrayList<FileData> files, int sizeW, int sizeH, int cachenum, int filesort, boolean hidden, boolean thumbsort, int crop, int margin, boolean epubThumb, boolean epubViewer) {
 		super(activity, uri, path, handler, id, files, sizeW, sizeH, cachenum, crop, margin);
@@ -49,6 +50,7 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 		Logcat.d(logLevel, "開始します. epubThumb=" + epubThumb);
 
 		mSkip = false;
+		mSorting = false;
 
 		mUser = user;
 		mPass = pass;
@@ -169,34 +171,38 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 				mThumbnailCacheLoader.setDispRange(firstindex, lastindex);
 			}
 
-			// 中でループさせたいので非同期処理にする
-			ExecutorService executor = Executors.newSingleThreadExecutor();
-			executor.submit(new Runnable() {
-				@Override
-				public void run() {
-					synchronized (mFileListLock) {
-						if (mFiles != null && !mFiles.isEmpty()) {
-							while (true) {
-								// ソートが成功するまでループする
-								try {
-									Collections.sort(mFiles, mComparator);
-									if (logLevel <= Logcat.LOG_LEVEL_VERBOSE) {
-										for (int i = 0; i < mFiles.size(); ++i) {
-											Logcat.v(logLevel, "mFiles[" + i + "]=" + mFiles.get(i).getIndex() + " : " + mFiles.get(i).getName());
+			if (!mSorting) {
+				// 中でループさせたいので非同期処理にする
+				ExecutorService executor = Executors.newSingleThreadExecutor();
+				executor.submit(new Runnable() {
+					@Override
+					public void run() {
+						synchronized (mFileListLock) {
+							mSorting = true;
+							if (mFiles != null && !mFiles.isEmpty()) {
+								while (true) {
+									// ソートが成功するまでループする
+									try {
+										Collections.sort(mFiles, mComparator);
+										if (logLevel <= Logcat.LOG_LEVEL_VERBOSE) {
+											for (int i = 0; i < mFiles.size(); ++i) {
+												Logcat.v(logLevel, "mFiles[" + i + "]=" + mFiles.get(i).getIndex() + " : " + mFiles.get(i).getName());
+											}
 										}
+										break;
+									} catch (ConcurrentModificationException e) {
+										continue;
 									}
-									break;
-								} catch (ConcurrentModificationException e) {
-									continue;
+								}
+								if (mComparator.compare(mFiles.get(0), mCurrentFile) < 0) {
+									interruptThread();
 								}
 							}
-							if (mComparator.compare(mFiles.get(0), mCurrentFile) < 0) {
-								interruptThread();
-							}
+							mSorting = false;
 						}
 					}
-				}
-			});
+				});
+			}
 		}
 
 		Logcat.d(logLevel,"終了します.");

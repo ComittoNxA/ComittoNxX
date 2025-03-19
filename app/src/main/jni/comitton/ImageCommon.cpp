@@ -339,7 +339,8 @@ int DrawScaleBitmap(int index, int page, int rotate, int s_x, int s_y, int s_cx,
 // メモリ確保
 int MemAlloc(int index, int buffsize)
 {
-    int buffnum = buffsize * 2;
+
+    int buffnum = buffsize * 8 / sizeof(LONG);
     int ret = index;
 
     gIsInit[index] = true;

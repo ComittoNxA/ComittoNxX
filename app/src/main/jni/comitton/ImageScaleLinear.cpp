@@ -57,7 +57,6 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 	int r1, r2, r3, r4, rr;
 	int g1, g2, g3, g4, gg;
 	int b1, b2, b3, b4, bb;
-	int yd3, yd2;
 
 	int yy, xx;
 	int wkxx;
@@ -81,8 +80,6 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 		buffptr = gSclLinesPtr[index][yy];
 //		LOGD("CreateScale : buffindex=%d, buffpos=%d, linesize=%d", buffindex, buffpos, linesize);
 
-		yd3 = gDitherY_3bit[yy & 0x07];
-		yd2 = gDitherY_2bit[yy & 0x03];
 		for (xx = 0 ; xx < SclWidth ; xx++) {
 			// 
 			wkxx = orgx[xx] + HOKAN_DOTS / 2;
@@ -102,9 +99,9 @@ void *CreateScaleLinear_ThreadFunc(void *param)
 			b3 = RGB888_BLUE(orgbuff2[wkxx + 0]);
 			b4 = RGB888_BLUE(orgbuff2[wkxx + 1]);
 
-			rr = ((r1 * d1[xx] + r2 * d2[xx]) * d3 + (r3 * d1[xx] + r4 * d2[xx]) * d4) / 256 / 256;
-			gg = ((g1 * d1[xx] + g2 * d2[xx]) * d3 + (g3 * d1[xx] + g4 * d2[xx]) * d4) / 256 / 256;
-			bb = ((b1 * d1[xx] + b2 * d2[xx]) * d3 + (b3 * d1[xx] + b4 * d2[xx]) * d4) / 256 / 256;
+			rr = (int)((LONG)(r1 * d1[xx] + r2 * d2[xx]) * d3 + (r3 * d1[xx] + r4 * d2[xx]) * d4) / 256 / 256;
+			gg = (int)((LONG)(g1 * d1[xx] + g2 * d2[xx]) * d3 + (g3 * d1[xx] + g4 * d2[xx]) * d4) / 256 / 256;
+			bb = (int)((LONG)(b1 * d1[xx] + b2 * d2[xx]) * d3 + (b3 * d1[xx] + b4 * d2[xx]) * d4) / 256 / 256;
 
 // LOGD("CreateScaleLinear : x=%d, y=%d, rr=%d(%d,%d,%d,%d), gg=%d(%d,%d,%d,%d)", xx, yy, rr, r1, r2, r3, r4, gg, g1, g2, g3, g4);
 

@@ -1008,10 +1008,8 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 
 					// サムネイル読み込み
 					loadThumbnail();
-					mThumbnailLoader.setDispRange(mFirstIndex, mLastIndex);
 					// 既読情報読み込み
 					loadFileState();
-					mFileStatusLoader.setDispRange(mFirstIndex, mLastIndex);
 				}
 				return true;
 			}
@@ -1192,6 +1190,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 			mFileStatusLoader.breakThread();
 		}
 		mFileStatusLoader = new ExpandFileStatusLoader(mActivity, mImageMgr, mURI, mPath, mFileName, mUser, mPass, mHandler, mFileList, mHidden);
+		mFileStatusLoader.setDispRange(mFirstIndex, mLastIndex);
 	}
 
 	// サムネイル読み込み
@@ -1210,6 +1209,7 @@ public class ExpandActivity extends AppCompatActivity implements Handler.Callbac
 		mThumbID = System.currentTimeMillis();
 
 		mThumbnailLoader = new ExpandThumbnailLoader(mActivity, mURI, DEF.relativePath(mActivity, mPath, mFileName), mHandler, mThumbID, mImageMgr, mFileList, mThumbSizeW, mThumbSizeH, mThumbNum, mThumbCrop, mThumbMargin);
+		mThumbnailLoader.setDispRange(mFirstIndex, mLastIndex);
 	}
 
 	public void readState(FileData fileData) {

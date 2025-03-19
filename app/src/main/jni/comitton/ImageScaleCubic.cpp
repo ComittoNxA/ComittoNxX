@@ -69,7 +69,6 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 	int		hy1, hy2, hy3, hy4;
 
 	int		rr, gg, bb;
-	int		yd3, yd2;
 
     LONG *buffptr = nullptr;
 
@@ -110,8 +109,6 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 		// バッファ位置
 		buffptr = gSclLinesPtr[index][yy];
 
-		yd3 = gDitherY_3bit[yy & 0x07];
-		yd2 = gDitherY_2bit[yy & 0x03];
 		for (xx = 0 ; xx < SclWidth ; xx++) {
 			xi = x_index[xx];
 			bx = x_pos[xx] + HOKAN_DOTS / 2;
@@ -122,19 +119,19 @@ void *CreateScaleCubic_ThreadFunc(void *param)
 			hx3 = gCubicSplines[xi].h3;
 			hx4 = gCubicSplines[xi].h4;
 
-			rr = (
+			rr = (int)((LONG)
 				hy1 * (hx1 * RGB888_RED(orgbuff1[bx-1]) + hx2 * RGB888_RED(orgbuff1[bx+0]) + hx3 * RGB888_RED(orgbuff1[bx+1]) + hx4 * RGB888_RED(orgbuff1[bx+2])) +
 				hy2 * (hx1 * RGB888_RED(orgbuff2[bx-1]) + hx2 * RGB888_RED(orgbuff2[bx+0]) + hx3 * RGB888_RED(orgbuff2[bx+1]) + hx4 * RGB888_RED(orgbuff2[bx+2])) +
 				hy3 * (hx1 * RGB888_RED(orgbuff3[bx-1]) + hx2 * RGB888_RED(orgbuff3[bx+0]) + hx3 * RGB888_RED(orgbuff3[bx+1]) + hx4 * RGB888_RED(orgbuff3[bx+2])) +
 				hy4 * (hx1 * RGB888_RED(orgbuff4[bx-1]) + hx2 * RGB888_RED(orgbuff4[bx+0]) + hx3 * RGB888_RED(orgbuff4[bx+1]) + hx4 * RGB888_RED(orgbuff4[bx+2]))
 				) / 256 / 256;
-			gg = (
+			gg = (int)((LONG)
 				hy1 * (hx1 * RGB888_GREEN(orgbuff1[bx-1]) + hx2 * RGB888_GREEN(orgbuff1[bx+0]) + hx3 * RGB888_GREEN(orgbuff1[bx+1]) + hx4 * RGB888_GREEN(orgbuff1[bx+2])) +
 				hy2 * (hx1 * RGB888_GREEN(orgbuff2[bx-1]) + hx2 * RGB888_GREEN(orgbuff2[bx+0]) + hx3 * RGB888_GREEN(orgbuff2[bx+1]) + hx4 * RGB888_GREEN(orgbuff2[bx+2])) +
 				hy3 * (hx1 * RGB888_GREEN(orgbuff3[bx-1]) + hx2 * RGB888_GREEN(orgbuff3[bx+0]) + hx3 * RGB888_GREEN(orgbuff3[bx+1]) + hx4 * RGB888_GREEN(orgbuff3[bx+2])) +
 				hy4 * (hx1 * RGB888_GREEN(orgbuff4[bx-1]) + hx2 * RGB888_GREEN(orgbuff4[bx+0]) + hx3 * RGB888_GREEN(orgbuff4[bx+1]) + hx4 * RGB888_GREEN(orgbuff4[bx+2]))
 				) / 256 / 256;
-			bb = (
+			bb = (int)((LONG)
 				hy1 * (hx1 * RGB888_BLUE(orgbuff1[bx-1]) + hx2 * RGB888_BLUE(orgbuff1[bx+0]) + hx3 * RGB888_BLUE(orgbuff1[bx+1]) + hx4 * RGB888_BLUE(orgbuff1[bx+2])) +
 				hy2 * (hx1 * RGB888_BLUE(orgbuff2[bx-1]) + hx2 * RGB888_BLUE(orgbuff2[bx+0]) + hx3 * RGB888_BLUE(orgbuff2[bx+1]) + hx4 * RGB888_BLUE(orgbuff2[bx+2])) +
 				hy3 * (hx1 * RGB888_BLUE(orgbuff3[bx-1]) + hx2 * RGB888_BLUE(orgbuff3[bx+0]) + hx3 * RGB888_BLUE(orgbuff3[bx+1]) + hx4 * RGB888_BLUE(orgbuff3[bx+2])) +

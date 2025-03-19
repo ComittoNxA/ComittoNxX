@@ -56,9 +56,6 @@ void *CreateScaleHalf_ThreadFunc(void *param)
 		// 元座標
 		sy = yy * 2;
 
-		int yd3 = gDitherY_3bit[yy & 0x07];
-		int yd2 = gDitherY_2bit[yy & 0x03];
-
 		orgbuff1 = gLinesPtr[index][sy + 0 + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
 		orgbuff2 = gLinesPtr[index][sy + 1 + HOKAN_DOTS / 2] + HOKAN_DOTS / 2;
 

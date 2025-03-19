@@ -801,13 +801,10 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 
 			// ファイルリストの読み込み
 			mImageMgr = new ImageManager(this.mActivity, mUriPath, mFileName, mUser, mPass, mFileSort, handler, mHidden, ImageManager.OPENMODE_VIEW, mMaxThread);
-			Logcat.d(logLevel, "メモリ利用状況.\n" + getMemoryString());
+			Logcat.v(logLevel, "メモリ利用状況.\n" + DEF.getMemoryString(mActivity));
 			setMgrConfig(true);
 			mImageMgr.LoadImageList(mMemSize, mMemNext, mMemPrev);
-			Logcat.d(logLevel, "メモリ利用状況.(2回目)\n" + getMemoryString());
-			// mImageMgr.setConfig(mScaleMode, mCenter, mFitDual, mDispMode,
-			// mNoExpand, mAlgoMode, mRotate, mWAdjust, mImgScale, mPageWay,
-			// mMgnCut);
+			Logcat.v(logLevel, "メモリ利用状況.(2回目)\n" + DEF.getMemoryString(mActivity));
 			mImageMgr.setViewSize(mViewWidth, mViewHeight);
 			mImageView.setImageManager(mImageMgr);
 
@@ -822,7 +819,7 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 			mCurrentPage = mRestorePage;
 			if (mCurrentPage == DEF.PAGENUMBER_READ)	mCurrentPage = mRestoreMaxPage - 1;
 			if (mCurrentPage == DEF.PAGENUMBER_UNREAD)	mCurrentPage = 0;
-			Logcat.d(logLevel, "mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage);
+			Logcat.v(logLevel, "mCurrentPage=" + mCurrentPage + ", mRestoreMaxPage=" + mRestoreMaxPage);
 
 			// 終了通知
 			Message message = new Message();
@@ -4912,50 +4909,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 						, mImageMgr.mFileList[mCurrentPage].name, mCurrentPage, null);
 			}
 		}
-	}
-
-	public String getMemoryString() {
-		int logLevel = Logcat.LOG_LEVEL_WARN;
-		Logcat.v(logLevel, "開始します.");
-
-		int memoryClass = ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getMemoryClass();
-		int largeMemoryClass = 0;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-			largeMemoryClass = ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getLargeMemoryClass();
-		}
-
-		// メモリ情報を取得
-		ActivityManager activityManager = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
-		ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-		activityManager.getMemoryInfo(memoryInfo);
-
-		int avaliMem = (int) (memoryInfo.availMem / 1024 / 1024);
-		int threshold = (int) (memoryInfo.threshold / 1024 / 1024);
-		boolean lowMemory = memoryInfo.lowMemory;
-
-		int nativeAllocate = (int) (Debug.getNativeHeapAllocatedSize() / 1024 / 1024);
-		int dalvikTotal = (int) (Runtime.getRuntime().totalMemory() / 1024 / 1024);
-		int dalvikFree = (int) (Runtime.getRuntime().freeMemory() / 1024 / 1024);
-
-		int javaAllocate = dalvikTotal - dalvikFree;
-		int totalAllocate = nativeAllocate + javaAllocate;
-
-		int ratio = (int)((double) totalAllocate / memoryClass * 100);
-		int largeRatio = (int)((double) totalAllocate / largeMemoryClass * 100);
-
-		return Build.BRAND + " " + Build.MODEL + " Android " + Build.VERSION.RELEASE + "\n"
-				+ "使用可能メモリ = " + String.valueOf(memoryClass) + " MB\n"
-				+ "使用可能メモリ(large) = " + largeMemoryClass + " MB\n"
-				+ "native割当済み = " + nativeAllocate + " MB\n"
-				+ "java割当済み = " + javaAllocate + " MB\n"
-				+ "total割当済み = " + totalAllocate + " MB\n"
-				+ "使用率 = " + ratio + "%\n"
-				+ "使用率(large) = " + largeRatio + "%\n"
-				+ "(dalvik最大メモリ = " + dalvikTotal + " MB)\n"
-				+ "(dalvik空きメモリ = " + dalvikFree + " MB)\n"
-				+ "availMem = " + avaliMem + " MB\n"
-				+ "threshold = " + threshold + " MB\n"
-				+ "lowMemory = " + lowMemory;
 	}
 
 }

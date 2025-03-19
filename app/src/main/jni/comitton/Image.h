@@ -70,11 +70,6 @@
 #define SCALE_BORDER1	0.5
 #define SCALE_BORDER2	0.8
 
-typedef unsigned long   LONG;
-typedef	unsigned short	WORD;
-typedef	unsigned char	BYTE;
-
-
 typedef enum {
     COLOR_FORMAT_RGB = 0,
     COLOR_FORMAT_RGBA,

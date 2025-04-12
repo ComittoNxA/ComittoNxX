@@ -2,8 +2,11 @@ package src.comitton.fileaccess;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -16,6 +19,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -844,14 +849,15 @@ public class FileAccess {
 		List<String> paths = new ArrayList<>();
 		for (File file : context.getExternalFilesDirs("external")) {
 			if (file != null) {
+				Logcat.d(true, "SDカードのパス=" + file.toString());
 				int index = file.getAbsolutePath().lastIndexOf("/Android/data");
 				if (index < 0) {
-					Logcat.w(logLevel, "Unexpected external file dir: " + file.getAbsolutePath());
+					Logcat.d(logLevel, "Unexpected external file dir: " + file.getAbsolutePath());
 				}
 				else {
 					String path = file.getAbsolutePath().substring(0, index);
 					try {
-						path = new File(path).getCanonicalPath();
+						path = new File(path).getCanonicalPath() + "/";
 					}
 					catch (IOException e) {
 						// Keep non-canonical path.
@@ -859,6 +865,55 @@ public class FileAccess {
 					paths.add(path);
 				}
 
+			}
+		}
+
+		if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.N) {
+			// Android 7-10 (API 24-29)
+			StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+			List<StorageVolume> sv = sm.getStorageVolumes();
+			for(int i = 0; i < sv.size(); ++i) {
+				String path = null;
+				Logcat.d(logLevel, "StorageVorume=" + sv.get(i).toString());
+				if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.R && sv.get(i).getDirectory() != null) {
+					// Android 11- (API 30)
+					Logcat.d(logLevel, ": Directory=" + sv.get(i).getDirectory());
+					path = sv.get(i).getDirectory().getAbsolutePath() + "/";
+				}
+				else if (sv.get(i).getUuid() != null) {
+					Logcat.d(logLevel, ": UUID=" + sv.get(i).getUuid());
+					path = "/storage/" + sv.get(i).getUuid() + "/";
+				}
+
+				if (path != null && !paths.contains(path)) {
+					paths.add(path);
+				}
+			}
+		}
+		else {
+			// Android 4-6 (API 14-23)
+			try {
+				StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+				Method getVolumeList = sm.getClass().getDeclaredMethod("getVolumeList");
+				Object svObj = getVolumeList.invoke(sm);
+				final int length = Array.getLength(svObj);
+				for (int i = 0; i < length; i++) {
+					Object sv = Array.get(svObj, i);
+					Logcat.d(logLevel, "StorageVorume=" + sv.toString());
+					Method getPath = sv.getClass().getMethod("getPath");
+					String path = (String) getPath.invoke(sv);
+					if (path != null) {
+						path += "/";
+					}
+					Logcat.d(logLevel, ": Path=" + path);
+
+					if (path != null && !paths.contains(path)) {
+						paths.add(path);
+					}
+				}
+			}
+			catch (Exception e) {
+				;
 			}
 		}
 		return paths.toArray(new String[0]);

@@ -157,7 +157,6 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 		for (int i = fileList.size() - 1; i >= 0; i--) {
 
-			fileList.get(i).setIndex(i);
 			String name = fileList.get(i).getName();
 
 			hit = false;
@@ -179,11 +178,15 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 							continue;
 						}
 					}
+
 				}
 			}
 			fileList.get(i).setMarker(hit);
 		}
 
+		for (int i = 0; i < fileList.size(); ++i) {
+			fileList.get(i).setIndex(i);
+		}
 		return fileList;
 	}
 
@@ -238,14 +241,31 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 				}
 
 				// ローカルの初期フォルダより上のフォルダの場合
-				Logcat.d(logLevel, "mStaticRootDir=" + mStaticRootDir + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
-				if (mStaticRootDir.startsWith(currentPath) && !mStaticRootDir.equals(currentPath)) {
-					int pos = mStaticRootDir.indexOf("/", mPath.length());
-					String dir = mStaticRootDir.substring(mPath.length(), pos + 1);
+				//Logcat.d(logLevel, "mStaticRootDir=" + mStaticRootDir + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
+				//if (mStaticRootDir.startsWith(currentPath) && !mStaticRootDir.equals(currentPath)) {
+				//	int pos = mStaticRootDir.indexOf("/", mPath.length());
+				//	String dir = mStaticRootDir.substring(mPath.length(), pos + 1);
+				//
+ 				//	//途中のフォルダを表示対象に追加
+				//	fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
+				//	fileList.add(fileData);
+				//}
 
-					//途中のフォルダを表示対象に追加
-					fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
-					fileList.add(fileData);
+				// SDカードフォルダより上のフォルダの場合
+				String[] SDCardPath = FileAccess.getExtSdCardPaths(mActivity);
+				for (int i = 0; i < SDCardPath.length; ++i) {
+					Logcat.i(logLevel, "SD Card Path=" + SDCardPath[i] + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
+					if (SDCardPath[i].startsWith(currentPath) && !SDCardPath[i].equals(currentPath)) {
+						int pos = SDCardPath[i].indexOf("/", mPath.length());
+						String dir = SDCardPath[i].substring(mPath.length(), pos + 1);
+
+						//途中のフォルダを表示対象に追加
+						fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
+						if (!fileList.contains(fileData)) {
+							Logcat.i(logLevel, "追加 dir=" + dir);
+							fileList.add(fileData);
+						}
+					}
 				}
 
 				// 処理中断

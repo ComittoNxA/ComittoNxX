@@ -1580,7 +1580,6 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 					@Override
 					public void onCancel() {
 						// 検索文字列クリア
-						mMarker = "";
 						updateMarker("", mFilter, mApplyDir);
 					}
 
@@ -2231,6 +2230,8 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 	private void updateMarker(String text, boolean filter, boolean applyDir) {
 		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.d(logLevel, "開始します.");
+		Logcat.v(logLevel, "mMarker=" + mMarker +", mFilter=" + mFilter + ", mApplyDir=" + mApplyDir);
+		Logcat.v(logLevel, "text=" + text +", filter=" + filter + ", applyDir=" + applyDir);
 
 
 		String prev_marker = mMarker;
@@ -2243,20 +2244,26 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 
 		if (mMarker.equals(prev_marker) && mFilter == prev_filter && mApplyDir == prev_applyDir) {
 			// すべて一致する場合は更新しない
+			Logcat.v(logLevel, "マーカーがすべて一致.");
+
 		}
 		else if (mMarker.isEmpty() && prev_marker.isEmpty()) {
 			// 空文字から空文字の場合は更新しない
+			Logcat.v(logLevel, "空文字から空文字.");
 		}
 		else if (!mFilter && !prev_filter) {
 			//　フィルタなしからフィルタなしの場合はサムネイルを更新しない
+			Logcat.v(logLevel, "フィルタなしからフィルタなし.");
 			updateListView();
 		}
-		else if (mMarker.equals(prev_marker) && mFilter == prev_filter) {
-			//　文字列とフィルタが一致する場合はサムネイルを更新しない
-			updateListView();
-		}
+		//else if (mMarker.equals(prev_marker) && mFilter == prev_filter) {
+		//	//　文字列とフィルタが一致する場合はサムネイルを更新しない
+		//	Logcat.v(logLevel, "文字列とフィルタが一致.");
+		//	updateListView();
+		//}
 		else {
 			// 通常はマーカーの更新とサムネイルの更新を行う
+			Logcat.v(logLevel, "全部更新.");
 			updateListView();
 			loadThumbnail(true);
 		}
@@ -3701,7 +3708,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 								if (msg.what == DEF.HMSG_FILE_STATUS) {
 									// 既読情報の更新
 									mFileList.readState(files.get(i));
-									updateListView();
+									//updateListView();
 								}
 								// リストの更新
 								mListScreenView.mFileListArea.update(false);

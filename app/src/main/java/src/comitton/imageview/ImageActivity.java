@@ -505,6 +505,12 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.i(logLevel, "開始します.");
 
+		// 起動処理失敗回数をリセット
+		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor ed = mSharedPreferences.edit();
+		ed.putInt(DEF.KEY_INITIALIZE, 0);
+		ed.apply();
+
 		// 回転
 		mInitFlg = 0;
 		mDispMode = DEF.DISPMODE_IM_NORMAL;
@@ -541,7 +547,6 @@ public class ImageActivity extends AppCompatActivity implements OnTouchListener,
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		// 設定の読み込み
-		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		SetCommonActivity.loadSettings(mSharedPreferences);
 		ReadSetting(mSharedPreferences);
 		if (mNotice) {

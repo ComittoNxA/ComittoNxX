@@ -1211,7 +1211,8 @@ public class ImageManager extends InputStream implements Runnable {
 		Logcat.d(logLevel, "終了します. ");
 	}
 
-	private void ImageFileList(String path, String user, String pass) throws IOException {
+	@SuppressLint("SuspiciousIndentation")
+    private void ImageFileList(String path, String user, String pass) throws IOException {
 		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.d(logLevel, "開始します. path=" + path);
 		mFileList = new FileListItem[1];

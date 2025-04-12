@@ -1541,7 +1541,8 @@ public class TextManager {
 						} else if (text.equalsIgnoreCase("??")) {
 							text = "⁇";
 						}
-						text = text.replaceAll(" ", "");
+						// 英文の空白が埋められるのでコメントアウトにする
+						//	text = text.replaceAll(" ", "");
 
 						if (tag_level_title > 0) {
 							if (!text.isEmpty()) {
@@ -1685,7 +1686,8 @@ public class TextManager {
 							} else if (text.equalsIgnoreCase("??")) {
 								text = "⁇";
 							}
-							text = text.replaceAll(" ", "");
+							// 英文の空白が埋められるのでコメントアウトにする
+							//	text = text.replaceAll(" ", "");
 
 							if (tag_level_navpoint > 0 && tag_level_navlabel > 0 && tag_level_text > 0) {
 								if (!text.isEmpty()) {
@@ -1835,6 +1837,8 @@ public class TextManager {
 									} else {
 										inputSB.append("［＃外字「]" + alt_value + "」（");
 									}
+									inputSB.append(src_value);
+									inputSB.append("）入る］");
 								} else {
 									inputSB.append("\n［＃挿絵（");
 									if (mEpubMode == EPUB_MODE_ALL_IMAGE || mEpubMode == EPUB_MODE_FIRST_IMAGE) {
@@ -1845,9 +1849,11 @@ public class TextManager {
 											return title;
 										}
 									}
+									inputSB.append(src_value);
+									inputSB.append("）入る］");
+									// 挿絵の後の文章を表示させるため改行コードを挿入
+									inputSB.append("\n");
 								}
-								inputSB.append(src_value);
-								inputSB.append("）入る］");
 							}
 						} else if (tag_name.equalsIgnoreCase("title")) {
 							tag_level_title++;
@@ -1940,7 +1946,8 @@ public class TextManager {
 						} else if (text.equalsIgnoreCase("??")) {
 							text = "⁇";
 						}
-						text = text.replaceAll(" ", "");
+						// 英文の空白が埋められるのでコメントアウトにする
+						//	text = text.replaceAll(" ", "");
 
 						if (tag_level_title > 0) {
 							if (!text.isEmpty()) {

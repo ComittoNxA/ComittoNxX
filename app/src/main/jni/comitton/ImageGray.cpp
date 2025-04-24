@@ -38,7 +38,7 @@ void *ImageGray_ThreadFunc(void *param)
     char	bs[256];
 
 	for (int i = 0 ; i < 256 ; i ++) {
-		rs[i] = (int)(0.299f * 2.0f * i + 0.5f);
+		rs[i] = (int)(0.299f * i + 0.5f);
 //		LOGD("ImageGray : rs[%d]", rs[i]);
 	}
 	for (int i = 0 ; i < 256 ; i ++) {
@@ -46,7 +46,7 @@ void *ImageGray_ThreadFunc(void *param)
 //		LOGD("ImageGray : gs[%d]", gs[i]);
 	}
 	for (int i = 0 ; i < 256 ; i ++) {
-		bs[i] = (int)(0.114f * 2.0f * i + 0.5f);
+		bs[i] = (int)(0.114f * i + 0.5f);
 //		LOGD("ImageGray : bs[%d]", bs[i]);
 	}
 

@@ -493,6 +493,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		mFileList = new FileSelectList(mHandler, this, mSharedPreferences);
 		mFileList.setMode(mSortMode);
 
+		mFileList.FlushFileList();
 		// 回転前にリストがなければ再読込
 		if (cursor != null) {
 			loadListView(cursor);
@@ -2020,6 +2021,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		}
 		else if (id == DEF.MENU_REFRESH) {
 			// リストを更新
+			mFileList.FlushFileList();
 			loadListView();
 		}
 		else if (id == DEF.MENU_MARKER) {
@@ -2357,6 +2359,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						break;
 					case DEF.TOOLBAR_REFRESH:
 						// リストを更新
+						mFileList.FlushFileList();
 						loadListView();
 						break;
 					case DEF.TOOLBAR_EXIT:
@@ -3338,6 +3341,10 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 				int topindex = mListScreenView.mFileListArea.getTopIndex();
 				mPathHistory.push(mServer.getCode(), mPath, topindex);
 			}
+		}
+		if	(!uri.equals(mURI) || !path.equals(mPath))	{
+			// パスが更新された場合はファイルリストをフラッシュ
+			mFileList.FlushFileList();
 		}
 
 		// 新しいパスを設定

@@ -7,15 +7,11 @@ import java.util.Comparator;
 
 import src.comitton.common.DEF;
 import src.comitton.common.Logcat;
-import src.comitton.config.SetImageTextDetailActivity;
 import src.comitton.fileaccess.FileAccess;
 import src.comitton.fileview.data.FileData;
 import src.comitton.dialog.LoadingDialog;
 import src.comitton.imageview.ImageManager;
 import src.comitton.textview.TextManager;
-import src.comitton.config.SetTextActivity;
-
-import android.graphics.Point;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -36,6 +32,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 	private static final String mStaticRootDir = Environment.getExternalStorageDirectory().getAbsolutePath() +"/";
 
 	private ArrayList<FileData> mFileList = null;
+	private ArrayList<FileData> mFileList2 = null;
 
 	private String mURI;
 	private String mPath;
@@ -86,6 +83,7 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 
 	private static int mAscMode;	// 半角の表示方法
 	private static String mFontFile;
+	private static boolean mCacheFile = false;
 
 	public FileSelectList(Handler handler, AppCompatActivity activity, SharedPreferences sp) {
 		mActivityHandler = handler;
@@ -206,6 +204,11 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 		return;
 	}
 
+	public static void FlushFileList()
+	{
+		mCacheFile = false;
+	}
+
 	@SuppressLint("SuspiciousIndentation")
     @Override
 	public void run() {
@@ -220,91 +223,93 @@ public class FileSelectList implements Runnable, Callback, DialogInterface.OnDis
 		String currentPath = DEF.relativePath(mActivity, mURI, mPath);
 
 		try {
-			fileList = FileAccess.listFiles(mActivity, currentPath, mUser, mPass, mHandler);
+			if (!mCacheFile) {
+				fileList = FileAccess.listFiles(mActivity, currentPath, mUser, mPass, mHandler);
 
-			if (thread.isInterrupted()) {
-				// 処理中断
-				return;
-			}
-
-			if (fileList.isEmpty()) {
-				// ファイルがない場合
-				Logcat.d(logLevel, "ファイルがありません.");
-				fileList = new ArrayList<FileData>();
-				String uri = FileAccess.parent(mActivity, mPath);
-				FileData fileData;
-
-				if (!uri.isEmpty() && mParentMove) {
-					// 親フォルダを表示
-					fileData = new FileData(mActivity, "..", DEF.PAGENUMBER_NONE);
-					fileList.add(fileData);
+				if (thread.isInterrupted()) {
+					// 処理中断
+					return;
 				}
 
-				// ローカルの初期フォルダより上のフォルダの場合
-				//Logcat.d(logLevel, "mStaticRootDir=" + mStaticRootDir + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
-				//if (mStaticRootDir.startsWith(currentPath) && !mStaticRootDir.equals(currentPath)) {
-				//	int pos = mStaticRootDir.indexOf("/", mPath.length());
-				//	String dir = mStaticRootDir.substring(mPath.length(), pos + 1);
-				//
- 				//	//途中のフォルダを表示対象に追加
-				//	fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
-				//	fileList.add(fileData);
-				//}
+				if (fileList.isEmpty()) {
+					// ファイルがない場合
+					Logcat.d(logLevel, "ファイルがありません.");
+					fileList = new ArrayList<FileData>();
+					String uri = FileAccess.parent(mActivity, mPath);
+					FileData fileData;
 
-				// SDカードフォルダより上のフォルダの場合
-				String[] SDCardPath = FileAccess.getExtSdCardPaths(mActivity);
-				for (int i = 0; i < SDCardPath.length; ++i) {
-					Logcat.i(logLevel, "SD Card Path=" + SDCardPath[i] + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
-					if (SDCardPath[i].startsWith(currentPath) && !SDCardPath[i].equals(currentPath)) {
-						int pos = SDCardPath[i].indexOf("/", mPath.length());
-						String dir = SDCardPath[i].substring(mPath.length(), pos + 1);
+					if (!uri.isEmpty() && mParentMove) {
+						// 親フォルダを表示
+						fileData = new FileData(mActivity, "..", DEF.PAGENUMBER_NONE);
+						fileList.add(fileData);
+					}
 
-						//途中のフォルダを表示対象に追加
-						fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
-						if (!fileList.contains(fileData)) {
-							Logcat.i(logLevel, "追加 dir=" + dir);
-							fileList.add(fileData);
+					// SDカードフォルダより上のフォルダの場合
+					String[] SDCardPath = FileAccess.getExtSdCardPaths(mActivity);
+					for (int i = 0; i < SDCardPath.length; ++i) {
+						Logcat.i(logLevel, "SD Card Path=" + SDCardPath[i] + ", mURI=" + mURI + ", mPath=" + mPath + ", currentPath=" + currentPath);
+						if (SDCardPath[i].startsWith(currentPath) && !SDCardPath[i].equals(currentPath)) {
+							int pos = SDCardPath[i].indexOf("/", mPath.length());
+							String dir = SDCardPath[i].substring(mPath.length(), pos + 1);
+
+							//途中のフォルダを表示対象に追加
+							fileData = new FileData(mActivity, dir, DEF.PAGENUMBER_UNREAD);
+							if (!fileList.contains(fileData)) {
+								Logcat.i(logLevel, "追加 dir=" + dir);
+								fileList.add(fileData);
+							}
 						}
 					}
+
+					// 処理中断
+					sendResult(true, thread);
+					mFileList = fileList;
+					return;
 				}
 
-				// 処理中断
-				sendResult(true, thread);
-				mFileList = fileList;
-				return;
-			}
-			else {
 				String uri = FileAccess.parent(mActivity, mPath);
 				if (!uri.isEmpty() && mParentMove) {
 					FileData fileData = new FileData(mActivity, "..", DEF.PAGENUMBER_NONE);
 					fileList.add(0, fileData);
 				}
+				mFileList2 = fileList;
+				mCacheFile = true;
 
 				mFileList = fileList;
 				updateListView(thread);
 
-				for (int i = mFileList.size() - 1; i >= 0; i--) {
+			} else {
+				fileList = mFileList2;
+			}
 
-					String name = mFileList.get(i).getName();
-					uri = FileAccess.parent(mActivity, mPath);
+			String uri = FileAccess.parent(mActivity, mPath);
+			mFileList = fileList;
 
-					if (mFileList.get(i).getType() == FileData.FILETYPE_NONE) {
+			Logcat.v(logLevel, "updateListView 開始します. ");
+			Logcat.v(logLevel, "ArrayList 開始します. ");
+
+			for (int i = mFileList.size() - 1; i >= 0; i--) {
+
+				String name = mFileList.get(i).getName();
+				uri = FileAccess.parent(mActivity, mPath);
+
+				if (mFileList.get(i).getType() == FileData.FILETYPE_NONE) {
+					mFileList.remove(i);
+					continue;
+				}
+				if (mFileList.get(i).getType() == FileData.FILETYPE_EPUB_SUB) {
+					mFileList.remove(i);
+					continue;
+				}
+				if (mFileList.get(i).getType() != FileData.FILETYPE_DIR && mFileList.get(i).getType() != FileData.FILETYPE_PARENT) {
+					// 通常のファイル
+					if (hidden && DEF.checkHiddenFile(name)) {
 						mFileList.remove(i);
 						continue;
-					}
-					if (mFileList.get(i).getType() == FileData.FILETYPE_EPUB_SUB) {
-						mFileList.remove(i);
-						continue;
-					}
-					if (mFileList.get(i).getType() != FileData.FILETYPE_DIR && mFileList.get(i).getType() != FileData.FILETYPE_PARENT) {
-						// 通常のファイル
-						if (hidden && DEF.checkHiddenFile(name)) {
-							mFileList.remove(i);
-							continue;
-						}
 					}
 				}
 			}
+
 		}
 		catch (Exception e) {
 			Logcat.e(logLevel, "", e);

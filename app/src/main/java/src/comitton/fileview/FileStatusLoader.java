@@ -61,10 +61,9 @@ public class FileStatusLoader extends ThumbnailLoader implements Runnable {
         mComparator = new FileTypeSortComparator();
         mComparator.setDispRange(mFirstIndex, mLastIndex);
 
-        for (int i = 0; i < files.size(); ++i) {
-            // 削除したらindexが変わるのでfilesで検査してmFilesから削除する
-            if (files.get(i).getType() == FileData.FILETYPE_PARENT || files.get(i).getType() == FileData.FILETYPE_IMG) {
-                removeFile(files.get(i));
+        for (int i = mFiles.size() - 1; i >= 0; i--) {
+            if (mFiles.get(i).getType() == FileData.FILETYPE_PARENT || mFiles.get(i).getType() == FileData.FILETYPE_IMG) {
+                removeFile(mFiles.get(i));
             }
         }
 

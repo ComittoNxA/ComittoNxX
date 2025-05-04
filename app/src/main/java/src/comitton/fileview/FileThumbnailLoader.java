@@ -69,11 +69,10 @@ public class FileThumbnailLoader extends ThumbnailLoader implements Runnable {
 			return;
 		}
 
-		for (int i = 0; i < files.size(); ++i) {
-			// 削除したらindexが変わるのでfilesで検査してmFilesから削除する
-			if (files.get(i).getType() == FileData.FILETYPE_PARENT || files.get(i).getType() == FileData.FILETYPE_TXT) {
-				CallImgLibrary.ThumbnailSetNone(mID, files.get(i).getIndex());
-				removeFile(files.get(i));
+		for (int i = mFiles.size() - 1; i >= 0; i--) {
+			if (mFiles.get(i).getType() == FileData.FILETYPE_PARENT || mFiles.get(i).getType() == FileData.FILETYPE_TXT) {
+				CallImgLibrary.ThumbnailSetNone(mID, mFiles.get(i).getIndex());
+				removeFile(mFiles.get(i));
 			}
 		}
 

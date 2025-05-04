@@ -301,6 +301,8 @@ public class MyImageView extends SurfaceView implements SurfaceHolder.Callback, 
 
 	@SuppressLint("SuspiciousIndentation")
     public void draw(Canvas canvas, boolean isCreateBack) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+
 		int drawLeft;
 		int drawTop;
 		int drawWidthSum;

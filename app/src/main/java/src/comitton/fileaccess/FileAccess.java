@@ -849,7 +849,7 @@ public class FileAccess {
 		List<String> paths = new ArrayList<>();
 		for (File file : context.getExternalFilesDirs("external")) {
 			if (file != null) {
-				Logcat.d(true, "SDカードのパス=" + file.toString());
+				Logcat.d(logLevel, "SDカードのパス=" + file.toString());
 				int index = file.getAbsolutePath().lastIndexOf("/Android/data");
 				if (index < 0) {
 					Logcat.d(logLevel, "Unexpected external file dir: " + file.getAbsolutePath());

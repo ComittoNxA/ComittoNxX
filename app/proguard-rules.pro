@@ -26,3 +26,10 @@
 # このへんをkeepnamesに変更したらSMBにアクセスできなくなった
 -keep class org.bouncycastle.jcajce.provider.** { *; }
 -keep class org.bouncycastle.jce.provider.** { *; }
+
+# リリースビルドにはデバッグログを含めない。
+-assumenosideeffects public class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+    public static *** i(...);
+}

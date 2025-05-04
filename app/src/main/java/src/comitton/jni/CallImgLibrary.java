@@ -11,7 +11,7 @@ import src.comitton.common.DEF;
 import src.comitton.common.Logcat;
 
 public class CallImgLibrary {
-	private static int logLevel = Logcat.LOG_LEVEL_WARN;
+	private static int logLevel = Logcat.LOG_LEVEL_DEBUG;
 
 	static {
 		// JNIライブラリのロード

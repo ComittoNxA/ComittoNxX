@@ -419,7 +419,8 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		}
 
 		// 初期状態を通知
-		mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, mTopRow * mColumnNum + mDispRange);
+		updateBottomRowPos();
+		mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, ((mBottomRow + 1) * mColumnNum) - 1);
 	}
 
 	// 座標からインデックスを求める
@@ -518,13 +519,17 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 //		mTopPos = pos;
 //		if (oldtop != mTopRow) {
 //			// 先頭インデックスの変更通知
-//			mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, mTopRow * mColumnNum + mDispRange);
+//			updateBottomRowPos();
+//			mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, ((mBottomRow + 1) * mColumnNum) - 1);
 //		}
 	}
 
 	// スクロール (range<0:下にスクロール, range>0:下にスクロール)
 	public void scrollMove(int row, int pos) {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel,"開始します.", true);
 		int oldtop = mTopRow;
+		int oldbottom = mBottomRow;
 		int ih;
 
 		while (0 <= row && row < mListSize) {
@@ -565,9 +570,10 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		}
 		mTopRow = row;
 		mTopPos = pos;
-		if (oldtop != mTopRow) {
+		updateBottomRowPos();
+		if (oldtop != mTopRow || oldbottom != mBottomRow) {
 			// 先頭インデックスの変更通知
-			mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, mTopRow * mColumnNum + mDispRange);
+			mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, ((mBottomRow + 1) * mColumnNum) - 1);
 		}
 	}
 
@@ -575,7 +581,8 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 		int logLevel = Logcat.LOG_LEVEL_WARN;
 		Logcat.d(logLevel,"開始します. mListType=" + mListType + ", mTopRow=" + mTopRow + ", mColumnNum=" + mColumnNum + ", mDispRange=" + mDispRange);
 		// リスト最終項目を返す
-		mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, mTopRow * mColumnNum + mDispRange);
+		updateBottomRowPos();
+		mListNoticeListener.onScrollChanged(mListType, mTopRow * mColumnNum, ((mBottomRow + 1) * mColumnNum) - 1);
 	}
 
 	protected short getRowHeight(int row) {
@@ -914,11 +921,16 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 	}
 
 	private void updateBottomRowPos() {
+		int logLevel = Logcat.LOG_LEVEL_WARN;
+		Logcat.d(logLevel, "開始します.");
 		// 画面表示の再下段のインデックスを求める
 		int row = 0;
 		int pos = 0; 
 		int totalh = mTopPos;
 		for (int i = mTopRow; i < mRowNum && totalh <= mAreaHeight; i++) {
+			Logcat.v(logLevel, "i=" + i + ", totalh=" + totalh + ", row=" + row);
+			row = i;
+			pos = totalh;
 			int h = getRowHeight(i);
 			if (h <= 0) {
 				break;
@@ -926,12 +938,11 @@ public class ListArea implements Handler.Callback, ScrollMoveListener {
 			if (totalh + h > mAreaHeight) {
 				break;
 			}
-			row = i;
-			pos = totalh;
 			totalh += h + BORDER_HEIGHT;
 		}
 		mBottomRow = row;
 //		mBottomPos = pos;
+		Logcat.v(logLevel, "mTopRow=" + mTopRow + ", mBottomRow=" + mBottomRow);
 	}
 
 	protected String[] getMultiLine(String str, int cx, int maxline, Paint text) {

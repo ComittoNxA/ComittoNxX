@@ -687,8 +687,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						// 権限の永続化
 						Intent intent = getIntent();
 						final int takeFlags =
-								intent.getFlags()
-										& (Intent.FLAG_GRANT_READ_URI_PERMISSION
+								(Intent.FLAG_GRANT_READ_URI_PERMISSION
 										| Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 						// Check for the freshest data.
 						getContentResolver().takePersistableUriPermission(uri, takeFlags);
@@ -718,8 +717,7 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 						// 権限の永続化
 						Intent intent = getIntent();
 						final int takeFlags =
-								intent.getFlags()
-										& (Intent.FLAG_GRANT_READ_URI_PERMISSION
+								(Intent.FLAG_GRANT_READ_URI_PERMISSION
 										| Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 						// Check for the freshest data.
 						getContentResolver().takePersistableUriPermission(uri, takeFlags);
@@ -3325,7 +3323,12 @@ public class FileSelectActivity extends AppCompatActivity implements OnTouchList
 		}
 		String uri = server.getURI();
 		Logcat.v(logLevel, "uri=" + uri);
-		if (uri.isEmpty() || uri.equalsIgnoreCase("smb://")) {
+		if (server.getAccesType() == DEF.ACCESS_TYPE_SMB && uri.equalsIgnoreCase("smb://")) {
+			Logcat.v(logLevel, "return false");
+			return false;
+		}
+		if (server.getAccesType() == DEF.ACCESS_TYPE_SAF && uri.isEmpty()) {
+			Logcat.v(logLevel, "return false");
 			return false;
 		}
 		// 移動

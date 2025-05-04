@@ -557,7 +557,7 @@ public class SafFileAccess {
 			}
 		}
 		catch (Exception e) {
-			Logcat.e(logLevel, "エラーが発生しました. uri=" + uri, e);
+			Logcat.d(logLevel, "エラーが発生しました. uri=" + uri, e);
             try {
                 result = URLDecoder.decode(rootUri,"UTF-8");
             } catch (UnsupportedEncodingException ex) {
